@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.FavoriteMapper">
+
+    <resultMap id="FavoriteMap" type="com.stellar.entity.Favorite">
+        <id     property="id"         column="id"/>
+        <result property="userId"     column="user_id"/>
+        <result property="spuId"      column="spu_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUser" column="update_user"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.Favorite"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_favorite (
+            user_id, spu_id,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{userId}, #{spuId},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM stellar_favorite WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserIdAndSpuId">
+        DELETE FROM stellar_favorite
+        WHERE user_id = #{userId} AND spu_id = #{spuId}
+    </delete>
+
+    <select id="getByUserIdAndSpuId" resultMap="FavoriteMap">
+        SELECT * FROM stellar_favorite
+        WHERE user_id = #{userId} AND spu_id = #{spuId}
+        LIMIT 1
+    </select>
+
+    <select id="listByUserId" resultMap="FavoriteMap">
+        SELECT * FROM stellar_favorite
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+    </select>
+
+    <select id="listSpuIdsByUserId" resultType="long">
+        SELECT spu_id FROM stellar_favorite
+        WHERE user_id = #{userId}
+        AND spu_id IN
+        <foreach collection="spuIds" item="sid" open="(" separator="," close=")">
+            #{sid}
+        </foreach>
+    </select>
+
+</mapper>

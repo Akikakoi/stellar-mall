@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.MallOrderMapper">
+
+    <resultMap id="MallOrderMap" type="com.stellar.entity.MallOrder">
+        <id     property="id"          column="id"/>
+        <result property="orderNo"     column="order_no"/>
+        <result property="userId"      column="user_id"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="payAmount"   column="pay_amount"/>
+        <result property="status"      column="status"/>
+        <result property="isRefunded"  column="is_refunded"/>
+        <result property="address"     column="address"/>
+        <result property="payMethod"   column="pay_method"/>
+        <result property="remark"      column="remark"/>
+        <result property="trackingNo"       column="tracking_no"/>
+        <result property="deliveryCompany"  column="delivery_company"/>
+        <result property="deliveryTime"     column="delivery_time"/>
+        <result property="pointsDeducted" column="points_deducted"/>
+        <result property="pointsAmount"   column="points_amount"/>
+        <result property="createTime"  column="create_time"/>
+        <result property="createUser"  column="create_user"/>
+        <result property="updateTime"  column="update_time"/>
+        <result property="updateUser"  column="update_user"/>
+        <result property="userPhone"  column="user_phone"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.MallOrder"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_mall_order (
+            order_no, user_id, total_amount, pay_amount, status,
+            address, pay_method, remark,
+            points_deducted, points_amount,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{orderNo}, #{userId}, #{totalAmount}, #{payAmount}, #{status},
+            #{address}, #{payMethod}, #{remark},
+            #{pointsDeducted}, #{pointsAmount},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.stellar.entity.MallOrder">
+        UPDATE stellar_mall_order
+        <set>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="totalAmount != null">total_amount = #{totalAmount},</if>
+            <if test="payAmount != null">pay_amount = #{payAmount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="payMethod != null">pay_method = #{payMethod},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="pointsDeducted != null">points_deducted = #{pointsDeducted},</if>
+            <if test="pointsAmount != null">points_amount = #{pointsAmount},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 简化版 pay/cancel 专用：只改 status 不改 update_user 之类业务字段 -->
+    <update id="updateStatus">
+        UPDATE stellar_mall_order SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <!-- 更新支付方式 -->
+    <update id="updatePayMethod">
+        UPDATE stellar_mall_order SET pay_method = #{payMethod} WHERE id = #{id}
+    </update>
+
+    <!-- 发货：设置 SHIPPED 状态 + 物流信息 -->
+    <update id="ship">
+        UPDATE stellar_mall_order
+        SET status = 'SHIPPED',
+            tracking_no = #{trackingNo},
+            delivery_company = #{deliveryCompany},
+            delivery_time = NOW()
+        WHERE id = #{id} AND status = 'PAID'
+    </update>
+
+    <select id="getById" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="getByOrderNo" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order WHERE order_no = #{orderNo} LIMIT 1
+    </select>
+
+    <select id="listByUserId" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+    </select>
+
+    <select id="listByUserIdAndStatus" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order
+        WHERE user_id = #{userId}
+          AND status IN
+        <foreach collection="statusList" item="st" open="(" separator="," close=")">
+            #{st}
+        </foreach>
+        ORDER BY id DESC
+    </select>
+
+    <select id="listAll" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order
+        <where>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                AND order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND create_time &lt; DATE_ADD(#{endTime}, INTERVAL 1 DAY)
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM stellar_mall_order
+        <where>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                AND order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND create_time &lt; DATE_ADD(#{endTime}, INTERVAL 1 DAY)
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM stellar_mall_order WHERE id = #{id}
+    </delete>
+
+    <update id="markRefunded">
+        UPDATE stellar_mall_order
+        SET status = 'REFUNDED', is_refunded = 1
+        WHERE id = #{id}
+    </update>
+
+    <!-- 导出：查询全部订单（关联用户手机号） -->
+    <select id="listAllForExport" resultMap="MallOrderMap">
+        SELECT o.*, u.phone AS user_phone
+        FROM stellar_mall_order o
+        LEFT JOIN stellar_mall_user u ON u.id = o.user_id
+        <where>
+            <if test="status != null and status != ''">AND o.status = #{status}</if>
+            <if test="startTime != null and startTime != ''">AND o.create_time &gt;= #{startTime}</if>
+            <if test="endTime != null and endTime != ''">AND o.create_time &lt;= #{endTime}</if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <!-- 财务报表：按月汇总销售额 -->
+    <select id="financeMonthlySummary" resultType="java.util.HashMap">
+        SELECT
+            DATE_FORMAT(o.create_time, '%Y-%m') AS month,
+            COUNT(o.id) AS order_count,
+            COALESCE(SUM(o.total_amount), 0) AS total_amount,
+            COALESCE(SUM(o.pay_amount), 0) AS pay_amount,
+            COUNT(CASE WHEN o.is_refunded = 1 THEN 1 END) AS refund_count,
+            COALESCE(SUM(CASE WHEN o.is_refunded = 1 THEN o.pay_amount ELSE 0 END), 0) AS refund_amount
+        FROM stellar_mall_order o
+        <where>
+            <if test="year != null and year != ''">
+                o.create_time BETWEEN CONCAT(#{year}, '-01-01') AND CONCAT(#{year}, '-12-31 23:59:59')
+            </if>
+            AND o.status != 'CANCELLED'
+        </where>
+        GROUP BY DATE_FORMAT(o.create_time, '%Y-%m')
+        ORDER BY month DESC
+    </select>
+
+    <!-- 查询过期的待付款订单（创建时间早于 cutoffTime 且状态为 PENDING） -->
+    <select id="listExpiredPending" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order
+        WHERE status = 'PENDING'
+          AND create_time &lt; #{cutoffTime}
+        ORDER BY id ASC
+    </select>
+
+</mapper>

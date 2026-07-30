@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.WalletMapper">
+
+    <!-- ============ Wallet ============ -->
+
+    <resultMap id="WalletMap" type="com.stellar.entity.Wallet">
+        <id     property="id"             column="id"/>
+        <result property="userId"         column="user_id"/>
+        <result property="balance"        column="balance"/>
+        <result property="frozen"         column="frozen"/>
+        <result property="totalRecharge"  column="total_recharge"/>
+        <result property="totalSpent"     column="total_spent"/>
+        <result property="version"        column="version"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="createUser"     column="create_user"/>
+        <result property="updateTime"     column="update_time"/>
+        <result property="updateUser"     column="update_user"/>
+    </resultMap>
+
+    <insert id="insertWallet" parameterType="com.stellar.entity.Wallet"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_wallet (user_id, balance, frozen, total_recharge, total_spent, version,
+                                    create_time, create_user, update_time, update_user)
+        VALUES (#{userId}, #{balance}, #{frozen}, #{totalRecharge}, #{totalSpent}, #{version},
+                #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
+    </insert>
+
+    <select id="getByUserId" resultMap="WalletMap">
+        SELECT * FROM stellar_wallet WHERE user_id = #{userId} LIMIT 1
+    </select>
+
+    <update id="deductBalance">
+        UPDATE stellar_wallet
+        SET balance = balance - #{amount},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND version = #{oldVersion}
+          AND balance >= #{amount}
+    </update>
+
+    <update id="addBalance">
+        UPDATE stellar_wallet
+        SET balance = balance + #{amount},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND version = #{oldVersion}
+    </update>
+
+    <update id="addTotalRecharge">
+        UPDATE stellar_wallet
+        SET total_recharge = total_recharge + #{amount}
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="addTotalSpent">
+        UPDATE stellar_wallet
+        SET total_spent = total_spent + #{amount}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- ============ Transaction ============ -->
+
+    <insert id="insertTransaction" parameterType="com.stellar.entity.WalletTransaction"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_wallet_transaction (wallet_id, user_id, type, amount, balance_after,
+                                                channel, biz_type, biz_id, remark, create_time)
+        VALUES (#{walletId}, #{userId}, #{type}, #{amount}, #{balanceAfter},
+                #{channel}, #{bizType}, #{bizId}, #{remark}, #{createTime})
+    </insert>
+
+    <select id="listTransactions" resultType="com.stellar.entity.WalletTransaction">
+        SELECT id, wallet_id, user_id, type, amount, balance_after, channel,
+               biz_type, biz_id, remark, create_time
+        FROM stellar_wallet_transaction
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countTransactions" resultType="int">
+        SELECT COUNT(*) FROM stellar_wallet_transaction WHERE user_id = #{userId}
+    </select>
+
+</mapper>

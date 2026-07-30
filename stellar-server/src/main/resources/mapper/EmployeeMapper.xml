@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.EmployeeMapper">
+
+    <resultMap id="EmployeeMap" type="com.stellar.entity.Employee">
+        <id     property="id"           column="id"/>
+        <result property="username"     column="username"/>
+        <result property="name"         column="name"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="phone"        column="phone"/>
+        <result property="sex"          column="sex"/>
+        <result property="idNumber"     column="id_number"/>
+        <result property="avatar"       column="avatar"/>
+        <result property="status"       column="status"/>
+        <result property="role"         column="role"/>
+        <result property="createTime"   column="create_time"/>
+        <result property="createUser"   column="create_user"/>
+        <result property="updateTime"   column="update_time"/>
+        <result property="updateUser"   column="update_user"/>
+    </resultMap>
+
+    <!-- =========================== insert =========================== -->
+    <insert id="insert" parameterType="com.stellar.entity.Employee"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_employee (
+            username, name, password_hash, phone, sex, id_number, avatar, status, role,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{username}, #{name}, #{passwordHash}, #{phone}, #{sex}, #{idNumber}, #{avatar}, #{status}, #{role},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <!-- =========================== update（动态字段） =========================== -->
+    <update id="update" parameterType="com.stellar.entity.Employee">
+        UPDATE stellar_employee
+        <set>
+            <if test="name         != null">name           = #{name},</if>
+            <if test="passwordHash != null">password_hash  = #{passwordHash},</if>
+            <if test="phone        != null">phone          = #{phone},</if>
+            <if test="sex          != null">sex            = #{sex},</if>
+            <if test="idNumber     != null">id_number      = #{idNumber},</if>
+            <if test="avatar       != null">avatar         = #{avatar},</if>
+            <if test="status       != null">status         = #{status},</if>
+            <if test="role         != null">role           = #{role},</if>
+            <!-- 公共字段总是更新 -->
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- =========================== count + page（动态条件） =========================== -->
+    <sql id="whereClause">
+        <where>
+            1=1
+            <if test="name   != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="role   != null">AND role = #{role}</if>
+        </where>
+    </sql>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM stellar_employee
+        <include refid="whereClause"/>
+    </select>
+
+    <select id="page" resultMap="EmployeeMap">
+        SELECT * FROM stellar_employee
+        <include refid="whereClause"/>
+        ORDER BY create_time DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+</mapper>

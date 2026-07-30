@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.AfterSaleMapper">
+
+    <resultMap id="AfterSaleMap" type="com.stellar.entity.AfterSale">
+        <id     property="id"             column="id"/>
+        <result property="orderId"        column="order_id"/>
+        <result property="skuId"          column="sku_id"/>
+        <result property="userId"         column="user_id"/>
+        <result property="type"           column="type"/>
+        <result property="status"         column="status"/>
+        <result property="reason"         column="reason"/>
+        <result property="detail"         column="detail"/>
+        <result property="amount"         column="amount"/>
+        <result property="images"         column="images"/>
+        <result property="auditUserId"    column="audit_user_id"/>
+        <result property="auditRemark"    column="audit_remark"/>
+        <result property="auditTime"      column="audit_time"/>
+        <result property="returnTracking" column="return_tracking"/>
+        <result property="refundNo"       column="refund_no"/>
+        <result property="refundTime"     column="refund_time"/>
+        <result property="exchangeSkuId"  column="exchange_sku_id"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="createUser"     column="create_user"/>
+        <result property="updateTime"     column="update_time"/>
+        <result property="updateUser"     column="update_user"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.AfterSale"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_after_sale (
+            order_id, sku_id, user_id, type, status,
+            reason, detail, amount, images,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{orderId}, #{skuId}, #{userId}, #{type}, #{status},
+            #{reason}, #{detail}, #{amount}, #{images},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.stellar.entity.AfterSale">
+        UPDATE stellar_after_sale
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="auditUserId != null">audit_user_id = #{auditUserId},</if>
+            <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="returnTracking != null">return_tracking = #{returnTracking},</if>
+            <if test="refundNo != null">refund_no = #{refundNo},</if>
+            <if test="refundTime != null">refund_time = #{refundTime},</if>
+            <if test="exchangeSkuId != null">exchange_sku_id = #{exchangeSkuId},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE stellar_after_sale SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <select id="getById" resultMap="AfterSaleMap">
+        SELECT * FROM stellar_after_sale WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="listByUserId" resultMap="AfterSaleMap">
+        SELECT * FROM stellar_after_sale
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM stellar_after_sale WHERE user_id = #{userId}
+    </select>
+
+    <select id="listAll" resultMap="AfterSaleMap">
+        SELECT * FROM stellar_after_sale
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM stellar_after_sale
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <select id="countActiveByOrderAndSku" resultType="int">
+        SELECT COUNT(*) FROM stellar_after_sale
+        WHERE order_id = #{orderId}
+          AND sku_id = #{skuId}
+          AND status IN (1, 2, 3, 4)
+    </select>
+
+    <select id="getByOrderIdAndUserId" resultMap="AfterSaleMap">
+        SELECT * FROM stellar_after_sale
+        WHERE order_id = #{orderId} AND user_id = #{userId}
+        LIMIT 1
+    </select>
+
+</mapper>

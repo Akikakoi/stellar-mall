@@ -1,0 +1,96 @@
+# =========================================================================
+# 星耀商城 stellar-mall — Docker Compose 基础设施
+# 一键启动：docker compose up -d
+# 停止：    docker compose down
+# 清理数据：docker compose down -v   （会删除所有持久化数据！）
+# =========================================================================
+
+services:
+  # ======================== Elasticsearch 7.17 ========================
+  elasticsearch:
+    image: elasticsearch:7.17.25
+    container_name: stellar-es
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+      - "TZ=Asia/Shanghai"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+      - es-plugins:/usr/share/elasticsearch/plugins
+    networks:
+      - stellar-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    restart: unless-stopped
+
+  # ======================== MySQL 8.0 ========================
+  mysql:
+    image: mysql:8.0.36
+    container_name: stellar-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: stellar_mall
+      MYSQL_USER: stellar
+      MYSQL_PASSWORD: "123456"
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    networks:
+      - stellar-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "stellar", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  # ======================== Redis 7 ========================
+  redis:
+    image: redis:7.2-alpine
+    container_name: stellar-redis
+    command:
+      - redis-server
+      - --appendonly yes
+      - --databases 16
+      - --maxmemory 256mb
+      - --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - stellar-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+# ======================== 持久化卷 ========================
+volumes:
+  es-data:
+  es-plugins:
+  mysql-data:
+  redis-data:
+
+# ======================== 共享网络 ========================
+networks:
+  stellar-net:
+    driver: bridge

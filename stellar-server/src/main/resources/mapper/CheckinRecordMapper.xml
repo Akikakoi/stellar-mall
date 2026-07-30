@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.CheckinRecordMapper">
+
+    <insert id="insert" parameterType="com.stellar.entity.CheckinRecord"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_checkin_record (user_id, checkin_date, points_earned, create_time)
+        VALUES (#{userId}, #{checkinDate}, #{pointsEarned}, #{createTime})
+    </insert>
+
+    <select id="getByUserAndDate" resultType="com.stellar.entity.CheckinRecord">
+        SELECT id, user_id, checkin_date, points_earned, create_time
+        FROM stellar_checkin_record
+        WHERE user_id = #{userId} AND checkin_date = #{date}
+        LIMIT 1
+    </select>
+
+    <select id="listDatesByMonth" resultType="java.time.LocalDate">
+        SELECT checkin_date
+        FROM stellar_checkin_record
+        WHERE user_id = #{userId}
+          AND checkin_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY checkin_date ASC
+    </select>
+
+</mapper>

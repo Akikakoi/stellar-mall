@@ -1,0 +1,53 @@
+# =========================================================================
+# 星耀商城 stellar-mall 本地开发环境配置（本地启动请 COPY 本文件为
+# application-dev.yml，并把下面的占位符改成你本地真实值）
+# =========================================================================
+
+# ---------- MySQL（主账号 stellar / 123456，库 stellar_mall） ----------
+stellar:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: 127.0.0.1
+    port: 3306
+    database: stellar_mall
+    username: stellar
+    password: "123456"
+
+  # ---------- Redis（127.0.0.1:6379，db=11，避开 sky 的 db=10） ----------
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 11
+    # password: 你本地 Redis 密码（没密码就注释掉）
+
+  # ---------- 阿里云 OSS（可沿用 RAG 项目同一个桶） ----------
+  alioss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    access-key-id: LTAI_替换成你的AK
+    access-key-secret: 替换成你的SK
+    bucket-name: web-akikakoi
+
+  # ---------- 库存锁模式：optimistic（默认，本地乐观锁） / redis（分布式锁） ----------
+  # stock:
+  #   lock-mode: optimistic
+
+  # ---------- JWT 强密钥（⚠️ 和 RAG 端 .env 里的 STELLAR_ADMIN_SECRET_KEY / STELLAR_USER_SECRET_KEY 保持完全一致！） ----------
+  # 建议用下面命令生成一个随机 48 字节强字符串填到两边 .env：
+  #   python -c "import secrets; print(secrets.token_urlsafe(48))"
+  # jwt:
+  #   admin-secret-key: <和 RAG 共用的 48 位强密钥>
+  #   user-secret-key:  <另一个和 RAG 共用的 48 位强密钥>
+
+  # ---------- 微信支付（P0 阶段不启用真实支付，模拟即可，留空也行） ----------
+  # wechat:
+  #   appid: wx0000000000000000
+  #   secret: <你的 wx 小程序/服务号 app secret>
+  #   mchid: 1600000000
+  #   mch-serial-no: 商户证书序列号
+  #   private-key-file-path: D:\\certs\\apiclient_key.pem
+  #   api-v3-key: V3 密钥 32 字符
+  #   cert-file-path: D:\\certs\\wechatpay_xxxxx.pem
+
+  # ---------- RAG 内部同步密钥（⚠️ 和 RAG 端 STELLAR_RAG_INTERNAL_SYNC_SECRET 完全一致） ----------
+  rag:
+    internal-sync-secret: <替换成你的 RAG 内部同步密钥>

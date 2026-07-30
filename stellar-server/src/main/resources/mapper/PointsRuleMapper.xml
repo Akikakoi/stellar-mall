@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.PointsRuleMapper">
+
+    <resultMap id="PointsRuleMap" type="com.stellar.entity.PointsRule">
+        <id     property="id"             column="id"/>
+        <result property="ruleType"       column="rule_type"/>
+        <result property="ruleName"       column="rule_name"/>
+        <result property="earnPoints"     column="earn_points"/>
+        <result property="conditionValue" column="condition_value"/>
+        <result property="maxPerDay"      column="max_per_day"/>
+        <result property="maxPerOrder"    column="max_per_order"/>
+        <result property="status"         column="status"/>
+        <result property="description"    column="description"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="createUser"     column="create_user"/>
+        <result property="updateTime"     column="update_time"/>
+        <result property="updateUser"     column="update_user"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.PointsRule"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_points_rule (rule_type, rule_name, earn_points, condition_value,
+                                         max_per_day, max_per_order, status, description,
+                                         create_time, create_user, update_time, update_user)
+        VALUES (#{ruleType}, #{ruleName}, #{earnPoints}, #{conditionValue},
+                #{maxPerDay}, #{maxPerOrder}, #{status}, #{description},
+                #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
+    </insert>
+
+    <update id="update" parameterType="com.stellar.entity.PointsRule">
+        UPDATE stellar_points_rule
+        <set>
+            <if test="ruleType != null">rule_type = #{ruleType},</if>
+            <if test="ruleName != null">rule_name = #{ruleName},</if>
+            <if test="earnPoints != null">earn_points = #{earnPoints},</if>
+            <if test="conditionValue != null">condition_value = #{conditionValue},</if>
+            <if test="maxPerDay != null">max_per_day = #{maxPerDay},</if>
+            <if test="maxPerOrder != null">max_per_order = #{maxPerOrder},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="description != null">description = #{description},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM stellar_points_rule WHERE id = #{id}
+    </delete>
+
+    <select id="getById" resultMap="PointsRuleMap">
+        SELECT * FROM stellar_points_rule WHERE id = #{id}
+    </select>
+
+    <select id="getByType" resultMap="PointsRuleMap">
+        SELECT * FROM stellar_points_rule WHERE rule_type = #{ruleType} AND status = 1 LIMIT 1
+    </select>
+
+    <select id="listAll" resultMap="PointsRuleMap">
+        SELECT * FROM stellar_points_rule ORDER BY id ASC
+    </select>
+
+    <select id="listEnabled" resultMap="PointsRuleMap">
+        SELECT * FROM stellar_points_rule WHERE status = 1 ORDER BY id ASC
+    </select>
+
+</mapper>

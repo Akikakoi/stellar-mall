@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.ReviewCommentMapper">
+
+    <resultMap id="CommentMap" type="com.stellar.entity.ReviewComment">
+        <id property="id" column="id"/>
+        <result property="reviewId" column="review_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="username" column="username"/>
+        <result property="avatar" column="avatar"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stellar_review_comment (review_id, user_id, content, status, create_time, create_user, update_time, update_user)
+        VALUES (#{reviewId}, #{userId}, #{content}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
+    </insert>
+
+    <select id="listByReviewId" resultMap="CommentMap">
+        SELECT c.*, u.nickname AS username, u.avatar AS avatar
+        FROM stellar_review_comment c
+        LEFT JOIN stellar_mall_user u ON u.id = c.user_id
+        WHERE c.review_id = #{reviewId} AND c.status = 1
+        ORDER BY c.create_time ASC
+    </select>
+
+    <select id="countByReviewId" resultType="long">
+        SELECT COUNT(*) FROM stellar_review_comment WHERE review_id = #{reviewId} AND status = 1
+    </select>
+
+    <select id="countByReviewIds" resultType="map">
+        SELECT review_id, COUNT(*) AS cnt
+        FROM stellar_review_comment
+        WHERE status = 1 AND review_id IN
+        <foreach collection="reviewIds" item="rid" open="(" separator="," close=")">
+            #{rid}
+        </foreach>
+        GROUP BY review_id
+    </select>
+
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.CouponMapper">
+    <resultMap id="CouponMap" type="com.stellar.entity.Coupon">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type"/>
+        <result property="conditionAmount" column="condition_amount"/>
+        <result property="discountAmount" column="discount_amount"/>
+        <result property="totalCount" column="total_count"/>
+        <result property="receivedCount" column="received_count"/>
+        <result property="usedCount" column="used_count"/>
+        <result property="perUserLimit" column="per_user_limit"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUser" column="update_user"/>
+    </resultMap>
+
+    <resultMap id="UserCouponMap" type="com.stellar.entity.UserCoupon">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="couponId" column="coupon_id"/>
+        <result property="status" column="status"/>
+        <result property="orderId" column="order_id"/>
+        <result property="usedTime" column="used_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="couponName" column="coupon_name"/>
+        <result property="couponType" column="coupon_type"/>
+        <result property="conditionAmount" column="condition_amount"/>
+        <result property="discountAmount" column="discount_amount"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+    </resultMap>
+
+    <!-- ===== Coupon CRUD ===== -->
+    <insert id="insertCoupon" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stellar_coupon (name, type, condition_amount, discount_amount, total_count, received_count, used_count, per_user_limit, start_time, end_time, status, create_time, create_user, update_time, update_user)
+        VALUES (#{name}, #{type}, #{conditionAmount}, #{discountAmount}, #{totalCount}, #{receivedCount}, #{usedCount}, #{perUserLimit}, #{startTime}, #{endTime}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
+    </insert>
+
+    <update id="updateCoupon">
+        UPDATE stellar_coupon
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="conditionAmount != null">condition_amount = #{conditionAmount},</if>
+            <if test="discountAmount != null">discount_amount = #{discountAmount},</if>
+            <if test="totalCount != null">total_count = #{totalCount},</if>
+            <if test="perUserLimit != null">per_user_limit = #{perUserLimit},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = #{updateTime}, update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteCoupon">
+        DELETE FROM stellar_coupon WHERE id = #{id}
+    </delete>
+
+    <select id="getCouponById" resultMap="CouponMap">
+        SELECT * FROM stellar_coupon WHERE id = #{id}
+    </select>
+
+    <select id="pageCoupon" resultMap="CouponMap">
+        SELECT * FROM stellar_coupon
+        <where>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+        ORDER BY create_time DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="countCoupon" resultType="long">
+        SELECT COUNT(*) FROM stellar_coupon
+        <where>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+    </select>
+
+    <select id="listAvailableCoupons" resultMap="CouponMap">
+        SELECT c.* FROM stellar_coupon c
+        WHERE c.status = 1
+          AND c.received_count &lt; c.total_count
+          AND NOW() BETWEEN c.start_time AND c.end_time
+          AND (
+              c.per_user_limit IS NULL OR c.per_user_limit &lt;= 0
+              OR (
+                  SELECT COUNT(*) FROM stellar_user_coupon uc
+                  WHERE uc.user_id = #{userId} AND uc.coupon_id = c.id
+              ) &lt; c.per_user_limit
+          )
+        ORDER BY c.create_time DESC
+    </select>
+
+    <update id="incrReceivedCount">
+        UPDATE stellar_coupon SET received_count = received_count + 1, update_time = NOW() WHERE id = #{id} AND received_count &lt; total_count
+    </update>
+
+    <update id="incrUsedCount">
+        UPDATE stellar_coupon SET used_count = used_count + 1, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- ===== UserCoupon ===== -->
+    <insert id="insertUserCoupon" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stellar_user_coupon (user_id, coupon_id, status, create_time, create_user, update_time, update_user)
+        VALUES (#{userId}, #{couponId}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
+    </insert>
+
+    <update id="updateUserCouponStatus">
+        UPDATE stellar_user_coupon SET status = #{status}
+        <if test="orderId != null">, order_id = #{orderId}</if>
+        <if test="usedTime != null">, used_time = #{usedTime}</if>
+        , update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="returnUserCoupon">
+        UPDATE stellar_user_coupon SET status = 1, order_id = NULL, used_time = NULL, update_time = NOW()
+        WHERE id = #{id} AND status = 2
+    </update>
+
+    <update id="decrUsedCount">
+        UPDATE stellar_coupon SET used_count = GREATEST(used_count - 1, 0), update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="listUserCoupons" resultMap="UserCouponMap">
+        SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
+        FROM stellar_user_coupon uc
+        LEFT JOIN stellar_coupon c ON c.id = uc.coupon_id
+        WHERE uc.user_id = #{userId}
+        <if test="status != null">AND uc.status = #{status}</if>
+        ORDER BY uc.create_time DESC
+    </select>
+
+    <select id="getUserCouponById" resultMap="UserCouponMap">
+        SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
+        FROM stellar_user_coupon uc
+        LEFT JOIN stellar_coupon c ON c.id = uc.coupon_id
+        WHERE uc.id = #{id}
+    </select>
+
+    <select id="getUserCouponByOrderId" resultMap="UserCouponMap">
+        SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
+        FROM stellar_user_coupon uc
+        LEFT JOIN stellar_coupon c ON c.id = uc.coupon_id
+        WHERE uc.order_id = #{orderId}
+    </select>
+
+    <select id="countUserCouponByCouponId" resultType="long">
+        SELECT COUNT(*) FROM stellar_user_coupon WHERE user_id = #{userId} AND coupon_id = #{couponId}
+    </select>
+
+    <select id="findExpiringSoon" resultMap="UserCouponMap">
+        SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
+        FROM stellar_user_coupon uc
+        LEFT JOIN stellar_coupon c ON c.id = uc.coupon_id
+        WHERE uc.status = 0
+          AND c.end_time IS NOT NULL
+          AND c.end_time BETWEEN #{now} AND #{deadline}
+        ORDER BY c.end_time ASC
+    </select>
+</mapper>

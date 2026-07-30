@@ -1,0 +1,112 @@
+server:
+  port: 8082
+
+spring:
+  profiles:
+    active: dev
+  main:
+    allow-circular-references: true
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 200MB
+  datasource:
+    druid:
+      driver-class-name: ${stellar.datasource.driver-class-name}
+      # 注意：MySQL 订单批量 SQL 使用 <foreach ;>，必须 allowMultiQueries=true
+      url: jdbc:mysql://${stellar.datasource.host}:${stellar.datasource.port}/${stellar.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&allowMultiQueries=true
+      username: ${stellar.datasource.username}
+      password: ${stellar.datasource.password}
+  redis:
+    host: ${stellar.redis.host}
+    port: ${stellar.redis.port}
+    # password: ${stellar.redis.password}
+    database: ${stellar.redis.database}
+    timeout: 3000
+    lettuce:
+      pool:
+        max-active: 32
+        max-idle: 16
+        min-idle: 4
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.stellar.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com:
+      stellar:
+        mapper: debug
+        service: info
+        controller: info
+
+# ======== 星耀商城自定义配置 ========
+stellar:
+  jwt:
+    # 管理端员工 token 密钥（≥32 强密钥，和 RAG 端 STELLAR_ADMIN_SECRET_KEY 完全一致！）
+    admin-secret-key: ${STELLAR_ADMIN_SECRET_KEY:StellarMall_Admin_SecretKey_2024_Strong_32bytes_!@#}
+    # 管理端 token TTL（毫秒，2 小时 = 7200000）
+    admin-ttl: 7200000
+    # 管理端前端传递 token 的 header 名
+    admin-token-name: token
+    # C 端用户 token 密钥（≥32，和 RAG 端 STELLAR_USER_SECRET_KEY 完全一致！）
+    user-secret-key: ${STELLAR_USER_SECRET_KEY:StellarMall_User_SecretKey_2024_Strong_32bytes_$%^}
+    user-ttl: 604800000   # 7 天
+    user-token-name: authentication
+  # 阿里云 OSS（和 RAG 共用一个桶，目录前缀 stellar-mall/）
+  alioss:
+    endpoint: ${STELLAR_OSS_ENDPOINT:}
+    access-key-id: ${STELLAR_OSS_ACCESS_KEY_ID:}
+    access-key-secret: ${STELLAR_OSS_ACCESS_KEY_SECRET:}
+    bucket-name: ${STELLAR_OSS_BUCKET:}
+  # 微信支付（P0 模拟支付，暂不用真证书；先把占位符留好）
+  wechat:
+    appid: ${STELLAR_WX_APPID:}
+    secret: ${STELLAR_WX_SECRET:}
+    mchid: ${STELLAR_WX_MCHID:0000000000}
+    mch-serial-no: ${STELLAR_WX_MCH_SERIAL_NO:}
+    private-key-file-path: ${STELLAR_WX_PRIVATE_KEY_PATH:}
+    api-v3-key: ${STELLAR_WX_APIV3_KEY:}
+    cert-file-path: ${STELLAR_WX_CERT_PATH:}
+    notify-url: ${STELLAR_WX_NOTIFY_URL:http://127.0.0.1:8082/notify/paySuccess}
+    refund-notify-url: ${STELLAR_WX_REFUND_NOTIFY_URL:http://127.0.0.1:8082/notify/refundSuccess}
+  # RAG 同步配置（Java → RAG 内部接口共享密钥）
+  rag:
+    base-url: ${STELLAR_RAG_BASE_URL:http://127.0.0.1:8000}
+    internal-sync-secret: ${STELLAR_RAG_INTERNAL_SYNC_SECRET:RagSync_Internal_Secret_2024_Stellar_!@#}
+  # Elasticsearch 搜索配置
+  elasticsearch:
+    enabled: true
+    uris: http://127.0.0.1:9200
+    connect-timeout: 5000
+    socket-timeout: 60000
+    index-prefix: stellar
+  # 4 个隔离线程池参数（对齐 sky）
+  thread-pool:
+    core-size: 10
+    max-size: 20
+    queue-capacity: 200
+    keep-alive-seconds: 60
+    name-prefix: stellar-common-
+    websocket:
+      core-size: 5
+      max-size: 10
+      queue-capacity: 100
+      keep-alive-seconds: 60
+      name-prefix: stellar-ws-
+    order:
+      core-size: 10
+      max-size: 30
+      queue-capacity: 500
+      keep-alive-seconds: 60
+      name-prefix: stellar-order-
+    report:
+      core-size: 2
+      max-size: 5
+      queue-capacity: 50
+      keep-alive-seconds: 120
+      name-prefix: stellar-report-

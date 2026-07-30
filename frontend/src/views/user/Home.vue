@@ -1,0 +1,768 @@
+<template>
+  <div class="home-page">
+    <!-- Hero 区域 -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <h1 class="hero-title">星耀商城</h1>
+        <p class="hero-subtitle">
+          <span class="typewriter-text">{{ subtitleText }}</span>
+          <span class="typewriter-cursor" :class="{ blink: showCursor }"></span>
+        </p>
+        <el-button type="primary" size="large" class="hero-cta" @click="scrollToContent">立即选购</el-button>
+      </div>
+    </section>
+
+    <!-- 动态模块区域 -->
+    <div ref="contentRef">
+      <template v-if="!filterMode">
+        <template v-for="mod in modules" :key="mod.id">
+          <!-- 轮播图 -->
+          <div v-if="mod.type === 'BANNER' && banners.length > 0" class="banner-wrap">
+            <el-carousel :interval="4000" height="320px" indicator-position="outside">
+              <el-carousel-item v-for="b in banners" :key="b.id">
+                <a :href="b.linkUrl || 'javascript:;'" :target="b.linkUrl ? '_blank' : '_self'">
+                  <img :src="b.imageUrl" :alt="b.title" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+                  <div class="banner-caption">{{ b.title }}</div>
+                </a>
+              </el-carousel-item>
+            </el-carousel>
+          </div>
+
+          <!-- 分类展示 -->
+          <template v-else-if="mod.type === 'CATEGORY_SHOWCASE'">
+            <section v-if="mod._products.length > 0 || mod._loading" class="container main-content cat-section">
+              <div class="cat-header">
+                <div class="cat-title">{{ mod.title || getCatName(mod) }}</div>
+                <div class="cat-side">
+                  <div v-if="getSubCats(mod).length > 0" class="sub-tabs">
+                    <span class="sub-tab" :class="{ active: !mod._activeSub }" @click="switchModuleSub(mod, null)">全部</span>
+                    <span v-for="sub in getSubCats(mod)" :key="sub.id" class="sub-tab" :class="{ active: mod._activeSub === sub.id }" @click="switchModuleSub(mod, sub.id)">{{ sub.name }}</span>
+                  </div>
+                  <a v-else class="view-more" @click="viewMoreModule(mod)">查看更多 <span class="arrow">›</span></a>
+                </div>
+              </div>
+              <div class="cat-grid" v-loading="mod._loading">
+                <div v-if="mod._products[0]" class="cat-banner" :style="{ gridRow: mod._products.length > 5 ? '1 / 3' : '1 / 2' }" @click="goDetail(mod._products[0].id)">
+                  <img :src="mod._products[0].mainImage || __PH" :alt="mod._products[0].name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <div class="banner-text">
+                    <h3>{{ mod._products[0].name }}</h3>
+                    <p>¥{{ Number(mod._products[0].minPrice || 0).toFixed(2) }} 起</p>
+                  </div>
+                </div>
+                <div v-for="p in mod._products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
+                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <div class="p-name">{{ p.name }}</div>
+                  <div class="p-desc">已售 {{ p.saleCount || 0 }}</div>
+                  <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
+                </div>
+                <div class="more-card" @click="viewMoreModule(mod)" v-if="mod._total > 8">
+                  <div class="more-inner">
+                    <div class="more-txt">浏览更多</div>
+                    <div class="more-sub">{{ mod._activeSubLabel || mod.title }}</div>
+                    <svg class="more-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </template>
+
+          <!-- 热门推荐 / 新品上市 / 精选商品 -->
+          <template v-else-if="mod.type === 'HOT_PRODUCTS' || mod.type === 'NEW_PRODUCTS' || mod.type === 'PRODUCT_GRID'">
+            <section v-if="mod._products.length > 0 || mod._loading" class="container main-content product-section">
+              <div class="cat-header">
+                <div class="cat-title">{{ mod.title }}</div>
+                <a class="view-more" @click="router.push('/shop/search')">查看更多 <span class="arrow">›</span></a>
+              </div>
+              <div class="spu-grid" v-loading="mod._loading">
+                <div v-for="spu in mod._products" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
+                  <div class="spu-image">
+                    <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                    <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)">{{ favSet.has(spu.id) ? '♥' : '♡' }}</button>
+                  </div>
+                  <div class="spu-info">
+                    <h3 class="spu-name">{{ spu.name }}</h3>
+                    <div class="spu-bottom">
+                      <div class="spu-price">¥{{ Number(spu.minPrice || 0).toFixed(2) }}</div>
+                      <el-button size="small" type="primary" class="add-cart-btn" @click.stop="handleAddToCart(spu)">加入购物车</el-button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </template>
+
+          <!-- 领券入口 -->
+          <section v-else-if="mod.type === 'COUPON_ENTRY'" class="container main-content">
+            <div class="coupon-entry-card" @click="router.push('/coupons')">
+              <div class="coupon-entry-inner">
+                <div class="coupon-entry-icon">🎫</div>
+                <div class="coupon-entry-text">
+                  <div class="coupon-entry-title">{{ mod.title || '领券中心' }}</div>
+                  <div class="coupon-entry-desc">超值优惠券等你来领</div>
+                </div>
+                <div class="coupon-entry-arrow">›</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 单图广告 -->
+          <section v-else-if="mod.type === 'SINGLE_IMAGE' && getCfg(mod).imageUrl" class="container main-content">
+            <a :href="getCfg(mod).linkUrl || 'javascript:;'" :target="getCfg(mod).linkUrl ? '_blank' : '_self'">
+              <img :src="getCfg(mod).imageUrl" :alt="mod.title" style="width:100%;border-radius:12px;display:block;" loading="lazy" />
+            </a>
+          </section>
+        </template>
+
+        <!-- 无模块或加载失败回退 -->
+        <template v-if="!modulesLoaded || modules.length === 0">
+          <div class="banner" v-if="banners.length > 0">
+            <el-carousel :interval="4000" height="320px" indicator-position="outside">
+              <el-carousel-item v-for="b in banners" :key="b.id">
+                <a :href="b.linkUrl || 'javascript:;'" :target="b.linkUrl ? '_blank' : '_self'">
+                  <img :src="b.imageUrl" :alt="b.title" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
+                  <div class="banner-caption">{{ b.title }}</div>
+                </a>
+              </el-carousel-item>
+            </el-carousel>
+          </div>
+
+          <main class="container main-content">
+            <section v-for="sec in sections" :key="sec.id" class="cat-section" v-show="sec.loading || sec.products.length > 0">
+              <div class="cat-header">
+                <div class="cat-title">{{ sec.name }}</div>
+                <div class="cat-side">
+                  <div v-if="sec.subs.length > 0" class="sub-tabs">
+                    <span class="sub-tab" :class="{ active: sec.activeSubId === null }" @click="switchSub(sec, null)" @mouseenter="switchSub(sec, null)">全部</span>
+                    <span v-for="sub in sec.subs" :key="sub.id" class="sub-tab" :class="{ active: sec.activeSubId === sub.id }" @click="switchSub(sec, sub.id)" @mouseenter="switchSub(sec, sub.id)">{{ sub.name }}</span>
+                  </div>
+                  <a v-else class="view-more" @click="viewMore(sec)">查看更多 <span class="arrow">›</span></a>
+                </div>
+              </div>
+              <div class="cat-grid" v-loading="sec.loading">
+                <div v-if="sec.products[0]" class="cat-banner" :style="{ gridRow: sec.products.length > 5 ? '1 / 3' : '1 / 2' }" @click="goDetail(sec.products[0].id)">
+                  <img :src="sec.products[0].mainImage || __PH" :alt="sec.products[0].name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <div class="banner-text"><h3>{{ sec.products[0].name }}</h3><p>¥{{ Number(sec.products[0].minPrice || 0).toFixed(2) }} 起</p></div>
+                </div>
+                <div v-for="p in sec.products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
+                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <div class="p-name">{{ p.name }}</div><div class="p-desc">已售 {{ p.saleCount || 0 }}</div>
+                  <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
+                </div>
+                <div class="more-card" @click="viewMore(sec)" v-if="sec.total > 8">
+                  <div class="more-inner"><div class="more-txt">浏览更多</div><div class="more-sub">{{ activeSubName(sec) }}</div><svg class="more-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+                </div>
+              </div>
+            </section>
+            <el-empty v-if="!sectionsLoading && sections.every(s => s.products.length === 0)" description="暂无商品" />
+          </main>
+        </template>
+      </template>
+
+      <!-- 筛选模式：平铺网格 -->
+      <div v-if="filterMode" class="spu-grid container main-content" v-loading="loading" v-infinite-scroll="loadMore" :infinite-scroll-disabled="!hasMore || loading || loadingMore" :infinite-scroll-distance="120" :infinite-scroll-immediate="false">
+        <div v-for="spu in spus" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
+          <div class="spu-image">
+            <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+            <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)">{{ favSet.has(spu.id) ? '♥' : '♡' }}</button>
+          </div>
+          <div class="spu-info">
+            <h3 class="spu-name">{{ spu.name }}</h3>
+            <div class="spu-bottom">
+              <div class="spu-price">¥{{ Number(spu.minPrice || 0).toFixed(2) }}</div>
+              <el-button size="small" type="primary" class="add-cart-btn" @click.stop="handleAddToCart(spu)">加入购物车</el-button>
+            </div>
+          </div>
+        </div>
+        <el-empty v-if="!loading && spus.length === 0" description="暂无商品" />
+        <div v-if="loadingMore" class="load-more-tip"><el-icon class="is-loading"><Loading /></el-icon><span>加载更多商品中...</span></div>
+        <div v-else-if="!hasMore && spus.length > 0" class="load-more-tip no-more">已经到底啦</div>
+      </div>
+    </div>
+
+    <!-- SKU 选择弹窗 -->
+    <el-dialog v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close>
+      <div class="sku-selected-preview" v-if="selectedSku">
+        <img :src="selectedSku.image || currentSpu?.mainImage || __PH" class="sku-preview-img" />
+        <div class="sku-preview-info">
+          <div class="sku-preview-price">¥{{ Number(selectedSku.price || 0).toFixed(2) }}</div>
+          <div class="sku-preview-spec">{{ selectedSku.specs || '默认规格' }}</div>
+          <div class="sku-preview-stock">库存：{{ selectedSku.stock || 0 }}</div>
+        </div>
+      </div>
+      <div class="sku-options">
+        <div v-for="sku in currentSkus" :key="sku.id" class="sku-option" :class="{ active: selectedSkuId === sku.id, disabled: (sku.stock || 0) <= 0 }" @click="(sku.stock || 0) > 0 ? selectedSkuId = sku.id : null">
+          <div class="sku-option-name">{{ sku.name || sku.specs || '默认规格' }}</div>
+          <div class="sku-option-price">¥{{ Number(sku.price || 0).toFixed(2) }}</div>
+          <div v-if="(sku.stock || 0) <= 0" class="sku-option-soldout">缺货</div>
+        </div>
+      </div>
+      <template #footer>
+        <el-button @click="skuDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="addingCart" :disabled="!selectedSkuId" @click="confirmAddToCart">加入购物车</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { Loading } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { useCartStore } from '@/stores/cart'
+import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
+import { userRequest } from '@/api/request'
+import { ElMessage } from 'element-plus'
+
+const __PH = window.__PH
+const router = useRouter()
+const userStore = useUserStore()
+const cartStore = useCartStore()
+
+const contentRef = ref(null)
+const loading = ref(false)
+const loadingMore = ref(false)
+const filterMode = ref(false)
+const isFiltering = computed(() => false)
+
+// Hero
+const subtitleText = ref('')
+const showCursor = ref(true)
+const fullSubtitle = '精选好物，品质生活'
+let typewriterTimer = null
+
+function startTypewriter() {
+  subtitleText.value = ''
+  showCursor.value = true
+  let i = 0
+  clearInterval(typewriterTimer)
+  typewriterTimer = setInterval(() => {
+    if (i < fullSubtitle.length) { subtitleText.value += fullSubtitle[i]; i++ }
+    else { clearInterval(typewriterTimer); typewriterTimer = null; setTimeout(() => { showCursor.value = false }, 3000) }
+  }, 120)
+}
+
+function scrollToContent() { contentRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+
+// ========== 动态模块 ==========
+const modules = ref([])
+const modulesLoaded = ref(false)
+const banners = ref([])
+const categoryTree = ref([]) // 用于 CATEGORY_SHOWCASE 查找子分类
+const flatCategories = ref([])
+const favSet = reactive(new Set())
+
+function getCfg(mod) {
+  try { return JSON.parse(mod.config || '{}') } catch { return {} }
+}
+
+function getCatName(mod) {
+  const cfg = getCfg(mod)
+  return cfg.categoryName || ''
+}
+
+/**
+ * 获取分类信息（id + level + parentId）。
+ * 优先取 config.categoryId；
+ * 缺失时从 categoryTree 按名称匹配（防御模块配置不完整的情况）。
+ */
+function resolveCategoryInfo(cfg) {
+  function findNode(list, predicate) {
+    for (const c of list) {
+      if (predicate(c)) return c
+      const found = findNode(c.children || [], predicate)
+      if (found) return found
+    }
+    return null
+  }
+  if (cfg.categoryId) {
+    const node = findNode(categoryTree.value, c => c.id === cfg.categoryId)
+    if (node) return { id: node.id, level: node.level, parentId: node.parentId }
+  }
+  if (!cfg.categoryName || !categoryTree.value.length) return null
+  const node = findNode(categoryTree.value, c => c.name === cfg.categoryName)
+  if (!node) return null
+  return { id: node.id, level: node.level, parentId: node.parentId }
+}
+
+function getSubCats(mod) {
+  const cfg = getCfg(mod)
+  const id = cfg.categoryId
+  if (!id || !categoryTree.value.length) return []
+  // 在树中查找该分类
+  function find(list) {
+    for (const c of list) {
+      if (c.id === id) return c.children || []
+      const found = find(c.children || [])
+      if (found.length) return found
+    }
+    return []
+  }
+  return find(categoryTree.value)
+}
+
+async function loadModules() {
+  try {
+    const res = await userRequest({ url: '/user/home-module/list', method: 'get', __silent: true })
+    const list = Array.isArray(res) ? res : (res?.data || [])
+    // 为每个模块附加运行时状态
+    modules.value = list.map(m => ({
+      ...m,
+      _products: [],
+      _total: 0,
+      _loading: false,
+      _activeSub: null,
+      _activeSubLabel: ''
+    }))
+  } catch (e) {
+    modules.value = []
+  } finally {
+    modulesLoaded.value = true
+  }
+}
+
+async function loadModuleProducts(mod) {
+  mod._loading = true
+  const cfg = getCfg(mod)
+  try {
+    if (mod.type === 'CATEGORY_SHOWCASE') {
+      const catNode = resolveCategoryInfo(cfg)
+      if (!catNode) { mod._products = []; mod._total = 0; mod._loading = false; return }
+      const params = { page: 1, pageSize: cfg.displayCount || 8 }
+      if (mod._activeSub) {
+        // 子分类筛选：categoryId 用一级父分类，category2Id 用子分类
+        params.category2Id = mod._activeSub
+        params.categoryId = catNode.parentId || catNode.id
+      } else if (catNode.level === 2) {
+        // 二级分类：同时传入 categoryId（一级）和 category2Id（二级），防止跨分类错配
+        params.category2Id = catNode.id
+        params.categoryId = catNode.parentId
+      } else {
+        params.categoryId = catNode.id
+      }
+      const res = await listSpu(params)
+      mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+      mod._total = res?.total || mod._products.length
+    } else if (mod.type === 'HOT_PRODUCTS') {
+      const res = await listSpu({ page: 1, pageSize: cfg.displayCount || 10, sortBy: 'saleCount', sortOrder: 'desc' })
+      mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+      mod._total = res?.total || mod._products.length
+    } else if (mod.type === 'NEW_PRODUCTS') {
+      const res = await listSpu({ page: 1, pageSize: cfg.displayCount || 10, sortBy: 'createTime', sortOrder: 'desc' })
+      mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+      mod._total = res?.total || mod._products.length
+    } else if (mod.type === 'PRODUCT_GRID' && cfg.spuIds?.length) {
+      const results = await Promise.allSettled(cfg.spuIds.map(id => getSpu(id)))
+      mod._products = results
+        .filter(r => r.status === 'fulfilled' && r.value)
+        .map(r => r.value)
+        .filter(Boolean)
+      mod._total = mod._products.length
+    }
+  } catch (e) {
+    mod._products = []
+  } finally {
+    mod._loading = false
+  }
+}
+
+async function switchModuleSub(mod, subId) {
+  if (mod._activeSub === subId) return
+  mod._activeSub = subId
+  mod._activeSubLabel = subId ? (getSubCats(mod).find(s => s.id === subId)?.name || '') : mod.title
+  await loadModuleProducts(mod)
+}
+
+function viewMoreModule(mod) {
+  const cfg = getCfg(mod)
+  const catNode = resolveCategoryInfo(cfg)
+  if (!catNode) return
+  const query = {}
+  if (mod._activeSub) {
+    query.category2Id = mod._activeSub
+    query.categoryId = catNode.parentId || catNode.id
+  } else if (catNode.level === 2) {
+    query.category2Id = catNode.id
+    query.categoryId = catNode.parentId
+  } else {
+    query.categoryId = catNode.id
+  }
+  router.push({ path: '/shop/search', query })
+}
+
+async function loadAllModuleProducts() {
+  await Promise.all(modules.value.map(m => loadModuleProducts(m)))
+  // 批量检查收藏
+  const allIds = modules.value.flatMap(m => m._products.map(p => p.id))
+  if (allIds.length > 0 && userStore.token) {
+    try {
+      const res = await batchCheckFavorites(allIds)
+      if (Array.isArray(res)) res.forEach(id => favSet.add(id))
+    } catch (e) {}
+  }
+}
+
+// ========== 回退：分类分区 ==========
+const sections = ref([])
+const sectionsLoading = ref(false)
+
+function buildSections(tree) {
+  sections.value = (tree || []).map(c => ({
+    id: c.id, name: c.name,
+    subs: (c.children || []).filter(s => (s.status ?? 1) !== 0),
+    activeSubId: null, products: [], total: 0, loading: false
+  }))
+  sections.value.sort((a, b) => a.name === '智能手机' ? -1 : b.name === '智能手机' ? 1 : 0)
+}
+
+async function loadSectionProducts(sec) {
+  sec.loading = true
+  try {
+    const params = { page: 1, pageSize: 8 }
+    if (sec.activeSubId) {
+      params.category2Id = sec.activeSubId
+      params.categoryId = sec.id
+    }
+    else params.categoryId = sec.id
+    const res = await listSpu(params)
+    sec.products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+    sec.total = res?.total || sec.products.length
+  } catch (e) { sec.products = [] } finally { sec.loading = false }
+}
+
+async function loadAllSections() {
+  sectionsLoading.value = true
+  try { await Promise.all(sections.value.map(s => loadSectionProducts(s))) } finally { sectionsLoading.value = false }
+}
+
+function switchSub(sec, subId) {
+  if (sec.activeSubId === subId) return
+  clearTimeout(sec._hoverTimer)
+  sec._hoverTimer = setTimeout(() => { sec.activeSubId = subId; loadSectionProducts(sec) }, 200)
+}
+
+function activeSubName(sec) {
+  if (!sec.activeSubId) return sec.name
+  return sec.subs.find(s => s.id === sec.activeSubId)?.name || sec.name
+}
+
+function viewMore(sec) {
+  const query = {}
+  if (sec.activeSubId) {
+    query.category2Id = sec.activeSubId
+    query.categoryId = sec.id
+  }
+  else query.categoryId = sec.id
+  router.push({ path: '/shop/search', query })
+}
+
+// ========== 分类数据 ==========
+async function loadCategory() {
+  try {
+    const res = await listCategory()
+    categoryTree.value = res || []
+    flatCategories.value = flattenCats(res || [])
+    buildSections(res || [])
+  } catch (e) {}
+}
+
+function flattenCats(tree) {
+  const result = []
+  function traverse(list) {
+    if (!list) return
+    for (const item of list) {
+      result.push({ ...item })
+      traverse(item.children)
+    }
+  }
+  traverse(tree)
+  return result
+}
+
+// ========== 筛选模式 + Banner ==========
+const spus = ref([])
+const total = ref(0)
+const page = ref(1)
+const pageSize = ref(20)
+const hasMore = computed(() => spus.value.length < total.value)
+
+async function loadBanners() {
+  try {
+    const res = await userRequest({ url: '/user/banner/list', method: 'get', __silent: true })
+    banners.value = Array.isArray(res) ? res : (res?.data || [])
+  } catch (e) {}
+}
+
+// ========== 通用方法 ==========
+function goDetail(id) {
+  const route = router.resolve(`/spu/${id}`)
+  window.open(route.href, '_blank')
+}
+
+async function toggleFav(spu) {
+  if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
+  try {
+    if (favSet.has(spu.id)) { await removeFavorite(spu.id); favSet.delete(spu.id); ElMessage.success('已取消收藏') }
+    else { await addFavorite(spu.id); favSet.add(spu.id); ElMessage.success('已添加收藏') }
+  } catch (e) { ElMessage.error('操作失败') }
+}
+
+// SKU dialog
+const skuDialogVisible = ref(false)
+const currentSpu = ref(null)
+const currentSkus = ref([])
+const selectedSkuId = ref(null)
+const addingCart = ref(false)
+const selectedSku = computed(() => currentSkus.value.find(s => s.id === selectedSkuId.value))
+
+async function handleAddToCart(spu) {
+  if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
+  try {
+    const res = await getSpu(spu.id)
+    const skuList = res?.skuList || res?.skuListVo || []
+    if (!skuList.length) { ElMessage.warning('该商品暂无规格可选'); return }
+    if (skuList.length === 1) { await doAddCart(skuList[0].id); return }
+    currentSpu.value = res
+    currentSkus.value = skuList.filter(s => s.status !== 0)
+    selectedSkuId.value = currentSkus.value[0]?.id || null
+    skuDialogVisible.value = true
+  } catch (e) { ElMessage.error(e?.response?.data?.msg || e?.message || '加载商品规格失败') }
+}
+
+async function doAddCart(skuId) {
+  if (!skuId) { ElMessage.warning('请选择商品规格'); return }
+  addingCart.value = true
+  try {
+    await addCart({ skuId, qty: 1 })
+    ElMessage.success('已加入购物车')
+    skuDialogVisible.value = false
+    await cartStore.load()
+  } catch (e) { ElMessage.error(e?.response?.data?.msg || e?.message || '加入购物车失败') } finally { addingCart.value = false }
+}
+
+function confirmAddToCart() { doAddCart(selectedSkuId.value) }
+
+// ========== 生命周期 ==========
+onMounted(async () => {
+  startTypewriter()
+  await loadBanners()
+  await loadCategory()
+  await loadModules()
+
+  if (modules.value.length > 0) {
+    await loadAllModuleProducts()
+  } else {
+    await loadAllSections()
+  }
+
+  if (userStore.token && !userStore.nickname) {
+    try { await userStore.fetchProfile() } catch (e) {}
+  }
+  try { await cartStore.load() } catch (e) {}
+})
+
+onUnmounted(() => {
+  clearInterval(typewriterTimer)
+})
+</script>
+
+<style scoped>
+.home-page {
+  min-height: 100vh;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+.hero {
+  background: transparent;
+  text-align: center;
+  padding: var(--space-3xl) 20px;
+}
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 16px;
+  height: 204px;
+}
+.hero-title { margin: 0 0 18px; line-height: 1.2; }
+.hero-subtitle {
+  font-size: 21px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  font-weight: 400;
+  min-height: 1.5em;
+}
+.typewriter-text { white-space: pre; }
+.typewriter-cursor {
+  display: inline-block; width: 2px; height: 1em;
+  background: var(--brand-primary); margin-left: 2px;
+  vertical-align: middle; opacity: 0;
+}
+.typewriter-cursor.blink {
+  animation: cursor-blink 0.9s steps(2, start) infinite;
+  opacity: 1;
+}
+@keyframes cursor-blink { to { opacity: 0; } }
+.hero-cta { height: 52px; padding: 0 36px; font-size: 17px; border-radius: 8px; }
+
+/* Banner */
+.banner, .banner-wrap { background: var(--bg-surface); }
+.banner-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 16px 24px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.45));
+  color: #fff; font-size: 18px; font-weight: 600;
+}
+
+.main-content { padding: 48px 20px 80px; }
+
+/* ===== 分类分区展示 ===== */
+.cat-section { margin-bottom: 44px; }
+.cat-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cat-title { font-size: 24px; font-weight: 600; color: var(--text-primary); }
+.cat-side { display: flex; align-items: center; gap: 22px; }
+.sub-tabs { display: flex; gap: 22px; flex-wrap: wrap; }
+.sub-tab {
+  font-size: 15px; color: var(--text-secondary); cursor: pointer;
+  padding-bottom: 4px; border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s; user-select: none;
+}
+.sub-tab:hover { color: var(--brand-primary); }
+.sub-tab.active { color: var(--brand-primary); border-bottom-color: var(--brand-primary); font-weight: 600; }
+.view-more {
+  font-size: 14px; color: var(--text-secondary); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: color .2s;
+}
+.view-more:hover { color: var(--brand-primary); }
+.view-more .arrow {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--text-muted); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: background .2s;
+}
+.view-more:hover .arrow { background: var(--brand-primary); }
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: 224px repeat(4, 1fr);
+  grid-auto-rows: 300px;
+  gap: 14px;
+}
+.cat-banner {
+  grid-row: 1 / 3; border-radius: 10px; overflow: hidden;
+  position: relative; cursor: pointer; background: var(--bg-hover);
+}
+.cat-banner img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+.cat-banner:hover img { transform: scale(1.04); }
+.cat-banner .banner-text {
+  position: absolute; left: 0; right: 0; top: 0;
+  padding: 22px 14px 40px; text-align: center; color: #fff;
+  background: linear-gradient(rgba(0,0,0,.5), transparent);
+  text-shadow: 0 1px 8px rgba(0,0,0,.45);
+}
+.cat-banner .banner-text h3 { font-size: 18px; font-weight: 600; margin: 0 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-banner .banner-text p { font-size: 13px; opacity: .92; margin: 0; }
+
+.p-card {
+  background: var(--bg-card); border-radius: 10px;
+  border: 1px solid var(--border-base); box-shadow: var(--shadow-sm);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 22px 16px 18px; cursor: pointer;
+  transition: transform .25s, box-shadow .25s; overflow: hidden;
+}
+.p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.p-card img { width: 140px; height: 140px; object-fit: cover; margin-bottom: 14px; border-radius: 10px; }
+.p-name { font-size: 14px; font-weight: 500; text-align: center; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.p-desc { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.p-price { margin-top: auto; padding-top: 12px; font-size: 14px; }
+.p-price .cur { color: var(--brand-primary); font-weight: 600; }
+
+.more-card {
+  background: var(--bg-card); border-radius: 10px;
+  border: 1px solid var(--border-base); box-shadow: var(--shadow-sm);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .25s;
+}
+.more-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--brand-primary); }
+.more-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.more-txt { font-size: 16px; font-weight: 600; color: var(--text-secondary); transition: color .2s; }
+.more-sub { font-size: 12px; color: var(--text-muted); }
+.more-arrow { margin-top: 2px; color: var(--brand-primary); transition: transform .2s; }
+.more-card:hover .more-txt { color: var(--brand-primary); }
+.more-card:hover .more-arrow { transform: translateX(3px); }
+
+/* ===== 产品网格（热门/新品/精选） ===== */
+.product-section { margin-bottom: 20px; }
+.spu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+.spu-card {
+  background: var(--bg-card); border-radius: 22px; overflow: hidden;
+  cursor: pointer; border: 1px solid var(--border-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+.spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); border-color: var(--brand-primary-border); }
+.spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
+.spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.spu-card:hover .spu-image img { transform: scale(1.05); }
+.fav-btn {
+  position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
+  border-radius: 50%; border: none;
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(8px);
+  color: rgba(255,255,255,0.9); font-size: 18px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; line-height: 1; padding: 0;
+}
+.fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
+.fav-btn.active { color: var(--status-danger); background: rgba(255,59,48,0.18); }
+.spu-info { padding: 18px 20px 22px; }
+.spu-name { font-size: 15px; color: var(--text-primary); margin: 0 0 10px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 45px; }
+.spu-bottom { display: flex; justify-content: space-between; align-items: center; }
+.spu-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
+.add-cart-btn { border-radius: 8px; }
+
+/* ===== 领券入口 ===== */
+.coupon-entry-card {
+  background: linear-gradient(135deg, #fff8f0, #fff0e0);
+  border-radius: var(--radius-lg); cursor: pointer;
+  transition: all .25s; border: 1px solid #ffe0c0;
+}
+.coupon-entry-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,140,0,0.15); }
+.coupon-entry-inner {
+  display: flex; align-items: center; gap: 18px;
+  padding: 28px 32px;
+}
+.coupon-entry-icon { font-size: 40px; }
+.coupon-entry-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+.coupon-entry-desc { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.coupon-entry-arrow { font-size: 28px; color: #e09040; margin-left: auto; }
+
+/* ===== Load more / 筛选 ===== */
+.load-more-tip { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 24px 0; color: var(--text-secondary); font-size: 14px; }
+.load-more-tip.no-more { color: var(--text-muted); }
+
+/* ===== SKU 弹窗 ===== */
+.sku-selected-preview { display: flex; align-items: center; gap: 14px; background: var(--bg-hover); padding: 14px; border-radius: var(--radius-md); margin-bottom: 18px; }
+.sku-preview-img { width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-sm); }
+.sku-preview-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
+.sku-preview-spec { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+.sku-preview-stock { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+.sku-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.sku-option { min-width: 100px; padding: 10px 14px; border: 1px solid var(--border-base); border-radius: 8px; background: var(--bg-card); cursor: pointer; transition: all 0.2s; position: relative; }
+.sku-option:hover:not(.disabled) { border-color: var(--brand-primary); }
+.sku-option.active { border-color: var(--brand-primary); background: var(--brand-primary-soft); }
+.sku-option.disabled { opacity: 0.5; cursor: not-allowed; }
+.sku-option-name { font-size: 13px; color: var(--text-primary); }
+.sku-option-price { font-size: 13px; color: var(--brand-primary); font-weight: 600; margin-top: 4px; }
+.sku-option-soldout { position: absolute; top: 2px; right: 4px; font-size: 10px; color: var(--status-danger); }
+
+@media (max-width: 1000px) {
+  .cat-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: none; }
+  .cat-banner { grid-row: auto; min-height: 220px; }
+}
+</style>

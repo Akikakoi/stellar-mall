@@ -1,0 +1,106 @@
+# =========================================================
+# stellar-mall 标准 .gitignore：Java + Maven + IntelliJ IDEA + Vue + Node
+# 生成时间：2026-07-12 （P1-P3 三阶段交付初始化）
+# =========================================================
+
+# ---------- Java 编译产物 ----------
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# ---------- Maven 构建输出（多模块每个子模块都有 target/）----------
+target/
+build/
+out/
+
+# ---------- Maven Wrapper 缓存 ----------
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# ---------- IntelliJ IDEA ----------
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+# 远程开发的 JetBrains 缓存
+.idea_modules/
+
+# ---------- Eclipse / STS ----------
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+.sts4-cache
+
+# ---------- VS Code ----------
+.vscode/
+*.code-workspace
+
+# ---------- Spring Boot ----------
+.spring-boot-devtools.properties
+.spring-boot-bean-info
+
+# ---------- Vue / Vite 前端 ----------
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.DS_Store
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# 所有层级的 node_modules / dist（防止未来子项目出现）
+**/node_modules/
+**/dist/
+
+# ---------- 通用日志 ----------
+*.log
+logs/
+*.log.*
+
+# ---------- 系统垃圾 ----------
+.DS_Store
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+$RECYCLE.BIN/
+Desktop.ini
+
+# ---------- 环境配置 & 本地覆盖 ----------
+# .env 文件本身不提交，只有 .env.example 提交
+.env
+.env.*
+!.env.example
+# application-dev.yml 本地配置（包含真实密钥，严禁提交）
+application-dev.yml
+
+# ---------- Python 运行时缓存 ----------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ---------- RAG 后端运行时数据 ----------
+rag-backend/data/
+rag-backend/.env
+rag-backend/.env.*
+!rag-backend/.env.example
+
+# ---------- Agent 本地通行证 & 临时产物（trae / pre-commit 检查目录）----------
+.trae/
+
+# ---------- WorkBuddy 项目数据 ----------
+.workbuddy/

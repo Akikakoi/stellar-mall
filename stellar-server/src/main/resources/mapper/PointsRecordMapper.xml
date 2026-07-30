@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.PointsRecordMapper">
+
+    <insert id="insert" parameterType="com.stellar.entity.PointsRecord"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_points_record (user_id, type, points, balance_after,
+                                           biz_type, biz_id, description, expired_time, create_time)
+        VALUES (#{userId}, #{type}, #{points}, #{balanceAfter},
+                #{bizType}, #{bizId}, #{description}, #{expiredTime}, #{createTime})
+    </insert>
+
+    <select id="listByUser" resultType="com.stellar.entity.PointsRecord">
+        SELECT id, user_id, type, points, balance_after, biz_type, biz_id,
+               description, expired_time, create_time
+        FROM stellar_points_record
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUser" resultType="int">
+        SELECT COUNT(*) FROM stellar_points_record WHERE user_id = #{userId}
+    </select>
+
+    <select id="countTodayByBizType" resultType="int">
+        SELECT COUNT(*)
+        FROM stellar_points_record
+        WHERE user_id = #{userId}
+          AND biz_type = #{bizType}
+          AND DATE(create_time) = #{today}
+    </select>
+
+    <select id="findExpiringPoints" resultType="com.stellar.entity.PointsRecord">
+        SELECT id, user_id, type, points, balance_after, biz_type, biz_id,
+               description, expired_time, create_time
+        FROM stellar_points_record
+        WHERE type = 1
+          AND expired_time IS NOT NULL
+          AND expired_time >= #{now}
+          AND expired_time &lt;= #{deadline}
+    </select>
+
+    <select id="findByBiz" resultType="com.stellar.entity.PointsRecord">
+        SELECT id, user_id, type, points, balance_after, biz_type, biz_id,
+               description, expired_time, create_time
+        FROM stellar_points_record
+        WHERE user_id = #{userId}
+          AND biz_type = #{bizType}
+          AND biz_id = #{bizId}
+          AND type = 1
+    </select>
+
+</mapper>

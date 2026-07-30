@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.ragsync.mapper.RagSyncOutboxMapper">
+
+    <resultMap id="OutboxMap" type="com.stellar.entity.RagSyncOutbox">
+        <id     property="id"            column="id"/>
+        <result property="bizType"       column="biz_type"/>
+        <result property="bizId"         column="biz_id"/>
+        <result property="opType"        column="op_type"/>
+        <result property="synced"        column="synced"/>
+        <result property="failed"        column="failed"/>
+        <result property="retryCount"    column="retry_count"/>
+        <result property="maxAttempt"    column="max_attempt"/>
+        <result property="lastTryTime"   column="last_try_time"/>
+        <result property="lastErrorMsg"  column="last_error_msg"/>
+        <result property="payloadJson"   column="payload_json"/>
+        <result property="createTime"    column="create_time"/>
+        <result property="createUser"    column="create_user"/>
+        <result property="updateTime"    column="update_time"/>
+        <result property="updateUser"    column="update_user"/>
+    </resultMap>
+
+    <!-- =========================== insert =========================== -->
+    <insert id="insert" parameterType="com.stellar.entity.RagSyncOutbox"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_rag_sync_outbox (
+            biz_type, biz_id, op_type, synced, failed, retry_count, max_attempt,
+            last_try_time, last_error_msg, payload_json,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{bizType}, #{bizId}, #{opType}, #{synced}, #{failed}, #{retryCount}, #{maxAttempt},
+            #{lastTryTime}, #{lastErrorMsg}, #{payloadJson},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <!-- =========================== update 动态 =========================== -->
+    <update id="update" parameterType="com.stellar.entity.RagSyncOutbox">
+        UPDATE stellar_rag_sync_outbox
+        <set>
+            <if test="bizType != null">biz_type = #{bizType},</if>
+            <if test="bizId != null">biz_id = #{bizId},</if>
+            <if test="opType != null">op_type = #{opType},</if>
+            <if test="synced != null">synced = #{synced},</if>
+            <if test="failed != null">failed = #{failed},</if>
+            <if test="retryCount != null">retry_count = #{retryCount},</if>
+            <if test="maxAttempt != null">max_attempt = #{maxAttempt},</if>
+            <if test="lastTryTime != null">last_try_time = #{lastTryTime},</if>
+            <if test="lastErrorMsg != null">last_error_msg = #{lastErrorMsg},</if>
+            <if test="payloadJson != null">payload_json = #{payloadJson},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="markSynced">
+        UPDATE stellar_rag_sync_outbox
+        SET synced      = 1,
+            retry_count = #{retryCount},
+            last_try_time = #{lastTryTime},
+            update_time   = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="markFailedOnce">
+        UPDATE stellar_rag_sync_outbox
+        SET retry_count   = #{retryCount},
+            last_try_time = #{lastTryTime},
+            last_error_msg = #{lastErrorMsg},
+            failed        = #{failed},
+            update_time   = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- =========================== get/list =========================== -->
+    <select id="getById" resultMap="OutboxMap">
+        SELECT * FROM stellar_rag_sync_outbox WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="listPending" resultMap="OutboxMap">
+        SELECT * FROM stellar_rag_sync_outbox
+        WHERE synced = 0 AND failed = 0
+        ORDER BY id ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- pagePending：与 countPending 保持一致，synced=0 AND failed=0 -->
+    <select id="pagePending" resultMap="OutboxMap">
+        SELECT * FROM stellar_rag_sync_outbox
+        WHERE synced = 0 AND failed = 0
+        ORDER BY id ASC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <update id="resetForRetry">
+        UPDATE stellar_rag_sync_outbox
+        SET synced = 0,
+            failed = 0,
+            retry_count = 0,
+            last_try_time = NULL,
+            last_error_msg = '',
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- =========================== 管理端：全局统计 + 全量分页 =========================== -->
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM stellar_rag_sync_outbox
+    </select>
+
+    <select id="countSynced" resultType="long">
+        SELECT COUNT(*) FROM stellar_rag_sync_outbox WHERE synced = 1
+    </select>
+
+    <select id="countPending" resultType="long">
+        SELECT COUNT(*) FROM stellar_rag_sync_outbox WHERE synced = 0 AND failed = 0
+    </select>
+
+    <select id="countFailed" resultType="long">
+        SELECT COUNT(*) FROM stellar_rag_sync_outbox WHERE failed = 1
+    </select>
+
+    <!-- =========================== 条件过滤：pageAllFiltered / countAllFiltered =========================== -->
+
+    <sql id="filterWhere">
+        <where>
+            <if test="status != null">
+                <choose>
+                    <!-- 0 待同步：synced=0 AND failed=0 AND last_try_time IS NULL -->
+                    <when test="status == 0">
+                        AND synced = 0 AND failed = 0 AND last_try_time IS NULL
+                    </when>
+                    <!-- 1 处理中：synced=0 AND failed=0 AND last_try_time IS NOT NULL -->
+                    <when test="status == 1">
+                        AND synced = 0 AND failed = 0 AND last_try_time IS NOT NULL
+                    </when>
+                    <!-- 2 成功：synced=1 -->
+                    <when test="status == 2">
+                        AND synced = 1
+                    </when>
+                    <!-- 3 失败：failed=1 -->
+                    <when test="status == 3">
+                        AND failed = 1
+                    </when>
+                </choose>
+            </if>
+            <if test="eventType != null and eventType != ''">
+                AND op_type = #{eventType}
+            </if>
+            <if test="bizId != null">
+                AND biz_id = #{bizId}
+            </if>
+        </where>
+    </sql>
+
+    <select id="countAllFiltered" resultType="long">
+        SELECT COUNT(*) FROM stellar_rag_sync_outbox
+        <include refid="filterWhere"/>
+    </select>
+
+    <select id="pageAllFiltered" resultMap="OutboxMap">
+        SELECT * FROM stellar_rag_sync_outbox
+        <include refid="filterWhere"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+</mapper>

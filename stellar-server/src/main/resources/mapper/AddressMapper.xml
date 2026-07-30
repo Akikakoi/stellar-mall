@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.AddressMapper">
+    <resultMap id="AddressMap" type="com.stellar.entity.Address">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="consignee" column="consignee"/>
+        <result property="phone" column="phone"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="district" column="district"/>
+        <result property="detail" column="detail"/>
+        <result property="isDefault" column="is_default"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUser" column="update_user"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stellar_user_address (user_id, consignee, phone, province, city, district, detail, is_default, create_time, create_user, update_time, update_user)
+        VALUES (#{userId}, #{consignee}, #{phone}, #{province}, #{city}, #{district}, #{detail}, #{isDefault}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
+    </insert>
+
+    <update id="update">
+        UPDATE stellar_user_address
+        <set>
+            <if test="address.consignee != null">consignee = #{address.consignee},</if>
+            <if test="address.phone != null">phone = #{address.phone},</if>
+            <if test="address.province != null">province = #{address.province},</if>
+            <if test="address.city != null">city = #{address.city},</if>
+            <if test="address.district != null">district = #{address.district},</if>
+            <if test="address.detail != null">detail = #{address.detail},</if>
+            <if test="address.isDefault != null">is_default = #{address.isDefault},</if>
+            update_time = #{address.updateTime}, update_user = #{address.updateUser}
+        </set>
+        WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM stellar_user_address WHERE id = #{id} AND user_id = #{userId}
+    </delete>
+
+    <select id="getById" resultMap="AddressMap">
+        SELECT * FROM stellar_user_address WHERE id = #{id} AND user_id = #{userId}
+    </select>
+
+    <select id="listByUserId" resultMap="AddressMap">
+        SELECT * FROM stellar_user_address WHERE user_id = #{userId} ORDER BY is_default DESC, create_time DESC
+    </select>
+
+    <update id="clearDefault">
+        UPDATE stellar_user_address SET is_default = 0 WHERE user_id = #{userId}
+    </update>
+
+    <update id="setDefault">
+        UPDATE stellar_user_address SET is_default = 1 WHERE id = #{id} AND user_id = #{userId}
+    </update>
+</mapper>
