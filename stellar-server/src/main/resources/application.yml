@@ -48,13 +48,13 @@ logging:
 stellar:
   jwt:
     # 管理端员工 token 密钥（≥32 强密钥，和 RAG 端 STELLAR_ADMIN_SECRET_KEY 完全一致！）
-    admin-secret-key: ${STELLAR_ADMIN_SECRET_KEY:StellarMall_Admin_SecretKey_2024_Strong_32bytes_!@#}
+    admin-secret-key: ${STELLAR_ADMIN_SECRET_KEY:CHANGE_ME_ADMIN_JWT_SECRET_AT_LEAST_32_CHARS}
     # 管理端 token TTL（毫秒，2 小时 = 7200000）
     admin-ttl: 7200000
     # 管理端前端传递 token 的 header 名
     admin-token-name: token
     # C 端用户 token 密钥（≥32，和 RAG 端 STELLAR_USER_SECRET_KEY 完全一致！）
-    user-secret-key: ${STELLAR_USER_SECRET_KEY:StellarMall_User_SecretKey_2024_Strong_32bytes_$%^}
+    user-secret-key: ${STELLAR_USER_SECRET_KEY:CHANGE_ME_USER_JWT_SECRET_AT_LEAST_32_CHARS}
     user-ttl: 604800000   # 7 天
     user-token-name: authentication
   # 阿里云 OSS（和 RAG 共用一个桶，目录前缀 stellar-mall/）
@@ -77,7 +77,7 @@ stellar:
   # RAG 同步配置（Java → RAG 内部接口共享密钥）
   rag:
     base-url: ${STELLAR_RAG_BASE_URL:http://127.0.0.1:8000}
-    internal-sync-secret: ${STELLAR_RAG_INTERNAL_SYNC_SECRET:RagSync_Internal_Secret_2024_Stellar_!@#}
+    internal-sync-secret: ${STELLAR_RAG_INTERNAL_SYNC_SECRET:CHANGE_ME_RAG_SYNC_SECRET}
   # Elasticsearch 搜索配置
   elasticsearch:
     enabled: true

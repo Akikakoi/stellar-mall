@@ -162,12 +162,8 @@ class ChromaVectorStore:
         if filter:
             # 显式传入 filter dict 优先级最高（用于 source / biz_id / status 等精确匹配）
             kwargs["filter"] = _normalize_chroma_where(filter)
-        elif tags_filter:
-            or_cond = [{"tags": {"$contains": t}} for t in tags_filter]
-            if len(or_cond) == 1:
-                kwargs["filter"] = or_cond[0]
-            else:
-                kwargs["filter"] = {"$or": or_cond}
+        # 注意：tags_filter 不再通过 ChromaDB where 传递，改为在 retriever.py 的
+        # hybrid_retrieve() 中做 Python 后过滤，兼容 ChromaDB 0.x/1.x 所有版本。
         return self._lc.as_retriever(search_kwargs=kwargs)
 
     def add_texts(self, texts: List[str], metadatas: Optional[List[dict]] = None,

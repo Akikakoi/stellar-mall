@@ -171,7 +171,7 @@ class OrderCancelRollbackTest {
         when(mallOrderMapper.getById(ORDER_ID)).thenReturn(order);
         when(mallOrderMapper.updateStatus(ORDER_ID, OrderStatus.PAID.getBackendValue())).thenReturn(1);
 
-        assertDoesNotThrow(() -> orderService.pay(ORDER_ID, USER_ID));
+        assertDoesNotThrow(() -> orderService.pay(ORDER_ID, USER_ID, 1));
         verify(mallOrderMapper, times(1)).updateStatus(ORDER_ID, OrderStatus.PAID.getBackendValue());
     }
 
@@ -181,7 +181,7 @@ class OrderCancelRollbackTest {
         when(mallOrderMapper.getById(ORDER_ID)).thenReturn(order);
 
         assertThrows(BaseException.class,
-                () -> orderService.pay(ORDER_ID, USER_ID));
+                () -> orderService.pay(ORDER_ID, USER_ID, 1));
 
         verify(mallOrderMapper, never()).updateStatus(ORDER_ID, OrderStatus.PAID.getBackendValue());
     }
@@ -193,7 +193,7 @@ class OrderCancelRollbackTest {
         when(mallOrderMapper.getById(ORDER_ID)).thenReturn(order);
 
         assertThrows(BaseException.class,
-                () -> orderService.pay(ORDER_ID, USER_ID));
+                () -> orderService.pay(ORDER_ID, USER_ID, 1));
     }
 
     // ========== 明细为空（极端情况）→ 仍允许 cancel ==========

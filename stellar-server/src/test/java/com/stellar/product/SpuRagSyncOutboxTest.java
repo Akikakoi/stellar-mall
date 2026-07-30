@@ -3,6 +3,7 @@ package com.stellar.product;
 import com.stellar.dto.SpuSaveDTO;
 import com.stellar.entity.Sku;
 import com.stellar.entity.Spu;
+import com.stellar.mapper.CategoryMapper;
 import com.stellar.mapper.SkuMapper;
 import com.stellar.mapper.SpuMapper;
 import com.stellar.ragsync.service.RagSyncService;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -41,6 +43,10 @@ class SpuRagSyncOutboxTest {
     private SpuMapper spuMapper;
     @Mock
     private SkuMapper skuMapper;
+    @Mock
+    private CategoryMapper categoryMapper;
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     /** 记录型 RagSyncService 替身：记录每次 enqueueSpuSync 的 bizId 和 opType。 */
     private static class RecordingRagSyncService implements RagSyncService {
@@ -56,11 +62,16 @@ class SpuRagSyncOutboxTest {
             return new PageResult(0L, new ArrayList<>());
         }
         @Override public void retryOne(Long outboxId) { }
-        @Override public PageResult listAllPage(int page, int pageSize) {
-            return new PageResult(0L, new ArrayList<>());
-        }
         @Override public Map<String, Long> stats() {
             return new HashMap<>();
+        }
+        @Override public PageResult listAllPageFiltered(int page, int pageSize,
+                                                         Integer status, String eventType, Long bizId) {
+            return new PageResult(0L, new ArrayList<>());
+        }
+        @Override public Long enqueueDocSync(String docId, String docType, String title,
+                                              String contentMd, String opType, int status, String tags) {
+            return 0L;
         }
     }
 
@@ -105,7 +116,7 @@ class SpuRagSyncOutboxTest {
         lenient().when(spuMapper.getById(any())).thenReturn(base);
 
         ragSyncSpy = new RecordingRagSyncService();
-        spuService = new SpuServiceImpl(spuMapper, skuMapper, ragSyncSpy);
+        spuService = new SpuServiceImpl(spuMapper, skuMapper, categoryMapper, ragSyncSpy, eventPublisher);
     }
 
     // ---- 辅助：最小 SpuSaveDTO ----

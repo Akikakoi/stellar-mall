@@ -51,7 +51,10 @@ def product_search_tool(
             logger.info(f"[product_search] fallback category resolve: '{query}' -> {cat_info}")
             if cat_info:
                 params["categoryId"] = cat_info["id"]
-                params["name"] = ""
+                # 从自然语言问题中提取核心搜索关键词，避免空搜索返回分类下所有商品
+                keyword = _extract_search_keyword(query, cat_info.get("name", ""))
+                params["name"] = keyword
+                logger.info(f"[product_search] fallback keyword: '{keyword}'")
                 result = call_mall("GET", "/user/spu/page", mall_token=mall_token, params=params)
 
     if not result["ok"]:
@@ -136,3 +139,48 @@ def _normalize_spu(item: dict) -> dict:
         "total_stock": item.get("totalStock", 0),
         "brand": item.get("brand", ""),
     }
+
+
+def _extract_search_keyword(query: str, category_name: str) -> str:
+    """从自然语言问题中提取核心搜索关键词。
+    
+    例："哪一款手机充电功率最高" → "手机"
+        "有没有平价的平板电脑" → "平板电脑"
+        "哪个耳机降噪最好" → "耳机"
+    """
+    import re
+    
+    # 去掉问句/比较前缀和后缀
+    noise_words = [
+        # 问句词
+        "哪一款", "哪款", "哪个", "哪一种", "哪种", "哪一个",
+        "有没有", "有没有卖", "帮我找", "帮我查", "帮我搜",
+        "我想买", "我要买", "想买个", "想买一个", "我想买个",
+        "推荐一下", "推荐几款", "推荐", "有什么", "有什么好的",
+        "告诉我", "请问", "我想知道",
+        "一款", "几款",
+        # 比较/筛选词
+        "最便宜", "最贵", "最快", "最高", "最低",
+        "最大", "最小", "最好", "最强", "最省电", "最轻", "最薄",
+        "性价比高的", "性价比",
+        "充电功率", "电池容量", "屏幕大小", "像素", "处理器",
+        "续航", "降噪",
+        "对比", "比较", "排行", "排名",
+        # 语气/助词
+        "是哪个", "是什么", "是", "的", "吗", "呢", "啊", "吧",
+        "？", "?", "！", "!", "，", ",", "。", ".",
+    ]
+    
+    cleaned = query
+    # 按长度降序替换，避免短词先被替换破坏长词
+    for w in sorted(noise_words, key=len, reverse=True):
+        cleaned = cleaned.replace(w, " ")
+    
+    # 清理多余空格
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    
+    # 如果清洗后结果太短（≤1个字符），直接用分类名
+    if not cleaned or len(cleaned) <= 1:
+        return category_name
+    
+    return cleaned

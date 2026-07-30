@@ -11,6 +11,19 @@ from app.rag.vector_store import get_vector_store
 # =====================================================
 # 1) 混合检索：EnsembleRetriever
 # =====================================================
+def _matches_tag_filter(metadata: dict, tags_filter: List[str]) -> bool:
+    """检查 metadata 的 tags 字段是否包含 tags_filter 中任一值。
+    
+    ChromaDB 1.5.x 移除了对 string 字段的 $contains 子串匹配（仅保留 list 字段的 $contains），
+    导致之前用 ChromaDB where 做 tags_filter 在 1.x 下静默返回 0 条。
+    改为 Python 后过滤，兼容 0.x / 1.x 所有版本。
+    """
+    tags = str(metadata.get("tags", "") or "")
+    if not tags:
+        return False
+    return any(t in tags for t in tags_filter)
+
+
 def _build_bm25_retriever_from_chroma(top_k: int, tags_filter: Optional[List[str]]):
     """从 Chroma 拿全部 docs 构建一个 BM25（量级不大时可行）。更高级可切到 Elasticsearch 等。"""
     try:
@@ -20,12 +33,8 @@ def _build_bm25_retriever_from_chroma(top_k: int, tags_filter: Optional[List[str
         return None
     vs = get_vector_store()
     col = vs.lc._collection
-    where = None
-    if tags_filter:
-        or_cond = [{"tags": {"$contains": t}} for t in tags_filter]
-        where = {"$or": or_cond} if len(or_cond) > 1 else or_cond[0]
     try:
-        batch = col.get(where=where, include=["documents", "metadatas"])
+        batch = col.get(include=["documents", "metadatas"])
     except Exception as e:  # noqa
         logger.warning(f"从 Chroma 取全量失败: {e}")
         return None
@@ -34,9 +43,13 @@ def _build_bm25_retriever_from_chroma(top_k: int, tags_filter: Optional[List[str
     if not docs:
         return None
     from langchain_core.documents import Document
-    bm25 = BM25Retriever.from_documents(
-        [Document(page_content=d, metadata=m or {}) for d, m in zip(docs, metas)]
-    )
+    all_docs = [Document(page_content=d, metadata=m or {}) for d, m in zip(docs, metas)]
+    # Python 层后过滤（兼容 ChromaDB 1.x 无 string $contains）
+    if tags_filter:
+        all_docs = [d for d in all_docs if _matches_tag_filter(d.metadata, tags_filter)]
+    if not all_docs:
+        return None
+    bm25 = BM25Retriever.from_documents(all_docs)
     bm25.k = top_k
     return bm25
 
@@ -46,10 +59,15 @@ def hybrid_retrieve(query: str, top_k: int | None = None, tags_filter: Optional[
     top_k = top_k or settings.RETRIEVER_TOP_K
     vs = get_vector_store()
     vs.k = top_k  # type: ignore
-    vector_ret = vs.as_retriever(top_k=top_k, tags_filter=tags_filter)
+    # 不再用 ChromaDB where 做 tags_filter，改为 Python 后过滤
+    vector_ret = vs.as_retriever(top_k=top_k)
     bm25 = _build_bm25_retriever_from_chroma(top_k, tags_filter)
     if bm25 is None:
-        return vector_ret.invoke(query)
+        docs = vector_ret.invoke(query)
+        # Python 后过滤
+        if tags_filter:
+            docs = [d for d in docs if _matches_tag_filter(d.metadata, tags_filter)]
+        return docs
     try:
         try:
             from langchain_community.retrievers import EnsembleRetriever  # langchain 1.x 新路径
@@ -58,10 +76,16 @@ def hybrid_retrieve(query: str, top_k: int | None = None, tags_filter: Optional[
         ensemble = EnsembleRetriever(retrievers=[bm25, vector_ret], weights=[0.4, 0.6])
         # EnsembleRetriever 不直接支持 top_k，由各内部 retriever 控制
         docs = ensemble.invoke(query)
+        # Python 后过滤（vector_ret 结果可能还没过滤）
+        if tags_filter:
+            docs = [d for d in docs if _matches_tag_filter(d.metadata, tags_filter)]
         return docs[:top_k]
     except Exception as e:  # noqa
         logger.warning(f"EnsembleRetriever 不可用: {e}")
-        return vector_ret.invoke(query)
+        docs = vector_ret.invoke(query)
+        if tags_filter:
+            docs = [d for d in docs if _matches_tag_filter(d.metadata, tags_filter)]
+        return docs
 
 
 # =====================================================

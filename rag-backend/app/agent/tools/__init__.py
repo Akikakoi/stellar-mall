@@ -1,4 +1,4 @@
-from app.agent.tools.kb_tool import kb_search_tool
+from app.agent.tools.kb_tool import kb_search_tool, kb_spec_compare
 from app.agent.tools.order_tool import query_order_tool
 from app.agent.tools.after_sales_tool import apply_after_sales_tool
 from app.agent.tools.cart_tool import query_cart_tool, clear_cart_tool, delete_cart_item_tool, update_cart_item_tool

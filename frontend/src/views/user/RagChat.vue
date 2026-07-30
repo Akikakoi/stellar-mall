@@ -454,7 +454,7 @@ async function send(text) {
     let sourcesData = []
     let tokensUsed = 0
     let latencyMs = 0
-    let mode = 'agent'
+    let mode = 'smart'
 
     while (true) {
       const { done, value } = await reader.read()

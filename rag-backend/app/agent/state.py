@@ -16,3 +16,4 @@ class AgentState(TypedDict, total=False):
     conversation_history: List[tuple]
     final_answer: Optional[str]
     stream_chunks: List[str]
+    kb_tags_filter: Optional[list]   # 意图覆盖时附加的 tags_filter

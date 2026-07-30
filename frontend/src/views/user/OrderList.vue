@@ -33,11 +33,11 @@
           <div v-for="it in order.items" :key="it.id || it.skuId" class="item-row">
             <img :src="it.image || it.pic || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
             <div class="item-info">
-              <div class="item-name">{{ it.name || it.skuName }}</div>
-              <div class="item-spec">{{ it.specs || '' }}</div>
+              <div class="item-name">{{ it.spuName || it.name || it.skuName }}</div>
+              <div class="item-spec">{{ it.skuSpecs || it.specs || '' }}</div>
             </div>
             <div class="item-price">¥{{ Number(it.price || 0).toFixed(2) }}</div>
-            <div class="item-qty">x{{ it.quantity || it.number || 1 }}</div>
+            <div class="item-qty">x{{ it.qty || it.quantity || it.number || 1 }}</div>
           </div>
         </div>
 
