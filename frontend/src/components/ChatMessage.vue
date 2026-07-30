@@ -137,7 +137,10 @@ const userLetter = computed(() => {
 })
 const meta = computed(() => {
   const parts = []
-  if (props.msg.mode) parts.push(props.msg.mode === 'agent' ? 'Agent 模式' : 'RAG 模式')
+  if (props.msg.mode) {
+    const label = props.msg.mode === 'agent' ? 'Agent 模式' : props.msg.mode === 'rag' ? 'RAG 模式' : '智能模式'
+    parts.push(label)
+  }
   if (props.msg.tokens_used) parts.push(`${props.msg.tokens_used} tokens`)
   if (props.msg.latency_ms) parts.push(`${(props.msg.latency_ms / 1000).toFixed(1)}s`)
   return parts.join(' · ')

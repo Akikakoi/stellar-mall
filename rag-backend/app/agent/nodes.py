@@ -11,7 +11,7 @@ from app.rag.llm import get_langchain_chat
 from app.agent.state import AgentState
 from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT
 from app.agent.tools import (
-    kb_search_tool, query_order_tool, apply_after_sales_tool,
+    kb_search_tool, kb_spec_compare, query_order_tool, apply_after_sales_tool,
     query_cart_tool, clear_cart_tool, delete_cart_item_tool, update_cart_item_tool,
     cancel_order_tool, confirm_receipt_tool, query_favorite_tool,
     add_to_cart_tool, query_wallet_tool, product_search_tool, query_reviews_tool,
@@ -123,6 +123,70 @@ def _get_last_user_query(state: AgentState) -> str:
     return ""
 
 
+# 规格属性关键词映射表：用户问题中的属性词 → 知识库查询关键词
+_SPEC_ATTR_KEYWORDS = {
+    "充电": "充电功率 有线快充 电池容量",
+    "充电功率": "充电功率 有线快充",
+    "续航": "电池容量 快充速度",
+    "电池": "电池容量 有线快充",
+    "屏幕": "屏幕 分辨率 刷新率",
+    "拍照": "摄像头 像素",
+    "像素": "摄像头 像素",
+    "处理器": "处理器 芯片 CPU",
+    "芯片": "处理器 芯片 CPU",
+    "内存": "内存 RAM",
+    "存储": "存储 ROM",
+    "重量": "机身尺寸 重量",
+    "尺寸": "机身尺寸 重量",
+}
+
+
+def _extract_spec_attrs(query: str) -> str:
+    """从用户问题中提取要比较的规格属性关键词。
+
+    例如："哪一款手机充电功率最高" → "充电功率 有线快充"
+        "哪个笔记本屏幕最好" → "屏幕 分辨率 刷新率"
+    """
+    found = set()
+    for kw, attrs in _SPEC_ATTR_KEYWORDS.items():
+        if kw in query:
+            for a in attrs.split():
+                found.add(a)
+    return " ".join(sorted(found))
+
+
+# 用户问题中的品类关键词 → KB 文档 tags 值（用于 ChromaDB tags_filter 过滤）
+_QUERY_CATEGORY_TO_TAG = {
+    "手机": "智能手机",
+    "平板": "平板电脑",
+    "平板电脑": "平板电脑",
+    "笔记本": "笔记本电脑",
+    "笔记本电脑": "笔记本电脑",
+    "手表": "智能穿戴",
+    "手环": "智能穿戴",
+    "耳机": "智能穿戴",
+    "眼镜": "智能穿戴",
+    "戒指": "智能穿戴",
+    "穿戴": "智能穿戴",
+    "路由": "其他",
+    "充电器": "其他",
+    "充电宝": "其他",
+}
+
+
+def _resolve_query_tags(query: str) -> list | None:
+    """从用户问题中提取产品品类，映射为 KB 文档的 tags 值列表，用于 tags_filter 过滤。
+
+    例如："哪一款手机充电功率更高" → ["智能手机"]
+        "哪个笔记本屏幕最好" → ["笔记本电脑"]
+        "平板电脑哪款最便宜" → ["平板电脑"]
+    """
+    for kw, tag in sorted(_QUERY_CATEGORY_TO_TAG.items(), key=lambda x: len(x[0]), reverse=True):
+        if kw in query:
+            return [tag]
+    return None
+
+
 def intent_classification_node(state: AgentState) -> Dict[str, Any]:
     """意图识别节点：判断用户问题属于哪个类别。"""
     query = _get_last_user_query(state)
@@ -160,15 +224,84 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
 
 def check_params_node(state: AgentState) -> Dict[str, Any]:
     """参数检查节点：检查当前意图对应的工具参数是否齐全。"""
+    import re
     intent = state.get("intent", "other")
+    query = _get_last_user_query(state)
     tool_name = INTENT_TO_TOOL.get(intent)
+
+    # 用户明确要求使用知识库时，强制走 kb_search，避免被"比较/搜索"意图带偏到商城 API
+    kb_override = False
+    if "知识库检索" in query or "调用知识库" in query or "查询知识库" in query:
+        tool_name = "kb_search"
+        kb_override = True
+        # 清理查询：去掉"调用知识库检索查询"等指令词，提取纯查询内容
+        cleaned = re.sub(
+            r'(调用)?(知识库检索|查询知识库)(查询)?[，,，]?\s*',
+            '', query
+        ).strip()
+        if cleaned:
+            query = cleaned
+
+    # 规格参数比较/筛选类问题应直接走知识库（product_consult），而不是商城搜索（product_search）
+    # 原因：Mall API 的 /user/spu/page?name= 对自然语言整句搜索效果差，
+    #       整句"哪一款手机充电功率更高"只会匹配到 1 款手机 + 2 个配件，漏掉另外 5 款手机
+    kb_tags_filter = None  # 当覆盖为 kb_search 时，附加的 tags_filter
+    should_check_spec = (
+        (intent == "product_search" and tool_name == "product_search")
+        or intent == "other"
+        or intent == "product_consult"  # 单产品查属性也走 spec_compare
+    )
+    if should_check_spec and not kb_override:
+        spec_comparison_patterns = [
+            r'(哪[一款个]|哪种|哪一[款种]|哪个).*(充电|功率|瓦|[0-9]+W|电池|续航|屏幕|拍照|��素|内存|存储|处理器|芯片|参数|配置|规格|价格|最便宜|最贵)',
+            r'(充电|功率|瓦|电池|续航|屏幕|拍照|像素|内存|存储|处理器|芯片|参数|配置|规格).*(比较|对比|哪[一款个]|哪个|最好|最高|最快|最强|最大|最小|最便宜|最贵)',
+            r'.*(哪[一款个]).*(哪[一款个]).*',
+            r'(一共|总共|到底)?有几[款个种台].*',
+            r'(列出|列举|全部|所有).*[款个商品品类].*',
+            r'有多少[款个台种].*',
+            r'.*知识库.*有几.*',
+            r'有没有.*(手机|平板|笔记本|手表|耳机|充电|路由)',
+            r'(支持|兼容|具备|配备).*(快充|W|瓦|瓦特).*',
+            # 单产品查属性："XXX 的充电功率是多少" / "XXX 的屏幕参数"
+            r'.*的(充电|功率|电池|屏幕|拍照|像素|内存|存储|处理器|芯片|重量|尺寸|价格).*(是多少|多少|怎么样|如何|多大|参数)',
+            # 单产品问特性："是否支持反向充电" / "能不能快充" / "支持无线充电吗"
+            r'(是否|能不能|可以|能)\s*(支持|用|使用)?.{0,10}(充电|快充|无线|反向|防水|NFC|红外|指纹|蓝牙|WiFi|5G)',
+            r'(支持|兼容|具备|配备|内置).{0,10}(充电|快充|无线|反向|防水|NFC|红外|指纹|蓝牙|WiFi|5G)',
+        ]
+        if any(re.search(p, query) for p in spec_comparison_patterns):
+            tool_name = "kb_search"
+            intent = "product_consult"
+            kb_override = True
+            kb_tags_filter = _resolve_query_tags(query)
+            logger.info(f"[CheckParams] 规格比较类问题，覆盖为 product_consult -> kb_search, tags_filter={kb_tags_filter}, query={query[:30]!r}")
 
     if not tool_name or tool_name not in TOOL_REQUIRED_PARAMS:
         return {"missing_params": [], "current_tool": tool_name}
 
     required_params = TOOL_REQUIRED_PARAMS[tool_name]["required"]
-    query = _get_last_user_query(state)
     collected = state.get("required_params", {})
+
+    # 规格比较/枚举覆盖：KB 检索需要更高的 top_k，确保多款产品的 spec 都进结果
+    if kb_override and tool_name == "kb_search":
+        collected["top_k"] = 20
+        if kb_tags_filter:
+            collected["tags_filter"] = kb_tags_filter
+        collected["original_query"] = query  # 保存原始问句
+        # 规格比较类问题的查询改写
+        if kb_tags_filter:
+            spec_attrs = _extract_spec_attrs(query)
+            if spec_attrs:
+                tag = kb_tags_filter[0]
+                cat_word = ""
+                if tag == "智能手机":
+                    cat_word = "手机"
+                elif tag == "平板电脑":
+                    cat_word = "平板电脑"
+                elif tag == "笔记本电脑":
+                    cat_word = "笔记本"
+                rewritten = f"{cat_word} {spec_attrs}" if cat_word else spec_attrs
+                collected["query"] = rewritten
+                logger.info(f"[CheckParams] 查询改写: {query[:30]!r} -> {rewritten!r}")
 
     missing = []
     for param in required_params:
@@ -206,6 +339,8 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
         "missing_params": missing,
         "required_params": collected,
         "current_tool": tool_name,
+        "intent": "product_consult" if kb_override else intent,
+        "kb_tags_filter": kb_tags_filter,
     }
 
 
@@ -328,8 +463,43 @@ def tool_execution_node(state: AgentState) -> Dict[str, Any]:
     try:
         if tool_name == "kb_search":
             query = params.get("query", "")
-            result = kb_search_tool.invoke({"query": query})
+            top_k = params.get("top_k")
+            tags_filter = params.get("tags_filter") or state.get("kb_tags_filter")
+
+            # 规格比较覆盖：走关键词匹配而非向量搜索，确保每款产品都有 spec
+            is_spec_override = top_k and top_k >= 20  # check_params 覆盖时设置 top_k=20
+            if is_spec_override:
+                original_query = params.get("original_query", query)
+                spec_attrs = _extract_spec_attrs(original_query)
+                if spec_attrs and tags_filter:
+                    spec_kw = spec_attrs.split()
+                    logger.info(f"[ExecuteTool] 规格比较: tags={tags_filter}, keywords={spec_kw}")
+                    result = kb_spec_compare(
+                        query=query, tags_filter=tags_filter,
+                        spec_keywords=spec_kw, per_product=3,
+                    )
+                elif tags_filter:
+                    # 枚举/全量统计模式：有品类标签但无 spec 关键词，取全部品类文档
+                    broad_kw = ["##", "|", "# ", "核心参数", "电池", "快充", "W", "处理器", "屏幕", "产品参数", "规格"]
+                    logger.info(f"[ExecuteTool] 枚举/全量统计: tags={tags_filter}")
+                    result = kb_spec_compare(
+                        query=query, tags_filter=tags_filter,
+                        spec_keywords=broad_kw, per_product=1,
+                    )
+                else:
+                    # 单产品查属性：无品类标签，但 query 含产品名，用向量搜索 + 大 top_k
+                    logger.info(f"[ExecuteTool] 单产品属性查询（向量搜索，top_k=20）: query={query[:40]!r}")
+                    result = kb_search_tool.invoke({"query": query, "top_k": 20})
+            else:
+                invoke_args = {"query": query}
+                if top_k:
+                    invoke_args["top_k"] = top_k
+                if tags_filter:
+                    invoke_args["tags_filter"] = tags_filter
+                logger.info(f"[ExecuteTool] kb_search: query={query[:40]!r} top_k={top_k} tags_filter={tags_filter}")
+                result = kb_search_tool.invoke(invoke_args)
             sources = result.get("sources", []) if isinstance(result, dict) else []
+            logger.info(f"[ExecuteTool] kb_search 返回 {len(sources)} 条结果")
             return {
                 "tool_results": result,
                 "sources": sources,
@@ -436,6 +606,94 @@ def tool_execution_node(state: AgentState) -> Dict[str, Any]:
                 "user_id": user_id,
             })
             sources = result.get("data", []) if isinstance(result, dict) else []
+
+            # 智能补充：商品搜索/比较时，从知识库补充规格参数（充电功率、电池等）
+            kb_specs = None
+            query_text = params.get("query", "")
+            # 判断是否涉及规格比较的关键词
+            spec_keywords = [
+                "充电", "电池", "续航", "功率", "瓦", "W",
+                "屏幕", "拍照", "像素", "内存", "存储", "处理器", "芯片",
+                "最快", "最高", "最大", "最好", "最强", "哪款", "比较", "对比",
+            ]
+            if result.get("success") and result.get("data") and any(kw in query_text for kw in spec_keywords):
+                try:
+                    kb_specs = []
+                    seen_keys = set()  # (doc_name, chunk_index) 去重
+                    # 同时记录每个 product 至少命中了几个 doc，避免重复
+                    seen_product_docs = {}  # pname -> set(doc_name)
+                    product_names = [item.get("name", "") for item in result.get("data", []) if item.get("name")][:6]
+                    spec_attrs = _extract_spec_attrs(query_text)
+
+                    def _add_sources(kb_res, pname=None):
+                        if not kb_res.get("success") or not kb_res.get("sources"):
+                            return 0
+                        added = 0
+                        for src in kb_res["sources"]:
+                            key = (src.get("doc_name", ""), src.get("chunk_index", 0))
+                            if key not in seen_keys:
+                                seen_keys.add(key)
+                                if pname and not src.get("matched_product"):
+                                    src["matched_product"] = pname
+                                # 记录 product 命中过哪些 doc
+                                if pname:
+                                    seen_product_docs.setdefault(pname, set()).add(src.get("doc_name", ""))
+                                kb_specs.append(src)
+                                added += 1
+                        return added
+
+                    # 方案 1：逐个商品单独检索（精准但召回可能不足）
+                    # 重要修复：tags_filter 用准确的 "智能手机"（KB 文档的真实 tag）
+                    #            之前用 "手机" 虽能 $contains 命中，但语义不对且容易被改库影响
+                    for pname in product_names:
+                        kb_q = f"{pname} {spec_attrs}" if spec_attrs else f"{pname} 充电功率 有线快充 电池容量"
+                        try:
+                            kb_res = kb_search_tool.invoke({
+                                "query": kb_q,
+                                "top_k": 6,
+                                "tags_filter": ["智能手机"],
+                            })
+                            _add_sources(kb_res, pname)
+                        except Exception:
+                            pass
+                        if len(kb_specs) >= 18:  # 6 款商品 * 3 条
+                            break
+
+                    # 方案 2（关键修复）：始终跑一次全量兜底检索，覆盖未被方案 1 命中的商品
+                    # 之前错误地写成 `if not kb_specs`：只要方案 1 找到任意一条，方案 2 就不跑
+                    # 导致其他商品的 spec（比如玉米手机 10 Pro 的 120W）永远拿不到
+                    # 现在：始终跑一次，不带 tags_filter，覆盖更广
+                    try:
+                        fallback_res = kb_search_tool.invoke({
+                            "query": query_text,
+                            "top_k": 12,
+                        })
+                        _add_sources(fallback_res)
+                    except Exception:
+                        pass
+
+                    # 方案 3（关键修复）：对每个还没命中 spec 的商品，再单独查一次（不带 tags_filter）
+                    # 确保每款返回的商品都有 spec 片段进入上下文
+                    for pname in product_names:
+                        if pname in seen_product_docs and seen_product_docs[pname]:
+                            continue  # 已经被方案 1/2 命中，跳过
+                        try:
+                            kb_res = kb_search_tool.invoke({
+                                "query": f"{pname} 充电功率 有线快充 电池容量",
+                                "top_k": 5,
+                            })
+                            _add_sources(kb_res, pname)
+                        except Exception:
+                            pass
+
+                    if kb_specs:
+                        logger.info(
+                            f"[product_search+KB] 为 {len(product_names)} 款商品补充 {len(kb_specs)} 条规格参数片段, 命中商品={list(seen_product_docs.keys())}"
+                        )
+                except Exception as e:
+                    logger.warning(f"[product_search+KB] 知识库补充失败: {e}")
+
+            result["kb_specs"] = kb_specs
             return {
                 "tool_results": result,
                 "sources": sources,
@@ -476,6 +734,39 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
     context = _build_tool_context(tool_result, intent)
 
     sys_msg = SystemMessage(content=AGENT_SYSTEM_PROMPT)
+    # 根据不同意图定制回答提示
+    extra_hints = ""
+    if intent == "product_search":
+        extra_hints = (
+            "- 如果工具结果中包含「知识库中相关商品的规格参数」，务必结合这些数据回答比较/筛选/推荐类问题\n"
+            "- 比较时用表格或列表展示各款商品的关键差异，重点突出用户关心的维度\n"
+        )
+
+    # 防幻觉：商品名称必须严格使用工具返回的真实名称
+    anti_hallucination = (
+        "【防幻觉强约束 — 违反任何一条都是严重错误】\n"
+        "- 回答中所有数字（功率、容量、价格、尺寸等）必须**严格等于**工具返回的数值，不得修改哪怕 1 个数字\n"
+        "- 如果用户问「有没有 200W 快充」但工具返回的数据里没有任何产品标注 200W，只能回答「没有，最高 XXW」\n"
+        "- 商品名称必须与工具返回 100% 一致，禁止近音字替换\n"
+        "- 不存在的数据写「暂无」，禁止编造\n"
+    )
+
+    # 硬数据校验：如果用户问的规格数值在上下文中不存在，直接注入警告
+    import re as _re
+    user_nums = set()
+    for m in _re.finditer(r'(\d+)\s*W', query):
+        user_nums.add(int(m.group(1)))
+    if user_nums:
+        # 搜索整个上下文（不是只搜 sources 的 content，也搜 product_count/product_names 等元信息）
+        context_str = context + " " + str(tool_result.get("product_names", []))
+        context_nums = set(int(n) for n in _re.findall(r'(\d+)\s*W', context_str))
+        missing_nums = user_nums - context_nums
+        if missing_nums:
+            context = (
+                f"⚠️ 注意：以下数据中**没有任何产品标注 {', '.join(f'{n}W' for n in sorted(missing_nums))} 快充**。"
+                f"如果你在数据中确实没有找到该规格，请如实告知用户，不要编造。\n\n{context}"
+            )
+
     user_msg = HumanMessage(content=f"""用户问题：{query}
 
 工具返回结果：
@@ -483,11 +774,12 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
 
 请根据工具返回的结果，用友好、专业的语气回答用户的问题。
 - 回答要简洁明了，重点突出
-- 适当使用 Markdown 格式（列表、加粗）
+- 适当使用 Markdown 格式（列表、加粗、表格）
 - 有数据的地方用数据说话
 - 如果工具返回失败或没有结果，如实告知用户
 - 涉及订单号等信息，提醒用户注意保管
-""")
+{extra_hints}
+{anti_hallucination}""")
 
     try:
         answer_chunks = []
@@ -543,6 +835,12 @@ def _build_tool_context(tool_result: Any, intent: str) -> str:
             if not sources:
                 return "（知识库中没有找到相关内容）"
             lines = []
+            # 枚举模式：附加产品总数信息，帮助 LLM 准确回答"一共有几款"
+            pc = tool_result.get("product_count")
+            if pc:
+                pn = tool_result.get("product_names", [])
+                lines.append(f"**知识库中该品类共有 {pc} 款产品：** {', '.join(pn[:20])}")
+                lines.append("")
             for src in sources:
                 lines.append(f"--- 来源: {src.get('doc_name', '未知')}  相关度: {src.get('score', 0):.3f} ---")
                 lines.append(src.get("content", ""))
@@ -629,6 +927,7 @@ def _build_tool_context(tool_result: Any, intent: str) -> str:
 
         elif intent == "product_search":
             data = tool_result.get("data")
+            kb_specs = tool_result.get("kb_specs")
             if not data:
                 return f"（未找到与「{tool_result.get('query', '')}」相关的商品）"
             lines = [tool_result.get("message", ""), ""]
@@ -637,6 +936,22 @@ def _build_tool_context(tool_result: Any, intent: str) -> str:
                 lines.append(f"   SPU编号：{item.get('id', '')}  |  价格区间：¥{item.get('min_price', '0')} ~ ¥{item.get('max_price', '0')}")
                 lines.append(f"   销量：{item.get('sale_count', 0)}  |  库存：{item.get('total_stock', 0)}")
                 lines.append("")
+
+            # 补充知识库中的规格参数（充电功率、电池等），帮助回答比较/筛选问题
+            if kb_specs:
+                lines.append("---")
+                lines.append("**知识库中相关商品的规格参数（用于回答比较类问题）：**")
+                lines.append("")
+                for src in kb_specs:
+                    doc_name = src.get("doc_name", "未知文档")
+                    matched = src.get("matched_product")
+                    prefix = f"📄 来源：{doc_name}"
+                    if matched:
+                        prefix += f"  |  对应商品：{matched}"
+                    lines.append(prefix)
+                    lines.append(src.get("content", ""))
+                    lines.append("")
+
             return "\n".join(lines)
 
         elif intent == "review_query":
@@ -683,12 +998,34 @@ def _build_tool_context(tool_result: Any, intent: str) -> str:
 
 def route_after_intent(state: AgentState) -> str:
     """意图识别后的路由。"""
+    import re
     intent = state.get("intent", "other")
     if intent in ("product_consult", "order_query", "cancel_order", "confirm_receipt",
                     "cart_query", "cart_add", "cart_clear", "cart_delete", "cart_update", "after_sales",
                     "favorite_query", "wallet_query", "product_search", "review_query"):
         return "check_params"
     elif intent == "small_talk":
+        return "generate_answer"
+    elif intent == "other":
+        # 被意图识别误判为 other 的查询，如果看起来像商品/品类问题，也送 check_params
+        messages = state.get("messages", [])
+        query = ""
+        if messages:
+            last = messages[-1]
+            if hasattr(last, "content"):
+                query = last.content if isinstance(last.content, str) else str(last.content)
+        rescue_patterns = [
+            r'(一共|总共|到底)?有几[款个种台]',
+            r'有多少[款个台种]',
+            r'(列出|列举|全部|所有).*[款个商品品类]',
+            r'知识库.*有几',
+            r'(哪[一款个]).*(充电|功率|电池|屏幕|配置|参数|价格)',
+            r'(比较|对比|推荐).*(手机|平板|笔记本|手表|耳机)',
+            r'(手机|平板|笔记本|手表|耳机|充电).*(哪|推荐|比较|多少)',
+        ]
+        if any(re.search(p, query) for p in rescue_patterns):
+            logger.info(f"[RouteAfterIntent] other→check_params rescue, query={query[:40]!r}")
+            return "check_params"
         return "generate_answer"
     else:
         return "generate_answer"

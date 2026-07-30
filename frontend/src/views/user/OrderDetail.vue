@@ -51,13 +51,17 @@
             <div class="item-main" @click="goSpu(it.spuId)">
               <img :src="it.pic || it.image || __PH" class="thumb"
                    onerror="this.src=window.__PH;this.onerror=null" />
-              <div class="item-info">
-                <div class="item-name">{{ it.spuName }}</div>
-                <div class="item-spec">{{ it.skuSpecs || '默认规格' }}</div>
+              <div class="item-detail">
+                <div class="item-info">
+                  <div class="item-name">{{ it.spuName }}</div>
+                  <div class="item-spec">{{ it.skuSpecs || '默认规格' }}</div>
+                </div>
+                <div class="item-meta">
+                  <span class="item-price">¥{{ Number(it.price || 0).toFixed(2) }}</span>
+                  <span class="item-qty">x{{ it.qty || 1 }}</span>
+                  <span class="item-subtotal">¥{{ Number(it.subtotal || 0).toFixed(2) }}</span>
+                </div>
               </div>
-              <div class="item-price">¥{{ Number(it.price || 0).toFixed(2) }}</div>
-              <div class="item-qty">x{{ it.qty || 1 }}</div>
-              <div class="item-subtotal">¥{{ Number(it.subtotal || 0).toFixed(2) }}</div>
             </div>
             <div v-if="isReviewable(order?.statusCode) && !reviewedSkuIds.has(it.skuId)" class="item-actions">
               <el-button size="small" type="primary" @click.stop="openReview(it)">评价</el-button>
@@ -448,10 +452,18 @@ watch(() => route.params.id, load)
 .item-row:last-child { border-bottom: none; }
 .item-row:hover { background: var(--bg-hover); }
 .item-main {
-  display: grid;
-  grid-template-columns: 90px 1fr 130px 80px 130px;
+  display: flex;
   align-items: center;
+  gap: 16px;
   cursor: pointer;
+}
+.item-detail {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 .item-actions {
   display: flex;
@@ -460,11 +472,13 @@ watch(() => route.params.id, load)
   padding-right: 12px;
 }
 .thumb { width: 72px; height: 72px; border-radius: var(--radius-sm); object-fit: cover; }
-.item-name { color: var(--text-primary); font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.item-info { flex: 1; min-width: 0; }
+.item-name { color: var(--text-primary); font-size: 14px; font-weight: 500; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item-spec { color: var(--text-muted); font-size: 12px; }
-.item-price { color: var(--text-primary); text-align: right; }
-.item-qty   { color: var(--text-muted); text-align: right; }
-.item-subtotal { color: var(--text-primary); text-align: right; font-weight: 600; }
+.item-meta { display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+.item-price { color: var(--text-primary); text-align: right; width: 90px; flex-shrink: 0; }
+.item-qty   { color: var(--text-muted); text-align: right; width: 60px; flex-shrink: 0; }
+.item-subtotal { color: var(--text-primary); text-align: right; font-weight: 600; width: 100px; flex-shrink: 0; }
 
 /* 评价弹窗 */
 .review-target {

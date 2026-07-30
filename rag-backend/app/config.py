@@ -113,7 +113,7 @@ class Settings(BaseSettings):
     # RAG
     RETRIEVER_TOP_K: int = 20
     RERANK_TOP_K: int = 5
-    SIMILARITY_THRESHOLD: float = 0.4
+    SIMILARITY_THRESHOLD: float = 0.25   # 降到 0.25：自然语言问句 vs 结构化 spec 的语义相似度本身偏低
     CHUNK_SIZE: int = 1024
     CHUNK_OVERLAP: int = 200
     QUERY_REWRITE_ENABLED: bool = True
