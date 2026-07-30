@@ -102,5 +102,8 @@ rag-backend/.env.*
 # ---------- Agent 本地通行证 & 临时产物（trae / pre-commit 检查目录）----------
 .trae/
 
+# ---------- 本地文档 ----------
+Stellar_Mall_AI_面试题.pdf
+
 # ---------- WorkBuddy 项目数据 ----------
 .workbuddy/
