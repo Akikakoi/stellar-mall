@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.PointsPaymentMapper">
+
+    <resultMap id="PointsPaymentMap" type="com.stellar.entity.PointsPayment">
+        <id     property="id"         column="id"/>
+        <result property="orderId"    column="order_id"/>
+        <result property="userId"     column="user_id"/>
+        <result property="points"     column="points"/>
+        <result property="amount"     column="amount"/>
+        <result property="type"       column="type"/>
+        <result property="bizDesc"    column="biz_desc"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.PointsPayment"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_points_payment (order_id, user_id, points, amount, type, biz_desc, create_time)
+        VALUES (#{orderId}, #{userId}, #{points}, #{amount}, #{type}, #{bizDesc}, #{createTime})
+    </insert>
+
+    <select id="listByOrderId" resultMap="PointsPaymentMap">
+        SELECT * FROM stellar_points_payment WHERE order_id = #{orderId} ORDER BY id ASC
+    </select>
+
+    <select id="listByOrderAndUser" resultMap="PointsPaymentMap">
+        SELECT * FROM stellar_points_payment WHERE order_id = #{orderId} AND user_id = #{userId} ORDER BY id ASC
+    </select>
+
+</mapper>

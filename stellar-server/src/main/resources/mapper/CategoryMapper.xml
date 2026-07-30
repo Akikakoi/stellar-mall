@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.CategoryMapper">
+
+    <resultMap id="CategoryMap" type="com.stellar.entity.Category">
+        <id     property="id"         column="id"/>
+        <result property="name"       column="name"/>
+        <result property="parentId"   column="parent_id"/>
+        <result property="level"      column="level"/>
+        <result property="type"       column="type"/>
+        <result property="sort"       column="sort"/>
+        <result property="status"     column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUser" column="create_user"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateUser" column="update_user"/>
+        <!-- children 非数据库字段，查询默认不填 -->
+    </resultMap>
+
+    <!-- ================= insert ================= -->
+    <insert id="insert" parameterType="com.stellar.entity.Category"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_category (
+            name, parent_id, level, type, sort, status,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{name}, #{parentId}, #{level}, #{type}, #{sort}, #{status},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <!-- ================= update（动态字段） ================= -->
+    <update id="update" parameterType="com.stellar.entity.Category">
+        UPDATE stellar_category
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- ================= misc ================= -->
+    <delete id="deleteById">
+        DELETE FROM stellar_category WHERE id = #{id}
+    </delete>
+
+    <select id="getById" resultMap="CategoryMap">
+        SELECT * FROM stellar_category WHERE id = #{id}
+    </select>
+
+    <select id="getByParentNameType" resultMap="CategoryMap">
+        SELECT * FROM stellar_category
+        WHERE parent_id = #{parentId} AND name = #{name} AND type = #{type}
+        LIMIT 1
+    </select>
+
+    <select id="countByParentId" resultType="long">
+        SELECT COUNT(*) FROM stellar_category WHERE parent_id = #{parentId}
+    </select>
+
+    <sql id="whereClause">
+        <where>
+            1 = 1
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="type != null">AND type = #{type}</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+    </sql>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM stellar_category
+        <include refid="whereClause"/>
+    </select>
+
+    <select id="page" resultMap="CategoryMap">
+        SELECT * FROM stellar_category
+        <include refid="whereClause"/>
+        <!-- ========== 排序白名单：仅允许 sortBy ∈ {id, name} 且 sortOrder ∈ {asc, desc}，否则走默认排序（防止注入 + 兼容旧调用） ========== -->
+        <!-- ⚠️ OGNL 字符串比较必须用 .equals()，用 == 比较的是引用，非 String pool 场景会恒 false → 永远走默认排序，用户感觉"不生效" -->
+        <choose>
+          <when test="sortBy != null and sortBy.trim() != '' and sortOrder != null and sortOrder.trim() != ''">
+            <choose>
+              <when test="'createTime'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY create_time ${sortOrder}
+              </when>
+              <when test="'name'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY name ${sortOrder}, id ASC
+              </when>
+              <otherwise>
+                ORDER BY sort DESC, create_time DESC
+              </otherwise>
+            </choose>
+          </when>
+          <otherwise>
+            ORDER BY sort DESC, create_time DESC
+          </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="list" resultMap="CategoryMap">
+        SELECT * FROM stellar_category
+        <where>
+            1 = 1
+            <if test="level != null">AND level = #{level}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="type != null">AND type = #{type}</if>
+        </where>
+        ORDER BY sort DESC, name ASC
+    </select>
+
+</mapper>

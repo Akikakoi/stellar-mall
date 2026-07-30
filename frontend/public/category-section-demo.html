@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>分类分区展示 · 演示样本</title>
+<style>
+  :root {
+    --brand-primary: #0071e3;
+    --bg-page: #f5f6f8;
+    --bg-card: #ffffff;
+    --text-primary: #1d1d1f;
+    --text-secondary: #555;
+    --text-muted: #999;
+    --border-base: #e5e7eb;
+    --radius-sm: 8px;
+    --radius-lg: 18px;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,.06);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,.10);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg-page);
+    font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+    color: var(--text-primary);
+    padding: 32px 0 80px;
+  }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+  .demo-tip {
+    background: #eef5ff;
+    border: 1px solid #c6dcff;
+    color: #2b5f9e;
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  /* ===== 分类区块 ===== */
+  .cat-section { margin-bottom: 44px; }
+  .cat-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cat-title { font-size: 24px; font-weight: 600; }
+  .cat-side { display: flex; align-items: center; gap: 22px; }
+
+  /* 小类 tabs */
+  .sub-tabs { display: flex; gap: 22px; }
+  .sub-tab {
+    font-size: 15px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+    user-select: none;
+  }
+  .sub-tab:hover { color: var(--brand-primary); }
+  .sub-tab.active {
+    color: var(--brand-primary);
+    border-bottom-color: var(--brand-primary);
+    font-weight: 600;
+  }
+  .view-more {
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .view-more:hover { color: var(--brand-primary); }
+  .view-more .arrow {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #d3d6da; color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    transition: background .2s;
+  }
+  .view-more:hover .arrow { background: var(--brand-primary); }
+
+  /* ===== 网格：左侧banner + 2行4列 ===== */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: 234px repeat(4, 1fr);
+    grid-template-rows: repeat(2, 300px);
+    gap: 14px;
+  }
+  .cat-banner {
+    grid-row: 1 / 3;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+  }
+  .cat-banner img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
+  .cat-banner:hover img { transform: scale(1.04); }
+  .cat-banner .banner-text {
+    position: absolute; left: 0; right: 0; top: 26px;
+    text-align: center; color: #fff;
+    text-shadow: 0 1px 8px rgba(0,0,0,.45);
+  }
+  .cat-banner .banner-text h3 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .cat-banner .banner-text p { font-size: 13px; opacity: .9; }
+
+  .p-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-base);
+    box-shadow: var(--shadow-sm);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 22px 16px 18px;
+    cursor: pointer;
+    transition: transform .25s, box-shadow .25s;
+  }
+  .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+  .p-card img {
+    width: 140px; height: 140px; object-fit: contain;
+    margin-bottom: 14px; border-radius: var(--radius-sm);
+  }
+  .p-name {
+    font-size: 14px; font-weight: 500; text-align: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 100%;
+  }
+  .p-desc {
+    font-size: 12px; color: var(--text-muted); margin-top: 6px;
+    text-align: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 100%;
+  }
+  .p-price { margin-top: auto; padding-top: 12px; font-size: 14px; }
+  .p-price .cur { color: var(--brand-primary); font-weight: 600; }
+  .p-price .old { color: var(--text-muted); text-decoration: line-through; margin-left: 6px; font-size: 12px; }
+
+  /* 浏览更多卡片 */
+  .more-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-base);
+    box-shadow: var(--shadow-sm);
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    cursor: pointer;
+    transition: transform .25s, box-shadow .25s;
+  }
+  .more-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+  .more-card .txt { font-size: 17px; }
+  .more-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .more-card .circle {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 2px solid var(--brand-primary); color: var(--brand-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    transition: background .2s, color .2s;
+  }
+  .more-card:hover .circle { background: var(--brand-primary); color: #fff; }
+
+  @media (max-width: 1000px) {
+    .cat-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: none; }
+    .cat-banner { grid-row: auto; min-height: 220px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="demo-tip">演示样本：每个一级大类单独成区展示；若该大类下有二级小类，则在区块右上角显示小类 tab（可点击切换）；没有小类时显示「查看更多」。数据为模拟数据。</div>
+  <div id="app"></div>
+</div>
+
+<script>
+// ===== 模拟数据：结构对应后端 category(level1/level2) + spu =====
+const mockSections = [
+  {
+    id: 1, name: '手机', subs: [],           // 无小类 → 右侧显示"查看更多"
+    banner: { img: 'https://picsum.photos/seed/banner-phone/470/1220', title: '星耀 X100 Pro Max', sub: '徕卡光学 · 2亿超清影像' },
+    products: {
+      _default: [
+        { name: '星耀 X100 Pro Max', desc: '徕卡光学 2亿超清影像', price: 5999, old: 6499, img: 'https://picsum.photos/seed/phone-x100promax/300/300' },
+        { name: '星耀 X100 青春版', desc: '大屏 大电量', price: 1999, old: null, img: 'https://picsum.photos/seed/phone-x100-lite/300/300' },
+        { name: 'Lumina Z9 Ultra', desc: '狂暴双芯 | 风冷主动散热', price: 4599, old: 4999, img: 'https://picsum.photos/seed/lumina-z9/300/300' },
+        { name: 'Aether N8 Max', desc: '质感影像 1300万高清主摄', price: 2799, old: 2999, img: 'https://picsum.photos/seed/aether-n8/300/300' },
+        { name: 'Corn 10 Pro', desc: '天玑旗舰性能芯', price: 3299, old: 3599, img: 'https://picsum.photos/seed/corn-10/300/300' },
+        { name: 'Stellar X1 Pro', desc: '低功耗超级阳光屏', price: 2999, old: 3299, img: 'https://picsum.photos/seed/stellar-x1/300/300' },
+        { name: '星耀 X90', desc: '第五代骁龙8 | 8000mAh', price: 4799, old: null, img: 'https://picsum.photos/seed/phone-x90/300/300' }
+      ]
+    }
+  },
+  {
+    id: 2, name: '智能穿戴', subs: ['耳机', '手环手表'],   // 有小类 → tabs
+    banner: { img: 'https://picsum.photos/seed/banner-wear/470/1220', title: '星耀手环 10 Pro', sub: '至高 3 期免息' },
+    products: {
+      '耳机': [
+        { name: '星耀头戴降噪耳机', desc: '40mm 超大镀钛动圈', price: 349, old: null, img: 'https://picsum.photos/seed/headphone1/300/300' },
+        { name: '星耀耳夹式耳机', desc: '轻盈无感 佩戴舒适', price: 799, old: 849, img: 'https://picsum.photos/seed/earclip/300/300' },
+        { name: 'Buds 8', desc: '至高 50dB 宽频降噪', price: 229, old: 249, img: 'https://picsum.photos/seed/buds8/300/300' },
+        { name: 'Buds 8 活力版', desc: '声享澎湃音质 超长续航', price: 99, old: 119, img: 'https://picsum.photos/seed/buds8-lite/300/300' },
+        { name: 'Buds 8 青春版', desc: '42dB 深度主动降噪', price: 139, old: null, img: 'https://picsum.photos/seed/buds8-youth/300/300' },
+        { name: 'Buds 8 Pro', desc: '55dB 深度降噪 | 智能查找', price: 369, old: 399, img: 'https://picsum.photos/seed/buds8-pro/300/300' },
+        { name: '开放式耳机 Pro', desc: '仿生曲线设计', price: 699, old: null, img: 'https://picsum.photos/seed/openear/300/300' }
+      ],
+      '手环手表': [
+        { name: '星耀手环 10 Pro', desc: '大屏血氧监测', price: 399, old: 449, img: 'https://picsum.photos/seed/band10/300/300' },
+        { name: '星耀手环 10', desc: '轻巧长续航', price: 249, old: null, img: 'https://picsum.photos/seed/band10-std/300/300' },
+        { name: 'Watch S5', desc: '全天心率 双频GPS', price: 999, old: 1099, img: 'https://picsum.photos/seed/watch-s5/300/300' },
+        { name: 'Watch S5 eSIM', desc: '独立通话 智能助理', price: 1299, old: null, img: 'https://picsum.photos/seed/watch-s5e/300/300' },
+        { name: 'Watch SE 青春版', desc: '超值之选', price: 499, old: 549, img: 'https://picsum.photos/seed/watch-se/300/300' }
+      ]
+    }
+  },
+  {
+    id: 3, name: '家电', subs: ['热门', '电视影音', '空调', '冰箱', '洗衣机'],
+    banner: { img: 'https://picsum.photos/seed/banner-tv/470/1220', title: '星耀电视 S Mini LED', sub: '旗舰画质 实力跃升' },
+    products: {
+      '热门': [
+        { name: '星耀电视 S Pro Mini LED', desc: '288Hz 超高刷 4+64G', price: 4999, old: null, img: 'https://picsum.photos/seed/tv-spro/300/300' },
+        { name: '星耀电视 S Mini LED 2026', desc: '2000nits 峰值亮度', price: 4199, old: null, img: 'https://picsum.photos/seed/tv-s26/300/300' },
+        { name: '星耀冰箱 十字430L', desc: '纤薄机身 精控变温', price: 1899, old: 2299, img: 'https://picsum.photos/seed/fridge430/300/300' },
+        { name: '星耀洗衣机 Pro 洗烘', desc: '12kg 大容量 洗+烘', price: 3299, old: 3999, img: 'https://picsum.photos/seed/washer-pro/300/300' },
+        { name: '星耀冰箱 对开门系列', desc: '海量空间 十年质保', price: 1999, old: null, img: 'https://picsum.photos/seed/fridge-duo/300/300' },
+        { name: '巨省电空调 1.5匹新1级', desc: '强劲制冷 | 高效节能', price: 1899, old: 2499, img: 'https://picsum.photos/seed/ac15/300/300' },
+        { name: '迷你波轮洗衣机 3kg', desc: '高温煮洗 杀菌除螨', price: 1599, old: null, img: 'https://picsum.photos/seed/washer-mini/300/300' }
+      ],
+      '电视影音': [
+        { name: '星耀电视 75" Max', desc: '巨幕影院级体验', price: 5999, old: 6999, img: 'https://picsum.photos/seed/tv-75max/300/300' },
+        { name: '星耀回音壁', desc: '5.1.2 全景声', price: 1499, old: null, img: 'https://picsum.photos/seed/soundbar/300/300' },
+        { name: '激光投影仪 2 Pro', desc: '0.23:1 超短焦', price: 6499, old: 6999, img: 'https://picsum.photos/seed/projector/300/300' }
+      ],
+      '空调': [
+        { name: '巨省电空调 1.5匹', desc: '新1级能效', price: 1899, old: 2499, img: 'https://picsum.photos/seed/ac-a/300/300' },
+        { name: '柜式空调 3匹', desc: '大风量 速冷暖', price: 4599, old: 4999, img: 'https://picsum.photos/seed/ac-cab/300/300' },
+        { name: '新风空调 Pro', desc: '60m³/h 大新风量', price: 3299, old: null, img: 'https://picsum.photos/seed/ac-fresh/300/300' }
+      ],
+      '冰箱': [
+        { name: '星耀冰箱 十字430L', desc: '精控变温更养鲜', price: 1899, old: 2299, img: 'https://picsum.photos/seed/fr-430/300/300' },
+        { name: '无霜三门 216L', desc: '小户型优选', price: 1199, old: null, img: 'https://picsum.photos/seed/fr-216/300/300' }
+      ],
+      '洗衣机': [
+        { name: '洗烘一体 Pro 12kg', desc: '超电解智投', price: 3299, old: 3999, img: 'https://picsum.photos/seed/wa-12/300/300' },
+        { name: '三区洗衣机 Pro', desc: '三筒洗烘护 14kg', price: 5499, old: null, img: 'https://picsum.photos/seed/wa-3zone/300/300' },
+        { name: '迷你波轮 3kg', desc: '母婴专属', price: 1599, old: null, img: 'https://picsum.photos/seed/wa-mini/300/300' }
+      ]
+    }
+  }
+];
+
+const app = document.getElementById('app');
+
+function productCard(p) {
+  return `<div class="p-card">
+    <img src="${p.img}" alt="${p.name}" loading="lazy" />
+    <div class="p-name">${p.name}</div>
+    <div class="p-desc">${p.desc}</div>
+    <div class="p-price"><span class="cur">¥${p.price}${p.old ? '' : ''}</span>${p.old ? `<span class="old">¥${p.old}</span>` : ''}</div>
+  </div>`;
+}
+
+function renderGrid(section, subName) {
+  const list = section.products[subName] || section.products._default || [];
+  const shown = list.slice(0, 7);          // 最多 7 个商品 + 1 个"浏览更多"
+  let cells = shown.map(productCard).join('');
+  cells += `<div class="more-card">
+      <div><div class="txt">浏览更多</div><div class="sub">${subName === '_default' ? section.name : subName}</div></div>
+      <div class="circle">→</div>
+    </div>`;
+  return `<div class="cat-grid">
+    <div class="cat-banner">
+      <img src="${section.banner.img}" alt="${section.banner.title}" />
+      <div class="banner-text"><h3>${section.banner.title}</h3><p>${section.banner.sub}</p></div>
+    </div>
+    ${cells}
+  </div>`;
+}
+
+function renderSection(section) {
+  const hasSubs = section.subs.length > 0;
+  const firstSub = hasSubs ? section.subs[0] : '_default';
+  const side = hasSubs
+    ? `<div class="sub-tabs">${section.subs.map((s, i) =>
+        `<span class="sub-tab${i === 0 ? ' active' : ''}" data-sec="${section.id}" data-sub="${s}">${s}</span>`).join('')}</div>`
+    : `<a class="view-more" href="javascript:void(0)">查看更多 <span class="arrow">›</span></a>`;
+
+  return `<section class="cat-section" id="sec-${section.id}">
+    <div class="cat-header">
+      <div class="cat-title">${section.name}</div>
+      <div class="cat-side">${side}</div>
+    </div>
+    <div class="cat-body" data-sec-body="${section.id}">${renderGrid(section, firstSub)}</div>
+  </section>`;
+}
+
+app.innerHTML = mockSections.map(renderSection).join('');
+
+// tab 切换
+app.addEventListener('click', (e) => {
+  const tab = e.target.closest('.sub-tab');
+  if (!tab) return;
+  const secId = Number(tab.dataset.sec);
+  const section = mockSections.find(s => s.id === secId);
+  document.querySelectorAll(`.sub-tab[data-sec="${secId}"]`).forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const body = document.querySelector(`[data-sec-body="${secId}"]`);
+  body.style.opacity = 0;
+  setTimeout(() => {
+    body.innerHTML = renderGrid(section, tab.dataset.sub);
+    body.style.transition = 'opacity .25s';
+    body.style.opacity = 1;
+  }, 120);
+});
+</script>
+</body>
+</html>

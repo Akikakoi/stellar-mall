@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.SpuMapper">
+
+    <resultMap id="SpuMap" type="com.stellar.entity.Spu">
+        <id     property="id"            column="id"/>
+        <result property="name"          column="name"/>
+        <result property="subTitle"      column="sub_title"/>
+        <result property="categoryId"    column="category_id"/>
+        <result property="category2Id"   column="category2_id"/>
+        <result property="description"   column="description"/>
+        <result property="descriptionMd" column="description_md"/>
+        <result property="mainImage"     column="main_image"/>
+        <result property="subImages"     column="sub_images"/>
+        <result property="sliderImages"  column="slider_images"/>
+        <result property="saleCount"     column="sale_count"/>
+        <result property="commentCount"  column="comment_count"/>
+        <result property="totalStock"    column="total_stock"/>
+        <result property="skuCount"      column="sku_count"/>
+        <result property="minPrice"      column="min_price"/>
+        <result property="maxPrice"      column="max_price"/>
+        <result property="isNew"         column="is_new"/>
+        <result property="isHot"         column="is_hot"/>
+        <result property="sort"          column="sort"/>
+        <result property="status"        column="status"/>
+        <result property="onShelfTime"   column="on_shelf_time"/>
+        <result property="offShelfTime"  column="off_shelf_time"/>
+        <result property="createTime"    column="create_time"/>
+        <result property="createUser"    column="create_user"/>
+        <result property="updateTime"    column="update_time"/>
+        <result property="updateUser"    column="update_user"/>
+        <result property="categoryName"  column="category_name"/>
+        <result property="category2Name" column="category2_name"/>
+    </resultMap>
+
+    <!-- =========================== insert =========================== -->
+    <insert id="insert" parameterType="com.stellar.entity.Spu"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_spu (
+            name, sub_title, category_id, category2_id,
+            description, description_md, main_image, sub_images, slider_images,
+            sale_count, comment_count, total_stock, sku_count,
+            min_price, max_price, is_new, is_hot, sort, status,
+            on_shelf_time, off_shelf_time,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{name}, #{subTitle}, #{categoryId}, #{category2Id},
+            #{description}, #{descriptionMd}, #{mainImage}, #{subImages}, #{sliderImages},
+            #{saleCount}, #{commentCount}, #{totalStock}, #{skuCount},
+            #{minPrice}, #{maxPrice}, #{isNew}, #{isHot}, #{sort}, #{status},
+            #{onShelfTime}, #{offShelfTime},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <!-- =========================== update 动态 =========================== -->
+    <update id="update" parameterType="com.stellar.entity.Spu">
+        UPDATE stellar_spu
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="subTitle != null">sub_title = #{subTitle},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="category2Id != null">category2_id = #{category2Id},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="descriptionMd != null">description_md = #{descriptionMd},</if>
+            <if test="mainImage != null">main_image = #{mainImage},</if>
+            <if test="subImages != null">sub_images = #{subImages},</if>
+            <if test="sliderImages != null">slider_images = #{sliderImages},</if>
+            <if test="totalStock != null">total_stock = #{totalStock},</if>
+            <if test="skuCount != null">sku_count = #{skuCount},</if>
+            <if test="minPrice != null">min_price = #{minPrice},</if>
+            <if test="maxPrice != null">max_price = #{maxPrice},</if>
+            <if test="isNew != null">is_new = #{isNew},</if>
+            <if test="isHot != null">is_hot = #{isHot},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="onShelfTime != null">on_shelf_time = #{onShelfTime},</if>
+            <if test="offShelfTime != null">off_shelf_time = #{offShelfTime},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 只更新 status + on/off shelf 时间（用于 onOffShelf） -->
+    <update id="updateStatusAndTime" parameterType="com.stellar.entity.Spu">
+        UPDATE stellar_spu
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="onShelfTime != null">on_shelf_time = #{onShelfTime},</if>
+            <if test="offShelfTime != null">off_shelf_time = #{offShelfTime},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 聚合 SKU 反写（每次 SKU 列表变化后调用一次）。不依赖 @AutoFill 以避免参数缺失：这里直接 NOW() 且不改动 update_user。 -->
+    <update id="refreshAggregatesFromSku">
+        UPDATE stellar_spu
+        SET min_price   = #{minPrice},
+            max_price   = #{maxPrice},
+            total_stock = #{totalStock},
+            sku_count   = #{skuCount},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- =========================== delete/get =========================== -->
+    <delete id="deleteById">
+        DELETE FROM stellar_spu WHERE id = #{id}
+    </delete>
+
+    <select id="getById" resultMap="SpuMap">
+        SELECT s.*,
+               c1.name AS category_name,
+               c2.name AS category2_name
+        FROM stellar_spu s
+             LEFT JOIN stellar_category c1 ON c1.id = s.category_id
+             LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
+        WHERE s.id = #{id}
+        LIMIT 1
+    </select>
+
+    <select id="listByIds" resultMap="SpuMap">
+        SELECT s.*,
+               c1.name AS category_name,
+               c2.name AS category2_name
+        FROM stellar_spu s
+             LEFT JOIN stellar_category c1 ON c1.id = s.category_id
+             LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
+        WHERE s.id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- =========================== count + page =========================== -->
+    <sql id="spuWhere">
+        <where>
+            1 = 1
+            <if test="name != null and name != ''">AND s.name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="categoryId != null">AND s.category_id = #{categoryId}</if>
+            <if test="category2Id != null">AND s.category2_id = #{category2Id}</if>
+            <if test="status != null">AND s.status = #{status}</if>
+            <if test="isNew != null">AND s.is_new = #{isNew}</if>
+            <if test="isHot != null">AND s.is_hot = #{isHot}</if>
+            <if test="priceFrom != null">AND s.min_price &gt;= #{priceFrom}</if>
+            <if test="priceTo != null">AND s.max_price &lt;= #{priceTo}</if>
+        </where>
+    </sql>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM stellar_spu s
+        <include refid="spuWhere"/>
+    </select>
+
+    <select id="page" resultMap="SpuMap">
+        SELECT s.*,
+               c1.name AS category_name,
+               c2.name AS category2_name
+        FROM stellar_spu s
+             LEFT JOIN stellar_category c1 ON c1.id = s.category_id
+             LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
+        <include refid="spuWhere"/>
+        <!-- ========== 排序白名单：仅允许 sortBy ∈ {id, name, saleCount, minPrice, createTime, relevance} 且 sortOrder ∈ {asc, desc}，否则走默认排序（防止注入 + 兼容旧调用） ========== -->
+        <choose>
+          <!-- relevance 排序不需要 sortOrder，搜索词非空时按相关性排 -->
+          <when test="sortBy != null and sortBy.trim() != '' and 'relevance'.equals(sortBy) and name != null and name.trim() != ''">
+            ORDER BY
+              CASE WHEN s.name = #{name} THEN 0 ELSE 1 END,
+              CASE WHEN s.name LIKE CONCAT(#{name}, '%') THEN 0 ELSE 1 END,
+              s.sort DESC, s.create_time DESC
+          </when>
+          <when test="sortBy != null and sortBy.trim() != '' and sortOrder != null and sortOrder.trim() != ''">
+            <choose>
+              <when test="'createTime'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY s.create_time ${sortOrder}
+              </when>
+              <when test="'name'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY s.name ${sortOrder}, s.id ASC
+              </when>
+              <when test="'saleCount'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY s.sale_count ${sortOrder}, s.id ASC
+              </when>
+              <when test="'minPrice'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY s.min_price ${sortOrder}, s.id ASC
+              </when>
+              <otherwise>
+                ORDER BY s.sort DESC, s.create_time DESC
+              </otherwise>
+            </choose>
+          </when>
+          <otherwise>
+            ORDER BY s.sort DESC, s.create_time DESC
+          </otherwise>
+        </choose>
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+  <!-- 作用域分类的关联 SPU 数（COUNT DISTINCT，避免 L1/L2 双维度叠加时重复计数，与删除禁止口径一致） -->
+  <select id="countDistinctIdByCategoryScope" resultType="java.lang.Long">
+    SELECT
+      <choose>
+        <when test="scopeIds != null and scopeIds.size() > 0">
+          COUNT(DISTINCT s.id)
+        </when>
+        <otherwise>
+          0
+        </otherwise>
+      </choose>
+    FROM stellar_spu s
+    <where>
+      <if test="scopeIds != null and scopeIds.size() > 0">
+        (s.category_id IN
+          <foreach collection="scopeIds" item="sid" open="(" separator="," close=")">#{sid}</foreach>
+         OR s.category2_id IN
+          <foreach collection="scopeIds" item="sid" open="(" separator="," close=")">#{sid}</foreach>
+        )
+      </if>
+    </where>
+  </select>
+
+  <!-- 批量导出：查询全部 SPU -->
+  <select id="listAll" resultMap="SpuMap">
+    SELECT s.*,
+           c1.name AS category_name,
+           c2.name AS category2_name
+    FROM stellar_spu s
+         LEFT JOIN stellar_category c1 ON c1.id = s.category_id
+         LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
+    ORDER BY s.id ASC
+  </select>
+
+  <update id="incrSaleCount">
+    UPDATE stellar_spu SET sale_count = sale_count + #{qty} WHERE id = #{spuId}
+  </update>
+
+  <!-- =========================== MySQL 聚合（侧栏筛选） =========================== -->
+  <!-- 分类聚合：按 category2_id 统计（如果有二级分类），否则退到 category_id -->
+  <select id="aggCategories" resultType="com.stellar.vo.BucketVO">
+    SELECT CAST(COALESCE(s.category2_id, s.category_id) AS CHAR(20)) AS `key`,
+           COUNT(*) AS doc_count
+    FROM stellar_spu s
+    <include refid="spuWhere"/>
+    GROUP BY COALESCE(s.category2_id, s.category_id)
+    ORDER BY doc_count DESC
+    LIMIT 20
+  </select>
+
+  <!-- 价格区间聚合：*-50 / 50-100 / 100-200 / 200-500 / 500-*，与 ES range 聚合口径一致 -->
+  <select id="aggPriceRanges" resultType="com.stellar.vo.BucketVO">
+    SELECT
+      CASE
+        WHEN s.min_price IS NULL OR s.min_price &lt; 50   THEN '*-50'
+        WHEN s.min_price &lt; 100                         THEN '50-100'
+        WHEN s.min_price &lt; 200                         THEN '100-200'
+        WHEN s.min_price &lt; 500                         THEN '200-500'
+        ELSE '500-*'
+      END AS `key`,
+      COUNT(*) AS doc_count
+    FROM stellar_spu s
+    <include refid="spuWhere"/>
+    GROUP BY `key`
+    ORDER BY MIN(s.min_price)
+  </select>
+</mapper>

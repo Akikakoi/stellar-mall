@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.UserPointsMapper">
+
+    <resultMap id="UserPointsMap" type="com.stellar.entity.UserPoints">
+        <id     property="id"               column="id"/>
+        <result property="userId"           column="user_id"/>
+        <result property="totalPoints"      column="total_points"/>
+        <result property="availablePoints"  column="available_points"/>
+        <result property="frozenPoints"     column="frozen_points"/>
+        <result property="totalEarned"      column="total_earned"/>
+        <result property="totalSpent"       column="total_spent"/>
+        <result property="version"          column="version"/>
+        <result property="createTime"       column="create_time"/>
+        <result property="updateTime"       column="update_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.UserPoints"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_user_points (user_id, total_points, available_points, frozen_points,
+                                         total_earned, total_spent, version, create_time, update_time)
+        VALUES (#{userId}, #{totalPoints}, #{availablePoints}, #{frozenPoints},
+                #{totalEarned}, #{totalSpent}, #{version}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="getByUserId" resultMap="UserPointsMap">
+        SELECT * FROM stellar_user_points WHERE user_id = #{userId} LIMIT 1
+    </select>
+
+    <update id="addPoints">
+        UPDATE stellar_user_points
+        SET total_points = total_points + #{points},
+            available_points = available_points + #{points},
+            version = version + 1
+        WHERE user_id = #{userId} AND version = #{oldVersion}
+    </update>
+
+    <update id="deductPoints">
+        UPDATE stellar_user_points
+        SET total_points = total_points - #{points},
+            available_points = available_points - #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND version = #{oldVersion}
+          AND available_points >= #{points}
+    </update>
+
+    <update id="freezePoints">
+        UPDATE stellar_user_points
+        SET available_points = available_points - #{points},
+            frozen_points = frozen_points + #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND version = #{oldVersion}
+          AND available_points >= #{points}
+    </update>
+
+    <update id="unfreezePoints">
+        UPDATE stellar_user_points
+        SET available_points = available_points + #{points},
+            frozen_points = frozen_points - #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND version = #{oldVersion}
+          AND frozen_points >= #{points}
+    </update>
+
+    <update id="addTotalEarned">
+        UPDATE stellar_user_points
+        SET total_earned = total_earned + #{points}
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="addTotalSpent">
+        UPDATE stellar_user_points
+        SET total_spent = total_spent + #{points}
+        WHERE user_id = #{userId}
+    </update>
+
+    <update id="expirePoints">
+        UPDATE stellar_user_points
+        SET total_points = total_points - #{points},
+            available_points = available_points - #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND version = #{oldVersion}
+          AND available_points >= #{points}
+    </update>
+
+    <!-- 消费冻结积分：frozen- → total_points- → total_spent+，一次原子操作 -->
+    <update id="consumeFrozenPoints">
+        UPDATE stellar_user_points
+        SET frozen_points = frozen_points - #{points},
+            total_points = total_points - #{points},
+            total_spent = total_spent + #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND version = #{oldVersion}
+          AND frozen_points >= #{points}
+    </update>
+
+</mapper>

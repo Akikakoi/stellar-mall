@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.SkuMapper">
+
+    <resultMap id="SkuMap" type="com.stellar.entity.Sku">
+        <id     property="id"           column="id"/>
+        <result property="spuId"        column="spu_id"/>
+        <result property="name"         column="name"/>
+        <result property="specs"        column="specs"/>
+        <result property="specsJson"    column="specs_json"/>
+        <result property="price"        column="price"/>
+        <result property="originalPrice" column="original_price"/>
+        <result property="costPrice"    column="cost_price"/>
+        <result property="marketPrice"  column="market_price"/>
+        <result property="stock"        column="stock"/>
+        <result property="version"      column="version"/>
+        <result property="warnStock"    column="warn_stock"/>
+        <result property="weightG"      column="weight_g"/>
+        <result property="barcode"      column="barcode"/>
+        <result property="image"        column="image"/>
+        <result property="sort"         column="sort"/>
+        <result property="status"       column="status"/>
+        <result property="createTime"   column="create_time"/>
+        <result property="createUser"   column="create_user"/>
+        <result property="updateTime"   column="update_time"/>
+        <result property="updateUser"   column="update_user"/>
+    </resultMap>
+
+    <!-- =========================== insert =========================== -->
+    <insert id="insert" parameterType="com.stellar.entity.Sku"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_sku (
+            spu_id, name, specs, specs_json,
+            price, original_price, cost_price, market_price,
+            stock, version, warn_stock, weight_g, barcode, image, sort, status,
+            create_time, create_user, update_time, update_user
+        ) VALUES (
+            #{spuId}, #{name}, #{specs}, #{specsJson},
+            #{price}, #{originalPrice}, #{costPrice}, #{marketPrice},
+            #{stock}, #{version}, #{warnStock}, #{weightG}, #{barcode}, #{image}, #{sort}, #{status},
+            #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
+        )
+    </insert>
+
+    <!-- =========================== update 动态 =========================== -->
+    <update id="update" parameterType="com.stellar.entity.Sku">
+        UPDATE stellar_sku
+        <set>
+            <if test="spuId != null">spu_id = #{spuId},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="specs != null">specs = #{specs},</if>
+            <if test="specsJson != null">specs_json = #{specsJson},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="costPrice != null">cost_price = #{costPrice},</if>
+            <if test="marketPrice != null">market_price = #{marketPrice},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="warnStock != null">warn_stock = #{warnStock},</if>
+            <if test="weightG != null">weight_g = #{weightG},</if>
+            <if test="barcode != null">barcode = #{barcode},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = #{updateTime},
+            update_user = #{updateUser}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 乐观锁扣库存：stock - qty, version + 1；受影响行数 0 表示冲突/不足 -->
+    <update id="deductStockWithVersion">
+        UPDATE stellar_sku
+        SET stock   = stock - #{qty},
+            version = version + 1
+        WHERE id = #{id}
+          AND version = #{version}
+          AND stock &gt;= #{qty}
+    </update>
+
+    <!-- 乐观锁回滚库存：stock + qty, version + 1 -->
+    <update id="rollbackStockWithVersion">
+        UPDATE stellar_sku
+        SET stock   = stock + #{qty},
+            version = version + 1
+        WHERE id = #{id}
+          AND version = #{version}
+    </update>
+
+    <!-- Redis 锁模式直接扣库存：只校验库存充足，不依赖 version -->
+    <update id="deductStock">
+        UPDATE stellar_sku
+        SET stock = stock - #{qty}
+        WHERE id = #{id}
+          AND stock &gt;= #{qty}
+    </update>
+
+    <!-- Redis 锁模式直接回滚库存：不依赖 version -->
+    <update id="rollbackStock">
+        UPDATE stellar_sku
+        SET stock = stock + #{qty}
+        WHERE id = #{id}
+    </update>
+
+    <!-- =========================== delete/get/list =========================== -->
+    <delete id="deleteById">
+        DELETE FROM stellar_sku WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBySpuId">
+        DELETE FROM stellar_sku WHERE spu_id = #{spuId}
+    </delete>
+
+    <select id="getById" resultMap="SkuMap">
+        SELECT * FROM stellar_sku WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="listByIds" resultMap="SkuMap">
+        SELECT * FROM stellar_sku
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="listBySpuId" resultMap="SkuMap">
+        SELECT * FROM stellar_sku
+        WHERE spu_id = #{spuId}
+        ORDER BY sort ASC, id ASC
+    </select>
+
+</mapper>

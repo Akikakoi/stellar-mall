@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.UserMessageMapper">
+
+    <resultMap id="MessageMap" type="com.stellar.entity.UserMessage">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="type" column="type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="refId" column="ref_id"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stellar_user_message (user_id, type, title, content, ref_id, is_read, create_time)
+        VALUES (#{userId}, #{type}, #{title}, #{content}, #{refId}, #{isRead}, #{createTime})
+    </insert>
+
+    <select id="pageByUserId" resultMap="MessageMap">
+        SELECT * FROM stellar_user_message
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM stellar_user_message WHERE user_id = #{userId}
+    </select>
+
+    <select id="countUnread" resultType="long">
+        SELECT COUNT(*) FROM stellar_user_message WHERE user_id = #{userId} AND is_read = 0
+    </select>
+
+    <update id="markAsRead">
+        UPDATE stellar_user_message SET is_read = 1 WHERE id = #{id}
+    </update>
+
+    <update id="markAllAsRead">
+        UPDATE stellar_user_message SET is_read = 1 WHERE user_id = #{userId} AND is_read = 0
+    </update>
+
+</mapper>

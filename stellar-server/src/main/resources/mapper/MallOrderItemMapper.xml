@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.MallOrderItemMapper">
+
+    <resultMap id="MallOrderItemMap" type="com.stellar.entity.MallOrderItem">
+        <id     property="id"        column="id"/>
+        <result property="orderId"   column="order_id"/>
+        <result property="spuId"     column="spu_id"/>
+        <result property="skuId"     column="sku_id"/>
+        <result property="spuName"   column="spu_name"/>
+        <result property="skuSpecs"  column="sku_specs"/>
+        <result property="price"     column="price"/>
+        <result property="qty"       column="qty"/>
+        <result property="subtotal"  column="subtotal"/>
+        <result property="extraAmount" column="extra_amount"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.MallOrderItem"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_mall_order_item (
+            order_id, spu_id, sku_id, spu_name, sku_specs,
+            price, qty, subtotal, extra_amount
+        ) VALUES (
+            #{orderId}, #{spuId}, #{skuId}, #{spuName}, #{skuSpecs},
+            #{price}, #{qty}, #{subtotal}, #{extraAmount}
+        )
+    </insert>
+
+    <!-- 批量插入：单条多 VALUES，一次往返写入全部明细 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO stellar_mall_order_item (
+            order_id, spu_id, sku_id, spu_name, sku_specs,
+            price, qty, subtotal, extra_amount
+        ) VALUES
+        <foreach collection="list" item="it" separator=",">
+            (#{it.orderId}, #{it.spuId}, #{it.skuId}, #{it.spuName}, #{it.skuSpecs},
+             #{it.price}, #{it.qty}, #{it.subtotal}, #{it.extraAmount})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByOrderId">
+        DELETE FROM stellar_mall_order_item WHERE order_id = #{orderId}
+    </delete>
+
+    <select id="listByOrderId" resultMap="MallOrderItemMap">
+        SELECT * FROM stellar_mall_order_item
+        WHERE order_id = #{orderId}
+        ORDER BY id ASC
+    </select>
+
+    <select id="listByOrderIds" resultMap="MallOrderItemMap">
+        SELECT * FROM stellar_mall_order_item
+        WHERE order_id IN
+        <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+        ORDER BY order_id ASC, id ASC
+    </select>
+
+</mapper>

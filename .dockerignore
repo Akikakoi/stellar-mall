@@ -1,0 +1,27 @@
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Java build
+stellar-server/target/
+stellar-common/target/
+stellar-pojo/target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# Python
+rag-backend/__pycache__/
+rag-backend/.venv/
+rag-backend/venv/
+rag-backend/chroma_db/
+
+# OS
+.DS_Store
+Thumbs.db

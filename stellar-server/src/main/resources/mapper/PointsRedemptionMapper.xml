@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.PointsRedemptionMapper">
+
+    <insert id="insert" parameterType="com.stellar.entity.PointsRedemption"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_points_redemption (user_id, product_id, product_name, points_cost,
+                                               status, coupon_id, address_id, remark, create_time)
+        VALUES (#{userId}, #{productId}, #{productName}, #{pointsCost},
+                #{status}, #{couponId}, #{addressId}, #{remark}, #{createTime})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE stellar_points_redemption
+        SET status = #{status}
+        <if test="couponId != null">, coupon_id = #{couponId}</if>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getById" resultType="com.stellar.entity.PointsRedemption">
+        SELECT id, user_id, product_id, product_name, points_cost,
+               status, coupon_id, address_id, remark, create_time
+        FROM stellar_points_redemption WHERE id = #{id}
+    </select>
+
+    <select id="listByUser" resultType="com.stellar.entity.PointsRedemption">
+        SELECT id, user_id, product_id, product_name, points_cost,
+               status, coupon_id, address_id, remark, create_time
+        FROM stellar_points_redemption
+        WHERE user_id = #{userId}
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countByUser" resultType="int">
+        SELECT COUNT(*) FROM stellar_points_redemption WHERE user_id = #{userId}
+    </select>
+
+</mapper>
