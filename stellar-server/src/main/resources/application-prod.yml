@@ -1,0 +1,17 @@
+# =========================================================================
+# 星耀商城 stellar-mall 生产环境配置
+# 启动方式: java -jar stellar-server.jar --spring.profiles.active=prod
+# =========================================================================
+
+# ---------- 生产环境 MyBatis：关闭 SQL 日志，禁用控制台输出 ----------
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+logging:
+  level:
+    com:
+      stellar:
+        mapper: warn
+        service: warn
+        controller: warn
