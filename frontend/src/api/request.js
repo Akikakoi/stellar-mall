@@ -32,8 +32,6 @@ function createInstance(baseURL, type) {
     } else {
       headers['Content-Type'] = 'application/json'
     }
-    console.log('[request.js] request interceptor, url:', config.url, 'method:', config.method, 'data:', config.data instanceof FormData ? '[FormData]' : JSON.stringify(config.data))
-
     if (type === 'user') {
       const userStore = useUserStore()
       const token = userStore.token || safeGetItem(USER_TOKEN_KEY)

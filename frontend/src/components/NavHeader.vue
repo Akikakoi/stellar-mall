@@ -320,13 +320,13 @@ onUnmounted(() => {
 })
 
 function handleCommand(cmd) {
-  if (cmd === 'profile') router.push('/me')
-  else if (cmd === 'messages') router.push('/me/messages')
+  if (cmd === 'profile') window.open('/me', '_blank')
+  else if (cmd === 'messages') window.open('/me/messages', '_blank')
   else if (cmd === 'orders') router.push('/order/list')
   else if (cmd === 'aftersale') router.push('/aftersale/list')
-  else if (cmd === 'wallet') router.push('/wallet')
+  else if (cmd === 'wallet') window.open('/wallet', '_blank')
   else if (cmd === 'coupons') router.push('/coupons')
-  else if (cmd === 'points') router.push('/points')
+  else if (cmd === 'points') window.open('/points', '_blank')
   else if (cmd === 'address') router.push('/address')
   else if (cmd === 'favorites') router.push('/favorites')
   else if (cmd === 'cart') router.push('/cart')

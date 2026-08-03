@@ -102,6 +102,13 @@ def _warmup_and_seed() -> None:
         logger.info("✅ RAG 组件预热完成 (background)")
     except Exception as e:  # noqa
         logger.warning(f"RAG 组件预热异常(首次问答会重试): {e}")
+    # 预热 LLM 缓存
+    try:
+        from app.rag.llm_cache import get_llm_cache
+        get_llm_cache()  # 触发 Prompt Hash 初始化
+        logger.info("✅ LLM 缓存模块预热完成 (background)")
+    except Exception as e:  # noqa
+        logger.warning(f"LLM 缓存预热跳过: {e}")
     try:
         from app.services.sample_data_loader import load_sample_data_if_empty
         load_sample_data_if_empty()
@@ -116,10 +123,22 @@ async def lifespan(app: FastAPI):
     _ensure_dirs()
     init_db()
     _seed_admin_once()
+    # 初始化 Redis（LLM 缓存 L1）
+    try:
+        from app.rag.llm_cache import init_redis
+        await init_redis()
+    except Exception as e:
+        logger.warning(f"LLM Cache Redis 初始化跳过: {e}")
     # 把较重的向量化/样例加载放到后台线程，立即开放 HTTP 端口
     threading.Thread(target=_warmup_and_seed, daemon=True).start()
     logger.info(f"🚀 {settings.APP_NAME} HTTP 服务已就绪: http://{settings.APP_HOST}:{settings.APP_PORT}")
     yield
+    # 关闭 Redis
+    try:
+        from app.rag.llm_cache import close_redis
+        await close_redis()
+    except Exception:
+        pass
     logger.info("👋 服务关闭")
 
 

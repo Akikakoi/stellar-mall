@@ -19,7 +19,13 @@ def add_to_cart_tool(
         mall_token: 商城用户token，用于身份验证
         user_id: 用户ID
     """
-    body = {"skuId": int(sku_id), "qty": qty}
+    try:
+        sku_id_int = int(sku_id)
+    except (ValueError, TypeError):
+        return {"success": False, "sku_id": sku_id, "qty": qty,
+                "message": "SKU 编号无效，请确认商品名称和型号是否正确"}
+
+    body = {"skuId": sku_id_int, "qty": qty}
     result = call_mall("POST", "/user/cart", mall_token=mall_token, json=body)
     if not result["ok"]:
         return {"success": False, "sku_id": sku_id, "qty": qty, "message": result["message"]}

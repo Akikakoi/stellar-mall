@@ -1,11 +1,14 @@
 """LangChain RAG 主链路：查询改写 + Prompt + 流式生成 + 引用来源。"""
 from __future__ import annotations
+import asyncio
+import hashlib
 from typing import AsyncGenerator, List, Optional, Tuple
 
 from app.config import settings
 from app.core.logger import logger
 from app.rag.llm import get_langchain_chat
-from app.rag.retriever import hybrid_retrieve, rerank, get_query_cache
+from app.rag.retriever import hybrid_retrieve, rerank
+from app.rag.llm_cache import get_llm_cache, RAG_PROMPT_HASH, REWRITE_PROMPT_HASH
 
 
 def _fix_garbled_tags(text: str) -> str:
@@ -118,15 +121,20 @@ async def astream_answer_with_sources(
     - {"type": "done", "tokens": N}
     """
     history = history or []
-    # 1) 先查缓存
-    cache = get_query_cache()
-    hit = cache.get(query)
+    # 1) 先查缓存（三层：L1 Redis 精确 + L2 Chroma 语义）
+    cache = get_llm_cache()
+    hit = await cache.get(
+        query=query,
+        model=settings.LLM_MODEL_NAME,
+        temperature=settings.LLM_TEMPERATURE,
+        system_prompt_hash=RAG_PROMPT_HASH,
+        cache_type="answer",
+    )
     if hit:
-        ans, srcs = hit
-        for ch in ans:
+        for ch in hit["answer"]:
             yield {"type": "token", "content": ch}
-        yield {"type": "sources", "data": srcs}
-        yield {"type": "done", "tokens": 0}
+        yield {"type": "sources", "data": hit.get("sources", [])}
+        yield {"type": "done", "tokens": hit.get("tokens_used", 0)}
         return
 
     # 2) 查询改写
@@ -181,10 +189,20 @@ async def astream_answer_with_sources(
         yield {"type": "token", "content": msg}
 
     full_answer = "".join(answer_chunks)
-    # 5) 写入缓存（FAQ 模式，只有有来源时才缓存）
+    # 5) 写入缓存（三层：L1 Redis + L2 Chroma，有来源时才缓存）
     if sources and full_answer:
         try:
-            cache.put(query, full_answer, sources)
+            context_hash = hashlib.sha256(
+                ",".join(sorted(str(s.get("doc_id", s.get("doc_name", ""))) for s in sources)).encode()
+            ).hexdigest()
+            asyncio.create_task(cache.put(
+                query=query, model=settings.LLM_MODEL_NAME,
+                temperature=settings.LLM_TEMPERATURE,
+                system_prompt_hash=RAG_PROMPT_HASH,
+                context_hash=context_hash,
+                answer=full_answer, sources=sources, intent="product_consult",
+                tokens_used=len(full_answer), cache_type="answer",
+            ))
         except Exception as e:  # noqa
             logger.warning(f"写缓存失败: {e}")
     yield {"type": "done", "tokens": tokens}

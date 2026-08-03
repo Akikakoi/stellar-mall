@@ -121,9 +121,11 @@ public class SpuSearchService {
             List<String> expandedTerms = synonymEngine.expand(keyword);
 
             // --- 文本搜索子句（should 上下文，参与评分） ---
-            // ① 精确短语匹配：最高优先级
+            // ① 精确字符串匹配 keyword 字段：最高优先级，确保完全同名商品排最前
+            boolQuery.should(QueryBuilders.termQuery("name.keyword", keyword).boost(100.0f));
+            // ② 精确短语匹配：次高优先级
             boolQuery.should(QueryBuilders.matchPhraseQuery("name", keyword).boost(20.0f));
-            // ② 分词匹配（无模糊）：原词 best_fields
+            // ③ 分词匹配（无模糊）：原词 best_fields
             boolQuery.should(QueryBuilders.multiMatchQuery(keyword, "name", "subTitle")
                     .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
                     .field("name", 3.0f)
@@ -305,6 +307,9 @@ public class SpuSearchService {
             case "minPrice":   return "minPrice";
             case "saleCount":  return "saleCount";
             case "createTime": return "createTime";
+            // name 不使用 field sort——ES Text 字段的 .keyword 子字段在 Spring Data Sort
+            // 中会被误解析为嵌套属性路径，走 ES 默认相关性评分即可（termQuery boost 100 保证精确匹配排最前）
+            case "name":       return null;
             default:           return null;
         }
     }

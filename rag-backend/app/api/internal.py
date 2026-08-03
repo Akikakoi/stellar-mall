@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
@@ -220,6 +221,14 @@ def sync_spu(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Vector store failed: {e}",
             ) from e
+
+    # === 精准失效 LLM 缓存 ===
+    try:
+        from app.rag.llm_cache import get_llm_cache
+        import asyncio
+        asyncio.run(get_llm_cache().invalidate_by_product_ids([int(req.spu_id)]))
+    except Exception:
+        pass  # 缓存失效异常不影响主流程
 
     return SyncResponse(
         ok=True, biz_type="SPU", biz_id=biz_id,

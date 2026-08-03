@@ -19,6 +19,8 @@ import com.stellar.service.SpuService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +45,7 @@ public class SpuServiceImpl implements SpuService {
     // ================= 保存 =================
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "spu:detail", key = "#result")
     public Long saveWithSkus(SpuSaveDTO dto) {
         if (dto == null) throw new BaseException(MessageConstant.ILLEGAL_PARAMETER);
         if (dto.getCategoryId() == null) {
@@ -121,6 +124,7 @@ public class SpuServiceImpl implements SpuService {
     }
 
     @Override
+    @Cacheable(value = "spu:detail", key = "#id", unless = "#result == null")
     public Spu getById(Long id) {
         if (id == null) return null;
         Spu s = spuMapper.getById(id);
@@ -138,6 +142,7 @@ public class SpuServiceImpl implements SpuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "spu:detail", key = "#dto.id")
     public void updateWithSkus(SpuSaveDTO dto) {
         if (dto == null || dto.getId() == null) {
             throw new BaseException(MessageConstant.ILLEGAL_PARAMETER);
@@ -240,6 +245,7 @@ public class SpuServiceImpl implements SpuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "spu:detail", key = "#id")
     public void deleteById(Long id) {
         if (id == null) return;
         Spu old = spuMapper.getById(id);

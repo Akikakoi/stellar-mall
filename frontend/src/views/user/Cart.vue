@@ -28,7 +28,12 @@
             <div class="col col-product">
               <div class="product-card" @click="goDetail(item.spuId || item.skuId)">
                 <img :src="item.image || item.pic || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
-                <div class="name">{{ item.name }}</div>
+                <div class="product-info">
+                  <div class="name">{{ item.name }}</div>
+                  <div class="sku-specs" v-if="item.skuName || item.skuSpecs">
+                    {{ item.skuName || (item.skuSpecs || '').replace(/;/g, ' / ') }}
+                  </div>
+                </div>
               </div>
             </div>
             <div class="col col-price">¥{{ Number(item.price || 0).toFixed(2) }}</div>
@@ -123,8 +128,10 @@ onMounted(async () => {
 .row.item:hover { background: var(--bg-hover); }
 .col-check { text-align: center; }
 .product-card { display: flex; align-items: center; gap: 14px; cursor: pointer; }
-.thumb { width: 80px; height: 80px; border-radius: var(--radius-sm); object-fit: cover; }
+.thumb { width: 80px; height: 80px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }
+.product-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .name { color: var(--text-primary); font-size: 14px; line-height: 1.5; }
+.sku-specs { color: var(--text-secondary); opacity: 0.75; font-size: 12px; line-height: 1.4; }
 .col-price, .col-subtotal { color: var(--text-primary); }
 .amount { color: var(--text-primary); font-weight: 600; }
 .col-qty { display: flex; justify-content: center; }

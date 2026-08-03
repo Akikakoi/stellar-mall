@@ -96,15 +96,31 @@ def kb_spec_compare(query: str, tags_filter: List[str], spec_keywords: List[str]
         # 2) 关键词打分：每个 chunk 对 spec_keywords 的命中数
         keyword_lower = [k.lower() for k in spec_keywords]
         scored = []
+        unscored_by_product = {}  # 兜底：每产品保底 1 条无命中 chunk
         for doc in tagged_docs:
             content_lower = doc.page_content.lower()
             hits = sum(1 for k in keyword_lower if k in content_lower)
             if hits > 0:
                 scored.append((doc, hits))
+            else:
+                prod = _clean_product_name(str(doc.metadata.get("doc_name", "")))
+                if prod not in unscored_by_product:
+                    unscored_by_product[prod] = doc
+
+        # 兜底：未被 scored 覆盖的产品，塞入 1 条无命中 chunk
+        # 解决某些产品文档用词（如"电池"而非"电池容量"）不匹配关键词被整版排除的问题
+        products_in_scored = set()
+        for doc, hits in scored:
+            products_in_scored.add(
+                _clean_product_name(str(doc.metadata.get("doc_name", ""))))
+        for prod, doc in unscored_by_product.items():
+            if prod not in products_in_scored:
+                scored.append((doc, 0))
 
         logger.info(
-            f"[kb_spec_compare] 关键词匹配后 %d 条（品类共 %d 条）",
-            len(scored), len(tagged_docs)
+            f"[kb_spec_compare] 关键词匹配后 %d 条（品类共 %d 条，兜底补充 %d 款产品）",
+            len(scored), len(tagged_docs),
+            sum(1 for p in unscored_by_product if p not in products_in_scored)
         )
 
         # 3) 按产品分组，每个产品取命中数最高的前 per_product 个 chunk

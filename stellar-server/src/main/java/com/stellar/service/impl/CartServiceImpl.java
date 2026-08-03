@@ -97,6 +97,7 @@ public class CartServiceImpl implements CartService {
                     .checked(c.getChecked())
                     .spuName(p == null ? null : p.getName())
                     .spuImage(p == null ? null : p.getMainImage())
+                    .skuName(s == null ? null : s.getName())
                     .skuSpecs(s == null ? null : s.getSpecs())
                     .skuPrice(s == null ? null : s.getPrice())
                     .skuImage(s == null ? null : s.getImage())

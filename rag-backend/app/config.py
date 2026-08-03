@@ -118,10 +118,29 @@ class Settings(BaseSettings):
     CHUNK_OVERLAP: int = 200
     QUERY_REWRITE_ENABLED: bool = True
 
-    # 缓存
+    # 缓存（旧版 _QueryCache，逐步弃用）
     QUERY_CACHE_MAXSIZE: int = 128
     QUERY_CACHE_SIM_THRESHOLD: float = 0.97
     QUERY_CACHE_TTL_SECONDS: int = 300  # FAQ 查询缓存默认 5 分钟过期
+
+    # ============ LLM 缓存（新三层缓存架构） ============
+    # 总开关
+    LLM_CACHE_ENABLED: bool = True
+    # L1 Redis 精确缓存
+    LLM_CACHE_REDIS_ENABLED: bool = True
+    LLM_CACHE_REDIS_URL: str = "redis://127.0.0.1:6379/11"
+    LLM_CACHE_REDIS_TTL_ANSWER: int = 7200       # 答案缓存 TTL（秒）
+    LLM_CACHE_REDIS_TTL_INTENT: int = 3600       # 意图缓存 TTL（秒）
+    LLM_CACHE_REDIS_TTL_REWRITE: int = 1800      # 改写缓存 TTL（秒）
+    # L2 Chroma 语义缓存
+    LLM_CACHE_SEMANTIC_ENABLED: bool = True
+    LLM_CACHE_SEMANTIC_MAXSIZE: int = 5000        # 最大条目数
+    LLM_CACHE_SEMANTIC_TTL_ANSWER: int = 7200     # 答案缓存 TTL（秒）
+    LLM_CACHE_SEMANTIC_TTL_INTENT: int = 3600     # 意图缓存 TTL（秒）
+    LLM_CACHE_SEMANTIC_RERANK_THRESHOLD: float = 0.90  # Reranker 命中阈值（中文自然语言标点差异大，不宜过高）
+    LLM_CACHE_SEMANTIC_K: int = 5                 # 召回候选数
+    # 监控
+    LLM_CACHE_METRICS_ENABLED: bool = True
 
     # 限流
     RATE_LIMIT_PER_MINUTE_AUTH: int = 60
@@ -131,6 +150,10 @@ class Settings(BaseSettings):
 
     # Agent 智能体
     AGENT_ENABLED: bool = True
+
+    # MCP (Model Context Protocol) Server
+    MCP_ENABLED: bool = True
+    MCP_SERVER_NAME: str = "stellar-mall"
 
     # ========================================================================
     # 星耀商城 stellar-mall 桥接配置（RAG ↔ Mall 跨端互通关键！）

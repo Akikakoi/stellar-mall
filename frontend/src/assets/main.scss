@@ -1,3 +1,12 @@
+/* 主题切换时冻结所有过渡动画，防止不同属性过渡时长不一致造成闪烁 */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
 :root {
   --radius-sm: 8px;
   --radius-md: 12px;

@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
 /**
  * [SPA + Backend proxy 冲突解决]
@@ -32,7 +34,12 @@ function spaBypass(req) {
 }
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    Components({
+      resolvers: [ElementPlusResolver({ importStyle: 'css' })],
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
@@ -56,6 +63,19 @@ export default defineConfig({
         changeOrigin: true,
         ws: true,
         rewrite: (path) => path.replace(/^\/ragapi/, '')
+      }
+    }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'element-plus': ['element-plus'],
+          'echarts': ['echarts'],
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'markdown': ['markdown-it', 'highlight.js'],
+          'axios': ['axios'],
+        }
       }
     }
   }

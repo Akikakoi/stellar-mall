@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -43,8 +44,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
         this.userInterceptor = userInterceptor;
     }
 
-    // ========= 1. Knife4j/Swagger Docket 双分组 =========
+    // ========= 1. Knife4j/Swagger Docket 双分组（仅 dev 环境启用） =========
     @Bean
+    @Profile("dev")
     public Docket docketAdmin() {
         ApiInfo info = new ApiInfoBuilder()
                 .title("星耀商城管理端 API 文档")
@@ -61,6 +63,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     }
 
     @Bean
+    @Profile("dev")
     public Docket docketUser() {
         ApiInfo info = new ApiInfoBuilder()
                 .title("星耀商城 C 端 API 文档")

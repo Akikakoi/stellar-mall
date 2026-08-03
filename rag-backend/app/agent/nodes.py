@@ -1,5 +1,6 @@
 """LangGraph 节点逻辑：意图识别、参数检查、工具执行、回答生成等。"""
 from __future__ import annotations
+import hashlib
 import json
 from typing import Dict, Any, List
 
@@ -8,6 +9,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, Tool
 from app.config import settings
 from app.core.logger import logger
 from app.rag.llm import get_langchain_chat
+from app.rag.llm_cache import get_cache_sync, put_cache_sync, INTENT_PROMPT_HASH, AGENT_PROMPT_HASH
 from app.agent.state import AgentState
 from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT
 from app.agent.tools import (
@@ -16,6 +18,7 @@ from app.agent.tools import (
     cancel_order_tool, confirm_receipt_tool, query_favorite_tool,
     add_to_cart_tool, query_wallet_tool, product_search_tool, query_reviews_tool,
 )
+from app.agent.tools.resolve_sku_tool import resolve_sku_tool
 
 
 INTENT_DESC_MAP = {
@@ -123,17 +126,40 @@ def _get_last_user_query(state: AgentState) -> str:
     return ""
 
 
+def _format_recent_history(messages: list, max_turns: int = 6) -> str:
+    """把最近 max_turns 条 Human/AIMessage 拼成对话文本，用于上下文提示。
+
+    返回示例：
+        用户: 帮我把星耀 X100 Pro Max 的 16+512G 加入购物车
+        客服: 请问对应的 SKU 编号是多少呢？
+    """
+    if not messages:
+        return "（无）"
+    lines = []
+    for msg in messages[-(max_turns * 2):]:  # 用户+客服算 1 turn
+        if isinstance(msg, HumanMessage):
+            content = msg.content if isinstance(msg.content, str) else str(msg.content)
+            lines.append(f"用户: {content}")
+        elif isinstance(msg, AIMessage):
+            content = msg.content if isinstance(msg.content, str) else str(msg.content)
+            # 截断过长的 AI 回复，避免提示词膨胀
+            if len(content) > 300:
+                content = content[:300] + "…"
+            lines.append(f"客服: {content}")
+    return "\n".join(lines) if lines else "（无）"
+
+
 # 规格属性关键词映射表：用户问题中的属性词 → 知识库查询关键词
 _SPEC_ATTR_KEYWORDS = {
-    "充电": "充电功率 有线快充 电池容量",
-    "充电功率": "充电功率 有线快充",
-    "续航": "电池容量 快充速度",
-    "电池": "电池容量 有线快充",
-    "屏幕": "屏幕 分辨率 刷新率",
-    "拍照": "摄像头 像素",
-    "像素": "摄像头 像素",
-    "处理器": "处理器 芯片 CPU",
-    "芯片": "处理器 芯片 CPU",
+    "充电": "充电功率 有线快充 电池容量 快充 电池 充电",
+    "充电功率": "充电功率 有线快充 快充 充电",
+    "续航": "电池容量 快充速度 电池 续航",
+    "电池": "电池容量 有线快充 电池 快充 mAh Wh",
+    "屏幕": "屏幕 分辨率 刷新率 显示 英寸",
+    "拍照": "摄像头 像素 拍照 摄影 镜头",
+    "像素": "摄像头 像素 镜头",
+    "处理器": "处理器 芯片 CPU 核心 核",
+    "芯片": "处理器 芯片 CPU 核心",
     "内存": "内存 RAM",
     "存储": "存储 ROM",
     "重量": "机身尺寸 重量",
@@ -193,8 +219,37 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
     if not query:
         return {"intent": "other", "intent_confidence": 0.0}
 
+    # 构建对话历史文本片段（最多 6 条最近消息）
+    history_text = _format_recent_history(state.get("messages", []), max_turns=6)
+
+    # 短回答（如 "2"、"1"、"是"、"否"）在有历史时不能走缓存，
+    # 否则上一次独立问 "2" 的结果（other）会污染本次带上下文的判断
+    has_history = bool(history_text and history_text != "（无）")
+    is_short_reply = len(query.strip()) <= 6
+    use_cache = not (has_history and is_short_reply)
+
+    # === LLM 缓存：意图识别 ===
+    cached = None
+    if use_cache:
+        cached = get_cache_sync(
+            query=query,
+            model=settings.LLM_MODEL_NAME,
+            temperature=settings.LLM_TEMPERATURE,
+            system_prompt_hash=INTENT_PROMPT_HASH,
+            cache_type="intent",
+        )
+    if cached:
+        logger.info(f"[Intent] cache HIT  query={query[:30]}...  intent={cached['intent']}")
+        return {
+            "intent": cached.get("intent", "other"),
+            "intent_confidence": cached.get("tokens_used", 90) / 100.0,
+        }
+
     llm = get_langchain_chat()
-    prompt = INTENT_CLASSIFICATION_PROMPT.format(query=query)
+    prompt = INTENT_CLASSIFICATION_PROMPT.format(
+        history=history_text,
+        query=query,
+    )
 
     try:
         resp = llm.invoke([SystemMessage(content="你是一个严格的JSON输出助手。"),
@@ -212,6 +267,24 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
         confidence = float(result.get("confidence", 0.5))
 
         logger.info(f"[Intent] query={query[:30]}... -> intent={intent} conf={confidence:.2f}")
+
+        # === 异步写入缓存（同样跳过短回答 + 有历史的场景） ===
+        if use_cache:
+            try:
+                put_cache_sync(
+                    query=query,
+                    model=settings.LLM_MODEL_NAME,
+                    temperature=settings.LLM_TEMPERATURE,
+                    system_prompt_hash=INTENT_PROMPT_HASH,
+                    context_hash=None,
+                    answer=json.dumps(result, ensure_ascii=False),
+                    sources=[],
+                    intent=intent,
+                    tokens_used=int(confidence * 100),
+                    cache_type="intent",
+                )
+            except Exception:
+                pass
 
         return {
             "intent": intent,
@@ -332,6 +405,32 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
                     collected["cart_item_id"] = extracted
                 else:
                     missing.append(param)
+            elif param == "sku_id":
+                extracted = _extract_sku_id(query, state.get("messages", []))
+                if extracted:
+                    collected["sku_id"] = extracted
+                elif intent == "cart_add":
+                    # 自动解析：从完整历史中提取商品名+规格描述，调用 resolve_sku_tool
+                    new_sku = _auto_resolve_sku(state)
+                    if new_sku:
+                        collected["sku_id"] = new_sku
+                    else:
+                        # 自动解析失败（规格不存在等），直接生成友好回答，不追问 SKU 编号
+                        fail_msg = state.get("resolve_sku_message", "")
+                        failed_spec = state.get("resolve_sku_failed_spec", "")
+                        if fail_msg:
+                            # 已有详细失败信息（来自 resolve_sku_tool），直接返回，
+                            # current_tool 设为 None 避免 execute_tool 走不完整的加购流程
+                            return {
+                                "missing_params": [],
+                                "required_params": collected,
+                                "current_tool": None,
+                                "final_answer": fail_msg,
+                            }
+                        # 兜底：真的无法解析
+                        missing.append(param)
+                else:
+                    missing.append(param)
             else:
                 missing.append(param)
 
@@ -399,6 +498,130 @@ def _extract_cart_item_id(query: str, messages: list) -> str | None:
         m = re.search(pat, query)
         if m:
             return m.group(1)
+    return None
+
+
+def _auto_resolve_sku(state: AgentState) -> str | None:
+    """当用户通过自然语言描述商品（如"星耀 X100 Pro Max的16+512版本"）时，
+    自动搜索商品、匹配规格，返回 sku_id。
+
+    使用**最新**用户消息（而非最长消息），确保处理当前请求而非历史消息。
+
+    Returns:
+        sku_id 字符串 或 None（解析失败）
+    失败时，将失败原因写入 state["resolve_sku_message"]，供后续节点使用。
+    """
+    import re
+
+    messages = state.get("messages", [])
+    mall_token = state.get("mall_token")
+
+    # 使用最新一条用户消息（get_last_user_query 的逻辑）
+    first_user_query = ""
+    for msg in reversed(messages):
+        if isinstance(msg, HumanMessage):
+            content = msg.content if isinstance(msg.content, str) else str(msg.content)
+            first_user_query = content
+            break
+
+    if not first_user_query:
+        return None
+
+    # 去掉常见的意图前缀，提取核心商品描述
+    clean = first_user_query
+    for prefix in ["帮我把", "把", "我想把", "请把", "给我把"]:
+        if clean.startswith(prefix):
+            clean = clean[len(prefix):]
+            break
+
+    # 去掉常见的后缀
+    for suffix in ["加入购物车", "加入我的购物车", "添加到购物车", "加购物车", "加一下购物车",
+                   "添加到我的购物车"]:
+        if clean.endswith(suffix):
+            clean = clean[:-len(suffix)].rstrip()
+            break
+
+    # 提取"的版本"/"的"之后的部分作为规格关键词
+    spec_keywords = ""
+    for sep in ["的版本", "版本", "的"]:
+        idx = clean.rfind(sep)
+        if idx > 0:
+            spec_keywords = clean[idx + len(sep):].strip()
+            clean = clean[:idx].strip()
+            # 如果 spec_keywords 为空（如"的版本"后没东西），
+            # 继续用剩余的 clean 再找一次"的"提取规格
+            if not spec_keywords and sep != "的":
+                continue
+            break
+
+    if not clean or len(clean) < 2:
+        return None
+
+    # 组合规格描述：显式规格 + 原始 query 中提取的模式
+    spec_desc = spec_keywords or None
+    if not spec_desc:
+        from app.agent.tools.resolve_sku_tool import _extract_spec_pattern
+        spec_desc = _extract_spec_pattern(first_user_query)
+
+    logger.info(f"[auto_resolve_sku] query='{first_user_query[:50]}...' product='{clean}' spec='{spec_desc}'")
+
+    try:
+        result = resolve_sku_tool.invoke({
+            "product_name": clean,
+            "spec_description": spec_desc,
+            "mall_token": mall_token,
+        })
+        if result.get("success") and result.get("sku_id"):
+            sku_id = result.get("sku_id")
+            logger.info(f"[auto_resolve_sku] SUCCESS sku_id={sku_id} spu={result.get('spu_name')} reason={result.get('match_reason')}")
+            return str(sku_id)
+        else:
+            failure_msg = result.get("message", "规格匹配失败")
+            logger.info(f"[auto_resolve_sku] FAILED: {failure_msg}")
+            # 透传失败消息给下游节点
+            state["resolve_sku_message"] = failure_msg
+            state["resolve_sku_failed_spec"] = spec_desc or "未知规格"
+            return None
+    except Exception as e:
+        err_msg = f"SKU 解析异常: {e}"
+        logger.warning(f"[auto_resolve_sku] {err_msg}")
+        state["resolve_sku_message"] = err_msg
+        return None
+
+
+def _extract_sku_id(query: str, messages: list) -> str | None:
+    """从用户消息中提取 SKU 编号。
+
+    支持以下场景：
+    1. 显式表达：'SKU 编号 12' / 'sku_id=12' / '第 12 个' / '编号 12'
+    2. 隐式回答：上一条客服消息询问了 SKU 编号，而用户用纯数字回答（"2"/"12"），
+       此时数字即视为 SKU 编号
+    """
+    import re
+
+    # 1) 显式匹配
+    explicit_patterns = [
+        r'SKU\s*(?:编号|ID|id)[：: =]*\s*(\d+)',
+        r'sku[_-]?id[：: =]*\s*(\d+)',
+        r'(?:SKU|sku)\s*[：: ]*\s*(\d+)',
+        r'第\s*(\d+)\s*个(?:SKU|sku)?',
+        r'编号[：: ]*(\d+)',
+    ]
+    for pat in explicit_patterns:
+        m = re.search(pat, query, re.IGNORECASE)
+        if m:
+            return m.group(1)
+
+    # 2) 隐式回答：纯数字 + 上一轮客服在追问 SKU
+    if re.fullmatch(r'\s*\d{1,12}\s*', query):
+        # 查找最近一条客服消息
+        for msg in reversed(messages[-4:]):
+            if isinstance(msg, AIMessage):
+                content = msg.content if isinstance(msg.content, str) else str(msg.content)
+                if "SKU" in content or "sku" in content or "规格编号" in content:
+                    return query.strip()
+                # 客服消息中没有 SKU 相关字样，停止查找
+                return None
     return None
 
 
@@ -717,17 +940,67 @@ def tool_execution_node(state: AgentState) -> Dict[str, Any]:
         return {"tool_results": {"success": False, "message": f"工具执行失败: {str(e)}"}}
 
 
+def _extract_product_ids(tool_result: dict) -> List[int]:
+    """从工具结果中提取商品 ID 列表（用于缓存精准失效）。"""
+    ids = []
+    try:
+        data = tool_result.get("data", {})
+        if isinstance(data, dict):
+            items = data.get("records", data.get("list", []))
+            if isinstance(items, list):
+                for item in items:
+                    if isinstance(item, dict):
+                        for key in ("spu_id", "id", "sku_id"):
+                            if key in item:
+                                ids.append(int(item[key]))
+                                break
+        # 知识库搜索结果
+        sources = tool_result.get("sources", [])
+        for s in sources:
+            if isinstance(s, dict) and "spu_id" in s:
+                ids.append(int(s["spu_id"]))
+    except Exception:
+        pass
+    return list(set(ids)) if ids else None
+
+
 def generate_answer_node(state: AgentState) -> Dict[str, Any]:
     """回答生成节点：根据工具结果生成最终回答。"""
     intent = state.get("intent", "other")
     tool_result = state.get("tool_results", {})
     query = _get_last_user_query(state)
 
+    # 如果已有预生成的 final_answer（如 check_params 因 SKU 解析失败直接返回的），直接使用
+    preset_answer = state.get("final_answer", "")
+    if preset_answer and not state.get("current_tool"):
+        return {"final_answer": preset_answer}
+
     if intent == "small_talk":
         return _handle_small_talk(state)
 
     if intent == "other":
         return _handle_other(state)
+
+    # === LLM 缓存：答案生成 ===
+    context_hash = hashlib.sha256(
+        json.dumps(tool_result, sort_keys=True, ensure_ascii=False, default=str).encode()
+    ).hexdigest()
+    cached = get_cache_sync(
+        query=query,
+        model=settings.LLM_MODEL_NAME,
+        temperature=settings.LLM_TEMPERATURE,
+        system_prompt_hash=AGENT_PROMPT_HASH,
+        context_hash=context_hash,
+        cache_type="answer",
+    )
+    if cached:
+        logger.info(f"[Agent] cache HIT  query={query[:30]}...  intent={intent}")
+        return {
+            "final_answer": cached["answer"],
+            "stream_chunks": list(cached["answer"]),
+            "from_cache": True,
+            "sources": cached.get("sources", []),
+        }
 
     llm = get_langchain_chat()
 
@@ -776,7 +1049,8 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
 - 回答要简洁明了，重点突出
 - 适当使用 Markdown 格式（列表、加粗、表格）
 - 有数据的地方用数据说话
-- 如果工具返回失败或没有结果，如实告知用户
+- **绝不要**在回复中暴露任何技术错误信息、英文异常、Python traceback 或"工具调用失败"等字样
+- 如果操作失败，只告诉用户"暂时无法完成，请确认商品名称和型号是否正确"，**不要输出任何技术术语**
 - 涉及订单号等信息，提醒用户注意保管
 {extra_hints}
 {anti_hallucination}""")
@@ -789,13 +1063,34 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                 answer_chunks.append(str(txt))
 
         full_answer = "".join(answer_chunks)
+
+        # === 异步写入缓存 ===
+        try:
+            # 提取商品 ID
+            product_ids = _extract_product_ids(tool_result)
+            put_cache_sync(
+                query=query,
+                model=settings.LLM_MODEL_NAME,
+                temperature=settings.LLM_TEMPERATURE,
+                system_prompt_hash=AGENT_PROMPT_HASH,
+                context_hash=context_hash,
+                answer=full_answer,
+                sources=state.get("sources", []),
+                intent=intent,
+                tokens_used=len(full_answer),
+                product_ids=product_ids,
+                cache_type="answer",
+            )
+        except Exception:
+            pass
+
         return {
             "final_answer": full_answer,
             "stream_chunks": answer_chunks,
         }
     except Exception as e:
         logger.error(f"生成回答失败: {e}")
-        return {"final_answer": f"抱歉，生成回答时出现异常：{str(e)}"}
+        return {"final_answer": "抱歉，系统暂时无法处理您的请求，请稍后重试。"}
 
 
 def _handle_small_talk(state: AgentState) -> Dict[str, Any]:
@@ -821,6 +1116,39 @@ def _handle_other(state: AgentState) -> Dict[str, Any]:
     }
 
 
+def _sanitize_error_message(raw_msg: str) -> str:
+    """清洗技术错误信息，去掉 Python 异常和英文提示，转为用户友好的中文描述。"""
+    import re
+
+    msg = raw_msg or ""
+
+    # 1. 去掉常见 Python 异常堆栈
+    msg = re.sub(r'invalid literal for int\(\) with base 10[^:]*:?\s*[\'"]?[^\'"]*[\'"]?',
+                 "数据类型错误", msg)
+    msg = re.sub(r"unsupported operand type\(s\)[^:]*:?\s*'[^']*'\s*(and|&)\s*'[^']*'",
+                 "参数类型不匹配", msg)
+    msg = re.sub(r"KeyError:\s*'[^']*'", "数据字段缺失", msg)
+    msg = re.sub(r"ValueError[:\s]*[^,\.]*", "数据格式错误", msg)
+    msg = re.sub(r"TypeError[:\s]*[^,\.]*", "参数类型不匹配", msg)
+    msg = re.sub(r"AttributeError[:\s]*[^,\.]*", "数据字段缺失", msg)
+    msg = re.sub(r"ConnectionError[^,\.]*", "网络连接失败", msg)
+    msg = re.sub(r"TimeoutError[^,\.]*", "请求超时", msg)
+    msg = re.sub(r"HTTP\s*\d{3}[:\s]*[^,\.]*", "商城服务异常", msg)
+    msg = re.sub(r"工具执行失败[:\s]*", "", msg)
+
+    # 2. 去掉残存的英文和路径信息
+    msg = re.sub(r"'[a-z_]+\.[a-z_]+'", "", msg)
+    msg = re.sub(r"in\s+\w+\.py", "", msg).strip()
+
+    # 3. 兜底：如果清洗后仍然很长或全是英文，给一个通用提示
+    if not msg or len(msg) > 200:
+        msg = "系统暂时无法处理您的请求"
+
+    # 4. 美化
+    msg = msg.strip().rstrip(".。")
+    return msg if msg else "系统暂时无法处理您的请求"
+
+
 def _build_tool_context(tool_result: Any, intent: str) -> str:
     """把工具结果格式化为上下文文本。"""
     if not tool_result:
@@ -828,7 +1156,10 @@ def _build_tool_context(tool_result: Any, intent: str) -> str:
 
     if isinstance(tool_result, dict):
         if not tool_result.get("success", True):
-            return f"工具调用失败：{tool_result.get('message', '未知错误')}"
+            # 清洗技术错误信息，转为用户友好提示
+            raw_msg = tool_result.get("message", "未知错误")
+            clean_msg = _sanitize_error_message(raw_msg)
+            return f"⚠️ 操作未成功：{clean_msg}\n（请用友好的语气告知用户，不要暴露任何技术细节或英文异常信息）"
 
         if intent == "product_consult":
             sources = tool_result.get("sources", [])

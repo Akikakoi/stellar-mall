@@ -38,6 +38,9 @@ public class CartVO implements Serializable {
     @ApiModelProperty("SPU 主图")
     private String spuImage;
 
+    @ApiModelProperty("SKU 名称（如：iPhone 15 Pro Max. 256GB. 深空黑）")
+    private String skuName;
+
     @ApiModelProperty("SKU 规格文本")
     private String skuSpecs;
 

@@ -38,7 +38,7 @@
                     <span class="sub-tab" :class="{ active: !mod._activeSub }" @click="switchModuleSub(mod, null)">全部</span>
                     <span v-for="sub in getSubCats(mod)" :key="sub.id" class="sub-tab" :class="{ active: mod._activeSub === sub.id }" @click="switchModuleSub(mod, sub.id)">{{ sub.name }}</span>
                   </div>
-                  <a v-else class="view-more" @click="viewMoreModule(mod)">查看更多 <span class="arrow">›</span></a>
+                  <a v-else class="view-more" @click="viewMoreModule(mod)">查看更多 <svg class="arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
               </div>
               <div class="cat-grid" v-loading="mod._loading">
@@ -71,7 +71,7 @@
             <section v-if="mod._products.length > 0 || mod._loading" class="container main-content product-section">
               <div class="cat-header">
                 <div class="cat-title">{{ mod.title }}</div>
-                <a class="view-more" @click="router.push('/shop/search')">查看更多 <span class="arrow">›</span></a>
+                <a class="view-more" @click="openShopSearch()">查看更多 <svg class="arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
               </div>
               <div class="spu-grid" v-loading="mod._loading">
                 <div v-for="spu in mod._products" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
@@ -135,7 +135,7 @@
                     <span class="sub-tab" :class="{ active: sec.activeSubId === null }" @click="switchSub(sec, null)" @mouseenter="switchSub(sec, null)">全部</span>
                     <span v-for="sub in sec.subs" :key="sub.id" class="sub-tab" :class="{ active: sec.activeSubId === sub.id }" @click="switchSub(sec, sub.id)" @mouseenter="switchSub(sec, sub.id)">{{ sub.name }}</span>
                   </div>
-                  <a v-else class="view-more" @click="viewMore(sec)">查看更多 <span class="arrow">›</span></a>
+                  <a v-else class="view-more" @click="viewMore(sec)">查看更多 <svg class="arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
               </div>
               <div class="cat-grid" v-loading="sec.loading">
@@ -373,6 +373,11 @@ async function switchModuleSub(mod, subId) {
   await loadModuleProducts(mod)
 }
 
+function openShopSearch(query = {}) {
+  const route = router.resolve({ path: '/shop/search', query })
+  window.open(route.href, '_blank')
+}
+
 function viewMoreModule(mod) {
   const cfg = getCfg(mod)
   const catNode = resolveCategoryInfo(cfg)
@@ -387,7 +392,7 @@ function viewMoreModule(mod) {
   } else {
     query.categoryId = catNode.id
   }
-  router.push({ path: '/shop/search', query })
+  openShopSearch(query)
 }
 
 async function loadAllModuleProducts() {
@@ -453,7 +458,7 @@ function viewMore(sec) {
     query.categoryId = sec.id
   }
   else query.categoryId = sec.id
-  router.push({ path: '/shop/search', query })
+  openShopSearch(query)
 }
 
 // ========== 分类数据 ==========
@@ -633,17 +638,23 @@ onUnmounted(() => {
 .sub-tab:hover { color: var(--brand-primary); }
 .sub-tab.active { color: var(--brand-primary); border-bottom-color: var(--brand-primary); font-weight: 600; }
 .view-more {
-  font-size: 14px; color: var(--text-secondary); cursor: pointer;
-  display: inline-flex; align-items: center; gap: 6px; transition: color .2s;
+  font-size: 13px; color: var(--brand-primary); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 14px; border-radius: 20px;
+  background: var(--brand-primary-soft);
+  transition: background .25s, color .25s, box-shadow .25s;
 }
-.view-more:hover { color: var(--brand-primary); }
-.view-more .arrow {
-  width: 18px; height: 18px; border-radius: 50%;
-  background: var(--text-muted); color: #fff;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 12px; transition: background .2s;
+.view-more:hover {
+  background: var(--brand-primary);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(64, 158, 255, 0.35);
 }
-.view-more:hover .arrow { background: var(--brand-primary); }
+.view-more .arrow-icon {
+  transition: transform .25s;
+}
+.view-more:hover .arrow-icon {
+  transform: translateX(3px);
+}
 
 .cat-grid {
   display: grid;
