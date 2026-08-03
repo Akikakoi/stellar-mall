@@ -1,6 +1,7 @@
 package com.stellar.service.impl;
 
 import com.stellar.constant.MessageConstant;
+import com.stellar.context.BaseContext;
 import com.stellar.dto.PointsAdjustDTO;
 import com.stellar.dto.PointsProductSaveDTO;
 import com.stellar.dto.PointsRedeemDTO;
@@ -598,9 +599,12 @@ public class PointsServiceImpl implements PointsService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveRule(PointsRule rule) {
+        Long userId = BaseContext.getCurrentId();
         rule.setUpdateTime(LocalDateTime.now());
+        rule.setUpdateUser(userId);
         if (rule.getId() == null) {
             rule.setCreateTime(LocalDateTime.now());
+            rule.setCreateUser(userId);
             pointsRuleMapper.insert(rule);
         } else {
             pointsRuleMapper.update(rule);
@@ -630,6 +634,7 @@ public class PointsServiceImpl implements PointsService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveProduct(PointsProductSaveDTO dto) {
+        Long userId = BaseContext.getCurrentId();
         PointsProduct product;
         if (dto.getId() != null) {
             product = pointsProductMapper.getById(dto.getId());
@@ -637,6 +642,7 @@ public class PointsServiceImpl implements PointsService {
         } else {
             product = new PointsProduct();
             product.setCreateTime(LocalDateTime.now());
+            product.setCreateUser(userId);
         }
         product.setName(dto.getName());
         product.setProductType(dto.getProductType());
@@ -648,6 +654,7 @@ public class PointsServiceImpl implements PointsService {
         product.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
         product.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
         product.setUpdateTime(LocalDateTime.now());
+        product.setUpdateUser(userId);
 
         if (dto.getId() == null) {
             pointsProductMapper.insert(product);

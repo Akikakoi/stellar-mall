@@ -42,11 +42,24 @@ export const useChatStore = defineStore('chat', {
     async loadActive() {
       if (!this.activeId) { this.messages = []; return }
       const r = await apiGetConversation(this.activeId)
-      this.messages = (r.data?.messages || []).map(m => ({
+      const serverMsgs = (r.data?.messages || []).map(m => ({
         ...m,
         streaming: false,
         sources: m.sources || [],
       }))
+
+      // 保留本地仍在流式传输中的消息（导航离开时 SSE 未完成的内容）
+      const localStreaming = this.messages.filter(m => m.streaming && m.content)
+      this.messages = serverMsgs
+
+      for (const sm of localStreaming) {
+        const exists = serverMsgs.some(m =>
+          m.role === sm.role && m.content === sm.content
+        )
+        if (!exists) {
+          this.messages.push(sm)
+        }
+      }
     },
     async rename(id, title) {
       const r = await apiRenameConversation(id, title)

@@ -82,9 +82,18 @@ def run_agent(query: str, user_id: int = None, mall_token: str = None,
             "missing_params": list,
         }
     """
-    from langchain_core.messages import HumanMessage
+    from langchain_core.messages import AIMessage, HumanMessage
 
-    messages = [HumanMessage(content=query)]
+    # 把历史对话还原成 LangChain 消息对象，注入 messages 列表；
+    # 借助 add_messages reducer，所有节点（意图识别、参数检查、追问生成等）
+    # 都能自然获得完整上下文，避免"短回答（2/1/是/否）"被当作独立问题处理
+    messages: list = []
+    for role, content in (conversation_history or []):
+        if role == "user":
+            messages.append(HumanMessage(content=content))
+        elif role == "assistant":
+            messages.append(AIMessage(content=content))
+    messages.append(HumanMessage(content=query))
 
     state = {
         "messages": messages,

@@ -10,7 +10,6 @@ const THEMES = Object.freeze({
 
 const theme = ref(/** @type {'dark'|'light'} */ (THEMES.DARK))
 let initialized = false
-let mountedSyncRegistered = false
 let mediaQueryListener = null
 let transitionLockTimer = null
 
@@ -27,27 +26,23 @@ export function applyThemeToDOM(value) {
   const root = document.documentElement
   const isDark = value === THEMES.DARK
 
-  // 切换前临时禁用所有过渡，防止不同元素过渡时长不一致导致闪烁
+  // 1) 先加锁，强制浏览器提交这一帧——此时所有过渡已冻结
   root.classList.add('theme-transitioning')
   if (transitionLockTimer) clearTimeout(transitionLockTimer)
 
-  root.classList.toggle('theme-dark', isDark)
-  root.classList.toggle('theme-light', !isDark)
-  root.classList.toggle('dark', isDark)
-  root.style.colorScheme = isDark ? 'dark' : 'light'
+  // 2) 在下一帧执行实际主题切换，确保锁先生效
+  requestAnimationFrame(() => {
+    root.classList.toggle('theme-dark', isDark)
+    root.classList.toggle('theme-light', !isDark)
+    root.classList.toggle('dark', isDark)
+    root.style.colorScheme = isDark ? 'dark' : 'light'
+    document.body?.setAttribute('data-theme', value)
 
-  document.body?.setAttribute('data-theme', value)
-
-  // 浏览器应用新主题后，继续保持统一过渡类直到完整过渡结束
-  if (typeof requestAnimationFrame !== 'undefined') {
-    requestAnimationFrame(() => {
-      transitionLockTimer = setTimeout(() => {
-        root.classList.remove('theme-transitioning')
-      }, 800)
-    })
-  } else {
-    root.classList.remove('theme-transitioning')
-  }
+    // 3) 等 CSS 变量全部挂载后再解锁，恢复过渡
+    transitionLockTimer = setTimeout(() => {
+      root.classList.remove('theme-transitioning')
+    }, 200)
+  })
 }
 
 function bindSystemPreference() {
@@ -77,19 +72,10 @@ export function useTheme() {
     theme.value = domTheme || readInitialTheme()
     applyThemeToDOM(theme.value)
     bindSystemPreference()
-
-    watch(
-      theme,
-      (val) => {
-        applyThemeToDOM(val)
-        storage.local.set(STORAGE_KEY, val)
-      },
-      { immediate: false },
-    )
   }
 
-  if (!mountedSyncRegistered && getCurrentInstance()) {
-    mountedSyncRegistered = true
+  // 每个调用组件都注册自己的 onMounted，确保组件挂载时重新应用主题
+  if (getCurrentInstance()) {
     onMounted(() => applyThemeToDOM(theme.value))
   }
 
@@ -122,3 +108,13 @@ export function useTheme() {
     THEMES,
   }
 }
+
+// 模块级 watch，不绑定任何组件生命周期，确保主题切换在组件卸载后仍生效
+watch(
+  theme,
+  (val) => {
+    applyThemeToDOM(val)
+    storage.local.set(STORAGE_KEY, val)
+  },
+  { immediate: false },
+)

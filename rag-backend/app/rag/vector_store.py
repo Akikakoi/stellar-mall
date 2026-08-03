@@ -102,7 +102,10 @@ class ChromaVectorStore:
 
     def __init__(self):
         import chromadb
-        from langchain_community.vectorstores import Chroma
+        try:
+            from langchain_chroma import Chroma  # langchain 0.3.9+ 官方推荐路径
+        except Exception:
+            from langchain_community.vectorstores import Chroma  # 旧路径兜底
         persist_dir = str((Path(settings.BASE_DIR) / settings.CHROMA_PERSIST_DIR).resolve())
         Path(persist_dir).mkdir(parents=True, exist_ok=True)
         # 新版 ChromaDB（>=0.5.x，Rust Bindings）首次使用空持久化目录会校验 tenant/database，

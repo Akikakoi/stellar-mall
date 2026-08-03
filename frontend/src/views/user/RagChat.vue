@@ -194,7 +194,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import {
   Plus, Edit, Delete, ChatDotRound, DataAnalysis, User, SwitchButton,
@@ -299,8 +299,18 @@ async function loadActiveMsgs() {
   finally { loadingMsgs.value = false; scrollToBottom(true) }
 }
 
+// 同步设置，避免 onMounted 异步执行时 scrollbar 已参与 100vh 计算导致底部空白
+document.body.style.overflow = 'hidden'
+
+function updateLayoutHeight() {
+  const headerHeight = 64
+  document.documentElement.style.setProperty('--rag-layout-height', `${window.innerHeight - headerHeight}px`)
+}
+
 onMounted(async () => {
-  document.body.style.overflow = 'hidden'
+  leaving = false
+  updateLayoutHeight()
+  window.addEventListener('resize', updateLayoutHeight)
   try {
     await fetchConvs()
   } catch (e) { /* 网络异常不影响页面加载 */ }
@@ -317,25 +327,22 @@ onMounted(async () => {
   } catch (e) { /* 加载消息失败不影响页面 */ }
 })
 
-// 路由离开前中止 SSE 连接，避免阻塞导航
+// 路由离开前标记 leaving，不再中止 SSE 连接
+// SSE 会在后台继续流式传输，确保消息不丢失
 onBeforeRouteLeave((to, from, next) => {
   leaving = true
-  if (activeController) {
-    try { activeController.abort() } catch (e) {}
-    activeController = null
-  }
   document.body.style.overflow = ''
   next()
 })
 
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
+
 onBeforeUnmount(() => {
   leaving = true
-  // 中止进行中的 SSE 流式请求
-  if (activeController) {
-    try { activeController.abort() } catch (e) {}
-    activeController = null
-  }
-  // 恢复 body 滚动，确保切换回其他页面时能正常滚动
+  window.removeEventListener('resize', updateLayoutHeight)
+  // 不再中止 SSE，让后台流式传输自然完成
   document.body.style.overflow = ''
 })
 
@@ -533,7 +540,7 @@ function parseEvent(block) {
 /* ===== 布局 ===== */
 .layout {
   width: 100%;
-  height: calc(100vh - 64px);
+  height: var(--rag-layout-height, calc(100vh - 64px));
   display: grid;
   grid-template-columns: 280px 1fr;
   grid-template-rows: 1fr;

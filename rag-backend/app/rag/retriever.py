@@ -70,9 +70,12 @@ def hybrid_retrieve(query: str, top_k: int | None = None, tags_filter: Optional[
         return docs
     try:
         try:
-            from langchain_community.retrievers import EnsembleRetriever  # langchain 1.x 新路径
+            from langchain_classic.retrievers import EnsembleRetriever  # langchain 1.x 新路径
         except Exception:
-            from langchain.retrievers import EnsembleRetriever  # langchain 0.3 旧路径
+            try:
+                from langchain_community.retrievers import EnsembleRetriever  # langchain 0.3.x 路径
+            except Exception:
+                from langchain.retrievers import EnsembleRetriever  # langchain 0.2 最旧路径
         ensemble = EnsembleRetriever(retrievers=[bm25, vector_ret], weights=[0.4, 0.6])
         # EnsembleRetriever 不直接支持 top_k，由各内部 retriever 控制
         docs = ensemble.invoke(query)
