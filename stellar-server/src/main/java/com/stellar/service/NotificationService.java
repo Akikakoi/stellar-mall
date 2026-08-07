@@ -1,6 +1,6 @@
 package com.stellar.service;
 
-import com.stellar.entity.SmsCode;
+import com.stellar.entity.EmailCode;
 import com.stellar.entity.NotificationLog;
 import com.stellar.entity.MallOrder;
 import com.stellar.entity.UserCoupon;
@@ -9,11 +9,11 @@ import java.util.List;
 
 public interface NotificationService {
 
-    /** 发送短信验证码 */
-    SmsCode sendSmsCode(String phone, String type);
+    /** 发送邮箱验证码 */
+    EmailCode sendEmailCode(String email, String type);
 
-    /** 校验短信验证码 */
-    boolean verifySmsCode(String phone, String type, String code);
+    /** 校验邮箱验证码 */
+    boolean verifyEmailCode(String email, String type, String code);
 
     /** 发送订单发货通知 */
     void sendOrderShippedNotice(MallOrder order);

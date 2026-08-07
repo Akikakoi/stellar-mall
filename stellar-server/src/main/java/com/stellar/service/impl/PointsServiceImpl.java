@@ -28,6 +28,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * 积分系统核心服务实现。
+ * <p>
+ * 涵盖用户积分账户管理、每日签到、消费赚取、积分+钱包组合支付（冻结/扣减/解冻/退款）、
+ * 积分商城兑换、管理端积分规则与商品配置、积分过期处理等完整功能。
+ * 积分兑换汇率为 100积分 = 1元，默认过期天数 365 天。
+ * </p>
+ */
 public class PointsServiceImpl implements PointsService {
 
     private final UserPointsMapper userPointsMapper;
@@ -52,12 +60,26 @@ public class PointsServiceImpl implements PointsService {
     // ================================================================
 
     @Override
+    /**
+     * 获取或创建用户积分账户。
+     *
+     * @param userId 用户ID
+     * @return 用户积分视图对象
+     */
     public UserPointsVO getOrCreateUserPoints(Long userId) {
         UserPoints up = ensureUserPoints(userId);
         return toVO(up);
     }
 
     @Override
+    /**
+     * 分页查询用户积分变动记录。
+     *
+     * @param userId   用户ID
+     * @param page     页码
+     * @param pageSize 每页条数
+     * @return 积分记录分页结果
+     */
     public PageResult pageRecords(Long userId, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
         List<PointsRecord> list = pointsRecordMapper.listByUser(userId, offset, pageSize);
@@ -73,6 +95,14 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
+    /**
+     * 分页查询用户积分兑换记录。
+     *
+     * @param userId   用户ID
+     * @param page     页码
+     * @param pageSize 每页条数
+     * @return 兑换记录分页结果
+     */
     public PageResult pageRedemptions(Long userId, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
         List<PointsRedemption> list = pointsRedemptionMapper.listByUser(userId, offset, pageSize);
@@ -86,6 +116,12 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 每日签到。同一用户同一天只能签到一次，根据 CHECKIN 规则发放积分。
+     *
+     * @param userId 用户ID
+     * @return 签到结果（含是否成功、获得积分、提示消息）
+     */
     public CheckinVO checkin(Long userId) {
         LocalDate today = LocalDate.now();
 
@@ -133,6 +169,12 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
+    /**
+     * 查询用户当月签到日期列表。
+     *
+     * @param userId 用户ID
+     * @return 签到日期字符串列表（yyyy-MM-dd）
+     */
     public List<String> getCheckinDates(Long userId) {
         LocalDate today = LocalDate.now();
         LocalDate startOfMonth = today.withDayOfMonth(1);
@@ -149,6 +191,14 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 下单赚取积分。根据 ORDER 规则按消费金额计算积分，受每单上限约束。
+     * 发放成功后发送积分到账通知。
+     *
+     * @param userId    用户ID
+     * @param orderId   订单ID
+     * @param payAmount 实际支付金额
+     */
     public void earnByOrder(Long userId, Long orderId, BigDecimal payAmount) {
         if (payAmount == null) {
             log.warn("[PointsService] payAmount 为空，跳过积分发放: orderId={}, userId={}", orderId, userId);
@@ -192,6 +242,12 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 评价赚取积分。根据 REVIEW 规则发放积分，受每日上限约束。
+     *
+     * @param userId   用户ID
+     * @param reviewId 评价ID
+     */
     public void earnByReview(Long userId, Long reviewId) {
         PointsRule rule = pointsRuleMapper.getByType("REVIEW");
         if (rule == null || rule.getStatus() != 1) {
@@ -221,6 +277,16 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 冻结积分用于订单支付。将用户请求抵扣金额转换为积分并冻结，不足时用尽可用积分。
+     * 100积分 = 1元，向下取整。
+     *
+     * @param userId          用户ID
+     * @param orderId         订单ID
+     * @param requestedAmount 用户请求抵扣金额
+     * @param orderPayAmount  订单实际应付金额
+     * @return 实际冻结的积分数
+     */
     public int freezePointsForOrder(Long userId, Long orderId, BigDecimal requestedAmount, BigDecimal orderPayAmount) {
         if (requestedAmount == null || requestedAmount.compareTo(BigDecimal.ZERO) <= 0) {
             return 0;
@@ -301,6 +367,12 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 实际扣除冻结积分。订单支付成功后将冻结积分转为实际消费，写入积分流水和支付追溯记录。
+     *
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     */
     public void consumeFrozenPointsForOrder(Long userId, Long orderId) {
         // 从 points_payment 记录中获取已冻结的积分数
         List<PointsPayment> payments = pointsPaymentMapper.listByOrderAndUser(orderId, userId);
@@ -369,6 +441,12 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 解冻积分。订单取消时将冻结积分归还用户可用余额，写入支付追溯记录。
+     *
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     */
     public void unfreezePointsForOrder(Long userId, Long orderId) {
         List<PointsPayment> payments = pointsPaymentMapper.listByOrderAndUser(orderId, userId);
         int frozenPoints = 0;
@@ -413,6 +491,14 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 退款退还积分。按退款比例返还已扣除的积分，写入支付追溯记录。
+     *
+     * @param userId      用户ID
+     * @param orderId     订单ID
+     * @param refundRatio 退款比例（0~1）
+     * @return 实际退还的积分数
+     */
     public int refundPointsForOrder(Long userId, Long orderId, BigDecimal refundRatio) {
         if (refundRatio == null || refundRatio.compareTo(BigDecimal.ZERO) <= 0) {
             return 0;
@@ -467,6 +553,13 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 退款收回赠送积分。订单全额退款时收回该订单赠送的全部积分，并发送通知。
+     *
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     * @return 实际收回的积分数
+     */
     public int reclaimOrderEarnPoints(Long userId, Long orderId) {
         // 查询该订单赠送的积分流水
         List<PointsRecord> records = pointsRecordMapper.findByBiz(userId, "ORDER", orderId.toString());
@@ -503,6 +596,11 @@ public class PointsServiceImpl implements PointsService {
     // ================================================================
 
     @Override
+    /**
+     * 查询在售积分商品列表。
+     *
+     * @return 积分商品视图对象列表
+     */
     public List<PointsProductVO> listProducts() {
         List<PointsProduct> list = pointsProductMapper.listOnSale();
         if (list == null) return new ArrayList<>();
@@ -511,6 +609,14 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 积分兑换商品。校验商品状态、库存和用户积分余额，扣减库存和积分后创建兑换记录。
+     * 若为优惠券类型商品，自动发放优惠券。
+     *
+     * @param userId 用户ID
+     * @param dto    兑换请求参数
+     * @return 兑换结果（含兑换ID、消耗积分、剩余积分、优惠券ID）
+     */
     public PointsRedeemVO redeem(Long userId, PointsRedeemDTO dto) {
         PointsProduct product = pointsProductMapper.getById(dto.getProductId());
         if (product == null) {
@@ -576,6 +682,11 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 管理端积分调整。支持正向加积分和负向扣减积分。
+     *
+     * @param dto 积分调整参数（用户ID、调整积分数、说明）
+     */
     public void adjustPoints(PointsAdjustDTO dto) {
         if (dto.getPoints() == 0) {
             throw new BaseException("调整积分不能为0");
@@ -592,12 +703,22 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
+    /**
+     * 查询全部积分规则列表。
+     *
+     * @return 积分规则列表
+     */
     public List<PointsRule> listRules() {
         return pointsRuleMapper.listAll();
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 新增或更新积分规则。id 为空时新增，否则更新。
+     *
+     * @param rule 积分规则实体
+     */
     public void saveRule(PointsRule rule) {
         Long userId = BaseContext.getCurrentId();
         rule.setUpdateTime(LocalDateTime.now());
@@ -613,11 +734,25 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 删除积分规则。
+     *
+     * @param id 规则ID
+     */
     public void deleteRule(Long id) {
         pointsRuleMapper.deleteById(id);
     }
 
     @Override
+    /**
+     * 管理端分页查询积分商品列表。
+     *
+     * @param name     商品名称（模糊搜索）
+     * @param status   状态
+     * @param page     页码
+     * @param pageSize 每页条数
+     * @return 积分商品分页结果
+     */
     public PageResult pageProducts(String name, Integer status, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
         List<PointsProduct> list = pointsProductMapper.page(name, status, offset, pageSize);
@@ -633,6 +768,11 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 新增或更新积分商品。id 为空时新增，否则更新。
+     *
+     * @param dto 积分商品保存参数
+     */
     public void saveProduct(PointsProductSaveDTO dto) {
         Long userId = BaseContext.getCurrentId();
         PointsProduct product;
@@ -665,11 +805,22 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 删除积分商品。
+     *
+     * @param id 商品ID
+     */
     public void deleteProduct(Long id) {
         pointsProductMapper.deleteById(id);
     }
 
     @Override
+    /**
+     * 根据ID查询积分商品详情。
+     *
+     * @param id 商品ID
+     * @return 积分商品视图对象，不存在时返回 null
+     */
     public PointsProductVO getProductById(Long id) {
         PointsProduct p = pointsProductMapper.getById(id);
         return p != null ? toProductVO(p) : null;
@@ -681,6 +832,11 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 处理过期积分。逐笔检查到期积分记录，从用户可用积分中扣除，写入过期流水。
+     *
+     * @return 本次过期的积分总数
+     */
     public int processExpiredPoints() {
         LocalDate today = LocalDate.now();
         List<PointsRecord> expiringRecords = pointsRecordMapper.findExpiringPoints(today, today);

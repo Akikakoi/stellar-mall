@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 管理端：分类管理。
+ * 提供分类的增删改查、启停用、嵌套树查询以及删除前预校验等功能。
+ */
 @RestController
 @RequestMapping("/admin/category")
 @RequiredArgsConstructor

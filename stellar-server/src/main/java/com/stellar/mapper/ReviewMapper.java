@@ -7,6 +7,10 @@ import org.apache.ibatis.annotations.Param;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * 商品评价 Mapper，管理用户评价的增删改查、回复、审核及评分统计。
+ * 表：stellar_review。
+ */
 @Mapper
 public interface ReviewMapper {
     int insert(Review review);

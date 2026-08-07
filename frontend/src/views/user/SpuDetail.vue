@@ -239,26 +239,43 @@ const zoomVisible = ref(false)
 const zoomIndex = ref(0)
 const zoomOverlayRef = ref(null)
 
+/**
+ * 打开图片放大预览，设置当前索引并聚焦遮罩层以支持键盘导航
+ * @param {number} index - 图片索引
+ */
 function openZoom(index) {
   zoomIndex.value = index
   zoomVisible.value = true
   nextTick(() => { zoomOverlayRef.value?.focus() })
 }
 
+/**
+ * 关闭图片放大预览
+ */
 function closeZoom() {
   zoomVisible.value = false
 }
 
+/**
+ * 预览模式下切换到上一张图片（循环）
+ */
 function prevImage() {
   const len = galleryImages.value.length
   zoomIndex.value = (zoomIndex.value - 1 + len) % len
 }
 
+/**
+ * 预览模式下切换到下一张图片（循环）
+ */
 function nextImage() {
   const len = galleryImages.value.length
   zoomIndex.value = (zoomIndex.value + 1) % len
 }
 
+/**
+ * 处理放大预览时的键盘事件：Esc 关闭、← → 切换图片
+ * @param {KeyboardEvent} e - 键盘事件
+ */
 function handleZoomKeydown(e) {
   if (e.key === 'Escape') closeZoom()
   if (e.key === 'ArrowLeft') prevImage()
@@ -289,6 +306,10 @@ const comments = ref({})
 const commentCounts = ref({})
 const commentInputs = ref({})
 
+/**
+ * 展开/折叠某条评价的评论列表，首次展开时异步加载评论数据
+ * @param {Object} review - 评价对象
+ */
 async function toggleComments(review) {
   const rid = review.id
   if (expandedReviews.value[rid]) {
@@ -308,6 +329,10 @@ async function toggleComments(review) {
   }
 }
 
+/**
+ * 提交评价的评论，提交后刷新该评价的评论列表
+ * @param {Object} review - 评价对象
+ */
 async function submitComment(review) {
   const rid = review.id
   const content = commentInputs.value[rid]?.trim()
@@ -325,6 +350,9 @@ async function submitComment(review) {
   }
 }
 
+/**
+ * 加载商品评价列表和平均评分
+ */
 async function loadReviews() {
   try {
     const res = await userRequest({ url: `/user/review/spu/${route.params.id}`, method: 'get', params: { page: 1, pageSize: 20 }, __silent: true })
@@ -338,6 +366,9 @@ async function loadReviews() {
   } catch (e) {}
 }
 
+/**
+ * 加载商品详情，包含 SKU 列表，并检查收藏状态；商品已下架时显示下架提示
+ */
 async function loadDetail() {
   loading.value = true
   offShelf.value = false
@@ -359,6 +390,9 @@ async function loadDetail() {
   }
 }
 
+/**
+ * 检查当前商品是否已被收藏
+ */
 async function checkFav() {
   if (!userStore.token) return
   try {
@@ -369,6 +403,9 @@ async function checkFav() {
   }
 }
 
+/**
+ * 切换商品收藏状态，未登录时跳转登录页
+ */
 async function toggleFav() {
   if (!userStore.token) {
     ElMessage.warning('请先登录')
@@ -391,6 +428,9 @@ async function toggleFav() {
   }
 }
 
+/**
+ * 将当前选中的 SKU 加入购物车，包含保障服务信息
+ */
 async function handleAddCart() {
   const sku = selectedSku.value
   if (!sku || !sku.id) {
@@ -418,6 +458,9 @@ async function handleAddCart() {
   }
 }
 
+/**
+ * 立即购买：将当前选中 SKU 构造为订单项，通过 query 参数传递到订单提交页面
+ */
 function handleBuyNow() {
   const sku = selectedSku.value
   if (!sku || !sku.id) {

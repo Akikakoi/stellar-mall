@@ -35,21 +35,13 @@ public class SpuDocument {
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String subTitle;
 
-    /** 一级分类 ID */
+    /** 分类 ID */
     @Field(type = FieldType.Long)
     private Long categoryId;
 
-    /** 二级分类 ID */
-    @Field(type = FieldType.Long)
-    private Long category2Id;
-
-    /** 一级分类名（冗余展示） */
+    /** 分类名（冗余展示） */
     @Field(type = FieldType.Keyword)
     private String categoryName;
-
-    /** 二级分类名（冗余展示） */
-    @Field(type = FieldType.Keyword)
-    private String category2Name;
 
     /** 主图 */
     @Field(type = FieldType.Keyword, index = false)

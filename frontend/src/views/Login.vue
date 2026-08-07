@@ -2,17 +2,23 @@
   <div class="login-page">
     <div class="login-card">
       <h1 class="title">星耀商城</h1>
-      <p class="subtitle">{{ loginMode === 'password' ? '欢迎回来，请登录您的账号' : '输入手机号获取验证码' }}</p>
+      <p class="subtitle">{{ loginMode === 'password' ? '欢迎回来，请登录您的账号' : '输入邮箱获取验证码' }}</p>
 
       <!-- 登录方式切换 -->
       <div class="login-tabs">
         <span class="tab" :class="{ active: loginMode === 'password' }" @click="switchMode('password')">密码登录</span>
-        <span class="tab" :class="{ active: loginMode === 'sms' }" @click="switchMode('sms')">验证码登录</span>
+        <span class="tab" :class="{ active: loginMode === 'email' }" @click="switchMode('email')">验证码登录</span>
       </div>
 
       <el-form :model="form" :rules="rules" ref="formRef" label-width="0" class="login-form">
-        <el-form-item prop="phone">
-          <el-input v-model="form.phone" placeholder="请输入手机号" size="large" />
+        <!-- 密码模式：邮箱 -->
+        <el-form-item v-if="loginMode === 'password'" prop="email">
+          <el-input v-model="form.email" placeholder="请输入邮箱地址" size="large" autocomplete="email" />
+        </el-form-item>
+
+        <!-- 验证码模式：邮箱 -->
+        <el-form-item v-if="loginMode === 'email'" prop="email">
+          <el-input v-model="form.email" placeholder="请输入邮箱地址" size="large" autocomplete="email" />
         </el-form-item>
 
         <!-- 密码模式 -->
@@ -21,17 +27,17 @@
         </el-form-item>
 
         <!-- 验证码模式 -->
-        <el-form-item v-if="loginMode === 'sms'" prop="code">
-          <div class="sms-row">
+        <el-form-item v-if="loginMode === 'email'" prop="code">
+          <div class="code-row">
             <el-input v-model="form.code" placeholder="请输入验证码" size="large" style="flex:1" />
             <el-button
-              class="sms-btn"
-              :disabled="smsCountdown > 0"
-              :loading="sendingSms"
-              @click="sendSms"
+              class="code-btn"
+              :disabled="codeCountdown > 0"
+              :loading="sendingCode"
+              @click="sendCode"
               size="large"
             >
-              {{ smsCountdown > 0 ? `${smsCountdown}s 后重发` : '获取验证码' }}
+              {{ codeCountdown > 0 ? `${codeCountdown}s 后重发` : '获取验证码' }}
             </el-button>
           </div>
         </el-form-item>
@@ -61,54 +67,74 @@ const userStore = useUserStore()
 const formRef = ref(null)
 const loading = ref(false)
 const loginMode = ref('password')
-const sendingSms = ref(false)
-const smsCountdown = ref(0)
+const sendingCode = ref(false)
+const codeCountdown = ref(0)
 let timer = null
 
 const form = reactive({
-  phone: '',
+  email: '',
   password: '',
   code: ''
 })
 
+const emailRule = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
+
 const rules = {
-  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }, { pattern: /^1[3-9]\d{9}$/, message: '手机号格式不正确', trigger: 'blur' }],
+  email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, emailRule],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
 }
 
+/**
+ * 切换登录方式（密码登录 / 验证码登录）
+ * @param {'password'|'email'} mode - 登录模式
+ */
 function switchMode(mode) {
   loginMode.value = mode
   form.code = ''
   form.password = ''
 }
 
-async function sendSms() {
-  if (!/^1[3-9]\d{9}$/.test(form.phone)) {
-    ElMessage.warning('请输入正确的手机号')
+/**
+ * 发送邮箱验证码，含 60 秒倒计时
+ * 需先校验邮箱格式
+ */
+async function sendCode() {
+  if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    ElMessage.warning('请输入正确的邮箱地址')
     return
   }
-  sendingSms.value = true
+  sendingCode.value = true
   try {
-    await userRequest({
-      url: '/user/sms/send',
+    const res = await userRequest({
+      url: '/user/email-code/send',
       method: 'post',
-      data: { phone: form.phone, type: 'LOGIN' },
+      data: { email: form.email, type: 'LOGIN' },
       __silent: true
     })
-    ElMessage.success('验证码已发送')
-    smsCountdown.value = 60
+    if (res && res.devCode) {
+      // 开发模式（未配置 SMTP）：接口直接返回验证码，自动填入并提示
+      form.code = res.devCode
+      ElMessage.success(`开发模式验证码：${res.devCode}（已自动填入）`)
+    } else {
+      ElMessage.success('验证码已发送，请查收邮箱')
+    }
+    codeCountdown.value = 60
     timer = setInterval(() => {
-      smsCountdown.value--
-      if (smsCountdown.value <= 0) clearInterval(timer)
+      codeCountdown.value--
+      if (codeCountdown.value <= 0) clearInterval(timer)
     }, 1000)
   } catch (e) {
     ElMessage.error('发送失败，请重试')
   } finally {
-    sendingSms.value = false
+    sendingCode.value = false
   }
 }
 
+/**
+ * 处理登录提交
+ * 根据当前登录模式调用密码登录或邮箱验证码登录，成功后跳转至重定向地址
+ */
 async function handleLogin() {
   if (!formRef.value) return
   try {
@@ -118,10 +144,10 @@ async function handleLogin() {
   }
   loading.value = true
   try {
-    if (loginMode.value === 'sms') {
-      await userStore.smsLogin({ phone: form.phone, type: 'LOGIN', code: form.code })
+    if (loginMode.value === 'email') {
+      await userStore.emailLogin({ email: form.email, type: 'LOGIN', code: form.code })
     } else {
-      await userStore.login({ phone: form.phone, password: form.password })
+      await userStore.login({ email: form.email, password: form.password })
     }
     ElMessage.success('登录成功')
     const redirect = route.query.redirect || '/'
@@ -189,8 +215,8 @@ async function handleLogin() {
   font-weight: 600;
 }
 
-.sms-row { display: flex; gap: 10px; }
-.sms-btn {
+.code-row { display: flex; gap: 10px; }
+.code-btn {
   white-space: nowrap;
   min-width: 120px;
   font-size: 14px;

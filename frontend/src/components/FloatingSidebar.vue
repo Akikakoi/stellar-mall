@@ -33,7 +33,9 @@ import { useCartStore } from '@/stores/cart'
 const router = useRouter()
 const cartStore = useCartStore()
 
-const cartCount = computed(() => cartStore.totalCount || 0)
+const cartCount = computed(() =>
+  cartStore.totalCount > 0 && !cartStore.badgeSeen ? cartStore.totalCount : 0
+)
 const showBackTop = ref(false)
 
 const items = computed(() => [
@@ -42,7 +44,10 @@ const items = computed(() => [
     label: '购物车',
     icon: ShoppingCartFull,
     badge: cartCount.value || null,
-    action: () => router.push('/cart')
+    action: () => {
+      cartStore.markBadgeSeen()
+      router.push('/cart')
+    }
   },
   {
     key: 'favorites',

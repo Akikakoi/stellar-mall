@@ -99,6 +99,9 @@ const STATUS_TAG_MAP = {
 
 function statusTag(s) { return STATUS_TAG_MAP[s] || 'info' }
 
+/**
+ * 加载售后列表数据，支持分页
+ */
 async function loadList() {
   loading.value = true
   try {
@@ -113,10 +116,18 @@ async function loadList() {
   }
 }
 
+/**
+ * 跳转到售后详情页
+ * @param {Object} item - 售后记录项
+ */
 function viewDetail(item) {
   router.push(`/aftersale/${item.id}`)
 }
 
+/**
+ * 取消指定售后申请，弹出确认框后调用取消接口
+ * @param {Object} item - 售后记录项
+ */
 async function cancelItem(item) {
   try {
     await ElMessageBox.confirm('确定取消该售后申请吗？', '提示', { type: 'warning' })
@@ -126,12 +137,19 @@ async function cancelItem(item) {
   } catch (e) { /* 用户取消 */ }
 }
 
+/**
+ * 打开退货物流填写弹窗
+ * @param {Object} item - 售后记录项
+ */
 function openReturnDialog(item) {
   returnItem.value = item
   returnTracking.value = ''
   returnVisible.value = true
 }
 
+/**
+ * 提交退货物流单号，校验后调用接口并刷新列表
+ */
 async function submitReturn() {
   if (!returnTracking.value.trim()) {
     ElMessage.warning('请输入快递单号')

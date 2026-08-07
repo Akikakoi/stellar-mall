@@ -151,6 +151,7 @@ const rules = {
   detail: [{ required: true, message: '请输入详细地址', trigger: 'blur' }]
 }
 
+/** 重置地址表单到初始状态 */
 function resetForm() {
   form.id = null
   form.consignee = ''
@@ -162,6 +163,7 @@ function resetForm() {
   form.isDefault = 0
 }
 
+/** 加载用户所有收货地址 */
 async function loadAddresses() {
   loading.value = true
   try {
@@ -174,12 +176,17 @@ async function loadAddresses() {
   }
 }
 
+/** 打开新增地址弹窗并重置表单 */
 function openAdd() {
   isEdit.value = false
   resetForm()
   dialogVisible.value = true
 }
 
+/**
+ * 打开编辑地址弹窗并回填已有地址数据
+ * @param {Object} addr - 要编辑的地址对象
+ */
 function openEdit(addr) {
   isEdit.value = true
   form.id = addr.id
@@ -194,6 +201,7 @@ function openEdit(addr) {
   setTimeout(() => formRef.value?.clearValidate?.(), 0)
 }
 
+/** 新增或编辑地址：校验表单后调用对应接口，完成后刷新地址列表 */
 async function handleSave() {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
@@ -217,6 +225,10 @@ async function handleSave() {
   }
 }
 
+/**
+ * 确认后删除指定地址
+ * @param {number} id - 地址 ID
+ */
 async function handleDelete(id) {
   try {
     await ElMessageBox.confirm('确定删除该地址？', '提示', { type: 'warning' })
@@ -228,6 +240,10 @@ async function handleDelete(id) {
   }
 }
 
+/**
+ * 将指定地址设为默认地址
+ * @param {number} id - 地址 ID
+ */
 async function handleSetDefault(id) {
   const addr = addresses.value.find(a => a.id === id)
   if (addr?.isDefault === 1) return

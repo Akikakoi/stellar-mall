@@ -6,6 +6,9 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * 通知日志 Mapper。表：stellar_notification_log。
+ */
 @Mapper
 public interface NotificationLogMapper {
 

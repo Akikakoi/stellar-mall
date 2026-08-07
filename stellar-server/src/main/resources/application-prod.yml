@@ -3,6 +3,12 @@
 # 启动方式: java -jar stellar-server.jar --spring.profiles.active=prod
 # =========================================================================
 
+# ---------- 生产环境 CORS：必须通过环境变量 STELLAR_CORS_ALLOWED_ORIGINS 指定 ----------
+# 示例：export STELLAR_CORS_ALLOWED_ORIGINS=https://mall.example.com,https://admin.example.com
+stellar:
+  cors:
+    allowed-origins: ${STELLAR_CORS_ALLOWED_ORIGINS:}
+
 # ---------- 生产环境 MyBatis：关闭 SQL 日志，禁用控制台输出 ----------
 mybatis:
   configuration:

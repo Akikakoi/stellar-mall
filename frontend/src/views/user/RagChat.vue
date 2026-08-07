@@ -240,6 +240,11 @@ const prompts = [
   '我要申请售后退货',
 ]
 
+/**
+ * 获取助手消息对应的用户问题文本
+ * @param {Object} m - 消息对象
+ * @returns {string} 用户问题内容
+ */
 function currentQueryOf(m) {
   if (m.role !== 'assistant') return ''
   const idx = chatStore.messages.indexOf(m)
@@ -249,6 +254,10 @@ function currentQueryOf(m) {
   return ''
 }
 
+/**
+ * 将当前活跃会话 ID 同步到 URL 路由参数
+ * 地址栏无变化时跳过，避免重复 replace
+ */
 function syncUrlWithActiveId() {
   if (leaving) return
   const urlId = route.params.conversationId || null
@@ -258,6 +267,10 @@ function syncUrlWithActiveId() {
   router.replace(target).catch(() => {})
 }
 
+/**
+ * 根据 URL 中的 conversationId 参数恢复活跃会话
+ * 如果会话列表未加载则先拉取，存在则设置为当前活跃会话
+ */
 async function ensureActiveFromUrl() {
   const urlId = route.params.conversationId
   if (!urlId) return
@@ -268,6 +281,10 @@ async function ensureActiveFromUrl() {
   }
 }
 
+/**
+ * 滚动消息列表至底部
+ * @param {boolean} [force=false] - 预留参数，当前未使用
+ */
 function scrollToBottom(force = false) {
   nextTick(() => {
     if (msgsRef.value) {
@@ -276,6 +293,9 @@ function scrollToBottom(force = false) {
   })
 }
 
+/**
+ * 从后端拉取会话列表并写入 store
+ */
 async function fetchConvs() {
   loadingList.value = true
   try { await chatStore.fetchConversations() }
@@ -283,6 +303,10 @@ async function fetchConvs() {
   finally { loadingList.value = false }
 }
 
+/**
+ * 加载当前活跃会话的消息列表
+ * 若加载失败则清空消息并回退到新会话状态
+ */
 async function loadActiveMsgs() {
   if (!chatStore.activeId) { chatStore.messages = []; return }
   loadingMsgs.value = true
@@ -302,6 +326,10 @@ async function loadActiveMsgs() {
 // 同步设置，避免 onMounted 异步执行时 scrollbar 已参与 100vh 计算导致底部空白
 document.body.style.overflow = 'hidden'
 
+/**
+ * 根据窗口高度动态计算并设置布局 CSS 变量
+ * 用于响应窗口大小变化，保持聊天界面正确的高度
+ */
 function updateLayoutHeight() {
   const headerHeight = 64
   document.documentElement.style.setProperty('--rag-layout-height', `${window.innerHeight - headerHeight}px`)
@@ -362,18 +390,29 @@ watch(() => chatStore.activeId, () => {
   }
 })
 
+/**
+ * 创建新的对话会话
+ */
 async function startNew() {
   await chatStore.createConversation('新的对话')
   input.value = ''
   scrollToBottom(true)
 }
 
+/**
+ * 切换到指定会话
+ * @param {string} id - 会话 ID
+ */
 async function switchConv(id) {
   if (id === chatStore.activeId) return
   chatStore.setActive(id)
   input.value = ''
 }
 
+/**
+ * 弹出对话框重命名会话
+ * @param {Object} c - 会话对象
+ */
 async function onRename(c) {
   try {
     const { value } = await ElMessageBox.prompt('会话标题', '重命名', {
@@ -382,33 +421,57 @@ async function onRename(c) {
     await chatStore.rename(c.id, value)
   } catch {}
 }
+/**
+ * 删除指定会话
+ * @param {string} id - 会话 ID
+ */
 async function onDelete(id) {
   await chatStore.remove(id)
   input.value = ''
   scrollToBottom(true)
 }
 
+/**
+ * 处理用户下拉菜单命令，分发路由跳转或退出登录
+ * @param {string} cmd - 命令标识 ('profile'|'kb'|'dash'|'logout')
+ */
 function onUserCmd(cmd) {
   if (cmd === 'profile') router.push('/me')
   else if (cmd === 'kb') router.push('/admin/kb')
   else if (cmd === 'dash') router.push('/admin/dashboard')
   else if (cmd === 'logout') onLogout()
 }
+/**
+ * 退出登录，清除用户状态并跳转至登录页
+ */
 function onLogout() {
   userStore.logout()
   router.replace('/login')
 }
+/**
+ * 返回首页（新建会话状态），清空活跃会话
+ */
 function goHome() {
   chatStore.setActive(null)
   router.replace('/rag/chat').catch(() => {})
 }
 
+/**
+ * 发送输入框中的消息
+ * 校验输入内容后调用 send 进行实际发送
+ */
 async function onSend() {
   const q = input.value.trim()
   if (!q || chatStore.loading) return
   await send(q)
 }
 
+/**
+ * 核心发送逻辑：通过 SSE 流式与后端 RAG 服务对话
+ * 自动创建会话（如无活跃会话）、发送用户消息、建立 SSE 连接、
+ * 实时解析 token 流并更新助手消息，处理 sources / done 等事件
+ * @param {string} text - 用户输入的问题文本
+ */
 async function send(text) {
   input.value = text
   if (chatStore.loading) return
@@ -520,6 +583,12 @@ async function send(text) {
   }
 }
 
+/**
+ * 解析单个 SSE 事件块，提取 event 和 data 字段
+ * data 字段尝试 JSON 解析，失败则保留原始字符串
+ * @param {string} block - SSE 原始文本块（event: xxx\ndata: xxx 格式）
+ * @returns {{ event: string, data: * }|null} 解析后的事件对象，失败返回 null
+ */
 function parseEvent(block) {
   if (!block) return null
   let event = 'token'; let data = null

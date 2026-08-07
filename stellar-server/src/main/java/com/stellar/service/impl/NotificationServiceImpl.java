@@ -1,12 +1,16 @@
 package com.stellar.service.impl;
 
 import com.stellar.entity.*;
+import com.stellar.mapper.EmailCodeMapper;
 import com.stellar.mapper.NotificationLogMapper;
-import com.stellar.mapper.SmsCodeMapper;
 import com.stellar.mapper.UserMessageMapper;
 import com.stellar.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.mail.MailProperties;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,62 +19,116 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * 通知服务实现。
+ *
+ * <p>提供邮箱验证码发送与校验、订单发货/收货通知、优惠券到期提醒等功能，
+ * 并统一记录通知日志到 {@link NotificationLog} 表。</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-    private final SmsCodeMapper smsCodeMapper;
+    private final EmailCodeMapper emailCodeMapper;
     private final NotificationLogMapper notificationLogMapper;
     private final UserMessageMapper userMessageMapper;
+    private final JavaMailSender javaMailSender;
+    private final MailProperties mailProperties;
 
     private static final int CODE_EXPIRE_MINUTES = 5;
     private static final Random RANDOM = new Random();
 
-    // ======================== 短信验证码 ========================
+    /** 是否启用真实 SMTP 发送；false 时为开发模式，不真实发信 */
+    @Value("${stellar.mail.enabled:false}")
+    private boolean mailEnabled;
 
+    // ======================== 邮箱验证码 ========================
+
+    /**
+     * 生成并发送邮箱验证码。
+     *
+     * <p>生成 6 位随机数字验证码，写入数据库。配置了 SMTP（stellar.mail.enabled=true）
+     * 时通过 JavaMailSender 真实发送；否则为开发模式，仅记录日志并在日志中输出验证码。</p>
+     *
+     * @param email 邮箱地址
+     * @param type  验证码类型
+     * @return 持久化后的 EmailCode 实体
+     */
     @Override
     @Transactional
-    public SmsCode sendSmsCode(String phone, String type) {
+    public EmailCode sendEmailCode(String email, String type) {
         String code = String.format("%06d", RANDOM.nextInt(1000000));
         LocalDateTime now = LocalDateTime.now();
 
-        SmsCode smsCode = SmsCode.builder()
-                .phone(phone)
+        EmailCode emailCode = EmailCode.builder()
+                .email(email)
                 .code(code)
                 .type(type)
                 .used(0)
                 .expireTime(now.plusMinutes(CODE_EXPIRE_MINUTES))
                 .createTime(now)
                 .build();
-        smsCodeMapper.insert(smsCode);
+        emailCodeMapper.insert(emailCode);
 
-        // 模拟发送短信（记录日志，开发环境直接打印）
-        log.info("[短信验证码] 手机号:{} 类型:{} 验证码:{} 有效期:{}分钟", phone, type, code, CODE_EXPIRE_MINUTES);
+        if (mailEnabled) {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(mailProperties.getUsername());
+                message.setTo(email);
+                message.setSubject("【星耀商城】验证码");
+                message.setText("【星耀商城】您的验证码是 " + code + "，5分钟内有效。若非本人操作请忽略。");
+                javaMailSender.send(message);
+                log.info("[邮箱验证码] 已发送 邮箱:{} 类型:{} 验证码:{}", email, type, code);
+                logNotification(null, null, email, "EMAIL", "VERIFY_CODE",
+                        "验证码", "【星耀商城】您的验证码是 " + code + "，5分钟内有效。", 1, null);
+            } catch (Exception e) {
+                log.error("[邮箱验证码] 发送失败 邮箱:{} 类型:{}", email, type, e);
+                logNotification(null, null, email, "EMAIL", "VERIFY_CODE",
+                        "验证码", "【星耀商城】您的验证码是 " + code + "，5分钟内有效。", 2, e.getMessage());
+            }
+        } else {
+            // 开发模式：未配置 SMTP，不真实发信，验证码直接打印日志由前端兜底展示
+            log.info("[邮箱验证码] 开发模式（未配置 SMTP，不真实发送） 邮箱:{} 类型:{} 验证码:{}", email, type, code);
+            logNotification(null, null, email, "EMAIL", "VERIFY_CODE",
+                    "验证码", "开发模式未真实发送，验证码 " + code, 0, "SMTP 未配置");
+        }
 
-        logNotification(null, phone, null, "SMS", "VERIFY_CODE",
-                "验证码", "【星耀商城】您的验证码是 " + code + "，5分钟内有效。", 1, null);
-
-        return smsCode;
+        return emailCode;
     }
 
+    /**
+     * 校验邮箱验证码是否有效。
+     *
+     * @param email 邮箱地址
+     * @param type  验证码类型
+     * @param code  用户输入的验证码
+     * @return true 表示验证通过，false 表示验证失败
+     */
     @Override
-    public boolean verifySmsCode(String phone, String type, String code) {
-        SmsCode smsCode = smsCodeMapper.findLatest(phone, type);
-        if (smsCode == null) {
-            log.warn("验证码校验失败：无有效验证码 phone={} type={}", phone, type);
+    public boolean verifyEmailCode(String email, String type, String code) {
+        EmailCode emailCode = emailCodeMapper.findLatest(email, type);
+        if (emailCode == null) {
+            log.warn("验证码校验失败：无有效验证码 email={} type={}", email, type);
             return false;
         }
-        if (!smsCode.getCode().equals(code)) {
-            log.warn("验证码校验失败：验证码不匹配 phone={}", phone);
+        if (!emailCode.getCode().equals(code)) {
+            log.warn("验证码校验失败：验证码不匹配 email={}", email);
             return false;
         }
-        smsCodeMapper.markUsed(smsCode.getId());
+        emailCodeMapper.markUsed(emailCode.getId());
         return true;
     }
 
     // ======================== 业务通知 ========================
 
+    /**
+     * 异步发送订单发货通知。
+     *
+     * <p>记录通知日志并写入用户消息表。</p>
+     *
+     * @param order 已发货的订单
+     */
     @Override
     @Async
     public void sendOrderShippedNotice(MallOrder order) {
@@ -85,6 +143,11 @@ public class NotificationServiceImpl implements NotificationService {
         sendUserMessage(order.getUserId(), "订单通知", content, "ORDER_NOTICE", order.getId());
     }
 
+    /**
+     * 异步发送订单确认收货通知。
+     *
+     * @param order 已确认收货的订单
+     */
     @Override
     @Async
     public void sendOrderReceivedNotice(MallOrder order) {
@@ -96,6 +159,14 @@ public class NotificationServiceImpl implements NotificationService {
                 "已确认收货", content, 1, null);
     }
 
+    /**
+     * 异步发送优惠券即将过期提醒。
+     *
+     * <p>当优惠券列表为空时直接返回，不发送通知。</p>
+     *
+     * @param userId  用户 ID
+     * @param coupons 即将过期的优惠券列表
+     */
     @Override
     @Async
     public void sendCouponExpireNotice(Long userId, List<UserCoupon> coupons) {
@@ -114,6 +185,19 @@ public class NotificationServiceImpl implements NotificationService {
         sendUserMessage(userId, "优惠券通知", content, "COUPON_NOTICE", null);
     }
 
+    /**
+     * 异步记录通知日志到数据库。
+     *
+     * @param userId   用户 ID（可为 null）
+     * @param phone    手机号（可为 null）
+     * @param email    邮箱（可为 null）
+     * @param channel  通知渠道（如 SMS、EMAIL）
+     * @param type     通知类型（如 VERIFY_CODE、ORDER_SHIPPED）
+     * @param title    通知标题
+     * @param content  通知内容
+     * @param status   发送状态（1 成功，0 失败）
+     * @param errorMsg 错误信息（可为 null）
+     */
     @Override
     @Async
     public void logNotification(Long userId, String phone, String email, String channel,

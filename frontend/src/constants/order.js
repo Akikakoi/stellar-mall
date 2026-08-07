@@ -1,4 +1,15 @@
-// 订单状态（与后端 OrderStatus 枚举的前端 code 保持一致）
+/**
+ * 订单状态枚举（与后端 OrderStatus 枚举的前端 code 保持一致）。
+ * @constant
+ * @property {number} CANCELLED - 已取消
+ * @property {number} PENDING - 待付款
+ * @property {number} PAID - 待发货
+ * @property {number} SHIPPED - 待收货
+ * @property {number} REVIEWABLE - 待评价（前端展示态，后端对应 COMPLETED）
+ * @property {number} COMPLETED - 已完成
+ * @property {number} REFUNDING - 退款中
+ * @property {number} REFUNDED - 已退款
+ */
 export const ORDER_STATUS = {
   CANCELLED: 0, // 已取消
   PENDING: 1,   // 待付款
@@ -10,6 +21,11 @@ export const ORDER_STATUS = {
   REFUNDED: 7    // 已退款
 }
 
+/**
+ * 订单状态对应的中文文本映射。
+ * @constant
+ * @type {Record<number, string>}
+ */
 export const ORDER_STATUS_TEXT = {
   [ORDER_STATUS.CANCELLED]: '已取消',
   [ORDER_STATUS.PENDING]: '待付款',
@@ -21,6 +37,17 @@ export const ORDER_STATUS_TEXT = {
   [ORDER_STATUS.REFUNDED]: '已退款'
 }
 
+/**
+ * 售后状态枚举。
+ * @constant
+ * @property {number} APPLIED - 申请中
+ * @property {number} AUDITING - 商家审核中
+ * @property {number} RETURNING - 用户退货中
+ * @property {number} REFUNDING - 退款中
+ * @property {number} COMPLETED - 已完成
+ * @property {number} REJECTED - 已拒绝
+ * @property {number} CANCELLED - 已取消
+ */
 // 售后状态
 export const AFTER_SALE_STATUS = {
   APPLIED: 1,    // 申请中
@@ -32,6 +59,11 @@ export const AFTER_SALE_STATUS = {
   CANCELLED: 7   // 已取消
 }
 
+/**
+ * 售后状态对应的中文文本映射。
+ * @constant
+ * @type {Record<number, string>}
+ */
 export const AFTER_SALE_STATUS_TEXT = {
   [AFTER_SALE_STATUS.APPLIED]: '申请中',
   [AFTER_SALE_STATUS.AUDITING]: '商家审核中',
@@ -42,12 +74,24 @@ export const AFTER_SALE_STATUS_TEXT = {
   [AFTER_SALE_STATUS.CANCELLED]: '已取消'
 }
 
+/**
+ * 售后类型枚举。
+ * @constant
+ * @property {number} REFUND_ONLY - 仅退款
+ * @property {number} RETURN_REFUND - 退货退款
+ * @property {number} EXCHANGE - 换货
+ */
 export const AFTER_SALE_TYPE = {
   REFUND_ONLY: 1,    // 仅退款
   RETURN_REFUND: 2,  // 退货退款
   EXCHANGE: 3        // 换货
 }
 
+/**
+ * 售后类型对应的中文文本映射。
+ * @constant
+ * @type {Record<number, string>}
+ */
 export const AFTER_SALE_TYPE_TEXT = {
   [AFTER_SALE_TYPE.REFUND_ONLY]: '仅退款',
   [AFTER_SALE_TYPE.RETURN_REFUND]: '退货退款',

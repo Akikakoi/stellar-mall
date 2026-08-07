@@ -6,6 +6,9 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * C 端用户消息 Mapper。表：stellar_user_message。
+ */
 @Mapper
 public interface UserMessageMapper {
 

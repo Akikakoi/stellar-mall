@@ -9,6 +9,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * 员工/管理员 Mapper。表：stellar_employee。
+ */
 @Mapper
 public interface EmployeeMapper {
 

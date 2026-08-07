@@ -49,7 +49,7 @@
               ¥{{ (Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2) }}
             </div>
             <div class="col col-op">
-              <el-button type="danger" link @click="cartStore.remove(item.id || item.skuId)">删除</el-button>
+              <el-button type="danger" link @click="handleRemove(item)">删除</el-button>
             </div>
           </div>
         </div>
@@ -75,6 +75,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCartStore } from '@/stores/cart'
 
 const __PH = window.__PH
@@ -83,6 +84,31 @@ const router = useRouter()
 const cartStore = useCartStore()
 const loading = ref(false)
 
+/**
+ * 删除购物车商品前弹出确认框
+ */
+async function handleRemove(item) {
+  try {
+    await ElMessageBox.confirm(`确定从购物车中删除「${item.name}」？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+  } catch {
+    return
+  }
+  try {
+    await cartStore.remove(item.id || item.skuId)
+    ElMessage.success('已删除')
+  } catch {
+    ElMessage.error('删除失败')
+  }
+}
+
+/**
+ * 在新标签页打开商品详情页
+ * @param {number|string} id - 商品 SPU ID
+ */
 function goDetail(id) {
   if (id) {
     const route = router.resolve(`/spu/${id}`)
@@ -90,6 +116,9 @@ function goDetail(id) {
   }
 }
 
+/**
+ * 跳转到订单提交页面进行结算
+ */
 function checkout() {
   router.push('/order/submit')
 }

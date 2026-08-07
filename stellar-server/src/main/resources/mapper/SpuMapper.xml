@@ -8,7 +8,6 @@
         <result property="name"          column="name"/>
         <result property="subTitle"      column="sub_title"/>
         <result property="categoryId"    column="category_id"/>
-        <result property="category2Id"   column="category2_id"/>
         <result property="description"   column="description"/>
         <result property="descriptionMd" column="description_md"/>
         <result property="mainImage"     column="main_image"/>
@@ -31,21 +30,20 @@
         <result property="updateTime"    column="update_time"/>
         <result property="updateUser"    column="update_user"/>
         <result property="categoryName"  column="category_name"/>
-        <result property="category2Name" column="category2_name"/>
     </resultMap>
 
     <!-- =========================== insert =========================== -->
     <insert id="insert" parameterType="com.stellar.entity.Spu"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_spu (
-            name, sub_title, category_id, category2_id,
+            name, sub_title, category_id,
             description, description_md, main_image, sub_images, slider_images,
             sale_count, comment_count, total_stock, sku_count,
             min_price, max_price, is_new, is_hot, sort, status,
             on_shelf_time, off_shelf_time,
             create_time, create_user, update_time, update_user
         ) VALUES (
-            #{name}, #{subTitle}, #{categoryId}, #{category2Id},
+            #{name}, #{subTitle}, #{categoryId},
             #{description}, #{descriptionMd}, #{mainImage}, #{subImages}, #{sliderImages},
             #{saleCount}, #{commentCount}, #{totalStock}, #{skuCount},
             #{minPrice}, #{maxPrice}, #{isNew}, #{isHot}, #{sort}, #{status},
@@ -61,7 +59,6 @@
             <if test="name != null and name != ''">name = #{name},</if>
             <if test="subTitle != null">sub_title = #{subTitle},</if>
             <if test="categoryId != null">category_id = #{categoryId},</if>
-            <if test="category2Id != null">category2_id = #{category2Id},</if>
             <if test="description != null">description = #{description},</if>
             <if test="descriptionMd != null">description_md = #{descriptionMd},</if>
             <if test="mainImage != null">main_image = #{mainImage},</if>
@@ -114,22 +111,18 @@
 
     <select id="getById" resultMap="SpuMap">
         SELECT s.*,
-               c1.name AS category_name,
-               c2.name AS category2_name
+               c1.name AS category_name
         FROM stellar_spu s
              LEFT JOIN stellar_category c1 ON c1.id = s.category_id
-             LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
         WHERE s.id = #{id}
         LIMIT 1
     </select>
 
     <select id="listByIds" resultMap="SpuMap">
         SELECT s.*,
-               c1.name AS category_name,
-               c2.name AS category2_name
+               c1.name AS category_name
         FROM stellar_spu s
              LEFT JOIN stellar_category c1 ON c1.id = s.category_id
-             LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
         WHERE s.id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
@@ -142,7 +135,6 @@
             1 = 1
             <if test="name != null and name != ''">AND s.name LIKE CONCAT('%', #{name}, '%')</if>
             <if test="categoryId != null">AND s.category_id = #{categoryId}</if>
-            <if test="category2Id != null">AND s.category2_id = #{category2Id}</if>
             <if test="status != null">AND s.status = #{status}</if>
             <if test="isNew != null">AND s.is_new = #{isNew}</if>
             <if test="isHot != null">AND s.is_hot = #{isHot}</if>
@@ -158,11 +150,9 @@
 
     <select id="page" resultMap="SpuMap">
         SELECT s.*,
-               c1.name AS category_name,
-               c2.name AS category2_name
+               c1.name AS category_name
         FROM stellar_spu s
              LEFT JOIN stellar_category c1 ON c1.id = s.category_id
-             LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
         <include refid="spuWhere"/>
         <!-- ========== 排序白名单：仅允许 sortBy ∈ {id, name, saleCount, minPrice, createTime, relevance} 且 sortOrder ∈ {asc, desc}，否则走默认排序（防止注入 + 兼容旧调用） ========== -->
         <choose>
@@ -199,7 +189,7 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
-  <!-- 作用域分类的关联 SPU 数（COUNT DISTINCT，避免 L1/L2 双维度叠加时重复计数，与删除禁止口径一致） -->
+  <!-- 作用域分类的关联 SPU 数（COUNT DISTINCT，与删除禁止口径一致） -->
   <select id="countDistinctIdByCategoryScope" resultType="java.lang.Long">
     SELECT
       <choose>
@@ -213,11 +203,8 @@
     FROM stellar_spu s
     <where>
       <if test="scopeIds != null and scopeIds.size() > 0">
-        (s.category_id IN
+        s.category_id IN
           <foreach collection="scopeIds" item="sid" open="(" separator="," close=")">#{sid}</foreach>
-         OR s.category2_id IN
-          <foreach collection="scopeIds" item="sid" open="(" separator="," close=")">#{sid}</foreach>
-        )
       </if>
     </where>
   </select>
@@ -225,11 +212,9 @@
   <!-- 批量导出：查询全部 SPU -->
   <select id="listAll" resultMap="SpuMap">
     SELECT s.*,
-           c1.name AS category_name,
-           c2.name AS category2_name
+           c1.name AS category_name
     FROM stellar_spu s
          LEFT JOIN stellar_category c1 ON c1.id = s.category_id
-         LEFT JOIN stellar_category c2 ON c2.id = s.category2_id
     ORDER BY s.id ASC
   </select>
 
@@ -238,13 +223,13 @@
   </update>
 
   <!-- =========================== MySQL 聚合（侧栏筛选） =========================== -->
-  <!-- 分类聚合：按 category2_id 统计（如果有二级分类），否则退到 category_id -->
+  <!-- 分类聚合：按 category_id 统计 -->
   <select id="aggCategories" resultType="com.stellar.vo.BucketVO">
-    SELECT CAST(COALESCE(s.category2_id, s.category_id) AS CHAR(20)) AS `key`,
+    SELECT CAST(s.category_id AS CHAR(20)) AS `key`,
            COUNT(*) AS doc_count
     FROM stellar_spu s
     <include refid="spuWhere"/>
-    GROUP BY COALESCE(s.category2_id, s.category_id)
+    GROUP BY s.category_id
     ORDER BY doc_count DESC
     LIMIT 20
   </select>

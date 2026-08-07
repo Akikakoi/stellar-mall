@@ -6,6 +6,9 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * 用户收货地址 Mapper。表：stellar_user_address。
+ */
 @Mapper
 public interface AddressMapper {
     int insert(Address address);

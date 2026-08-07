@@ -42,7 +42,6 @@ public interface SpuMapper {
 
     long count(@Param("name") String name,
                @Param("categoryId") Long categoryId,
-               @Param("category2Id") Long category2Id,
                @Param("status") Integer status,
                @Param("isNew") Integer isNew,
                @Param("isHot") Integer isHot,
@@ -53,7 +52,6 @@ public interface SpuMapper {
                    @Param("pageSize") int pageSize,
                    @Param("name") String name,
                    @Param("categoryId") Long categoryId,
-                   @Param("category2Id") Long category2Id,
                    @Param("status") Integer status,
                    @Param("isNew") Integer isNew,
                    @Param("isHot") Integer isHot,
@@ -63,8 +61,8 @@ public interface SpuMapper {
                    @Param("sortOrder") String sortOrder);
 
     /**
-     * 统计「scopeIds 中任一 id 作为 SPU.categoryId 或 SPU.category2Id 关联的 SPU 数」，
-     * 同一个 SPU 只会计一次（COUNT DISTINCT），避免 L1 + L2 作用域叠加时的重复计数。
+     * 统计「scopeIds 中任一 id 作为 SPU.categoryId 关联的 SPU 数」，
+     * 同一个 SPU 只计一次（COUNT DISTINCT）。
      * scopeIds 为 null/empty → 返回 0。
      */
     long countDistinctIdByCategoryScope(@Param("scopeIds") List<Long> scopeIds);
@@ -78,7 +76,6 @@ public interface SpuMapper {
     /** MySQL 聚合：按分类统计商品数（与 ES 搜索聚合口径一致，复用 spuWhere 过滤条件）。 */
     List<BucketVO> aggCategories(@Param("name") String name,
                                  @Param("categoryId") Long categoryId,
-                                 @Param("category2Id") Long category2Id,
                                  @Param("status") Integer status,
                                  @Param("isNew") Integer isNew,
                                  @Param("isHot") Integer isHot,
@@ -88,7 +85,6 @@ public interface SpuMapper {
     /** MySQL 聚合：按价格区间统计商品数。 */
     List<BucketVO> aggPriceRanges(@Param("name") String name,
                                   @Param("categoryId") Long categoryId,
-                                  @Param("category2Id") Long category2Id,
                                   @Param("status") Integer status,
                                   @Param("isNew") Integer isNew,
                                   @Param("isHot") Integer isHot,

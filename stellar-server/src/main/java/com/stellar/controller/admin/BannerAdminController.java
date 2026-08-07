@@ -9,6 +9,10 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 管理端：首页轮播图管理。
+ * 提供轮播图的新增、更新、删除和分页查询功能。
+ */
 @RestController
 @RequestMapping("/admin/banner")
 @RequiredArgsConstructor

@@ -104,6 +104,7 @@ rag-backend/.env.*
 
 # ---------- 本地文档 ----------
 Stellar_Mall_AI_面试题.pdf
+Stellar_Mall_AI_面试题_追问篇.pdf
 
 # ---------- WorkBuddy 项目数据 ----------
 .workbuddy/

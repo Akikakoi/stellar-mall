@@ -97,12 +97,18 @@ const redeemVisible = ref(false)
 const redeemTarget = ref(null)
 const redeeming = ref(false)
 
+/**
+ * 是否可兑换 - 当前积分是否足够兑换选中的商品
+ */
 const canRedeem = computed(() => {
   if (!redeemTarget.value || !points.value) return false
   return points.value.availablePoints >= redeemTarget.value.pointsPrice
 })
 
-// 计算本月所有日期字符串
+/**
+ * 计算本月所有日期字符串，用于签到日历展示
+ * @returns {string[]} 格式为 YYYY-MM-DD 的日期数组
+ */
 const monthDays = computed(() => {
   const now = new Date()
   const year = now.getFullYear()
@@ -116,6 +122,9 @@ const monthDays = computed(() => {
   return result
 })
 
+/**
+ * 加载页面数据：积分概览、兑换商品列表、签到记录
+ */
 async function loadData() {
   loading.value = true
   try {
@@ -137,6 +146,9 @@ async function loadData() {
   }
 }
 
+/**
+ * 每日签到，签到成功后刷新积分数据
+ */
 async function doCheckin() {
   checkingIn.value = true
   try {
@@ -156,11 +168,18 @@ async function doCheckin() {
   }
 }
 
+/**
+ * 打开兑换确认弹窗
+ * @param {Object} p - 要兑换的商品对象
+ */
 function openRedeem(p) {
   redeemTarget.value = p
   redeemVisible.value = true
 }
 
+/**
+ * 执行积分兑换，扣减积分并兑换商品
+ */
 async function doRedeem() {
   if (!canRedeem.value) return
   redeeming.value = true

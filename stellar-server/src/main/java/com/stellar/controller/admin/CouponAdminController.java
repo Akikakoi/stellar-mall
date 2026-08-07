@@ -9,6 +9,10 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 管理端：优惠券管理。
+ * 提供优惠券的创建、更新、删除和分页查询功能。
+ */
 @RestController
 @RequestMapping("/admin/coupon")
 @RequiredArgsConstructor

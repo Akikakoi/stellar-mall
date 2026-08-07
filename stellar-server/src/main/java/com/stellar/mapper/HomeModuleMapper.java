@@ -6,6 +6,9 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * 首页模块 Mapper。表：stellar_home_module。
+ */
 @Mapper
 public interface HomeModuleMapper {
 

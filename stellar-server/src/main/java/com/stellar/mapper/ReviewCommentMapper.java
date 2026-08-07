@@ -6,6 +6,9 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * 评价回复 Mapper。表：stellar_review_comment。
+ */
 @Mapper
 public interface ReviewCommentMapper {
 

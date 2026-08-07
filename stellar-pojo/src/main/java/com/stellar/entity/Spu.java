@@ -25,7 +25,6 @@ public class Spu implements Serializable {
     private String subTitle;
     private Long brandId;
     private Long categoryId;
-    private Long category2Id;
     private String description;
     private String descriptionMd;
     private String mainImage;
@@ -56,6 +55,4 @@ public class Spu implements Serializable {
     private String brandName;
     /** 非 DB 字段：分类名。 */
     private String categoryName;
-    /** 非 DB 字段：二级分类名。 */
-    private String category2Name;
 }

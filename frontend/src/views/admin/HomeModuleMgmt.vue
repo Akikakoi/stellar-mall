@@ -93,7 +93,7 @@
         <!-- 分类展示：选择分类 -->
         <template v-if="form.type === 'CATEGORY_SHOWCASE'">
           <el-form-item label="展示分类" prop="categoryId">
-            <el-select v-model="form.categoryId" placeholder="选择要展示的商品分类" style="width: 100%" filterable>
+            <el-select v-model="form.categoryId" placeholder="选择要展示的商品分类" style="width: 100%" filterable @change="form.bannerSpuId = null; bannerSpuOptions = []">
               <el-option
                 v-for="c in allCategories"
                 :key="c.id"
@@ -104,6 +104,28 @@
           </el-form-item>
           <el-form-item label="展示数量" prop="displayCount">
             <el-input-number v-model="form.displayCount" :min="1" :max="20" />
+          </el-form-item>
+          <el-form-item label="左侧主图商品">
+            <el-select
+              v-model="form.bannerSpuId"
+              filterable
+              remote
+              reserve-keyword
+              clearable
+              :remote-method="searchBannerSpu"
+              :loading="bannerSpuSearchLoading"
+              placeholder="搜索并选择商品作为左侧大图"
+              style="width: 100%"
+              @focus="searchBannerSpu('')"
+            >
+              <el-option
+                v-for="s in bannerSpuOptions"
+                :key="s.id"
+                :label="s.name"
+                :value="s.id"
+              />
+            </el-select>
+            <span style="margin-left: 8px; color: var(--text-muted); font-size: 12px;">留空则默认第一个商品</span>
           </el-form-item>
         </template>
 
@@ -201,6 +223,8 @@ const formRef = ref(null)
 const allCategories = ref([])
 const spuOptions = ref([])
 const spuSearchLoading = ref(false)
+const bannerSpuOptions = ref([])
+const bannerSpuSearchLoading = ref(false)
 
 const form = reactive({
   type: 'HOT_PRODUCTS',
@@ -210,6 +234,7 @@ const form = reactive({
   spuIds: [],
   imageUrl: '',
   linkUrl: '',
+  bannerSpuId: null,
   sortOrder: 0,
   status: 1
 })
@@ -295,17 +320,9 @@ async function loadCategories() {
   } catch (e) {}
 }
 
-function flattenCats(tree) {
-  const result = []
-  function walk(list) {
-    if (!list) return
-    for (const c of list) {
-      result.push({ id: c.id, name: c.name })
-      walk(c.children)
-    }
-  }
-  walk(tree)
-  return result
+function flattenCats(list) {
+  if (!list) return []
+  return list.map(c => ({ id: c.id, name: c.name }))
 }
 
 async function searchSpu(query) {
@@ -321,6 +338,21 @@ async function searchSpu(query) {
   }
 }
 
+async function searchBannerSpu(query) {
+  bannerSpuSearchLoading.value = true
+  try {
+    const params = { page: 1, pageSize: 20 }
+    if (query) params.name = query
+    if (form.categoryId) params.categoryId = form.categoryId
+    const res = await adminRequest({ url: '/admin/spu/page', method: 'get', params })
+    const records = res?.records || res?.list || (res?.data?.records) || []
+    bannerSpuOptions.value = records.map(r => ({ id: r.id, name: r.name }))
+  } catch (e) {
+  } finally {
+    bannerSpuSearchLoading.value = false
+  }
+}
+
 // ========== CRUD ==========
 function resetForm() {
   form.type = 'HOT_PRODUCTS'
@@ -330,10 +362,12 @@ function resetForm() {
   form.spuIds = []
   form.imageUrl = ''
   form.linkUrl = ''
+  form.bannerSpuId = null
   form.sortOrder = 0
   form.status = 1
   editId.value = null
   isEdit.value = false
+  bannerSpuOptions.value = []
 }
 
 function openAdd() {
@@ -356,6 +390,12 @@ function openEdit(item) {
   form.spuIds = cfg.spuIds || []
   form.imageUrl = cfg.imageUrl || ''
   form.linkUrl = cfg.linkUrl || ''
+  form.bannerSpuId = cfg.bannerSpuId || null
+
+  // 如果已有 bannerSpuId，预加载该商品名称到选项
+  if (cfg.bannerSpuId) {
+    searchBannerSpu('')
+  }
 
   dialogVisible.value = true
 }
@@ -365,6 +405,7 @@ function buildConfig() {
   if (form.type === 'CATEGORY_SHOWCASE') {
     cfg.categoryId = form.categoryId
     cfg.displayCount = form.displayCount
+    if (form.bannerSpuId) cfg.bannerSpuId = form.bannerSpuId
   } else if (form.type === 'HOT_PRODUCTS' || form.type === 'NEW_PRODUCTS') {
     cfg.displayCount = form.displayCount
   } else if (form.type === 'PRODUCT_GRID') {

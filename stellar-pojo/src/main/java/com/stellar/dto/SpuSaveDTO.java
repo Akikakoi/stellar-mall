@@ -30,12 +30,9 @@ public class SpuSaveDTO implements Serializable {
     @ApiModelProperty("副标题/卖点")
     private String subtitle;
 
-    @NotNull(message = "一级分类不能为空")
-    @ApiModelProperty(value = "一级分类 id", required = true)
+    @NotNull(message = "分类不能为空")
+    @ApiModelProperty(value = "分类 id", required = true)
     private Long categoryId;
-
-    @ApiModelProperty("二级分类 id（可选）")
-    private Long category2Id;
 
     // ========= 图片：mainImage（标准）+ image（前端常用别名，兼容保存） =========
     @Size(max = 255)

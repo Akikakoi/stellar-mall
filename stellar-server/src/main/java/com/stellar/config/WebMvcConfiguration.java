@@ -2,9 +2,11 @@ package com.stellar.config;
 
 import com.stellar.interceptor.JwtTokenAdminInterceptor;
 import com.stellar.interceptor.JwtTokenUserInterceptor;
+import com.stellar.interceptor.RateLimitInterceptor;
 import com.stellar.json.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,6 +23,7 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,12 +39,22 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 
     private final JwtTokenAdminInterceptor adminInterceptor;
     private final JwtTokenUserInterceptor userInterceptor;
+    private final RateLimitInterceptor rateLimitInterceptor;
+
+    /**
+     * CORS 允许的来源域名，通过 stellar.cors.allowed-origins 配置。
+     * dev 环境默认 *，prod 环境必须通过环境变量 STELLAR_CORS_ALLOWED_ORIGINS 指定。
+     */
+    @Value("${stellar.cors.allowed-origins:*}")
+    private String allowedOrigins;
 
     @Autowired
     public WebMvcConfiguration(JwtTokenAdminInterceptor adminInterceptor,
-                               JwtTokenUserInterceptor userInterceptor) {
+                               JwtTokenUserInterceptor userInterceptor,
+                               RateLimitInterceptor rateLimitInterceptor) {
         this.adminInterceptor = adminInterceptor;
         this.userInterceptor = userInterceptor;
+        this.rateLimitInterceptor = rateLimitInterceptor;
     }
 
     // ========= 1. Knife4j/Swagger Docket 双分组（仅 dev 环境启用） =========
@@ -94,8 +107,18 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     // ========= 2. CORS 跨域 =========
     @Override
     protected void addCorsMappings(CorsRegistry registry) {
+        String[] origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
+        if (origins.length == 0) {
+            log.warn("[CORS] 未配置允许的来源域名，CORS 将不生效。"
+                    + "生产环境请通过 STELLAR_CORS_ALLOWED_ORIGINS 环境变量指定。");
+            return;
+        }
+        log.info("[CORS] 允许的来源域名: {}", String.join(", ", origins));
         registry.addMapping("/**")
-                .allowedOriginPatterns("*")
+                .allowedOriginPatterns(origins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("token", "authentication", "Content-Disposition")
@@ -103,9 +126,14 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .maxAge(3600);
     }
 
-    // ========= 3. 双 JWT 拦截器 =========
+    // ========= 3. 双 JWT 拦截器 + 限流拦截器 =========
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
+        // 限流拦截器：全局生效，优先级最高（order=0），仅对标注 @RateLimit 的方法生效
+        registry.addInterceptor(rateLimitInterceptor)
+                .addPathPatterns("/**")
+                .order(0);
+
         // —— 管理端拦截 /admin/**，放行登录和健康检查、文档
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/admin/**")
@@ -126,6 +154,8 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .addPathPatterns("/user/**")
                 .excludePathPatterns(
                         "/user/user/login",
+                        "/user/user/email-login",
+                        "/user/email-code/**",
                         "/user/spu/page",
                         "/user/spu/**",
                         "/user/banner/list",

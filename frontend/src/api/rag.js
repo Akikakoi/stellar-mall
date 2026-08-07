@@ -1,5 +1,13 @@
+/**
+ * RAG（检索增强生成）模块 API 接口。
+ * 包含对话管理、知识库管理、管理员后台等接口。
+ * 所有请求通过 ragRequest 实例发送。
+ */
 import { ragRequest } from './request'
 
+// =========================== 认证 ===========================
+
+/** 获取当前 RAG 用户身份 */
 export function apiAuthMe() {
   return ragRequest({
     url: '/ragapi/api/auth/me',
@@ -7,6 +15,9 @@ export function apiAuthMe() {
   })
 }
 
+// =========================== 对话管理 ===========================
+
+/** 获取对话列表 */
 export function apiListConversations() {
   return ragRequest({
     url: '/ragapi/api/conversations',
@@ -14,6 +25,7 @@ export function apiListConversations() {
   })
 }
 
+/** 创建新对话 */
 export function apiCreateConversation(data) {
   return ragRequest({
     url: '/ragapi/api/conversations',
@@ -22,6 +34,7 @@ export function apiCreateConversation(data) {
   })
 }
 
+/** 获取对话详情 */
 export function apiGetConversation(id) {
   return ragRequest({
     url: `/ragapi/api/conversations/${id}`,
@@ -29,6 +42,7 @@ export function apiGetConversation(id) {
   })
 }
 
+/** 重命名对话 */
 export function apiRenameConversation(id, title) {
   return ragRequest({
     url: `/ragapi/api/conversations/${id}`,
@@ -37,6 +51,7 @@ export function apiRenameConversation(id, title) {
   })
 }
 
+/** 删除对话 */
 export function apiDeleteConversation(id) {
   return ragRequest({
     url: `/ragapi/api/conversations/${id}`,
@@ -44,6 +59,7 @@ export function apiDeleteConversation(id) {
   })
 }
 
+/** 对消息提交反馈（点赞/点踩） */
 export function apiFeedbackMessage(convId, msgId, feedback) {
   return ragRequest({
     url: `/ragapi/api/conversations/${convId}/messages/${msgId}/feedback`,
@@ -52,6 +68,9 @@ export function apiFeedbackMessage(convId, msgId, feedback) {
   })
 }
 
+// =========================== 知识库 ===========================
+
+/** 分页查询知识库文档列表 */
 export function apiKbList(params) {
   return ragRequest({
     url: '/ragapi/api/kb/documents',
@@ -60,6 +79,7 @@ export function apiKbList(params) {
   })
 }
 
+/** 查询知识库文档详情 */
 export function apiKbGet(id) {
   return ragRequest({
     url: `/ragapi/api/kb/documents/${id}`,
@@ -67,6 +87,7 @@ export function apiKbGet(id) {
   })
 }
 
+/** 删除知识库文档 */
 export function apiKbDelete(id) {
   return ragRequest({
     url: `/ragapi/api/kb/documents/${id}`,
@@ -74,6 +95,7 @@ export function apiKbDelete(id) {
   })
 }
 
+/** 更新知识库文档 */
 export function apiKbUpdate(id, data) {
   return ragRequest({
     url: `/ragapi/api/kb/documents/${id}`,
@@ -82,6 +104,7 @@ export function apiKbUpdate(id, data) {
   })
 }
 
+/** 上传文件到知识库（支持进度回调） */
 export function apiKbUpload(form, onProgress) {
   return ragRequest({
     url: '/ragapi/api/kb/documents',
@@ -94,6 +117,14 @@ export function apiKbUpload(form, onProgress) {
   })
 }
 
+/**
+ * 上传文件到知识库（带自定义分块参数）。
+ * @param {File} file - 上传的文件
+ * @param {string} tags - 标签
+ * @param {number} chunkSize - 分块大小
+ * @param {number} chunkOverlap - 分块重叠大小
+ * @param {Function} onProgress - 进度回调
+ */
 export function apiKbUploadWithChunks(file, tags, chunkSize, chunkOverlap, onProgress) {
   const fd = new FormData()
   fd.append('file', file)
@@ -103,6 +134,7 @@ export function apiKbUploadWithChunks(file, tags, chunkSize, chunkOverlap, onPro
   return apiKbUpload(fd, onProgress)
 }
 
+/** 获取知识库统计信息 */
 export function apiKbStats() {
   return ragRequest({
     url: '/ragapi/api/kb/stats',
@@ -110,6 +142,7 @@ export function apiKbStats() {
   })
 }
 
+/** 预览文档分块结果（上传前预览） */
 export function apiKbPreview(form, onProgress) {
   return ragRequest({
     url: '/ragapi/api/kb/preview',
@@ -122,6 +155,7 @@ export function apiKbPreview(form, onProgress) {
   })
 }
 
+/** 重新索引文档 */
 export function apiKbReindex(id) {
   return ragRequest({
     url: `/ragapi/api/kb/documents/${id}/reindex`,
@@ -129,10 +163,12 @@ export function apiKbReindex(id) {
   })
 }
 
+/** 获取文档下载 URL */
 export function apiKbDownloadUrl(id) {
   return `/api/kb/documents/${id}/download`
 }
 
+/** 下载文档（返回 Blob） */
 export function apiKbDownload(id) {
   return ragRequest({
     url: `/ragapi/api/kb/documents/${id}/download`,
@@ -141,6 +177,7 @@ export function apiKbDownload(id) {
   })
 }
 
+/** 获取文档分块列表 */
 export function apiKbChunks(id, limit = 100) {
   return ragRequest({
     url: `/ragapi/api/kb/documents/${id}/chunks`,
@@ -149,6 +186,9 @@ export function apiKbChunks(id, limit = 100) {
   })
 }
 
+// =========================== 管理员后台 ===========================
+
+/** 获取管理后台仪表盘数据 */
 export function apiAdminDashboard() {
   return ragRequest({
     url: '/ragapi/api/admin/dashboard',
@@ -156,6 +196,7 @@ export function apiAdminDashboard() {
   })
 }
 
+/** 查询操作日志 */
 export function apiAdminLogs(params) {
   return ragRequest({
     url: '/ragapi/api/admin/logs',
@@ -164,6 +205,7 @@ export function apiAdminLogs(params) {
   })
 }
 
+/** 获取系统设置 */
 export function apiAdminSettingsGet() {
   return ragRequest({
     url: '/ragapi/api/admin/settings',
@@ -171,6 +213,7 @@ export function apiAdminSettingsGet() {
   })
 }
 
+/** 更新系统设置 */
 export function apiAdminSettingsUpdate(data) {
   return ragRequest({
     url: '/ragapi/api/admin/settings',

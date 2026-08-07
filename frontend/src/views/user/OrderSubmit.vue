@@ -206,6 +206,9 @@ const submitting = ref(false)
 const directItems = ref([])
 const isDirect = computed(() => directItems.value.length > 0)
 
+/**
+ * 从路由 query 参数中解析直接购买的商品数据
+ */
 function parseDirectItems() {
   try {
     const raw = route.query.direct
@@ -296,6 +299,10 @@ const canUsePoints = computed(() => userPoints.value >= 100 && finalAmountWithou
 // 不含积分抵扣的应付金额（用于计算最大可抵扣积分）
 const finalAmountWithoutPoints = computed(() => Math.max(0, orderAmount.value - couponDiscount.value))
 
+/**
+ * 计算积分抵扣金额，积分不足或抵扣金额为 0 时自动关闭积分抵扣
+ * @param {boolean} val - 是否开启积分抵扣
+ */
 function calcPointsDeduction(val) {
   if (!val) {
     pointsDeduction.value = 0
@@ -317,6 +324,7 @@ function calcPointsDeduction(val) {
 }
 
 // ==================== localStorage 缓存：手动填写的收货信息 ====================
+/** 从 localStorage 恢复上次手动填写的收货信息草稿 */
 function loadDraftAddress() {
   try {
     const raw = localStorage.getItem(DRAFT_KEY)
@@ -331,6 +339,7 @@ function loadDraftAddress() {
   }
 }
 
+/** 将手动填写的收货信息缓存到 localStorage，地址簿模式下不缓存 */
 function saveDraftAddress() {
   if (selectedAddress.value) return // 使用了地址簿，不缓存
   const draft = { consignee: form.consignee, phone: form.phone, address: form.address }
@@ -350,6 +359,7 @@ watch(
 )
 
 // ==================== 地址簿 CRUD ====================
+/** 加载用户地址簿，自动选中默认地址，若无地址则回退到 localStorage 草稿 */
 async function loadAddresses() {
   try {
     const res = await listAddresses()
@@ -368,10 +378,19 @@ async function loadAddresses() {
   }
 }
 
+/**
+ * 生成地址选择器的选项标签
+ * @param {Object} addr - 地址对象
+ * @returns {string} 格式化的地址标签
+ */
 function addressLabel(addr) {
   return `${addr.consignee} ${addr.phone} · ${addr.province}${addr.city}${addr.district} ${addr.detail}`
 }
 
+/**
+ * 根据选中的地址 ID 切换收货地址，切换后清除 localStorage 草稿
+ * @param {number} id - 地址 ID
+ */
 function handleAddressChange(id) {
   const addr = addresses.value.find(a => a.id === id)
   if (addr) {
@@ -380,6 +399,7 @@ function handleAddressChange(id) {
   }
 }
 
+/** 打开新增地址弹窗，若当前有手动填写的内容则预填到表单中 */
 function openAddressDialog() {
   showAddressDialog.value = true
   // 如果当前有手动填写的内容，预填到新增表单
@@ -395,6 +415,7 @@ function openAddressDialog() {
   nextTick(() => addFormRef.value?.clearValidate())
 }
 
+/** 重置新增地址表单 */
 function resetAddForm() {
   addForm.consignee = ''
   addForm.phone = ''
@@ -405,6 +426,7 @@ function resetAddForm() {
   addForm.isDefault = 0
 }
 
+/** 保存新地址并刷新地址列表，自动选中新增的地址 */
 async function handleAddAddress() {
   const valid = await addFormRef.value?.validate().catch(() => false)
   if (!valid) return
@@ -435,6 +457,7 @@ async function handleAddAddress() {
 }
 
 // ==================== 优惠券 ====================
+/** 加载用户拥有的可用优惠券列表 */
 async function loadCoupons() {
   try {
     const res = await userRequest({ url: '/user/coupon/my', method: 'get', params: { status: 1 } })
@@ -442,12 +465,18 @@ async function loadCoupons() {
   } catch (e) {}
 }
 
+/**
+ * 生成优惠券选项的标签文本
+ * @param {Object} c - 优惠券对象
+ * @returns {string} 优惠券描述标签
+ */
 function couponLabel(c) {
   const type = c.couponType || c.type
   if (type === 1) return `${c.couponName || c.name} 满${c.conditionAmount}减${c.discountAmount}`
   return `${c.couponName || c.name} 满${c.conditionAmount}打${(c.discountAmount * 10).toFixed(1)}折`
 }
 
+/** 根据选中的优惠券计算优惠金额，若订单金额不满足门槛则自动取消选中 */
 function calcAmount() {
   couponDiscount.value = 0
   if (!selectedCouponId.value) return
@@ -469,6 +498,7 @@ function calcAmount() {
 }
 
 // ==================== 提交订单 ====================
+/** 提交订单：校验收货信息、组装订单数据，提交成功后发起支付并跳转订单列表 */
 async function handleSubmit() {
   if (orderItems.value.length === 0) {
     ElMessage.warning('请先选择商品')

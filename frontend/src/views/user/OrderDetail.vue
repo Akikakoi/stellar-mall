@@ -187,6 +187,9 @@ const ORDER_EXPIRE_MINUTES = 15
 const countdownText = ref('')
 let countdownTimer = null
 
+/**
+ * 根据订单创建时间计算剩余支付倒计时，更新到 countdownText
+ */
 function updateCountdown() {
   if (!order.value || order.value.statusCode !== ORDER_STATUS.PENDING || !order.value.createTime) {
     countdownText.value = ''
@@ -205,12 +208,18 @@ function updateCountdown() {
   countdownText.value = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
+/**
+ * 启动订单支付倒计时定时器
+ */
 function startCountdown() {
   stopCountdown()
   updateCountdown()
   countdownTimer = setInterval(updateCountdown, 1000)
 }
 
+/**
+ * 停止倒计时定时器并清理
+ */
 function stopCountdown() {
   if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
 }
@@ -227,12 +236,19 @@ const reviewForm = ref({ rating: 5, content: '' })
 const reviewSubmitting = ref(false)
 const reviewedSkuIds = ref(new Set())
 
+/**
+ * 打开商品评价弹窗，初始化评价表单
+ * @param {Object} item - 订单商品项
+ */
 function openReview(item) {
   reviewItem.value = item
   reviewForm.value = { rating: 5, content: '' }
   reviewVisible.value = true
 }
 
+/**
+ * 提交商品评价，校验内容不少于2字后调用接口
+ */
 async function submitReview() {
   const item = reviewItem.value
   if (!item) return
@@ -261,6 +277,9 @@ async function submitReview() {
   }
 }
 
+/**
+ * 加载订单详情，同时获取关联售后单；若从"去评价"进入则自动打开评价弹窗
+ */
 function load() {
   const id = route.params.id
   if (!id) {
@@ -288,6 +307,11 @@ function load() {
   })
 }
 
+/**
+ * 判断订单状态是否允许评价
+ * @param {number} statusCode - 订单状态码
+ * @returns {boolean}
+ */
 function isReviewable(statusCode) {
   return statusCode === ORDER_STATUS.REVIEWABLE || statusCode === ORDER_STATUS.COMPLETED
 }
@@ -311,18 +335,30 @@ function payMethodText(m) {
   return map[m] || `方式${m}`
 }
 
+/**
+ * 是否显示底部操作栏（待付款/待收货时显示）
+ */
 const showActions = computed(() =>
   order.value && (order.value.statusCode === ORDER_STATUS.PENDING || order.value.statusCode === ORDER_STATUS.SHIPPED)
 )
 
+/**
+ * 是否显示"申请售后"按钮（已支付/已发货/已完成时显示）
+ */
 const showAfterSaleBtn = computed(() => {
   const s = order.value?.statusCode
   return s === ORDER_STATUS.PAID || s === ORDER_STATUS.SHIPPED || s === ORDER_STATUS.COMPLETED
 })
+/**
+ * 计算订单中所有商品的总数量
+ */
 const totalQty = computed(() =>
   (order.value?.items || []).reduce((s, i) => s + (Number(i.qty) || 0), 0)
 )
 
+/**
+ * 支付订单，弹出确认框后调用支付接口
+ */
 async function onPay() {
   try {
     await ElMessageBox.confirm('确认支付该订单？', '支付确认', { type: 'warning' })
@@ -332,6 +368,9 @@ async function onPay() {
   } catch (e) { /* 用户取消不提示 */ }
 }
 
+/**
+ * 取消订单，弹出确认框后调用取消接口
+ */
 async function onCancel() {
   try {
     await ElMessageBox.confirm('确定要取消该订单吗？', '提示', { type: 'warning' })
@@ -341,6 +380,9 @@ async function onCancel() {
   } catch (e) {}
 }
 
+/**
+ * 确认收货，弹出确认框后调用确认收货接口
+ */
 async function onConfirm() {
   try {
     await ElMessageBox.confirm('确认已收到商品？', '提示', { type: 'warning' })
@@ -350,6 +392,9 @@ async function onConfirm() {
   } catch (e) {}
 }
 
+/**
+ * 复制订单编号到剪贴板
+ */
 function copyOrderNo() {
   const t = order.value?.orderNo
   if (!t) return
@@ -361,26 +406,43 @@ function copyOrderNo() {
   }
 }
 
+/**
+ * 在新标签页中打开商品详情页
+ * @param {number} spuId - 商品SPU ID
+ */
 function goSpu(spuId) {
   if (spuId) {
     const route = router.resolve(`/spu/${spuId}`)
     window.open(route.href, '_blank')
   }
 }
+
+/**
+ * 返回上一页，若历史记录为空则跳转到订单列表
+ */
 function goBack() {
   if (window.history.length > 1) router.back()
   else router.push('/order/list')
 }
 
+/**
+ * 跳转到售后申请页面，带上当前订单ID
+ */
 function onApplyAfterSale() {
   router.push(`/aftersale/apply?orderId=${order.value.id}`)
 }
 
+/**
+ * 打开退货物流填写弹窗，重置输入
+ */
 function onOpenReturn() {
   returnTracking.value = ''
   returnVisible.value = true
 }
 
+/**
+ * 提交退货物流单号，校验后调用接口并刷新订单详情
+ */
 async function onSubmitReturn() {
   if (!returnTracking.value.trim()) {
     ElMessage.warning('请输入快递单号')

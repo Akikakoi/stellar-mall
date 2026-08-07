@@ -6,6 +6,10 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * Banner 轮播图 Mapper，管理首页轮播图的增删改查及启用状态。
+ * 表：stellar_banner。
+ */
 @Mapper
 public interface BannerMapper {
 

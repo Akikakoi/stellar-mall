@@ -42,8 +42,6 @@
             <span style="font-weight:600; color: var(--text-primary);">{{ row.name }}</span>
             <span style="font-size:12px; color: var(--text-muted); margin-top:2px;">
               {{ row.type == 1 ? '商品分类' : (row.type == 2 ? '套餐分类' : '—') }}
-              <span v-if="row.level === 1" style="margin-left:6px;">· 一级</span>
-              <span v-else style="margin-left:6px;">· 二级（pid={{ row.parentId }}）</span>
             </span>
           </div>
           </template>
@@ -183,6 +181,7 @@ const formRules = {
   type: [{ required: true, message: '请选择类型', trigger: 'change' }]
 }
 
+/** 加载分类分页列表，根据当前查询条件筛选 */
 async function loadPage() {
   loading.value = true
   try {
@@ -195,6 +194,7 @@ async function loadPage() {
   }
 }
 
+/** 打开新增/编辑分类对话框，create 模式初始化空表单，edit 模式回填数据 */
 function openDialog(mode, row) {
   dialogMode.value = mode
   if (mode === 'create') {
@@ -211,6 +211,7 @@ function openDialog(mode, row) {
   dialogVisible.value = true
 }
 
+/** 提交分类表单：校验后保存或更新分类 */
 async function submitForm() {
   if (!formRef.value) return
   try { await formRef.value.validate() } catch (e) { return }
@@ -224,6 +225,7 @@ async function submitForm() {
   } finally { submitting.value = false }
 }
 
+/** 切换分类启用/禁用状态 */
 async function toggleStatus(row, val) {
   try {
     await setCategoryStatus(row.id, val ? 1 : 0)
@@ -231,6 +233,7 @@ async function toggleStatus(row, val) {
   } catch (e) { loadPage() }
 }
 
+/** 删除分类：先预校验是否可删，通过后二次确认再执行删除 */
 async function handleDelete(row) {
   // 阶段 1：预校验（后端 checkDeletable 会查「作用域 = 分类 + 子分类」下的商品数量与子分类数量）
   let deletable = true

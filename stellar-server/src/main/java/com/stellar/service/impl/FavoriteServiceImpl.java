@@ -26,6 +26,12 @@ public class FavoriteServiceImpl implements FavoriteService {
     private final FavoriteMapper favoriteMapper;
     private final SpuMapper spuMapper;
 
+    /**
+     * 添加收藏。
+     *
+     * @param userId 用户ID
+     * @param spuId  SPU ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void add(Long userId, Long spuId) {
@@ -42,6 +48,12 @@ public class FavoriteServiceImpl implements FavoriteService {
         favoriteMapper.insert(f);
     }
 
+    /**
+     * 取消收藏。
+     *
+     * @param userId 用户ID
+     * @param spuId  SPU ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void remove(Long userId, Long spuId) {
@@ -49,12 +61,25 @@ public class FavoriteServiceImpl implements FavoriteService {
         favoriteMapper.deleteByUserIdAndSpuId(userId, spuId);
     }
 
+    /**
+     * 判断是否已收藏。
+     *
+     * @param userId 用户ID
+     * @param spuId  SPU ID
+     * @return true 表示已收藏，false 表示未收藏
+     */
     @Override
     public boolean isFavorited(Long userId, Long spuId) {
         if (userId == null || spuId == null) return false;
         return favoriteMapper.getByUserIdAndSpuId(userId, spuId) != null;
     }
 
+    /**
+     * 查询用户的收藏列表，包含 SPU 基本信息。
+     *
+     * @param userId 用户ID
+     * @return 收藏列表，无数据时返回空列表
+     */
     @Override
     public List<FavoriteVO> list(Long userId) {
         if (userId == null) return Collections.emptyList();
@@ -78,6 +103,13 @@ public class FavoriteServiceImpl implements FavoriteService {
         return res;
     }
 
+    /**
+     * 从给定的 SPU ID 列表中筛选出用户已收藏的 SPU ID。
+     *
+     * @param userId 用户ID
+     * @param spuIds 待筛选的 SPU ID 列表
+     * @return 已收藏的 SPU ID 列表
+     */
     @Override
     public List<Long> listFavoritedSpuIds(Long userId, List<Long> spuIds) {
         if (userId == null || spuIds == null || spuIds.isEmpty()) return Collections.emptyList();

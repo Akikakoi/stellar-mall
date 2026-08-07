@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.RateLimit;
 import com.stellar.constant.JwtClaimsConstant;
 import com.stellar.constant.MessageConstant;
 import com.stellar.context.BaseContext;
@@ -36,6 +37,7 @@ public class EmployeeController {
         this.employeeService = employeeService;
     }
 
+    @RateLimit(key = "admin-login", maxRequests = 10, windowSeconds = 60)
     @PostMapping("/login")
     @ApiOperation("员工登录（返回 JWT，前端用 token=xxx / Authorization=Bearer xxx 两种 header 都可以）")
     public Result<EmployeeLoginVO> login(@RequestBody EmployeeLoginDTO dto) {

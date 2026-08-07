@@ -102,6 +102,9 @@ const form = ref({
   detail: ''
 })
 
+/**
+ * 计算退款金额，若订单有优惠券折扣则按比例折算
+ */
 const refundAmount = computed(() => {
   if (!selectedItem.value) return 0
   const itemAmount = Number(selectedItem.value.price || 0) * (selectedItem.value.qty || 1)
@@ -113,6 +116,9 @@ const refundAmount = computed(() => {
   return itemAmount
 })
 
+/**
+ * 判断当前订单是否使用了优惠券折扣（实付 < 商品合计）
+ */
 const hasCouponDiscount = computed(() => {
   const total = Number(selectedOrder.value?.totalAmount || 0)
   const paid = Number(selectedOrder.value?.payAmount || 0)
@@ -123,6 +129,9 @@ watch(selectedSkuId, (val) => {
   selectedItem.value = orderItems.value.find(it => it.skuId === val) || null
 })
 
+/**
+ * 加载用户订单列表，筛选出可申请售后的订单（已支付/已发货/已完成/可评价）
+ */
 async function loadAvailableOrders() {
   loading.value = true
   try {
@@ -141,6 +150,10 @@ async function loadAvailableOrders() {
   }
 }
 
+/**
+ * 切换选中订单，加载订单详情和商品列表，并重置表单
+ * @param {number} orderId - 订单ID
+ */
 async function onOrderChange(orderId) {
   if (!orderId) {
     selectedOrder.value = null
@@ -167,6 +180,9 @@ async function onOrderChange(orderId) {
   }
 }
 
+/**
+ * 提交售后申请，校验表单后调用接口，成功后跳转到售后列表页
+ */
 async function onSubmit() {
   if (!selectedItem.value) { ElMessage.warning('请选择售后商品'); return }
   if (!form.value.reason) { ElMessage.warning('请选择申请原因'); return }
@@ -191,6 +207,9 @@ async function onSubmit() {
   }
 }
 
+/**
+ * 取消操作，返回上一页
+ */
 function onCancel() {
   router.back()
 }

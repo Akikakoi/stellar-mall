@@ -130,6 +130,12 @@ const selectedServices = computed({
   set: (val) => emit('update:selectedServices', val)
 })
 
+/**
+ * 将 SKU 的规格信息归一化为键值对对象
+ * 支持 specsJson 和 specs 两种格式
+ * @param {Object} sku - SKU 对象
+ * @returns {Object} 规格键值对，如 { 颜色: '红色', 尺寸: 'M' }
+ */
 function normalizeSpecs(sku) {
   if (!sku) return {}
   if (sku.specsJson) {
@@ -150,11 +156,20 @@ function normalizeSpecs(sku) {
   return {}
 }
 
+/**
+ * 将 SKU 规格格式化为可读字符串
+ * @param {Object} sku - SKU 对象
+ * @returns {string} 格式化后的规格字符串，如 "颜色:红色；尺寸:M"
+ */
 function formatSpecs(sku) {
   const map = normalizeSpecs(sku)
   return Object.entries(map).map(([k, v]) => `${k}:${v}`).join('；')
 }
 
+/**
+ * 解析后的 SKU 列表，每个 SKU 附加归一化的 specsMap
+ * @returns {Array<Object>} 包含 specsMap 属性的 SKU 数组
+ */
 const parsedSkus = computed(() => {
   return props.skus.map((sku) => {
     const specs = normalizeSpecs(sku)
@@ -162,6 +177,11 @@ const parsedSkus = computed(() => {
   })
 })
 
+/**
+ * 规格分组：从所有 SKU 的规格中提取维度，按规格键分组
+ * 自动识别颜色类规格以支持图片展示模式
+ * @returns {Array<Object>} 规格分组数组，每组包含 key、label、showImage、options
+ */
 const specGroups = computed(() => {
   if (!parsedSkus.value.length) return []
 
@@ -214,8 +234,16 @@ const specGroups = computed(() => {
   })
 })
 
+/**
+ * 是否显示图片模式切换按钮
+ * @returns {boolean}
+ */
 const hasImageMode = computed(() => specGroups.value.some((g) => g.showImage))
 
+/**
+ * 当前选中的 SKU：根据 selectedValues 匹配完整 SKU
+ * @returns {Object|null} 匹配到的 SKU 对象，未匹配时返回 null
+ */
 const selectedSku = computed(() => {
   if (!parsedSkus.value.length) return null
   return parsedSkus.value.find((sku) => {
@@ -223,16 +251,31 @@ const selectedSku = computed(() => {
   }) || null
 })
 
+/**
+ * 当前可购买的最大数量，基于选中 SKU 的库存
+ * @returns {number}
+ */
 const maxQty = computed(() => {
   return selectedSku.value?.stock > 0 ? Math.min(selectedSku.value.stock, 999) : 999
 })
 
+/**
+ * 判断规格选项是否禁用（无任何 SKU 包含该选项时禁用）
+ * @param {string} groupKey - 规格键名
+ * @param {string} value - 规格值
+ * @returns {boolean}
+ */
 function isOptionDisabled(groupKey, value) {
   // 只要有任意 SKU 包含该选项，就允许点击。
   // 点击时 selectOption 会自动匹配最近的完整 SKU。
   return !parsedSkus.value.some((sku) => sku.specsMap[groupKey] === value)
 }
 
+/**
+ * 选择规格选项，更新选中值并同步数量
+ * @param {string} groupKey - 规格键名
+ * @param {string} value - 规格值
+ */
 function selectOption(groupKey, value) {
   if (selectedValues.value[groupKey] === value) return
   selectedValues.value[groupKey] = value
@@ -240,26 +283,42 @@ function selectOption(groupKey, value) {
   emit('sku-change', selectedSku.value)
 }
 
+/**
+ * 同步购买数量：当数量超过最大可购数量时自动修正
+ */
 function syncQuantity() {
   if (quantity.value > maxQty.value) {
     quantity.value = Math.max(1, maxQty.value)
   }
 }
 
+/**
+ * 增加购买数量
+ */
 function increaseQty() {
   if (quantity.value < maxQty.value) quantity.value++
 }
 
+/**
+ * 减少购买数量
+ */
 function decreaseQty() {
   if (quantity.value > 1) quantity.value--
 }
 
+/**
+ * 限制购买数量在有效范围内
+ */
 function clampQty() {
   let v = Number(quantity.value) || 1
   v = Math.max(1, Math.min(v, maxQty.value))
   quantity.value = v
 }
 
+/**
+ * 初始化规格选择：默认选中每个规格维度的第一个选项
+ * 优先匹配完整 SKU，若默认组合不存在则回退到第一个 SKU
+ */
 function initSelections() {
   if (!specGroups.value.length) return
   const defaults = {}

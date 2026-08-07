@@ -35,7 +35,7 @@
                 <div class="cat-title">{{ mod.title || getCatName(mod) }}</div>
                 <div class="cat-side">
                   <div v-if="getSubCats(mod).length > 0" class="sub-tabs">
-                    <span class="sub-tab" :class="{ active: !mod._activeSub }" @click="switchModuleSub(mod, null)">全部</span>
+                    <span v-if="!getCfg(mod).categoryIds" class="sub-tab" :class="{ active: !mod._activeSub }" @click="switchModuleSub(mod, null)">全部</span>
                     <span v-for="sub in getSubCats(mod)" :key="sub.id" class="sub-tab" :class="{ active: mod._activeSub === sub.id }" @click="switchModuleSub(mod, sub.id)">{{ sub.name }}</span>
                   </div>
                   <a v-else class="view-more" @click="viewMoreModule(mod)">查看更多 <svg class="arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
@@ -231,6 +231,9 @@ const showCursor = ref(true)
 const fullSubtitle = '精选好物，品质生活'
 let typewriterTimer = null
 
+/**
+ * 启动 Hero 区域打字机动画效果，逐字显示副标题文本
+ */
 function startTypewriter() {
   subtitleText.value = ''
   showCursor.value = true
@@ -248,7 +251,6 @@ function scrollToContent() { contentRef.value?.scrollIntoView({ behavior: 'smoot
 const modules = ref([])
 const modulesLoaded = ref(false)
 const banners = ref([])
-const categoryTree = ref([]) // 用于 CATEGORY_SHOWCASE 查找子分类
 const flatCategories = ref([])
 const favSet = reactive(new Set())
 
@@ -262,58 +264,68 @@ function getCatName(mod) {
 }
 
 /**
- * 获取分类信息（id + level + parentId）。
+ * 获取分类信息（id + level）。
  * 优先取 config.categoryId；
- * 缺失时从 categoryTree 按名称匹配（防御模块配置不完整的情况）。
+ * 缺失时从 flatCategories 按名称匹配（防御模块配置不完整的情况）。
+ * @param {Object} cfg - 模块配置对象
+ * @returns {Object|null} 分类信息节点或 null
  */
 function resolveCategoryInfo(cfg) {
-  function findNode(list, predicate) {
-    for (const c of list) {
-      if (predicate(c)) return c
-      const found = findNode(c.children || [], predicate)
-      if (found) return found
-    }
-    return null
+  // 支持 categoryIds 数组配置（多分类聚合展示）
+  if (cfg.categoryIds && cfg.categoryIds.length > 0) {
+    const firstId = cfg.categoryIds[0]
+    const node = flatCategories.value.find(c => c.id === firstId)
+    if (node) return { id: node.id, level: node.level, categoryIds: cfg.categoryIds }
+    return { id: firstId, level: 1, categoryIds: cfg.categoryIds }
   }
   if (cfg.categoryId) {
-    const node = findNode(categoryTree.value, c => c.id === cfg.categoryId)
-    if (node) return { id: node.id, level: node.level, parentId: node.parentId }
+    const node = flatCategories.value.find(c => c.id === cfg.categoryId)
+    if (node) return { id: node.id, level: node.level }
   }
-  if (!cfg.categoryName || !categoryTree.value.length) return null
-  const node = findNode(categoryTree.value, c => c.name === cfg.categoryName)
+  if (!cfg.categoryName || !flatCategories.value.length) return null
+  const node = flatCategories.value.find(c => c.name === cfg.categoryName)
   if (!node) return null
-  return { id: node.id, level: node.level, parentId: node.parentId }
+  return { id: node.id, level: node.level }
 }
 
+/**
+ * 获取模块关联分类下的子分类列表
+ * @param {Object} mod - 模块对象
+ * @returns {Array} 子分类列表
+ */
 function getSubCats(mod) {
   const cfg = getCfg(mod)
-  const id = cfg.categoryId
-  if (!id || !categoryTree.value.length) return []
-  // 在树中查找该分类
-  function find(list) {
-    for (const c of list) {
-      if (c.id === id) return c.children || []
-      const found = find(c.children || [])
-      if (found.length) return found
-    }
-    return []
+  // 支持 categoryIds 数组配置（多分类聚合展示）
+  if (cfg.categoryIds && cfg.categoryIds.length > 0) {
+    return cfg.categoryIds
+      .map(id => flatCategories.value.find(c => c.id === id) || null)
+      .filter(Boolean)
   }
-  return find(categoryTree.value)
+  return []
 }
 
+/**
+ * 加载首页动态模块配置，为每个模块附加运行时状态字段
+ */
 async function loadModules() {
   try {
     const res = await userRequest({ url: '/user/home-module/list', method: 'get', __silent: true })
     const list = Array.isArray(res) ? res : (res?.data || [])
     // 为每个模块附加运行时状态
-    modules.value = list.map(m => ({
-      ...m,
-      _products: [],
-      _total: 0,
-      _loading: false,
-      _activeSub: null,
-      _activeSubLabel: ''
-    }))
+    modules.value = list.map(m => {
+      let cfg = {}
+      try { cfg = JSON.parse(m.config || '{}') } catch {}
+      // categoryIds 模式默认选中第一个分类
+      const defaultSub = (cfg.categoryIds && cfg.categoryIds.length > 0) ? cfg.categoryIds[0] : null
+      return {
+        ...m,
+        _products: [],
+        _total: 0,
+        _loading: false,
+        _activeSub: defaultSub,
+        _activeSubLabel: ''
+      }
+    })
   } catch (e) {
     modules.value = []
   } finally {
@@ -321,28 +333,60 @@ async function loadModules() {
   }
 }
 
+/**
+ * 根据模块类型加载对应的商品数据，支持 CATEGORY_SHOWCASE、HOT_PRODUCTS、NEW_PRODUCTS 和 PRODUCT_GRID
+ * @param {Object} mod - 模块对象
+ */
 async function loadModuleProducts(mod) {
   mod._loading = true
   const cfg = getCfg(mod)
+  /** 将 bannerSpuId 指定的商品置顶 */
+  async function applyBanner() {
+    if (!cfg.bannerSpuId || mod._products.length === 0) return
+    try {
+      const banner = await getSpu(cfg.bannerSpuId)
+      if (banner) {
+        mod._products = mod._products.filter(p => p.id !== cfg.bannerSpuId)
+        mod._products.unshift(banner)
+        mod._total = Math.max(mod._total, mod._products.length)
+      }
+    } catch { /* 获取失败不影响正常展示 */ }
+  }
   try {
     if (mod.type === 'CATEGORY_SHOWCASE') {
       const catNode = resolveCategoryInfo(cfg)
       if (!catNode) { mod._products = []; mod._total = 0; mod._loading = false; return }
       const params = { page: 1, pageSize: cfg.displayCount || 8 }
-      if (mod._activeSub) {
-        // 子分类筛选：categoryId 用一级父分类，category2Id 用子分类
-        params.category2Id = mod._activeSub
-        params.categoryId = catNode.parentId || catNode.id
-      } else if (catNode.level === 2) {
-        // 二级分类：同时传入 categoryId（一级）和 category2Id（二级），防止跨分类错配
-        params.category2Id = catNode.id
-        params.categoryId = catNode.parentId
+      if (catNode.categoryIds) {
+        // 多分类聚合模式（categoryIds）：按选中的子分类或并发加载全部分类
+        if (mod._activeSub) {
+          params.categoryId = mod._activeSub
+        } else {
+          const results = await Promise.allSettled(
+            catNode.categoryIds.map(id => listSpu({ ...params, categoryId: id }))
+          )
+          const allProducts = []
+          results.forEach(r => {
+            if (r.status === 'fulfilled' && r.value) {
+              const products = r.value?.records || r.value?.list || (Array.isArray(r.value) ? r.value : [])
+              allProducts.push(...products)
+            }
+          })
+          mod._products = allProducts.slice(0, params.pageSize)
+          mod._total = allProducts.length
+          await applyBanner()
+          mod._loading = false
+          return
+        }
+      } else if (mod._activeSub) {
+        params.categoryId = mod._activeSub
       } else {
         params.categoryId = catNode.id
       }
       const res = await listSpu(params)
       mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
       mod._total = res?.total || mod._products.length
+      await applyBanner()
     } else if (mod.type === 'HOT_PRODUCTS') {
       const res = await listSpu({ page: 1, pageSize: cfg.displayCount || 10, sortBy: 'saleCount', sortOrder: 'desc' })
       mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
@@ -366,6 +410,11 @@ async function loadModuleProducts(mod) {
   }
 }
 
+/**
+ * 切换模块的子分类筛选并重新加载商品
+ * @param {Object} mod - 模块对象
+ * @param {number|null} subId - 子分类 ID，null 表示全部
+ */
 async function switchModuleSub(mod, subId) {
   if (mod._activeSub === subId) return
   mod._activeSub = subId
@@ -373,28 +422,38 @@ async function switchModuleSub(mod, subId) {
   await loadModuleProducts(mod)
 }
 
+/**
+ * 在新标签页打开商城搜索页
+ * @param {Object} [query={}] - 查询参数
+ */
 function openShopSearch(query = {}) {
   const route = router.resolve({ path: '/shop/search', query })
   window.open(route.href, '_blank')
 }
 
+/**
+ * 查看模块更多商品，解析分类信息后跳转到商城搜索页
+ * @param {Object} mod - 模块对象
+ */
 function viewMoreModule(mod) {
   const cfg = getCfg(mod)
   const catNode = resolveCategoryInfo(cfg)
   if (!catNode) return
   const query = {}
-  if (mod._activeSub) {
-    query.category2Id = mod._activeSub
-    query.categoryId = catNode.parentId || catNode.id
-  } else if (catNode.level === 2) {
-    query.category2Id = catNode.id
-    query.categoryId = catNode.parentId
+  if (catNode.categoryIds) {
+    // 多分类聚合模式
+    query.categoryId = mod._activeSub || catNode.categoryIds[0]
+  } else if (mod._activeSub) {
+    query.categoryId = mod._activeSub
   } else {
     query.categoryId = catNode.id
   }
   openShopSearch(query)
 }
 
+/**
+ * 并发加载所有模块的商品数据，并批量检查收藏状态
+ */
 async function loadAllModuleProducts() {
   await Promise.all(modules.value.map(m => loadModuleProducts(m)))
   // 批量检查收藏
@@ -411,35 +470,45 @@ async function loadAllModuleProducts() {
 const sections = ref([])
 const sectionsLoading = ref(false)
 
+/**
+ * 根据分类树构建回退分区列表，每个分类对应一个展示区域
+ * @param {Array} tree - 分类树
+ */
 function buildSections(tree) {
   sections.value = (tree || []).map(c => ({
     id: c.id, name: c.name,
-    subs: (c.children || []).filter(s => (s.status ?? 1) !== 0),
     activeSubId: null, products: [], total: 0, loading: false
   }))
   sections.value.sort((a, b) => a.name === '智能手机' ? -1 : b.name === '智能手机' ? 1 : 0)
 }
 
+/**
+ * 加载指定分类分区的商品列表，支持子分类筛选
+ * @param {Object} sec - 分区对象
+ */
 async function loadSectionProducts(sec) {
   sec.loading = true
   try {
-    const params = { page: 1, pageSize: 8 }
-    if (sec.activeSubId) {
-      params.category2Id = sec.activeSubId
-      params.categoryId = sec.id
-    }
-    else params.categoryId = sec.id
+    const params = { page: 1, pageSize: 8, categoryId: sec.activeSubId || sec.id }
     const res = await listSpu(params)
     sec.products = res?.records || res?.list || (Array.isArray(res) ? res : [])
     sec.total = res?.total || sec.products.length
   } catch (e) { sec.products = [] } finally { sec.loading = false }
 }
 
+/**
+ * 并发加载所有分类分区的商品数据
+ */
 async function loadAllSections() {
   sectionsLoading.value = true
   try { await Promise.all(sections.value.map(s => loadSectionProducts(s))) } finally { sectionsLoading.value = false }
 }
 
+/**
+ * 切换分类分区的子分类，带防抖延迟后重新加载商品
+ * @param {Object} sec - 分区对象
+ * @param {number|null} subId - 子分类 ID
+ */
 function switchSub(sec, subId) {
   if (sec.activeSubId === subId) return
   clearTimeout(sec._hoverTimer)
@@ -447,30 +516,34 @@ function switchSub(sec, subId) {
 }
 
 function activeSubName(sec) {
-  if (!sec.activeSubId) return sec.name
-  return sec.subs.find(s => s.id === sec.activeSubId)?.name || sec.name
+  return sec.name
 }
 
+/**
+ * 查看分区更多商品，跳转到商城搜索页
+ * @param {Object} sec - 分区对象
+ */
 function viewMore(sec) {
-  const query = {}
-  if (sec.activeSubId) {
-    query.category2Id = sec.activeSubId
-    query.categoryId = sec.id
-  }
-  else query.categoryId = sec.id
-  openShopSearch(query)
+  openShopSearch({ categoryId: sec.activeSubId || sec.id })
 }
 
 // ========== 分类数据 ==========
+/**
+ * 加载商品分类数据，构建平铺列表并构建回退分区
+ */
 async function loadCategory() {
   try {
     const res = await listCategory()
-    categoryTree.value = res || []
     flatCategories.value = flattenCats(res || [])
     buildSections(res || [])
   } catch (e) {}
 }
 
+/**
+ * 将分类树平铺为一维数组
+ * @param {Array} tree - 分类树
+ * @returns {Array} 平铺后的分类列表
+ */
 function flattenCats(tree) {
   const result = []
   function traverse(list) {
@@ -491,6 +564,9 @@ const page = ref(1)
 const pageSize = ref(20)
 const hasMore = computed(() => spus.value.length < total.value)
 
+/**
+ * 加载首页 Banner 轮播图数据
+ */
 async function loadBanners() {
   try {
     const res = await userRequest({ url: '/user/banner/list', method: 'get', __silent: true })
@@ -499,11 +575,19 @@ async function loadBanners() {
 }
 
 // ========== 通用方法 ==========
+/**
+ * 在新标签页打开商品详情页
+ * @param {number|string} id - 商品 SPU ID
+ */
 function goDetail(id) {
   const route = router.resolve(`/spu/${id}`)
   window.open(route.href, '_blank')
 }
 
+/**
+ * 切换商品收藏状态，未登录时跳转登录页
+ * @param {Object} spu - 商品对象
+ */
 async function toggleFav(spu) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
@@ -520,6 +604,10 @@ const selectedSkuId = ref(null)
 const addingCart = ref(false)
 const selectedSku = computed(() => currentSkus.value.find(s => s.id === selectedSkuId.value))
 
+/**
+ * 处理加入购物车：获取商品 SKU 列表，单个 SKU 直接加入，多个 SKU 弹出规格选择弹窗
+ * @param {Object} spu - 商品对象
+ */
 async function handleAddToCart(spu) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
@@ -534,6 +622,10 @@ async function handleAddToCart(spu) {
   } catch (e) { ElMessage.error(e?.response?.data?.msg || e?.message || '加载商品规格失败') }
 }
 
+/**
+ * 执行加入购物车操作，调用接口并刷新购物车数据
+ * @param {number} skuId - SKU ID
+ */
 async function doAddCart(skuId) {
   if (!skuId) { ElMessage.warning('请选择商品规格'); return }
   addingCart.value = true

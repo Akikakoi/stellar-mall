@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * P1-M1 RED阶段：SPU + SKU CRUD + SKU 嵌套保存 + 6 SPU 精简样例数据。
  * ⚠️ 类级别 @Transactional：每个 @Test 方法结束后自动回滚，避免残留。
- * ⚠️ 每个 @Test 会先造唯一一级+二级分类（用返回 ID 当外键），不依赖库里预置 1L/2L。
+ * ⚠️ 每个 @Test 会先造唯一分类（用返回 ID 当外键），不依赖库里预置数据。
  */
 @SpringBootTest
 @Transactional
@@ -43,34 +43,26 @@ class SpuSkuServiceTest {
                 (int) ((System.nanoTime() ^ System.identityHashCode(Thread.currentThread())) & 0xffff));
     }
 
-    /** 创建一对 一级+二级分类，返回 [l1CategoryId, l2CategoryId] */
-    private Long[] seedCategoryL1L2() {
-        Category c1 = new Category();
-        c1.setName(uid("L1"));
-        c1.setParentId(0L); c1.setLevel(1); c1.setStatus(1);
-        CategorySaveDTO cdto1 = new CategorySaveDTO();
-        BeanUtils.copyProperties(c1, cdto1);
-        Long l1 = categoryService.save(cdto1);
-
-        Category c2 = new Category();
-        c2.setName(uid("L2"));
-        c2.setParentId(l1); c2.setLevel(2); c2.setStatus(1);
-        CategorySaveDTO cdto2 = new CategorySaveDTO();
-        BeanUtils.copyProperties(c2, cdto2);
-        Long l2 = categoryService.save(cdto2);
-        return new Long[]{l1, l2};
+    /** 创建唯一分类，返回 categoryId */
+    private Long seedCategory() {
+        Category c = new Category();
+        c.setName(uid("CAT"));
+        c.setStatus(1);
+        CategorySaveDTO cdto = new CategorySaveDTO();
+        BeanUtils.copyProperties(c, cdto);
+        return categoryService.save(cdto);
     }
 
     @Test
     void saveSpuWithSkus_persistsAllAndBackfillsIds() {
         assertNotNull(spuService, "RED失败：SpuService 未注册");
         assertNotNull(skuService, "RED失败：SkuService 未注册");
-        Long[] ids = seedCategoryL1L2();
+        Long catId = seedCategory();
 
         SpuSaveDTO dto = new SpuSaveDTO();
         dto.setName(uid("星耀 55 寸 4K 智能电视 Pro"));
-        dto.setCategoryId(ids[0]);
-        dto.setCategory2Id(ids[1]);
+        dto.setCategoryId(catId);
+        
         dto.setSubtitle("量子点 · 超薄全面屏 · 杜比视界");
         dto.setMainImage("https://cdn.example.com/tv-main.jpg");
         dto.setSubImages("https://cdn.example.com/tv-1.jpg;https://cdn.example.com/tv-2.jpg");
@@ -117,10 +109,10 @@ class SpuSkuServiceTest {
     @Test
     void onOffShelf_updatesStatus_andSetsTime() {
         assertNotNull(spuService);
-        Long[] ids = seedCategoryL1L2();
+        Long catId = seedCategory();
         SpuSaveDTO dto = new SpuSaveDTO();
         dto.setName(uid("上下架测试"));
-        dto.setCategoryId(ids[0]); dto.setStatus(1);
+        dto.setCategoryId(catId); dto.setStatus(1);
         dto.setDescriptionMd("# 占位");
         dto.setSkuList(Arrays.asList());
         Long id = spuService.saveWithSkus(dto);
@@ -139,10 +131,10 @@ class SpuSkuServiceTest {
     @Test
     void pageQueryByName_andUpdate() {
         assertNotNull(spuService);
-        Long[] ids = seedCategoryL1L2();
+        Long catId = seedCategory();
         SpuSaveDTO dto = new SpuSaveDTO();
         dto.setName(uid("我是分页SPU"));
-        dto.setCategoryId(ids[0]); dto.setStatus(1);
+        dto.setCategoryId(catId); dto.setStatus(1);
         dto.setDescriptionMd("# x");
         dto.setSkuList(Arrays.asList());
         Long id = spuService.saveWithSkus(dto);
@@ -153,7 +145,7 @@ class SpuSkuServiceTest {
         SpuSaveDTO update = new SpuSaveDTO();
         update.setId(id);
         update.setName(uid("修改后SPU名"));
-        update.setCategoryId(ids[0]); update.setStatus(1);
+        update.setCategoryId(catId); update.setStatus(1);
         update.setDescriptionMd("# 新描述");
         update.setSkuList(Arrays.asList());
         spuService.updateWithSkus(update);
@@ -165,13 +157,13 @@ class SpuSkuServiceTest {
     @Test
     void pageQueryByDto_sortByIdAsc_returnsOrdered() {
         assertNotNull(spuService);
-        Long[] ids = seedCategoryL1L2();
+        Long catId = seedCategory();
         // 注意：sort 设为同一值（覆盖默认的 ORDER BY sort DESC 影响），名字故意乱序以验证排序维度确实生效
         String[] names = {"Z-苹果", "A-香蕉", "M-橙子"};
         for (String n : names) {
             SpuSaveDTO dto = new SpuSaveDTO();
             dto.setName(uid(n));
-            dto.setCategoryId(ids[0]); dto.setCategory2Id(ids[1]); dto.setStatus(1);
+            dto.setCategoryId(catId); dto.setStatus(1);
             dto.setSort(0);
             dto.setDescriptionMd("# x");
             dto.setSkuList(Arrays.asList());
@@ -180,8 +172,8 @@ class SpuSkuServiceTest {
 
         SpuPageQueryDTO dto = new SpuPageQueryDTO();
         dto.setPage(1); dto.setPageSize(20);
-        dto.setCategoryId(ids[0]);     // 仅过滤我们造的，避免库里预置数据干扰
-        dto.setCategory2Id(ids[1]);
+        dto.setCategoryId(catId);     // 仅过滤我们造的，避免库里预置数据干扰
+        
         dto.setSortBy("id");
         dto.setSortOrder("asc");
 
@@ -201,12 +193,12 @@ class SpuSkuServiceTest {
     @Test
     void pageQueryByDto_sortByNameDesc_returnsOrdered() {
         assertNotNull(spuService);
-        Long[] ids = seedCategoryL1L2();
+        Long catId = seedCategory();
         String[] names = {"苹果", "香蕉", "橙子", "草莓"};
         for (String n : names) {
             SpuSaveDTO dto = new SpuSaveDTO();
             dto.setName(uid(n));
-            dto.setCategoryId(ids[0]); dto.setCategory2Id(ids[1]); dto.setStatus(1);
+            dto.setCategoryId(catId); dto.setStatus(1);
             dto.setSort(0);
             dto.setDescriptionMd("# x");
             dto.setSkuList(Arrays.asList());
@@ -215,8 +207,8 @@ class SpuSkuServiceTest {
 
         SpuPageQueryDTO dto = new SpuPageQueryDTO();
         dto.setPage(1); dto.setPageSize(20);
-        dto.setCategoryId(ids[0]);
-        dto.setCategory2Id(ids[1]);
+        dto.setCategoryId(catId);
+        
         dto.setSortBy("name");
         dto.setSortOrder("desc");
 

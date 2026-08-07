@@ -123,6 +123,10 @@ const ORDER_EXPIRE_MINUTES = 15
 const countdowns = reactive({})  // orderId → { remaining, text, expired }
 let countdownTimer = null
 
+/**
+ * 为待付款订单初始化倒计时，计算截止时间并存入 countdowns 响应式对象
+ * @param {Array} list - 订单列表
+ */
 function initCountdowns(list) {
   list.forEach(order => {
     if (order.statusCode === ORDER_STATUS.PENDING && order.createTime) {
@@ -132,6 +136,9 @@ function initCountdowns(list) {
   })
 }
 
+/**
+ * 更新所有待付款订单的倒计时显示文本，并清理已不在列表中的倒计时
+ */
 function updateCountdowns() {
   let changed = false
   const ids = Object.keys(countdowns)
@@ -198,6 +205,9 @@ const STATUS_MAP = {
 function statusText(s) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
 function statusTag(s) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
 
+/**
+ * 加载订单列表，根据当前选中的状态标签页筛选，并初始化倒计时和异步加载售后单
+ */
 async function loadOrders() {
   loading.value = true
   try {
@@ -213,6 +223,9 @@ async function loadOrders() {
   loadAfterSales()
 }
 
+/**
+ * 加载售后单列表，按 orderId 建立映射，加载失败不影响订单展示
+ */
 async function loadAfterSales() {
   try {
     const asRes = await listAfterSales({ page: 1, pageSize: 200 })
@@ -223,6 +236,10 @@ async function loadAfterSales() {
   } catch (e) { /* 售后加载失败不影响订单展示 */ }
 }
 
+/**
+ * 取消指定订单，弹出确认框后调用取消接口
+ * @param {Object} order - 订单对象
+ */
 async function cancel(order) {
   try {
     await ElMessageBox.confirm('确定要取消该订单吗？', '提示', { type: 'warning' })
@@ -237,12 +254,19 @@ const payDialogVisible = ref(false)
 const pendingOrder = ref(null)
 const selectedPayMethod = ref('1')
 
+/**
+ * 打开支付方式选择对话框
+ * @param {Object} order - 待支付的订单对象
+ */
 async function pay(order) {
   pendingOrder.value = order
   selectedPayMethod.value = '1'
   payDialogVisible.value = true
 }
 
+/**
+ * 执行订单支付，调用支付接口并刷新订单列表
+ */
 async function doPay() {
   if (!pendingOrder.value) return
   paying.value = true
@@ -260,6 +284,10 @@ async function doPay() {
   }
 }
 
+/**
+ * 确认收货，弹出确认框后调用确认收货接口
+ * @param {Object} order - 订单对象
+ */
 async function confirm(order) {
   try {
     await ElMessageBox.confirm('确认已收到商品？', '提示', { type: 'warning' })
@@ -269,6 +297,10 @@ async function confirm(order) {
   } catch (e) {}
 }
 
+/**
+ * 永久删除指定订单，弹出二次确认后调用删除接口
+ * @param {Object} order - 订单对象
+ */
 async function handleDelete(order) {
   try {
     await ElMessageBox.confirm(
@@ -302,12 +334,19 @@ function showAfterSale(code) {
   return code === ORDER_STATUS.PAID || code === ORDER_STATUS.SHIPPED || code === ORDER_STATUS.COMPLETED
 }
 
+/**
+ * 打开填写退货物流弹窗
+ * @param {Object} order - 订单对象
+ */
 function openReturn(order) {
   returnOrderId.value = order.id
   returnTracking.value = ''
   returnVisible.value = true
 }
 
+/**
+ * 提交退货物流单号，校验非空后调用接口并刷新订单列表
+ */
 async function submitReturn() {
   if (!returnTracking.value.trim()) {
     ElMessage.warning('请输入快递单号')

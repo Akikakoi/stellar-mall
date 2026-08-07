@@ -4,17 +4,25 @@
       <h1 class="title">注册新账号</h1>
       <p class="subtitle">加入星耀商城，开启购物之旅</p>
       <el-form :model="form" :rules="rules" ref="formRef" label-width="0" class="register-form">
-        <el-form-item prop="phone">
-          <el-input v-model="form.phone" placeholder="请输入手机号" size="large" />
+        <el-form-item prop="email">
+          <el-input v-model="form.email" placeholder="请输入邮箱地址" size="large" />
         </el-form-item>
         <el-form-item prop="nickname">
-          <el-input v-model="form.nickname" placeholder="请输入昵称" size="large" />
+          <el-input v-model="form.nickname" placeholder="请输入昵称（可选）" size="large" />
         </el-form-item>
-        <el-form-item prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" show-password />
-        </el-form-item>
-        <el-form-item prop="confirmPassword">
-          <el-input v-model="form.confirmPassword" type="password" placeholder="请确认密码" size="large" show-password />
+        <el-form-item prop="code">
+          <div class="code-row">
+            <el-input v-model="form.code" placeholder="请输入验证码" size="large" style="flex:1" />
+            <el-button
+              class="code-btn"
+              :disabled="codeCountdown > 0"
+              :loading="sendingCode"
+              @click="sendCode"
+              size="large"
+            >
+              {{ codeCountdown > 0 ? `${codeCountdown}s 后重发` : '获取验证码' }}
+            </el-button>
+          </div>
         </el-form-item>
         <el-button type="primary" size="large" class="submit-btn" :loading="loading" @click="handleRegister">
           注 册
@@ -30,36 +38,71 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { registerUser } from '@/api/mall'
+import { useUserStore } from '@/stores/user'
+import { userRequest } from '@/api/request'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const userStore = useUserStore()
 const formRef = ref(null)
 const loading = ref(false)
+const sendingCode = ref(false)
+const codeCountdown = ref(0)
+let timer = null
 
 const form = reactive({
-  phone: '',
+  email: '',
   nickname: '',
-  password: '',
-  confirmPassword: ''
+  code: ''
 })
 
+const emailRule = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
+
 const rules = {
-  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }],
-  nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '密码至少 6 位', trigger: 'blur' }],
-  confirmPassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
-    {
-      validator: (_rule, value, callback) => {
-        if (value !== form.password) callback(new Error('两次输入密码不一致'))
-        else callback()
-      },
-      trigger: 'blur'
-    }
-  ]
+  email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, emailRule],
+  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
 }
 
+/**
+ * 发送邮箱注册验证码，含 60 秒倒计时
+ * 需先校验邮箱格式
+ */
+async function sendCode() {
+  if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    ElMessage.warning('请输入正确的邮箱地址')
+    return
+  }
+  sendingCode.value = true
+  try {
+    const res = await userRequest({
+      url: '/user/email-code/send',
+      method: 'post',
+      data: { email: form.email, type: 'REGISTER' },
+      __silent: true
+    })
+    if (res && res.devCode) {
+      // 开发模式（未配置 SMTP）：接口直接返回验证码，自动填入并提示
+      form.code = res.devCode
+      ElMessage.success(`开发模式验证码：${res.devCode}（已自动填入）`)
+    } else {
+      ElMessage.success('验证码已发送，请查收邮箱')
+    }
+    codeCountdown.value = 60
+    timer = setInterval(() => {
+      codeCountdown.value--
+      if (codeCountdown.value <= 0) clearInterval(timer)
+    }, 1000)
+  } catch (e) {
+    ElMessage.error('发送失败，请重试')
+  } finally {
+    sendingCode.value = false
+  }
+}
+
+/**
+ * 处理注册提交：邮箱验证码校验通过后自动注册并登录，
+ * 若填写了昵称则同步更新
+ */
 async function handleRegister() {
   if (!formRef.value) return
   try {
@@ -69,13 +112,20 @@ async function handleRegister() {
   }
   loading.value = true
   try {
-    await registerUser({
-      phone: form.phone,
-      nickname: form.nickname,
-      password: form.password
-    })
-    ElMessage.success('注册成功，请登录')
-    router.push('/login')
+    await userStore.emailLogin({ email: form.email, type: 'REGISTER', code: form.code })
+    if (form.nickname) {
+      try {
+        await userRequest({
+          url: '/user/user/profile',
+          method: 'put',
+          data: { nickname: form.nickname }
+        })
+      } catch (e) {
+        // 昵称更新失败不阻断注册流程
+      }
+    }
+    ElMessage.success('注册成功')
+    router.push('/')
   } catch (e) {
     // error shown
   } finally {
@@ -118,6 +168,13 @@ async function handleRegister() {
   color: var(--text-secondary);
   font-size: 15px;
   margin-bottom: 40px;
+}
+
+.code-row { display: flex; gap: 10px; }
+.code-btn {
+  white-space: nowrap;
+  min-width: 120px;
+  font-size: 14px;
 }
 
 .submit-btn {

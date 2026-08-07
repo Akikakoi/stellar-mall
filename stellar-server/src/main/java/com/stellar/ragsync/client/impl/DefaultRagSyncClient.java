@@ -103,7 +103,7 @@ public class DefaultRagSyncClient implements RagSyncClient {
         m.put("name", nvl(spu.getName()));
         m.put("subtitle", nvl(spu.getSubTitle()));
 
-        // category_path: 用已有的分类名拼成 "一级 > 二级" 路径字符串
+        // category_path: 分类名称
         String catPath = buildCategoryPath(spu);
         if (catPath != null) m.put("category_path", catPath);
 
@@ -134,10 +134,7 @@ public class DefaultRagSyncClient implements RagSyncClient {
 
     private String buildCategoryPath(Spu spu) {
         String c1 = nvl(spu.getCategoryName());
-        String c2 = nvl(spu.getCategory2Name());
-        if (c1.isEmpty()) return null;
-        if (c2.isEmpty()) return c1;
-        return c1 + " > " + c2;
+        return c1.isEmpty() ? null : c1;
     }
 
     /**

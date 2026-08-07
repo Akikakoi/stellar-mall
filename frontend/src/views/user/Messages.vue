@@ -56,6 +56,11 @@ const pageSize = ref(20)
 
 const hasUnread = computed(() => list.value.some(m => m.isRead === 0))
 
+/**
+ * 根据消息类型返回对应的 Element Plus Tag 样式
+ * @param {string} type - 消息类型
+ * @returns {string} Tag 类型
+ */
 function tagType(type) {
   if (type === 'ORDER_SHIPPED' || type === 'AFTER_SALE_APPROVED' || type === 'AFTER_SALE_COMPLETED') return 'success'
   if (type === 'ORDER_CANCELLED' || type === 'AFTER_SALE_REJECTED') return 'danger'
@@ -63,6 +68,11 @@ function tagType(type) {
   return 'info'
 }
 
+/**
+ * 根据消息类型返回对应的中文标签
+ * @param {string} type - 消息类型
+ * @returns {string} 中文标签
+ */
 function typeLabel(type) {
   const map = {
     ORDER_SHIPPED: '发货通知',
@@ -76,6 +86,9 @@ function typeLabel(type) {
   return map[type] || type || '系统消息'
 }
 
+/**
+ * 加载消息列表，分页查询
+ */
 async function load() {
   try {
     const res = await listMessages({ page: pageNum.value, pageSize: pageSize.value })
@@ -85,6 +98,10 @@ async function load() {
   } catch (e) { /* */ }
 }
 
+/**
+ * 标记单条消息为已读，并更新未读角标
+ * @param {Object} m - 消息对象
+ */
 async function acknowledge(m) {
   if (m.isRead === 1) return
   try {
@@ -97,6 +114,9 @@ async function acknowledge(m) {
   }
 }
 
+/**
+ * 将所有未读消息标记为已读，并更新未读角标
+ */
 async function readAll() {
   try {
     await markAllMessagesRead()
