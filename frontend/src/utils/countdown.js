@@ -1,10 +1,23 @@
 import { ref, onUnmounted } from 'vue'
 
 /**
- * 订单倒计时：计算从 createTime 开始的过期倒计时。
- * @param {string} createTime - 订单创建时间（ISO 或后端格式字符串）
- * @param {number} expireMinutes - 过期分钟数，默认 15
- * @returns {{ remaining: import('vue').Ref<number>, remainingText: import('vue').Ref<string>, expired: import('vue').Ref<boolean> }}
+ * 订单倒计时组合式函数。
+ * 根据订单创建时间和过期时长，计算剩余时间并自动更新。
+ * 需要手动调用返回的 start() 方法启动倒计时，组件卸载时自动停止。
+ * @param {string|number} createTime - 订单创建时间（ISO 字符串或时间戳）
+ * @param {number} [expireMinutes=15] - 过期分钟数
+ * @returns {{
+ *   remaining: import('vue').Ref<number>,
+ *   remainingText: import('vue').Ref<string>,
+ *   expired: import('vue').Ref<boolean>,
+ *   start: () => void,
+ *   stop: () => void
+ * }} 倒计时相关状态与控制方法
+ *   - remaining: 剩余秒数
+ *   - remainingText: 格式化后的剩余时间文本（如 "14:32"），超时时显示"已超时"
+ *   - expired: 是否已超时
+ *   - start: 启动倒计时
+ *   - stop: 停止倒计时
  */
 export function useOrderCountdown(createTime, expireMinutes = 15) {
   const remaining = ref(0)         // 剩余秒数
@@ -40,11 +53,17 @@ export function useOrderCountdown(createTime, expireMinutes = 15) {
     }
   }
 
+  /**
+   * 启动倒计时（立即执行一次 tick，然后每秒更新）。
+   */
   function start() {
     tick()
     timer = setInterval(tick, 1000)
   }
 
+  /**
+   * 停止倒计时，清除定时器。
+   */
   function stop() {
     if (timer) {
       clearInterval(timer)

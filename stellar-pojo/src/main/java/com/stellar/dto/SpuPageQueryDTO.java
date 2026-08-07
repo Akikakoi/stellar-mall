@@ -20,11 +20,8 @@ public class SpuPageQueryDTO implements Serializable {
     @ApiModelProperty("SPU 名模糊")
     private String name;
 
-    @ApiModelProperty("一级分类 id")
+    @ApiModelProperty("分类 id")
     private Long categoryId;
-
-    @ApiModelProperty("二级分类 id")
-    private Long category2Id;
 
     @ApiModelProperty("1 上架 0 下架")
     private Integer status;

@@ -29,15 +29,15 @@ public interface SpuService {
 
     /** 分页查询（简化版，供测试/历史代码调用：仅 name+分类+状态）。 */
     default PageResult pageQuery(Integer page, Integer pageSize, String name,
-                                 Long categoryId, Long category2Id,
+                                 Long categoryId,
                                  Integer status) {
-        return pageQuery(page, pageSize, name, categoryId, category2Id,
+        return pageQuery(page, pageSize, name, categoryId,
                 status, null, null, null, null);
     }
 
     /** 分页查询。注意：DTO 里的字段为 null 时表示不过滤。 */
     PageResult pageQuery(Integer page, Integer pageSize, String name,
-                         Long categoryId, Long category2Id,
+                         Long categoryId,
                          Integer status, Integer isNew, Integer isHot,
                          BigDecimal priceFrom, BigDecimal priceTo);
 
@@ -45,7 +45,7 @@ public interface SpuService {
     default PageResult pageQueryByDto(SpuPageQueryDTO dto) {
         if (dto == null) dto = new SpuPageQueryDTO();
         return pageQuery(dto.getPage(), dto.getPageSize(), dto.getName(),
-                dto.getCategoryId(), dto.getCategory2Id(),
+                dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
                 dto.getPriceFrom(), dto.getPriceTo());
     }

@@ -57,10 +57,12 @@ const favorites = ref([])
 const LAYOUT_KEY = 'stellar_fav_cols'
 const colsPerRow = ref(Number(localStorage.getItem(LAYOUT_KEY)) || 4)
 
+/** 将每行显示列数偏好保存到 localStorage */
 function saveLayout() {
   localStorage.setItem(LAYOUT_KEY, colsPerRow.value)
 }
 
+/** 加载用户收藏的商品列表 */
 async function loadFavorites() {
   loading.value = true
   try {
@@ -73,11 +75,19 @@ async function loadFavorites() {
   }
 }
 
+/**
+ * 在新标签页中打开商品详情页
+ * @param {number} spuId - 商品 SPU ID
+ */
 function goDetail(spuId) {
   const route = router.resolve(`/spu/${spuId}`)
   window.open(route.href, '_blank')
 }
 
+/**
+ * 确认后取消收藏指定商品，从列表中移除
+ * @param {Object} item - 收藏项对象
+ */
 async function handleRemove(item) {
   try {
     await ElMessageBox.confirm(`确定取消收藏「${item.spuName}」？`, '提示', {

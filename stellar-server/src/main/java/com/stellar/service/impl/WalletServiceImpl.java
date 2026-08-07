@@ -24,6 +24,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 钱包服务实现类。
+ * <p>
+ * 提供钱包账户管理、充值、支付、退款及交易流水查询等核心功能，
+ * 余额变更采用乐观锁机制保证并发安全。
+ * </p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,6 +41,13 @@ public class WalletServiceImpl implements WalletService {
 
     // -------- 获取或创建钱包 --------
 
+    /**
+     * 获取或创建用户钱包。
+     * 若用户尚无钱包则自动创建，初始余额为零。
+     *
+     * @param userId 用户ID
+     * @return 钱包信息视图对象
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public WalletVO getOrCreateWallet(Long userId) {
@@ -55,6 +69,14 @@ public class WalletServiceImpl implements WalletService {
 
     // -------- 模拟充值 --------
 
+    /**
+     * 模拟钱包充值。
+     * 使用乐观锁增加余额，并记录充值交易流水。
+     *
+     * @param userId 用户ID
+     * @param dto    充值请求参数，包含金额和渠道
+     * @return 充值后的钱包信息视图对象
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public WalletVO recharge(Long userId, WalletRechargeDTO dto) {
@@ -96,6 +118,13 @@ public class WalletServiceImpl implements WalletService {
 
     // -------- 钱包支付 --------
 
+    /**
+     * 使用钱包余额支付订单。
+     * 校验订单状态、余额是否充足，通过乐观锁扣减余额并更新订单状态为已支付。
+     *
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void payByWallet(Long userId, Long orderId) {
@@ -153,6 +182,14 @@ public class WalletServiceImpl implements WalletService {
 
     // -------- 退款到钱包 --------
 
+    /**
+     * 退款到用户钱包。
+     * 使用乐观锁增加余额，最多重试3次以应对并发冲突，并记录退款交易流水。
+     *
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     * @param amount  退款金额
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void refundToWallet(Long userId, Long orderId, BigDecimal amount) {
@@ -198,6 +235,14 @@ public class WalletServiceImpl implements WalletService {
 
     // -------- 交易流水 --------
 
+    /**
+     * 分页查询用户钱包交易流水。
+     *
+     * @param userId   用户ID
+     * @param page     当前页码（从1开始）
+     * @param pageSize 每页记录数
+     * @return 分页结果，包含交易流水视图对象列表
+     */
     @Override
     public PageResult pageTransactions(Long userId, int page, int pageSize) {
         int offset = (page - 1) * pageSize;

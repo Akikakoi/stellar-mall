@@ -5,12 +5,10 @@ import com.github.pagehelper.PageHelper;
 import com.stellar.constant.MessageConstant;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.dto.SpuSaveDTO;
-import com.stellar.entity.Category;
 import com.stellar.entity.Sku;
 import com.stellar.entity.Spu;
 import com.stellar.exception.BaseException;
 import com.stellar.elasticsearch.event.SpuChangedEvent;
-import com.stellar.mapper.CategoryMapper;
 import com.stellar.mapper.SkuMapper;
 import com.stellar.mapper.SpuMapper;
 import com.stellar.ragsync.service.RagSyncService;
@@ -31,6 +29,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * SPU（标准产品单元）服务实现类。
+ * <p>
+ * 提供 SPU 的增删改查、上下架、批量上下架、分页查询、SKU 聚合刷新等核心功能。
+ * 每个 SPU 下可嵌套多个 SKU，保存/更新时支持自动生成默认 SKU。
+ * 变更操作会同步触发 RAG 索引队列和 Elasticsearch 同步事件。
+ * </p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -38,11 +44,21 @@ public class SpuServiceImpl implements SpuService {
 
     private final SpuMapper spuMapper;
     private final SkuMapper skuMapper;
-    private final CategoryMapper categoryMapper;
     private final RagSyncService ragSyncService;
     private final ApplicationEventPublisher eventPublisher;
 
     // ================= 保存 =================
+
+    /**
+     * 保存 SPU 及其嵌套的 SKU 列表。
+     * <p>
+     * 若前端未传 skuList 但传了 price，会自动生成一条默认 SKU；保存完成后从 SKU 聚合
+     * 价格、库存等数据回写 SPU，并触发 RAG 同步和 ES 事件。
+     * </p>
+     *
+     * @param dto SPU 保存请求
+     * @return 新创建的 SPU ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "spu:detail", key = "#result")
@@ -51,8 +67,6 @@ public class SpuServiceImpl implements SpuService {
         if (dto.getCategoryId() == null) {
             throw new BaseException(MessageConstant.ILLEGAL_PARAMETER);
         }
-        // 校验二级分类归属一级分类
-        validateCategoryRelation(dto.getCategoryId(), dto.getCategory2Id());
 
         Spu spu = new Spu();
         BeanUtils.copyProperties(dto, spu);
@@ -123,6 +137,12 @@ public class SpuServiceImpl implements SpuService {
         return spuId;
     }
 
+    /**
+     * 根据 ID 查询 SPU 及其关联的 SKU 列表（按 sort 排序），结果会被缓存。
+     *
+     * @param id SPU ID
+     * @return SPU 实体（含 SKU 列表），不存在则返回 null
+     */
     @Override
     @Cacheable(value = "spu:detail", key = "#id", unless = "#result == null")
     public Spu getById(Long id) {
@@ -140,16 +160,22 @@ public class SpuServiceImpl implements SpuService {
         return s;
     }
 
+    /**
+     * 更新 SPU 及其嵌套的 SKU 列表（先删后插覆盖式更新）。
+     * <p>
+     * 若前端未传 skuList 但传了 price，会自动生成一条默认 SKU 覆盖原有 SKU；
+     * 若 skuList 为空且 price 也为空，则保留原有 SKU 不变。
+     * 更新完成后会清除缓存、刷新聚合数据并触发 RAG/ES 同步。
+     * </p>
+     *
+     * @param dto SPU 更新请求（必须包含 id）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "spu:detail", key = "#dto.id")
     public void updateWithSkus(SpuSaveDTO dto) {
         if (dto == null || dto.getId() == null) {
             throw new BaseException(MessageConstant.ILLEGAL_PARAMETER);
-        }
-        // 校验二级分类归属一级分类（仅当传了 category2Id 时）
-        if (dto.getCategoryId() != null && dto.getCategory2Id() != null) {
-            validateCategoryRelation(dto.getCategoryId(), dto.getCategory2Id());
         }
         Spu old = spuMapper.getById(dto.getId());
         if (old == null) throw new BaseException(MessageConstant.SPU_NOT_FOUND);
@@ -209,6 +235,16 @@ public class SpuServiceImpl implements SpuService {
         eventPublisher.publishEvent(SpuChangedEvent.saved(dto.getId()));
     }
 
+    /**
+     * 单个 SPU 上架/下架操作。
+     * <p>
+     * 上架时记录上架时间，下架时记录下架时间，并触发 RAG 同步和 ES 事件。
+     * 若当前状态与目标状态一致则直接返回，不做重复操作。
+     * </p>
+     *
+     * @param id     SPU ID
+     * @param status 目标状态：1-上架，0-下架
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void onOffShelf(Long id, Integer status) {
@@ -232,6 +268,12 @@ public class SpuServiceImpl implements SpuService {
         eventPublisher.publishEvent(SpuChangedEvent.saved(id));
     }
 
+    /**
+     * 批量上架/下架操作，遍历调用 {@link #onOffShelf(Long, Integer)}。
+     *
+     * @param ids    SPU ID 列表
+     * @param status 目标状态：1-上架，0-下架
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void batchOnOffShelf(List<Long> ids, Integer status) {
@@ -243,6 +285,11 @@ public class SpuServiceImpl implements SpuService {
         }
     }
 
+    /**
+     * 删除 SPU 及其关联的所有 SKU，清除缓存并触发 RAG/ES 删除同步。
+     *
+     * @param id SPU ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = "spu:detail", key = "#id")
@@ -259,55 +306,55 @@ public class SpuServiceImpl implements SpuService {
         eventPublisher.publishEvent(SpuChangedEvent.deleted(id));
     }
 
+    /**
+     * 多条件分页查询 SPU 列表。
+     *
+     * @param page        页码（从 1 开始）
+     * @param pageSize    每页大小
+     * @param name        商品名称（模糊匹配）
+     * @param categoryId  分类 ID
+     * @param status      状态：1-上架，0-下架
+     * @param isNew       是否新品
+     * @param isHot       是否热销
+     * @param priceFrom   价格区间下限
+     * @param priceTo     价格区间上限
+     * @return 分页结果
+     */
     @Override
     public PageResult pageQuery(Integer page, Integer pageSize, String name,
-                                Long categoryId, Long category2Id,
+                                Long categoryId,
                                 Integer status, Integer isNew, Integer isHot,
                                 BigDecimal priceFrom, BigDecimal priceTo) {
         int p = (page == null || page < 1) ? 1 : page;
         int ps = (pageSize == null || pageSize < 1) ? 10 : pageSize;
         List<Spu> list = spuMapper.page((p - 1) * ps, ps, name,
-                categoryId, category2Id, status, isNew, isHot, priceFrom, priceTo,
+                categoryId, null, status, isNew, isHot, priceFrom, priceTo,
                 null, null);
-        long total = spuMapper.count(name, categoryId, category2Id,
+        long total = spuMapper.count(name, categoryId, null,
                 status, isNew, isHot, priceFrom, priceTo);
         return new PageResult(total, list == null ? new ArrayList<>() : list);
     }
 
-    /** DTO 版本分页：带 sortBy/sortOrder（白名单排序，Mapper XML 内部二次校验）。 */
+    /**
+     * DTO 版本分页查询，支持白名单排序（sortBy/sortOrder 由 Mapper XML 内部二次校验）。
+     *
+     * @param dto 分页查询参数
+     * @return 分页结果
+     */
     @Override
     public PageResult pageQueryByDto(SpuPageQueryDTO dto) {
         if (dto == null) dto = new SpuPageQueryDTO();
         int p = (dto.getPage() == null || dto.getPage() < 1) ? 1 : dto.getPage();
         int ps = (dto.getPageSize() == null || dto.getPageSize() < 1) ? 10 : dto.getPageSize();
         List<Spu> list = spuMapper.page((p - 1) * ps, ps,
-                dto.getName(), dto.getCategoryId(), dto.getCategory2Id(),
+                dto.getName(), dto.getCategoryId(), null,
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
                 dto.getPriceFrom(), dto.getPriceTo(),
                 dto.getSortBy(), dto.getSortOrder());
-        long total = spuMapper.count(dto.getName(), dto.getCategoryId(), dto.getCategory2Id(),
+        long total = spuMapper.count(dto.getName(), dto.getCategoryId(), null,
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
                 dto.getPriceFrom(), dto.getPriceTo());
         return new PageResult(total, list == null ? new ArrayList<>() : list);
-    }
-
-    // ================= 内部：校验分类归属 =================
-    /**
-     * 校验 category2Id（二级分类）的 parentId 是否等于 categoryId（一级分类），
-     * 防止商品被错误地挂到不属于的父分类下。
-     */
-    private void validateCategoryRelation(Long categoryId, Long category2Id) {
-        if (category2Id == null) return; // 未设二级分类，不校验
-        Category subCategory = categoryMapper.getById(category2Id);
-        if (subCategory == null) {
-            throw new BaseException("二级分类不存在（id=" + category2Id + "）");
-        }
-        if (subCategory.getLevel() == null || subCategory.getLevel() != 2) {
-            throw new BaseException("category2Id 必须指向二级分类（id=" + category2Id + "）");
-        }
-        if (subCategory.getParentId() == null || !subCategory.getParentId().equals(categoryId)) {
-            throw new BaseException("二级分类（" + subCategory.getName() + "）不属于所选的一级分类");
-        }
     }
 
     // ================= 内部：聚合 SKU 回写 SPU =================

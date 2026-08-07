@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * 购物车服务实现类，提供购物车的添加、查询、更新、删除和清空功能。
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,12 @@ public class CartServiceImpl implements CartService {
     private final SkuMapper skuMapper;
     private final SpuMapper spuMapper;
 
+    /**
+     * 添加商品到购物车。若已存在相同 SKU 则累加数量，否则新增记录。
+     *
+     * @param userId 用户ID
+     * @param dto    添加购物车请求参数
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void add(Long userId, CartAddDTO dto) {
@@ -64,6 +73,12 @@ public class CartServiceImpl implements CartService {
         }
     }
 
+    /**
+     * 查询用户购物车列表，包含 SKU 和 SPU 详细信息。
+     *
+     * @param userId 用户ID
+     * @return 购物车商品列表
+     */
     @Override
     public List<CartVO> list(Long userId) {
         Long uid = userId != null ? userId : 0L;
@@ -107,6 +122,12 @@ public class CartServiceImpl implements CartService {
         return res;
     }
 
+    /**
+     * 更新购物车记录，支持修改数量和选中状态。
+     *
+     * @param userId 用户ID
+     * @param dto    更新请求参数
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(Long userId, CartUpdateDTO dto) {
@@ -135,6 +156,12 @@ public class CartServiceImpl implements CartService {
         if (changed) cartMapper.update(upd);
     }
 
+    /**
+     * 删除指定购物车记录，仅允许删除自己的记录。
+     *
+     * @param userId 用户ID
+     * @param cartId 购物车记录ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long userId, Long cartId) {
@@ -146,6 +173,11 @@ public class CartServiceImpl implements CartService {
         cartMapper.deleteById(cartId);
     }
 
+    /**
+     * 清空用户购物车中所有商品。
+     *
+     * @param userId 用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void clear(Long userId) {

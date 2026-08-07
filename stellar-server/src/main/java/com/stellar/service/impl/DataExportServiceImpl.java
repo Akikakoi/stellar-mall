@@ -18,6 +18,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 数据导出服务实现。
+ *
+ * <p>支持将订单、用户、财务报表等数据导出为 Excel 字节流，
+ * 使用 Apache POI 生成 .xlsx 格式文件。</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -44,6 +50,14 @@ public class DataExportServiceImpl implements DataExportService {
             "COMPLETED", "已完成", "CANCELLED", "已取消", "REFUNDED", "已退款"
     );
 
+    /**
+     * 导出订单数据为 Excel 字节流。
+     *
+     * @param status    订单状态筛选（可为 null 表示全部）
+     * @param startTime 开始时间（可为 null）
+     * @param endTime   结束时间（可为 null）
+     * @return Excel 文件的字节数组
+     */
     @Override
     public byte[] exportOrders(String status, String startTime, String endTime) {
         List<MallOrder> orders = orderMapper.listAllForExport(status, startTime, endTime);
@@ -75,6 +89,11 @@ public class DataExportServiceImpl implements DataExportService {
         }
     }
 
+    /**
+     * 导出全部用户数据为 Excel 字节流。
+     *
+     * @return Excel 文件的字节数组
+     */
     @Override
     public byte[] exportUsers() {
         List<MallUser> users = userMapper.listAllForExport();
@@ -103,6 +122,15 @@ public class DataExportServiceImpl implements DataExportService {
         }
     }
 
+    /**
+     * 导出指定年份的财务报表为 Excel 字节流。
+     *
+     * <p>按月份汇总订单数、销售额、实收金额、退款订单数和退款金额，
+     * 并在末尾附加合计行。</p>
+     *
+     * @param year 年份（如 "2024"），为 null 或空时默认使用当前年份
+     * @return Excel 文件的字节数组
+     */
     @Override
     public byte[] exportFinanceReport(String year) {
         if (year == null || year.isEmpty()) {

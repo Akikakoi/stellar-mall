@@ -9,6 +9,7 @@ public class MessageConstant {
     public static final String ILLEGAL_PARAMETER = "参数非法";
     public static final String LOGIN_FAILED = "登录失败，用户名或密码错误";
     public static final String ACCOUNT_LOCKED = "账号已被锁定";
+    public static final String ACCOUNT_CLOSED = "账号已注销，无法登录";
     public static final String ACCOUNT_NOT_FOUND = "账号不存在";
     public static final String PASSWORD_ERROR = "密码错误";
     public static final String UNAUTHORIZED = "未登录或登录已过期";

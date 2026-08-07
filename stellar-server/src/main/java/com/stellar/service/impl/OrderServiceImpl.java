@@ -32,6 +32,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * 订单服务实现类。
+ * <p>
+ * 提供订单的完整生命周期管理，包括：购物车下单、直接购买、支付、取消、发货、
+ * 确认收货、删除、退款处理以及过期订单自动取消等功能。
+ * </p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -52,6 +59,14 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 提交订单 --------
 
+    /**
+     * 从购物车提交订单。
+     * 校验用户已勾选的购物车项，锁定库存，创建订单并清理购物车。
+     *
+     * @param userId 用户ID
+     * @param dto    订单提交参数（地址、支付方式、备注、优惠券、积分抵扣等）
+     * @return 创建成功的订单对象
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MallOrder submit(Long userId, OrderSubmitDTO dto) {
@@ -73,6 +88,15 @@ public class OrderServiceImpl implements OrderService {
                 dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount());
     }
 
+    /**
+     * 直接购买下单（不经过购物车）。
+     * 根据前端传入的商品项直接构建订单行，锁定库存并创建订单。
+     * 默认会清理用户已勾选的购物车项，可通过 {@code dto.clearCart} 控制。
+     *
+     * @param userId 用户ID
+     * @param dto    订单提交参数（含商品项列表、地址、支付方式等）
+     * @return 创建成功的订单对象
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public MallOrder submitDirect(Long userId, OrderSubmitDTO dto) {
@@ -317,6 +341,15 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 模拟支付 --------
 
+    /**
+     * 模拟支付订单。
+     * 仅待付款状态的订单可支付。支持钱包支付（payMethod=4）和其他模拟支付方式。
+     * 支付成功后累加销量、消费积分、发放奖励积分。
+     *
+     * @param orderId   订单ID
+     * @param userId    用户ID
+     * @param payMethod 支付方式（1-微信 2-支付宝 3-银行卡 4-钱包）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void pay(Long orderId, Long userId, Integer payMethod) {
@@ -400,6 +433,13 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 取消订单（逐条 rollback 库存）。仅 PENDING 待付款可取消；PAID 退款需走售后审批单独流程 --------
 
+    /**
+     * 取消订单（用户端）。
+     * 仅待付款状态的订单可取消。逐条回滚库存，解冻积分，退还优惠券。
+     *
+     * @param orderId 订单ID
+     * @param userId  用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long orderId, Long userId) {
@@ -428,6 +468,14 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 管理端发货 --------
 
+    /**
+     * 管理端发货。
+     * 仅已支付状态的订单可发货。更新物流信息，自动发送发货通知和异步短信/邮件通知。
+     *
+     * @param orderId         订单ID
+     * @param trackingNo      快递单号
+     * @param deliveryCompany 快递公司
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void ship(Long orderId, String trackingNo, String deliveryCompany) {
@@ -460,6 +508,18 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 管理端分页查询 --------
 
+    /**
+     * 管理端分页查询订单列表。
+     * 支持按状态、订单号、时间范围筛选。
+     *
+     * @param page      页码（从1开始）
+     * @param pageSize  每页条数
+     * @param status    订单状态筛选（后端字符串值）
+     * @param orderNo   订单号筛选
+     * @param startTime 开始时间
+     * @param endTime   结束时间
+     * @return 分页结果
+     */
     @Override
     public com.stellar.result.PageResult pageOrders(int page, int pageSize, String status, String orderNo,
                                                     String startTime, String endTime) {
@@ -472,6 +532,12 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 管理端删除订单 --------
 
+    /**
+     * 管理端删除订单。
+     * 仅已完成或已取消状态的订单可删除，同时删除订单明细。
+     *
+     * @param orderId 订单ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteOrder(Long orderId) {
@@ -488,6 +554,13 @@ public class OrderServiceImpl implements OrderService {
         mallOrderMapper.deleteById(orderId);
     }
 
+    /**
+     * 用户端删除订单。
+     * 校验订单归属，仅已完成或已取消状态的订单可删除，同时删除订单明细。
+     *
+     * @param orderId 订单ID
+     * @param userId  用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteOrder(Long orderId, Long userId) {
@@ -503,6 +576,14 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 订单详情/列表 --------
 
+    /**
+     * 查询订单详情。
+     * 校验订单归属，返回含订单项明细和 SPU 主图的订单 VO。
+     *
+     * @param orderId 订单ID
+     * @param userId  用户ID
+     * @return 订单详情 VO
+     */
     @Override
     public MallOrderVO getDetail(Long orderId, Long userId) {
         MallOrder order = requireOrder(orderId, userId);
@@ -512,11 +593,25 @@ public class OrderServiceImpl implements OrderService {
         return toOrderVO(order, items, imageMap);
     }
 
+    /**
+     * 查询用户全部订单列表。
+     *
+     * @param userId 用户ID
+     * @return 订单 VO 列表，userId 为空时返回空列表
+     */
     @Override
     public List<MallOrderVO> listByUser(Long userId) {
         return listByUser(userId, null);
     }
 
+    /**
+     * 按状态查询用户订单列表。
+     * 前端数字状态码会转换为后端字符串状态进行筛选。
+     *
+     * @param userId     用户ID
+     * @param statusCode 前端数字状态码（0-6），为 null 时查询全部
+     * @return 订单 VO 列表
+     */
     @Override
     public List<MallOrderVO> listByUser(Long userId, Integer statusCode) {
         if (userId == null) return Collections.emptyList();
@@ -539,6 +634,13 @@ public class OrderServiceImpl implements OrderService {
         return status == null ? null : status.getBackendValue();
     }
 
+    /**
+     * 用户确认收货。
+     * 仅已发货状态的订单可确认收货，确认后订单状态变为已完成，并发送异步短信通知。
+     *
+     * @param orderId 订单ID
+     * @param userId  用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void confirm(Long orderId, Long userId) {
@@ -672,6 +774,12 @@ public class OrderServiceImpl implements OrderService {
 
     // -------- 退款相关（供售后模块调用） --------
 
+    /**
+     * 标记订单为退款中状态。
+     * 供售后模块调用，将订单状态更新为退款中。
+     *
+     * @param orderId 订单ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void markRefunding(Long orderId) {
@@ -679,6 +787,12 @@ public class OrderServiceImpl implements OrderService {
         log.info("[OrderService] 订单 {} 售后申请已提交，状态标记为退款中", orderId);
     }
 
+    /**
+     * 完成退款处理。
+     * 回滚订单项库存，将订单标记为已退款。已取消的订单不可退款。
+     *
+     * @param orderId 订单ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void completeRefund(Long orderId) {
@@ -726,6 +840,14 @@ public class OrderServiceImpl implements OrderService {
     /** 订单过期时间（分钟） */
     private static final int ORDER_EXPIRE_MINUTES = 15;
 
+    /**
+     * 自动取消过期订单。
+     * 扫描超出 {@value #ORDER_EXPIRE_MINUTES} 分钟未支付的待付款订单并逐个取消，
+     * 包括回滚库存、解冻积分、退还优惠券。
+     *
+     * @param limit 最大取消数量
+     * @return 实际取消的订单数
+     */
     @Override
     public int cancelExpiredOrders(int limit) {
         java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusMinutes(ORDER_EXPIRE_MINUTES);

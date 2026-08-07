@@ -13,14 +13,12 @@
 -- ============================================================
 
 -- ------------------------------------------------------------
--- 1. 分类表（商品分类 / 售后分类，最多 2 级）
+-- 1. 分类表（商品分类 / 售后分类）
 -- ------------------------------------------------------------
 DROP TABLE IF EXISTS stellar_category;
 CREATE TABLE stellar_category (
     id            BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
     name          VARCHAR(32)   NOT NULL                COMMENT '分类名称',
-    parent_id     BIGINT        NOT NULL DEFAULT 0      COMMENT '父分类 id，0=顶级',
-    level         TINYINT       NOT NULL DEFAULT 1      COMMENT '层级：1=顶级，2=二级',
     type          TINYINT       NOT NULL DEFAULT 1      COMMENT '类型：1 商品分类，2 售后分类',
     sort          INT           NOT NULL DEFAULT 0      COMMENT '排序，越大越靠前',
     status        TINYINT       NOT NULL DEFAULT 1      COMMENT '状态：1 启用，0 禁用',
@@ -29,10 +27,8 @@ CREATE TABLE stellar_category (
     update_time   DATETIME      NOT NULL                COMMENT '更新时间',
     update_user   BIGINT        NOT NULL                COMMENT '更新人',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_category_parent_name_type (parent_id, name, type),
-    KEY idx_category_parent (parent_id),
-    KEY idx_category_level (level)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品/售后分类表（最多 2 级）';
+    UNIQUE KEY uk_category_name_type (name, type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='商品/售后分类表';
 
 
 -- ------------------------------------------------------------
@@ -120,8 +116,7 @@ CREATE TABLE stellar_spu (
     id              BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
     name            VARCHAR(128)  NOT NULL                COMMENT 'SPU 名称',
     sub_title       VARCHAR(255)  DEFAULT NULL            COMMENT '副标题/卖点一句话',
-    category_id     BIGINT        NOT NULL                COMMENT '一级分类 ID',
-    category2_id    BIGINT        DEFAULT NULL            COMMENT '二级分类 ID',
+    category_id     BIGINT        NOT NULL                COMMENT '分类 ID',
     description     MEDIUMTEXT    DEFAULT NULL            COMMENT '商品详情长文本（HTML/富文本，可选）',
     description_md  MEDIUMTEXT    DEFAULT NULL            COMMENT '商品详情 Markdown —— 主要同步给 RAG 知识库',
     main_image      VARCHAR(255)  NOT NULL DEFAULT ''     COMMENT '主图 URL',
@@ -144,7 +139,7 @@ CREATE TABLE stellar_spu (
     update_time     DATETIME      NOT NULL                COMMENT '更新时间',
     update_user     BIGINT        NOT NULL                COMMENT '更新人',
     PRIMARY KEY (id),
-    KEY idx_spu_category (category_id, category2_id),
+    KEY idx_spu_category (category_id),
     KEY idx_spu_status (status),
     KEY idx_spu_sort (sort)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='SPU标准产品单元';
@@ -537,54 +532,54 @@ INSERT INTO stellar_shop_settings (id, shop_status, notice, customer_service_pho
  NOW(), 0, NOW(), 0);
 
 -- 6 个精简分类（对应 6 个 SPU 大类）
-INSERT INTO stellar_category (id, name, parent_id, level, type, sort, status, create_time, create_user, update_time, update_user) VALUES
-(1, '智能手机',     0, 1, 1, 1, 1, NOW(), 1, NOW(), 1),
-(2, '家用电冰箱',   0, 1, 1, 2, 1, NOW(), 1, NOW(), 1),
-(3, '家用空调',     0, 1, 1, 3, 1, NOW(), 1, NOW(), 1),
-(4, '笔记本电脑',   0, 1, 1, 4, 1, NOW(), 1, NOW(), 1),
-(5, '平板电视',     0, 1, 1, 5, 1, NOW(), 1, NOW(), 1),
-(6, '智能影音',     0, 1, 1, 6, 1, NOW(), 1, NOW(), 1),
-(7, '售后分类-退款', 0, 1, 2, 99,1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_category (id, name, type, sort, status, create_time, create_user, update_time, update_user) VALUES
+(1, '智能手机',   1, 1, 1, NOW(), 1, NOW(), 1),
+(2, '家用电冰箱', 1, 2, 1, NOW(), 1, NOW(), 1),
+(3, '家用空调',   1, 3, 1, NOW(), 1, NOW(), 1),
+(4, '笔记本电脑', 1, 4, 1, NOW(), 1, NOW(), 1),
+(5, '平板电视',   1, 5, 1, NOW(), 1, NOW(), 1),
+(6, '智能影音',   1, 6, 1, NOW(), 1, NOW(), 1),
+(7, '售后分类-退款', 2, 99, 1, NOW(), 1, NOW(), 1);
 
 -- ============================================================
 -- 6 SPU 精简版样例数据 + 对应 1-2 个 SKU（M1 精简版够用）
 -- ============================================================
-INSERT INTO stellar_spu (id, name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (id, name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 (1, '星耀 X100 Pro 旗舰手机', '骁龙 8 至尊版 · 徕卡三摄 · IP68',
-    1, NULL,
+    1,
     '# 星耀 X100 Pro\n\n## 核心性能\n- 骁龙 8 至尊版 4nm 工艺\n- 12GB LPDDR5X + 1TB UFS 4.1\n## 影像系统\n- 徕卡主摄 1 英寸 IMX989\n- 3.5X 潜望长焦 OIS\n## 续航\n- 5600mAh 硅碳负极电池 · 120W 有线 + 50W 无线',
     'https://cdn.example.com/spu-1-main.jpg', NULL,
     100, 1, NOW(), 3999.00, 4999.00, 150, 2, 1, 1,
     NOW(), 1, NOW(), 1),
 (2, '极净 516L 法式多门冰箱', '一级能效 · 零度保鲜 · 母婴舱',
-    2, NULL,
+    2,
     '# 极净 516L 法式冰箱\n\n- **容量**：516L（冷藏 348L / 冷冻 168L）\n- **能效**：新国标一级，日耗电 0.88 度\n- **核心功能**：零度保鲜舱 · 银离子净味 · 双变频压缩机\n- **静音**：35dB 图书馆级静音',
     'https://cdn.example.com/spu-2-main.jpg', NULL,
     90, 1, NOW(), 4599.00, 5199.00, 80, 2, 0, 1,
     NOW(), 1, NOW(), 1),
 (3, '御风 3 匹一级变频柜机空调', '新一级 · 急速冷暖 · 自清洁',
-    3, NULL,
+    3,
     '# 御风 3 匹柜机\n\n- **制冷量**：7200W，适用 30-45㎡\n- **能效**：APF 4.42，新国标一级\n- **黑科技**：0.5℃ 精准控温 · 57℃ 高温除菌自清洁 · 智能除湿\n- **噪音**：低至 22dB 睡眠模式',
     'https://cdn.example.com/spu-3-main.jpg', NULL,
     85, 1, NOW(), 5299.00, 5999.00, 40, 1, 0, 0,
     NOW(), 1, NOW(), 1),
 (4, '清逸 AirBook 14 轻薄本', '2.8K OLED · 1.1kg · 18h 续航',
-    4, NULL,
+    4,
     '# 清逸 AirBook 14\n\n- **屏幕**：14 寸 2.8K 120Hz OLED 100% DCI-P3\n- **平台**：Intel Core Ultra 7 258H · 32GB LPDDR5X · 2TB PCIe 4.0\n- **重量/厚度**：1.1kg · 13.9mm\n- **续航**：75Wh 电池，本地视频 18 小时\n- **接口**：双 Thunderbolt 4 · USB-A 3.2 · HDMI 2.1 · SD 读卡器',
     'https://cdn.example.com/spu-4-main.jpg', NULL,
     95, 1, NOW(), 7299.00, 8799.00, 60, 2, 1, 1,
     NOW(), 1, NOW(), 1),
 (5, '逸彩 65 寸 QD-MiniLED 电视', '量子点 · 2000nits · 全阵列 2000 分区',
-    5, NULL,
+    5,
     '# 逸彩 65Q80 MiniLED\n\n## 画质\n- 65 寸 QD-MiniLED，量子点广色域 99% DCI-P3\n- 峰值亮度 2000nits，HDR10+ / Dolby Vision\n- 全阵列 2000 分区背光，暗部细节拉满\n## 音质\n- 8 单元 60W 音响 · Dolby Atmos 全景声\n## 智能\n- 星耀 SmartHub 8 核芯片 · 远场语音 3.0 · HDMI 2.1 4K144Hz 游戏模式',
     'https://cdn.example.com/spu-5-main.jpg', NULL,
     92, 1, NOW(), 4299.00, 4999.00, 100, 2, 1, 1,
     NOW(), 1, NOW(), 1),
 (6, '逸彩 VividBar 5.1.2 回音壁套装', '杜比全景声 · DTS:X · 无线低音炮',
-    6, NULL,
+    6,
     '# 逸彩 VividBar 5.1.2 回音壁\n\n- **声道布局**：5.1.2（天空反射声道 × 2）\n- **解码**：Dolby Atmos · DTS:X · eARC 回传\n- **配置**：回音壁主体 + 8 寸 120W 无线低音炮 + 2 只后环绕\n- **总功率**：620W 峰值\n- **连接**：HDMI 2.1 eARC · 光纤 · 蓝牙 5.3 · Wi-Fi 无线播流',
     'https://cdn.example.com/spu-6-main.jpg', NULL,
     88, 1, NOW(), 2599.00, 2599.00, 200, 1, 0, 0,

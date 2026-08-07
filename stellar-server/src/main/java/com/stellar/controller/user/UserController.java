@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.RateLimit;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.MallUserLoginDTO;
 import com.stellar.dto.MallUserProfileUpdateDTO;
@@ -17,8 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 
 @RestController
 @RequestMapping("/user/user")
@@ -29,20 +30,22 @@ public class UserController {
     private final MallUserService mallUserService;
     private final NotificationService notificationService;
 
+    @RateLimit(key = "login", maxRequests = 10, windowSeconds = 60)
     @PostMapping("/login")
-    @ApiOperation("C 端用户登录：手机号 + 密码。首次登录自动注册")
+    @ApiOperation("C 端用户登录：邮箱 + 密码。首次登录自动注册")
     public Result<MallUserLoginVO> login(@RequestBody MallUserLoginDTO dto) {
         return Result.success(mallUserService.login(dto));
     }
 
-    @PostMapping("/sms-login")
-    @ApiOperation("C 端用户短信验证码登录/注册")
-    public Result<MallUserLoginVO> smsLogin(@RequestBody @Valid SmsLoginDTO dto) {
-        boolean ok = notificationService.verifySmsCode(dto.getPhone(), dto.getType(), dto.getCode());
+    @RateLimit(key = "email-login", maxRequests = 10, windowSeconds = 60)
+    @PostMapping("/email-login")
+    @ApiOperation("C 端用户邮箱验证码登录/注册")
+    public Result<MallUserLoginVO> emailLogin(@RequestBody @Valid EmailLoginDTO dto) {
+        boolean ok = notificationService.verifyEmailCode(dto.getEmail(), dto.getType(), dto.getCode());
         if (!ok) {
             throw new BaseException("验证码错误或已过期");
         }
-        return Result.success(mallUserService.loginOrRegisterByPhone(dto.getPhone()));
+        return Result.success(mallUserService.loginOrRegisterByEmail(dto.getEmail()));
     }
 
     @GetMapping("/me")
@@ -54,6 +57,7 @@ public class UserController {
         return Result.success(MallUserVO.builder()
                 .id(u.getId())
                 .phone(u.getPhone())
+                .email(u.getEmail())
                 .nickname(u.getNickname())
                 .status(u.getStatus())
                 .build());
@@ -72,12 +76,19 @@ public class UserController {
         return Result.success();
     }
 
+    @PostMapping("/deactivate")
+    @ApiOperation("注销当前账号")
+    public Result<String> deactivate() {
+        mallUserService.deactivateAccount(BaseContext.getCurrentId());
+        return Result.success();
+    }
+
     // ======================== DTO ========================
 
     @Data
-    public static class SmsLoginDTO {
-        @NotBlank @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
-        private String phone;
+    public static class EmailLoginDTO {
+        @NotBlank @Email(message = "邮箱格式不正确")
+        private String email;
         @NotBlank
         private String type;    // LOGIN / REGISTER
         @NotBlank

@@ -21,6 +21,13 @@ function readInitialTheme() {
   return prefersDark ? THEMES.DARK : THEMES.LIGHT
 }
 
+/**
+ * 将指定的主题应用到 DOM 上。
+ * 通过操作 document.documentElement 的 class 和 style 来实现暗色/亮色模式的切换，
+ * 并加入过渡锁防止切换时出现闪烁动画。
+ *
+ * @param {'dark'|'light'} value - 要应用的主题值
+ */
 export function applyThemeToDOM(value) {
   if (typeof document === 'undefined') return
   const root = document.documentElement
@@ -58,6 +65,22 @@ function bindSystemPreference() {
   else if (mql.addListener) mql.addListener(mediaQueryListener)
 }
 
+/**
+ * 主题切换管理 composable。
+ * 提供暗色/亮色模式的切换、持久化和系统偏好跟随功能。
+ * 初始化时优先读取本地存储的偏好，其次跟随系统配色方案，默认使用暗色模式。
+ * 主题变更会自动同步到 DOM 并持久化到 localStorage。
+ *
+ * @returns {{
+ *   theme: import('vue').Ref<'dark'|'light'>,
+ *   isDark: import('vue').ComputedRef<boolean>,
+ *   isLight: import('vue').ComputedRef<boolean>,
+ *   toggleTheme: () => void,
+ *   setTheme: (val: 'dark'|'light') => void,
+ *   resetToSystem: () => void,
+ *   THEMES: { readonly DARK: 'dark', readonly LIGHT: 'light' }
+ * }}
+ */
 export function useTheme() {
   if (!initialized) {
     initialized = true
@@ -82,14 +105,24 @@ export function useTheme() {
   const isDark = computed(() => theme.value === THEMES.DARK)
   const isLight = computed(() => theme.value === THEMES.LIGHT)
 
+  /**
+   * 在暗色和亮色模式之间切换。
+   */
   function toggleTheme() {
     theme.value = theme.value === THEMES.DARK ? THEMES.LIGHT : THEMES.DARK
   }
 
+  /**
+   * 设置主题为指定值。
+   * @param {'dark'|'light'} val - 目标主题，仅接受 'dark' 或 'light'
+   */
   function setTheme(val) {
     if (val === THEMES.DARK || val === THEMES.LIGHT) theme.value = val
   }
 
+  /**
+   * 重置主题偏好，清除本地存储并恢复为跟随系统配色方案。
+   */
   function resetToSystem() {
     storage.local.remove(STORAGE_KEY)
     const prefersDark =

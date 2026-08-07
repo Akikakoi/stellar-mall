@@ -89,6 +89,14 @@
               </el-form-item>
             </el-form>
           </div>
+
+          <div class="card danger-card">
+            <h3 class="danger-title">注销账号</h3>
+            <p class="danger-desc">注销后账号将无法再登录，历史订单等数据将保留但无法访问。</p>
+            <el-button type="danger" plain :loading="deactivating" @click="handleDeactivate">
+              注销账号
+            </el-button>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </main>
@@ -99,14 +107,15 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { updateUserProfile } from '@/api/mall'
-import { ElMessage } from 'element-plus'
+import { updateUserProfile, deactivateAccount } from '@/api/mall'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { List, Wallet, Van, ChatDotRound, Ticket, Warning, StarFilled } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const loading = ref(false)
+const deactivating = ref(false)
 const activeTab = ref('info')
 
 const form = reactive({
@@ -121,6 +130,7 @@ const pwdForm = reactive({
   confirmPwd: ''
 })
 
+/** 从服务端加载用户资料并同步到本地表单和 store */
 async function loadProfile() {
   loading.value = true
   try {
@@ -135,6 +145,7 @@ async function loadProfile() {
   }
 }
 
+/** 提交更新用户基本信息（昵称、手机号、邮箱） */
 async function handleUpdate() {
   try {
     await updateUserProfile({ ...form })
@@ -143,6 +154,7 @@ async function handleUpdate() {
   } catch (e) {}
 }
 
+/** 校验并提交修改密码请求 */
 async function handleChangePwd() {
   if (pwdForm.newPwd !== pwdForm.confirmPwd) {
     ElMessage.warning('两次输入的新密码不一致')
@@ -154,6 +166,35 @@ async function handleChangePwd() {
     pwdForm.newPwd = ''
     pwdForm.confirmPwd = ''
   } catch (e) {}
+}
+
+/** 注销账号：二次确认后调用后端接口，成功后退出登录并跳转登录页 */
+async function handleDeactivate() {
+  try {
+    await ElMessageBox.confirm(
+      '注销后账号将无法再登录，此操作不可恢复。确定要注销当前账号吗？',
+      '注销账号',
+      {
+        type: 'warning',
+        confirmButtonText: '确认注销',
+        cancelButtonText: '再想想',
+        confirmButtonClass: 'el-button--danger'
+      }
+    )
+  } catch (e) {
+    return // 用户取消
+  }
+  deactivating.value = true
+  try {
+    await deactivateAccount()
+    userStore.logout()
+    ElMessage.success('账号已注销')
+    router.push('/login')
+  } catch (e) {
+    // error shown
+  } finally {
+    deactivating.value = false
+  }
 }
 
 onMounted(loadProfile)
@@ -190,6 +231,20 @@ onMounted(loadProfile)
   grid-template-columns: repeat(5, 1fr);
   gap: 20px;
   padding: 24px;
+}
+
+.danger-card {
+  border-color: var(--el-color-danger-light-7);
+}
+.danger-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: var(--el-color-danger);
+}
+.danger-desc {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--text-muted);
 }
 .link-item {
   display: flex;

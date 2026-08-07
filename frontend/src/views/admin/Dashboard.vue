@@ -119,6 +119,7 @@ const salesTrendData = ref([])
 const orderTrendHasData = computed(() => orderTrendData.value.some(d => (d.count || 0) > 0))
 const salesTrendHasData = computed(() => salesTrendData.value.some(d => (d.amount || 0) > 0))
 
+/** 获取今天的日期字符串，格式为 YYYY-MM-DD */
 function todayStr() {
   const d = new Date()
   return d.getFullYear() + '-' +
@@ -126,10 +127,12 @@ function todayStr() {
     String(d.getDate()).padStart(2, '0')
 }
 
+/** 跳转到订单管理页面，并按指定状态筛选 */
 function goOrders(status) {
   router.push({ path: '/admin/orders', query: { status } })
 }
 
+/** 跳转到订单管理页面，并按今天日期筛选 */
 function goOrdersToday() {
   const today = todayStr()
   router.push({ path: '/admin/orders', query: { startTime: today, endTime: today } })
@@ -138,6 +141,7 @@ function goOrdersToday() {
 let orderChart = null
 let salesChart = null
 
+/** 加载仪表盘全部数据：核心统计、增强统计、RAG同步状态 */
 async function load() {
   loading.value = true
   try {
@@ -168,6 +172,7 @@ async function load() {
   } finally { loading.value = false }
 }
 
+/** 使用 ECharts 渲染近7天订单趋势和销售额趋势图 */
 function renderCharts(orderTrend, salesTrend) {
   orderTrendData.value = Array.isArray(orderTrend) ? orderTrend : []
   salesTrendData.value = Array.isArray(salesTrend) ? salesTrend : []
@@ -213,6 +218,7 @@ function renderCharts(orderTrend, salesTrend) {
   })
 }
 
+/** 响应窗口大小变化，调整图表尺寸 */
 function handleResize() {
   orderChart && orderChart.resize()
   salesChart && salesChart.resize()
@@ -230,6 +236,7 @@ onUnmounted(() => {
 })
 
 const exporting = ref(null)
+/** 导出数据为 Excel 文件，支持 orders / users / finance 三种类型 */
 async function handleExport(type) {
   exporting.value = type
   try {

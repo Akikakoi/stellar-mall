@@ -415,6 +415,7 @@ const categories = ref([])
 
 const query = reactive({ page: 1, pageSize: 10, name: '', categoryId: null, status: null, sortBy: null, sortOrder: null })
 
+/** 从 localStorage 恢复上次选择的排序维度与方向 */
 function restoreSort() {
   const obj = storage.local.getObject(SORT_STORAGE_KEY)
   if (obj && SORT_BY_ALLOWED.has(obj.sortBy)) {
@@ -424,6 +425,7 @@ function restoreSort() {
   }
 }
 
+/** 将当前排序维度与方向写入 localStorage，缺失任一则清除 */
 function persistSort() {
   if (query.sortBy && SORT_BY_ALLOWED.has(query.sortBy) && query.sortOrder && SORT_ORDER_ALLOWED.has(query.sortOrder)) {
     storage.local.setObject(SORT_STORAGE_KEY, { sortBy: query.sortBy, sortOrder: query.sortOrder })
@@ -432,6 +434,7 @@ function persistSort() {
   }
 }
 
+/** 切换排序字段，若未选方向则默认升序，重置到第1页并重新加载 */
 function onSortByChange() {
   if (query.sortBy && !query.sortOrder) query.sortOrder = 'asc'
   query.page = 1
@@ -439,12 +442,14 @@ function onSortByChange() {
   loadPage()
 }
 
+/** 切换排序方向，重置到第1页并重新加载 */
 function onSortChange() {
   query.page = 1
   persistSort()
   loadPage()
 }
 
+/** 点击查询按钮，重置到第1页并加载数据 */
 function onQueryClick() {
   query.page = 1
   loadPage()
@@ -477,16 +482,19 @@ const kbExistingDocId = ref(null)
 const imageUploading = ref(false)
 const uploadedImages = ref([])  // { url, name } 数组：第0项为主图，其余为副图
 
+/** 移除指定索引的已上传图片，并同步到表单字段 */
 function removeUploadedImage(idx) {
   uploadedImages.value.splice(idx, 1)
   syncImagesToForm()
 }
+/** 将已上传图片列表同步到表单的 mainImage 和 subImages 字段 */
 function syncImagesToForm() {
   const urls = uploadedImages.value.map(i => i.url)
   form.mainImage = urls[0] || ''
   form.image = urls[0] || ''
   form.subImages = urls.slice(1).join(';')
 }
+/** 上传单张图片到服务器，成功后添加到已上传列表 */
 async function doImageUpload(options) {
   const { file } = options
   imageUploading.value = true
@@ -503,6 +511,7 @@ async function doImageUpload(options) {
     imageUploading.value = false
   }
 }
+/** 从表单的 mainImage 和 subImages 字段初始化已上传图片预览列表 */
 function initUploadedImages() {
   const images = []
   const main = form.mainImage || form.image || ''
@@ -526,6 +535,7 @@ const canGenerateSkus = computed(() => {
   return valid.length >= 1
 })
 
+/** 加载分类列表元数据 */
 async function loadMeta() {
   try {
     const c = await listAdminCategory()
@@ -533,6 +543,7 @@ async function loadMeta() {
   } catch (e) {}
 }
 
+/** 加载商品分页列表，根据当前查询条件筛选 */
 async function loadPage() {
   loading.value = true
   try {
@@ -545,10 +556,12 @@ async function loadPage() {
   }
 }
 
+/** 添加一个新的规格组 */
 function addSpecGroup() {
   specGroups.value.push({ name: '', values: [], newValue: '' })
 }
 
+/** 向指定规格组添加一个规格值 */
 function addSpecValue(gi) {
   const group = specGroups.value[gi]
   if (!group) return
@@ -560,6 +573,7 @@ function addSpecValue(gi) {
   group.newValue = ''
 }
 
+/** 根据规格组的笛卡尔积自动生成 SKU 组合列表 */
 function generateSkus() {
   const valid = specGroups.value.filter(g => g.name && g.name.trim() && g.values.length > 0)
   if (valid.length === 0) {
@@ -582,6 +596,7 @@ function generateSkus() {
   ElMessage.success(`已生成 ${form.skuList.length} 个 SKU 组合`)
 }
 
+/** 计算多个规格组的笛卡尔积，生成所有规格组合 */
 function cartesianProduct(groups) {
   if (groups.length === 0) return []
   let result = [{ specs: '', name: '' }]
@@ -599,6 +614,7 @@ function cartesianProduct(groups) {
   return result
 }
 
+/** 从已有的 SKU 列表中反推规格组定义，用于编辑时回填 */
 function inferSpecGroups(skuList) {
   if (!skuList || skuList.length === 0) {
     specGroups.value = [{ name: '', values: [], newValue: '' }]
@@ -632,6 +648,7 @@ function inferSpecGroups(skuList) {
   }
 }
 
+/** 手动添加一个空 SKU 规格 */
 function addManualSku() {
   form.skuList.push({
     _uid: Date.now() + Math.random(),
@@ -640,11 +657,13 @@ function addManualSku() {
   })
 }
 
+/** 移除指定索引的 SKU */
 function removeSku(index) {
   form.skuList.splice(index, 1)
 }
 
 // KB functions
+/** 知识库文件变更时，保存文件引用并自动填充标签 */
 function onKbFileChange(f) {
   const raw = f?.raw
   if (!raw) return
@@ -658,12 +677,14 @@ function onKbFileChange(f) {
   kbTags.value = parts.join(',')
 }
 
+/** 知识库文件被移除时，清空相关状态 */
 function onKbFileRemove() {
   kbFile.value = null
   kbFileList.value = []
   kbPreviewResult.value = null
 }
 
+/** 预览知识库文档的分块切分结果 */
 async function doKbPreview() {
   if (!kbFile.value) return
   kbPreviewing.value = true
@@ -682,6 +703,7 @@ async function doKbPreview() {
   }
 }
 
+/** 上传知识库文档到 RAG 服务，返回文档 ID */
 async function uploadKbDoc() {
   if (!kbFile.value) return null
   kbUploadProgress.value = 10
@@ -698,6 +720,7 @@ async function uploadKbDoc() {
   }
 }
 
+/** 打开新增/编辑商品对话框，create 模式初始化空表单，edit 模式加载详情 */
 async function openDialog(mode, row) {
   dialogMode.value = mode
   specGroups.value = [{ name: '', values: [], newValue: '' }]
@@ -762,6 +785,7 @@ async function openDialog(mode, row) {
   }
 }
 
+/** 构建提交给后端的商品数据对象 */
 function buildPayload() {
   const priceNum = Number(form.price ?? 0)
   const imageStr = form.mainImage || form.image || ''
@@ -777,7 +801,7 @@ function buildPayload() {
     : []
   return {
     id: form.id ?? undefined, name: form.name, categoryId: form.categoryId,
-    category2Id: form.category2Id ?? null, status: form.status ?? 1, sort: form.sort ?? 0,
+    status: form.status ?? 1, sort: form.sort ?? 0,
     subtitle: form.subtitle ?? '', image: imageStr, mainImage: imageStr,
     subImages: subImagesStr, description: descStr, descriptionMd: descStr,
     price: isNaN(priceNum) ? null : priceNum,
@@ -787,6 +811,7 @@ function buildPayload() {
   }
 }
 
+/** 提交商品表单：校验、上传知识库文档、保存或更新商品 */
 async function submitForm() {
   if (!formRef.value) return
   try { await formRef.value.validate() } catch (e) { return }
@@ -825,6 +850,7 @@ async function submitForm() {
 function handleSelectionChange(rows) { selectedRows.value = rows }
 function tableRowClassName({ row }) { return row.status === 0 ? 'row-off-shelf' : '' }
 
+/** 下架单个商品，二次确认后执行 */
 async function handleShelfOff(row) {
   const name = row.name || ('商品#' + row.id)
   try { await ElMessageBox.confirm(`确定下架商品「${name}」？\n下架后用户将无法搜索和购买该商品。`, '下架确认', { type: 'warning' }) } catch (e) { return }
@@ -832,6 +858,7 @@ async function handleShelfOff(row) {
   catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '下架失败') }
 }
 
+/** 上架单个商品，二次确认后执行 */
 async function handleShelfOn(row) {
   const name = row.name || ('商品#' + row.id)
   try { await ElMessageBox.confirm(`确定上架商品「${name}」？`, '上架确认', { type: 'warning' }) } catch (e) { return }
@@ -839,6 +866,7 @@ async function handleShelfOn(row) {
   catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '上架失败') }
 }
 
+/** 批量下架选中的商品，二次确认后执行 */
 async function handleBatchShelfOff() {
   const names = selectedRows.value.map(r => r.name).join('、')
   try { await ElMessageBox.confirm(`确定批量下架以下 ${selectedRows.value.length} 件商品？\n${names}\n\n下架后用户将无法搜索和购买这些商品。`, '批量下架确认', { type: 'warning', confirmButtonText: '确定下架', cancelButtonText: '取消' }) } catch (e) { return }
@@ -851,6 +879,7 @@ async function handleBatchShelfOff() {
   } catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量下架失败') }
 }
 
+/** 批量上架选中的商品，二次确认后执行 */
 async function handleBatchShelfOn() {
   const names = selectedRows.value.map(r => r.name).join('、')
   try { await ElMessageBox.confirm(`确定批量上架以下 ${selectedRows.value.length} 件商品？\n${names}`, '批量上架确认', { type: 'warning', confirmButtonText: '确定上架', cancelButtonText: '取消' }) } catch (e) { return }
@@ -863,6 +892,7 @@ async function handleBatchShelfOn() {
   } catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量上架失败') }
 }
 
+/** 删除商品，二次确认后执行 */
 async function handleDelete(row) {
   try { await ElMessageBox.confirm(`确定删除商品「${row.name}」？`, '提示', { type: 'warning' }); await deleteSpu(row.id); ElMessage.success('已删除'); loadPage() } catch (e) {}
 }
@@ -877,6 +907,7 @@ function openImport() { importVisible.value = true; importResult.value = null; i
 function onFileChange(file) { importFile.value = file.raw; importResult.value = null }
 function onFileRemove() { importFile.value = null }
 
+/** 下载商品导入模板 Excel 文件 */
 async function downloadTemplate() {
   try {
     const resp = await fetch('/admin/spu/import-export/template', { headers: { token: localStorage.getItem('stellar_admin_token') || '' } })
@@ -887,6 +918,7 @@ async function downloadTemplate() {
   } catch (e) { ElMessage.error('下载模板失败') }
 }
 
+/** 导出全部商品数据为 Excel 文件 */
 async function handleExport() {
   exporting.value = true
   try {
@@ -898,6 +930,7 @@ async function handleExport() {
   } catch (e) { ElMessage.error('导出失败') } finally { exporting.value = false }
 }
 
+/** 导入 Excel 文件批量创建商品和 SKU */
 async function handleImport() {
   if (!importFile.value) { ElMessage.warning('请先选择文件'); return }
   importing.value = true; importResult.value = null

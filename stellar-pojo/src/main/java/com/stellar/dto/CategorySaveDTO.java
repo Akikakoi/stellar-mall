@@ -10,19 +10,13 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
-@ApiModel("新增分类 DTO")
+@ApiModel("分类保存 DTO")
 public class CategorySaveDTO implements Serializable {
 
     @NotBlank(message = "分类名不能为空")
     @Size(max = 32, message = "分类名最多 32 字符")
     @ApiModelProperty(value = "分类名", required = true)
     private String name;
-
-    @ApiModelProperty("父分类 id，0 或不传表示顶级")
-    private Long parentId = 0L;
-
-    @ApiModelProperty("层级：1=顶级 2=二级；不传会根据 parentId 自动推算")
-    private Integer level;
 
     @ApiModelProperty("类型：1 商品分类 2 售后分类，默认 1")
     @NotNull(message = "类型不能为空")

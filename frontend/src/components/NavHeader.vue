@@ -137,6 +137,10 @@ let lastScrollY = 0
 let ticking = false
 const SCROLL_THRESHOLD = 10
 
+/**
+ * 滚动事件处理：根据滚动方向控制导航栏的显示/隐藏
+ * 向下滚动超过阈值时收起导航栏，向上滚动时展开
+ */
 function handleScroll() {
   if (!ticking) {
     window.requestAnimationFrame(() => {
@@ -165,6 +169,10 @@ function handleScroll() {
   }
 }
 
+/**
+ * 计算当前激活的导航项索引，根据当前路由路径匹配
+ * @returns {number} 激活的导航项索引，未匹配时返回 -1
+ */
 const activeIndex = computed(() => {
   const items = navItems.value
   const path = route.path
@@ -174,6 +182,10 @@ const activeIndex = computed(() => {
   )
 })
 
+/**
+ * 更新导航栏激活指示器的位置和样式
+ * 根据当前激活的导航项计算指示器的偏移量和宽度
+ */
 function updateIndicator() {
   nextTick(() => {
     if (!navRef.value) return
@@ -215,17 +227,30 @@ const searchKeyword = ref('')
 // ===== 搜索历史 =====
 const HISTORY_MAX = 20
 
+/**
+ * 获取当前用户的搜索历史 localStorage 键名
+ * @returns {string} 包含用户 ID 的存储键名
+ */
 function historyKey() {
   const uid = userStore.userId
   return uid ? `stellar_search_history_${uid}` : 'stellar_search_history'
 }
 
+/**
+ * 从 localStorage 加载搜索历史记录
+ * @returns {string[]} 搜索关键词数组
+ */
 function loadHistory() {
   return JSON.parse(localStorage.getItem(historyKey()) || '[]')
 }
 
 const searchHistory = ref(loadHistory())
 
+/**
+ * 将搜索关键词添加到搜索历史
+ * 去重后插入到数组头部，超出最大数量时截断
+ * @param {string} kw - 搜索关键词
+ */
 function addToHistory(kw) {
   const arr = searchHistory.value.filter(h => h !== kw)
   arr.unshift(kw)
@@ -234,6 +259,11 @@ function addToHistory(kw) {
   localStorage.setItem(historyKey(), JSON.stringify(arr))
 }
 
+/**
+ * 删除单条搜索历史记录
+ * 弹出确认框后执行删除操作
+ * @param {Object} item - 搜索历史项，包含 value 属性
+ */
 async function removeHistory(item) {
   try {
     await ElMessageBox.confirm('确定要删除这条搜索记录吗？', '提示', {
@@ -253,6 +283,12 @@ watch(() => userStore.userId, () => {
   searchHistory.value = loadHistory()
 })
 
+/**
+ * 搜索建议查询回调函数，供 el-autocomplete 使用
+ * 无输入时显示搜索历史，有输入时调用远程搜索建议接口
+ * @param {string} queryString - 用户输入的搜索关键词
+ * @param {Function} cb - 回调函数，接收建议项数组
+ */
 function querySearch(queryString, cb) {
   if (!queryString || queryString.trim().length < 1) {
     const items = searchHistory.value.map(h => ({ value: h, isHistory: true }))
@@ -262,11 +298,21 @@ function querySearch(queryString, cb) {
   fetchSuggestions(queryString, cb)
 }
 
+/**
+ * 选中搜索建议项时的回调
+ * 填充搜索关键词并立即执行搜索
+ * @param {Object} item - 选中的建议项，包含 value 属性
+ */
 function onSelectSuggestion(item) {
   searchKeyword.value = item.value
   doSearch()
 }
 
+/**
+ * 调用远程接口获取搜索建议（SPU 补全）
+ * @param {string} queryString - 搜索关键词
+ * @param {Function} cb - 回调函数，接收建议项数组
+ */
 async function fetchSuggestions(queryString, cb) {
   if (!queryString || queryString.trim().length < 1) {
     cb([])
@@ -282,6 +328,10 @@ async function fetchSuggestions(queryString, cb) {
   }
 }
 
+/**
+ * 执行搜索：将关键词加入历史记录，跳转到搜索结果页
+ * 当前已在搜索页时使用 replace 替换，否则在新标签页打开
+ */
 function doSearch() {
   const kw = searchKeyword.value.trim()
   if (!kw) return
@@ -296,6 +346,9 @@ function doSearch() {
   }
 }
 
+/**
+ * 获取未读消息数量，仅在用户已登录时调用
+ */
 async function fetchUnreadCount() {
   if (!userStore.token) return
   try {
@@ -305,6 +358,9 @@ async function fetchUnreadCount() {
   } catch (e) { /* ignore */ }
 }
 
+/**
+ * 跳转到消息页面
+ */
 function goMessages() {
   router.push('/me/messages')
 }
@@ -319,6 +375,11 @@ onUnmounted(() => {
   if (unreadTimer) clearInterval(unreadTimer)
 })
 
+/**
+ * 处理用户下拉菜单命令
+ * 支持跳转到个人中心、消息、订单、售后、钱包、地址、收藏、优惠券、积分商城、AI 助手等页面，以及退出登录
+ * @param {string} cmd - 菜单命令标识
+ */
 function handleCommand(cmd) {
   if (cmd === 'profile') window.open('/me', '_blank')
   else if (cmd === 'messages') window.open('/me/messages', '_blank')
@@ -338,6 +399,10 @@ function handleCommand(cmd) {
   }
 }
 
+/**
+ * 导航菜单项配置
+ * @returns {Array<{to: string, label: string, icon: Component}>} 导航项数组
+ */
 const navItems = computed(() => [
   { to: '/', label: '首页', icon: House },
   { to: '/coupons', label: '优惠券', icon: Ticket },
@@ -345,6 +410,10 @@ const navItems = computed(() => [
   { to: '/rag', label: 'AI助手', icon: ChatDotRound }
 ])
 
+/**
+ * 处理 Logo 点击事件
+ * 若有自定义点击监听器则触发事件，否则跳转到首页
+ */
 function handleLogoClick() {
   if (!props.logoClickable) return
   if (hasLogoClickListener.value) {

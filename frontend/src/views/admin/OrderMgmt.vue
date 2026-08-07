@@ -141,10 +141,12 @@ const STATUS_MAP = {
   REFUNDED: '已退款'
 }
 
+/** 获取订单状态的中文标签 */
 function statusLabel(s) {
   return STATUS_MAP[s] || s || '-'
 }
 
+/** 获取订单状态对应的 Element Plus Tag 类型 */
 function statusTagType(s) {
   switch (s) {
     case 'PENDING': return 'warning'
@@ -158,11 +160,13 @@ function statusTagType(s) {
   }
 }
 
+/** 点击查询按钮，重置到第1页并加载数据 */
 function onQueryClick() {
   query.page = 1
   loadPage()
 }
 
+/** 将日期对象或字符串转为 YYYY-MM-DD 格式 */
 function fmtDate(d) {
   if (!d) return ''
   const dt = d instanceof Date ? d : new Date(d)
@@ -172,6 +176,7 @@ function fmtDate(d) {
   return `${y}-${m}-${day}`
 }
 
+/** 加载订单分页列表，根据当前查询条件筛选 */
 async function loadPage() {
   loading.value = true
   try {
@@ -194,6 +199,7 @@ async function loadPage() {
   }
 }
 
+/** 打开发货对话框，回填当前订单信息 */
 function handleShip(row) {
   Object.assign(shipTarget, row)
   shipForm.trackingNo = ''
@@ -201,6 +207,7 @@ function handleShip(row) {
   shipDialogVisible.value = true
 }
 
+/** 执行发货操作，提交快递公司和快递单号 */
 async function doShip() {
   shipSubmitting.value = true
   try {
@@ -219,6 +226,7 @@ async function doShip() {
   } finally { shipSubmitting.value = false }
 }
 
+/** 删除订单，二次确认后执行永久删除 */
 async function handleDelete(row) {
   try {
     await ElMessageBox.confirm(
@@ -237,6 +245,7 @@ async function handleDelete(row) {
   }
 }
 
+/** 导出订单数据为 Excel 文件 */
 async function handleExportOrders() {
   exporting.value = true
   try {
@@ -257,11 +266,13 @@ async function handleExportOrders() {
 }
 
 const exporting = ref(false)
+/** 将日期对象转为 YYYY-MM-DD 字符串 */
 function toDateStr(d) {
   if (!d) return ''
   const dt = new Date(d)
   return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0')
 }
+/** 下载 Blob 数据为文件 */
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

@@ -1,7 +1,7 @@
 <template>
   <div class="app-root">
     <NavHeader v-if="showHeader" />
-    <div :class="{ 'page-bg': showHeader || route.path === '/shop/search' || route.path === '/points' }">
+    <div :class="{ 'page-bg': showHeader || route.path === '/shop/search' || route.path === '/points', 'page-bg--rag': isRag }">
       <router-view />
     </div>
     <FloatingSidebar v-if="showFloatingSidebar" />
@@ -20,10 +20,11 @@ const hideSidebarPaths = ['/login', '/register', '/shop/search', '/me', '/me/mes
 const isAdmin = computed(() => route.path.startsWith('/admin'))
 // 商品详情页隐藏顶部导航，沉浸式浏览
 const isSpuDetail = computed(() => route.path.startsWith('/spu/'))
+const isRag = computed(() => route.path.startsWith('/rag'))
 const showHeader = computed(() => !isAdmin.value && !isSpuDetail.value && !hideHeaderPaths.includes(route.path))
 // AI 助手页面本身已有左侧会话栏，右侧浮动栏会遮挡聊天区，故隐藏；商品详情页同样隐藏
 const showFloatingSidebar = computed(() =>
-  showHeader.value && !route.path.startsWith('/rag')
+  showHeader.value && !isRag.value
 )
 </script>
 
@@ -72,5 +73,11 @@ a {
 .page-bg > * {
   position: relative;
   z-index: 1;
+}
+
+/* AI 助手页面：NavHeader 64px + 布局区 = 100vh，避免底部空白 */
+.page-bg--rag {
+  min-height: auto;
+  height: calc(100vh - 64px);
 }
 </style>

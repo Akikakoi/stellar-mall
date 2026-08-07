@@ -21,6 +21,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * SPU 商品导入导出服务实现。
+ *
+ * <p>支持将全部商品（含 SKU）导出为 Excel、生成导入模板、
+ * 以及从 Excel 批量导入商品数据。导入时按 SPU 名称分组，
+ * 同名 SPU 复用，不同 SKU 规格行为独立插入。</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,7 +37,7 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
     private final SkuMapper skuMapper;
 
     private static final String[] HEADERS = {
-            "SPU名称", "副标题", "一级分类ID", "二级分类ID",
+            "SPU名称", "副标题", "一级分类ID",
             "主图URL", "商品描述", "排序值", "状态",
             "SKU规格名称", "SKU规格值", "价格(元)", "库存", "条码"
     };
@@ -38,17 +45,24 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
     private static final int COL_NAME = 0;
     private static final int COL_SUBTITLE = 1;
     private static final int COL_CATEGORY_ID = 2;
-    private static final int COL_CATEGORY2_ID = 3;
-    private static final int COL_MAIN_IMAGE = 4;
-    private static final int COL_DESC = 5;
-    private static final int COL_SORT = 6;
-    private static final int COL_STATUS = 7;
-    private static final int COL_SKU_NAME = 8;
-    private static final int COL_SKU_SPECS = 9;
-    private static final int COL_SKU_PRICE = 10;
-    private static final int COL_SKU_STOCK = 11;
-    private static final int COL_SKU_BARCODE = 12;
+    private static final int COL_MAIN_IMAGE = 3;
+    private static final int COL_DESC = 4;
+    private static final int COL_SORT = 5;
+    private static final int COL_STATUS = 6;
+    private static final int COL_SKU_NAME = 7;
+    private static final int COL_SKU_SPECS = 8;
+    private static final int COL_SKU_PRICE = 9;
+    private static final int COL_SKU_STOCK = 10;
+    private static final int COL_SKU_BARCODE = 11;
 
+    /**
+     * 导出全部商品数据为 Excel 字节流。
+     *
+     * <p>每个 SPU 与其关联的 SKU 展开为多行，SPU 列重复填充，
+     * 无 SKU 的商品也导出一行。</p>
+     *
+     * @return Excel 文件的字节数组
+     */
     @Override
     public byte[] exportAll() {
         List<Spu> spuList = spuMapper.listAll();
@@ -88,6 +102,13 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
         }
     }
 
+    /**
+     * 生成商品导入模板 Excel 文件。
+     *
+     * <p>包含表头、示例数据行和分类 ID 参考页。</p>
+     *
+     * @return 模板 Excel 文件的字节数组
+     */
     @Override
     public byte[] generateTemplate() {
         try (Workbook wb = new XSSFWorkbook()) {
@@ -105,8 +126,8 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
             // 示例数据行
             CellStyle demoStyle = createDataStyle(wb);
             Object[][] examples = {
-                    {"示例智能手机", "2024新款", "1", "", "https://example.com/img.jpg", "商品描述示例", "0", "1", "标准版 · 星空黑", "颜色:星空黑;存储:128GB", "2999.00", "100", "6901234567890"},
-                    {"示例智能手机", "2024新款", "1", "", "https://example.com/img.jpg", "商品描述示例", "0", "1", "高配版 · 极光蓝", "颜色:极光蓝;存储:256GB", "3599.00", "50", "6901234567891"},
+                    {"示例智能手机", "2024新款", "1", "https://example.com/img.jpg", "商品描述示例", "0", "1", "标准版 · 星空黑", "颜色:星空黑;存储:128GB", "2999.00", "100", "6901234567890"},
+                    {"示例智能手机", "2024新款", "1", "https://example.com/img.jpg", "商品描述示例", "0", "1", "高配版 · 极光蓝", "颜色:极光蓝;存储:256GB", "3599.00", "50", "6901234567891"},
             };
             CellStyle wrapStyle = createDataStyle(wb);
             wrapStyle.setWrapText(true);
@@ -124,22 +145,19 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
             // 第二页：分类参考
             Sheet catSheet = wb.createSheet("分类ID参考");
             Row catHeader = catSheet.createRow(0);
-            catHeader.createCell(0).setCellValue("一级分类ID");
-            catHeader.createCell(1).setCellValue("一级分类名称");
-            catHeader.createCell(2).setCellValue("二级分类ID");
-            catHeader.createCell(3).setCellValue("二级分类名称");
+            catHeader.createCell(0).setCellValue("分类ID");
+            catHeader.createCell(1).setCellValue("分类名称");
             catHeader.setRowStyle(headerStyle);
 
             // 注意：这里硬编码了几个常见的分类ID，实际可从数据库读取
             Object[][] catData = {
-                    {"1", "智能手机", "", ""},
-                    {"6", "笔记本电脑", "", ""},
-                    {"7", "智能影音", "", ""},
-                    {"8", "智能穿戴", "", ""},
-                    {"9", "生活家电", "", ""},
-                    {"9", "生活家电", "2", "家用电冰箱"},
-                    {"9", "生活家电", "3", "家用空调"},
-                    {"9", "生活家电", "5", "平板电视"},
+                    {"1", "智能手机"},
+                    {"2", "家用电冰箱"},
+                    {"3", "家用空调"},
+                    {"5", "平板电视"},
+                    {"6", "笔记本电脑"},
+                    {"7", "智能影音"},
+                    {"8", "智能穿戴"},
             };
             for (int i = 0; i < catData.length; i++) {
                 Row r = catSheet.createRow(i + 1);
@@ -163,6 +181,15 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
         }
     }
 
+    /**
+     * 从 Excel 文件批量导入商品数据。
+     *
+     * <p>按 SPU 名称分组，同名 SPU 复用已有记录，不同 SKU 行独立插入。
+     * 导入完成后反写 SPU 的聚合字段（价格区间、总库存、SKU 数量）。</p>
+     *
+     * @param file 上传的 Excel 文件
+     * @return 包含导入结果信息的 Map（success, newSpuCount, newSkuCount, skippedRows, errors 等）
+     */
     @Override
     @Transactional
     public Map<String, Object> importFromExcel(MultipartFile file) {
@@ -200,7 +227,6 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
                 er.spuName = spuName;
                 er.subTitle = getCellString(row, COL_SUBTITLE);
                 er.categoryId = parseLong(row, COL_CATEGORY_ID);
-                er.category2Id = parseLong(row, COL_CATEGORY2_ID);
                 er.mainImage = getCellString(row, COL_MAIN_IMAGE);
                 er.description = getCellString(row, COL_DESC);
                 er.sort = parseInt(row, COL_SORT, 0);
@@ -249,7 +275,6 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
                             .name(first.spuName)
                             .subTitle(first.subTitle)
                             .categoryId(first.categoryId)
-                            .category2Id(first.category2Id)
                             .mainImage(first.mainImage)
                             .description(nullToEmpty(first.description))
                             .sort(first.sort)
@@ -331,7 +356,6 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
         setCell(row, COL_NAME, spu.getName(), style);
         setCell(row, COL_SUBTITLE, spu.getSubTitle(), style);
         setCell(row, COL_CATEGORY_ID, spu.getCategoryId(), style);
-        setCell(row, COL_CATEGORY2_ID, spu.getCategory2Id(), style);
         setCell(row, COL_MAIN_IMAGE, spu.getMainImage(), style);
         setCell(row, COL_DESC, spu.getDescription(), style);
         setCell(row, COL_SORT, spu.getSort(), style);
@@ -417,7 +441,6 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
     /** 按名称精确匹配查找已有 SPU（用于导入时去重）。 */
     private Spu findSpuByName(String name) {
         // 通过 page 接口查询，但这里需要一个更直接的方法
-        // 我们通过已有的 page 查询来做
         List<Spu> list = spuMapper.page(0, 1, name, null, null, null, null, null, null, null, null, null);
         return (list != null && !list.isEmpty()) ? list.get(0) : null;
     }
@@ -427,7 +450,7 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
     private static class ExcelRow {
         int rowNum;
         String spuName, subTitle, mainImage, description;
-        Long categoryId, category2Id;
+        Long categoryId;
         Integer sort, status;
         String skuName, skuSpecs, skuBarcode;
         BigDecimal skuPrice;

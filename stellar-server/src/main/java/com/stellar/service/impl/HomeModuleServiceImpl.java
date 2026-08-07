@@ -14,12 +14,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 首页模块服务实现。
+ * <p>
+ * 提供首页模块的创建、更新、删除、查询和批量排序等操作。
+ * 启用状态的模块列表会被缓存，写操作会清除缓存。
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class HomeModuleServiceImpl implements HomeModuleService {
 
     private final HomeModuleMapper homeModuleMapper;
 
+    /**
+     * 创建首页模块。
+     *
+     * @param dto 模块保存参数
+     * @return 新创建的模块ID
+     */
     @Override
     @Transactional
     @CacheEvict(value = "homeModule:listEnabled", allEntries = true)
@@ -40,6 +53,11 @@ public class HomeModuleServiceImpl implements HomeModuleService {
         return module.getId();
     }
 
+    /**
+     * 更新首页模块。
+     *
+     * @param dto 模块更新参数
+     */
     @Override
     @Transactional
     @CacheEvict(value = "homeModule:listEnabled", allEntries = true)
@@ -58,6 +76,11 @@ public class HomeModuleServiceImpl implements HomeModuleService {
         homeModuleMapper.update(module);
     }
 
+    /**
+     * 删除首页模块。
+     *
+     * @param id 模块ID
+     */
     @Override
     @Transactional
     @CacheEvict(value = "homeModule:listEnabled", allEntries = true)
@@ -65,17 +88,32 @@ public class HomeModuleServiceImpl implements HomeModuleService {
         homeModuleMapper.deleteById(id);
     }
 
+    /**
+     * 查询所有首页模块（含禁用）。
+     *
+     * @return 所有模块列表
+     */
     @Override
     public List<HomeModule> listAll() {
         return homeModuleMapper.listAll();
     }
 
+    /**
+     * 查询所有已启用的首页模块，结果会被缓存。
+     *
+     * @return 已启用模块列表
+     */
     @Override
     @Cacheable(value = "homeModule:listEnabled", key = "'enabled'")
     public List<HomeModule> listEnabled() {
         return homeModuleMapper.listEnabled();
     }
 
+    /**
+     * 批量更新模块排序。
+     *
+     * @param items 模块排序参数列表
+     */
     @Override
     @Transactional
     @CacheEvict(value = "homeModule:listEnabled", allEntries = true)

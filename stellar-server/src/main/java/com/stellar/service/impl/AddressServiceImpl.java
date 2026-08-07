@@ -36,6 +36,16 @@ public class AddressServiceImpl implements AddressService {
 
     private final AddressMapper addressMapper;
 
+    /**
+     * 新增收货地址。
+     * <p>
+     * 自动填充当前登录用户ID、创建/更新时间等字段。
+     * 如果设为默认地址，会先清空当前用户的其他默认地址。
+     * </p>
+     *
+     * @param dto 地址保存请求
+     * @return 新增地址ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long save(AddressSaveDTO dto) {
@@ -66,6 +76,14 @@ public class AddressServiceImpl implements AddressService {
         return address.getId();
     }
 
+    /**
+     * 更新收货地址。
+     * <p>
+     * 校验地址所有权（用户只能修改自己的地址），如果设为默认地址会先清空其他默认地址。
+     * </p>
+     *
+     * @param dto 地址更新请求
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void update(AddressUpdateDTO dto) {
@@ -99,6 +117,15 @@ public class AddressServiceImpl implements AddressService {
         addressMapper.update(address.getId(), userId, address);
     }
 
+    /**
+     * 删除收货地址。
+     * <p>
+     * 按 ID + userId 删除，校验所有权，防止横向越权。
+     * </p>
+     *
+     * @param id     地址ID
+     * @param userId 用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id, Long userId) {
@@ -114,6 +141,16 @@ public class AddressServiceImpl implements AddressService {
         }
     }
 
+    /**
+     * 根据ID查询收货地址。
+     * <p>
+     * 校验地址所有权，返回 AddressVO 避免暴露审计字段。
+     * </p>
+     *
+     * @param id     地址ID
+     * @param userId 用户ID
+     * @return 地址VO，不存在或无权操作时抛异常
+     */
     @Override
     public AddressVO getById(Long id, Long userId) {
         if (id == null || userId == null) {
@@ -127,6 +164,12 @@ public class AddressServiceImpl implements AddressService {
         return toVO(address);
     }
 
+    /**
+     * 查询用户的所有收货地址。
+     *
+     * @param userId 用户ID
+     * @return 地址VO列表，无数据时返回空列表
+     */
     @Override
     public List<AddressVO> listByUser(Long userId) {
         if (userId == null) {
@@ -142,6 +185,15 @@ public class AddressServiceImpl implements AddressService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 设置默认收货地址。
+     * <p>
+     * 先校验地址所有权，再清空当前用户的其他默认地址，最后将指定地址设为默认。
+     * </p>
+     *
+     * @param id     地址ID
+     * @param userId 用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void setDefault(Long id, Long userId) {

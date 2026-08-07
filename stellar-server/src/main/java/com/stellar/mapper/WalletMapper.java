@@ -11,7 +11,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * 钱包 Mapper。
+ * 钱包 Mapper，管理用户钱包账户余额及交易流水，支持乐观锁余额操作。
+ * 表：stellar_wallet（钱包账户）、stellar_wallet_transaction（交易流水）。
  */
 @Mapper
 public interface WalletMapper {

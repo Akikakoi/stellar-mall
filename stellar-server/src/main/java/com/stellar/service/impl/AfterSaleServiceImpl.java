@@ -32,6 +32,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 售后处理服务实现类。
+ * <p>
+ * 提供售后申请的完整生命周期管理，包括：
+ * <ul>
+ *   <li>用户提交售后申请（仅退款 / 退货退款）</li>
+ *   <li>用户取消售后、填写退货物流</li>
+ *   <li>管理员审核售后申请</li>
+ *   <li>管理员确认退款（含退款到钱包、退还优惠券、积分处理）</li>
+ *   <li>用户和管理员分页查询售后记录</li>
+ * </ul>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -50,6 +62,16 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 用户提交售后 --------
 
+    /**
+     * 用户提交售后申请。
+     * <p>
+     * 校验订单归属和状态、未存在进行中的售后单、售后类型合法性，并基于订单明细
+     * 计算实际退款金额（优惠券按比例分摊），创建售后单并返回。
+     *
+     * @param userId 用户ID
+     * @param dto    售后提交参数
+     * @return 创建的售后单
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public AfterSale submit(Long userId, AfterSaleSubmitDTO dto) {
@@ -134,6 +156,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 用户取消售后 --------
 
+    /**
+     * 用户取消售后申请。
+     * <p>
+     * 仅当售后状态为"申请中"或"审核中"时可取消，取消后若该订单无其他进行中
+     * 的售后单则保持订单状态不变。
+     *
+     * @param id     售后单ID
+     * @param userId 用户ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Long id, Long userId) {
@@ -155,6 +186,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 用户提交退货物流 --------
 
+    /**
+     * 用户提交退货物流单号。
+     * <p>
+     * 仅当售后状态为"退货中"时可填写，提交后售后状态变更为"退款中"，
+     * 并同步更新订单状态为退款中。
+     *
+     * @param userId 用户ID
+     * @param dto    退货物流参数（含售后单ID和快递单号）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void submitReturnTracking(Long userId, AfterSaleReturnDTO dto) {
@@ -184,6 +224,14 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 用户售后列表 --------
 
+    /**
+     * 分页查询当前用户的售后记录。
+     *
+     * @param userId   用户ID
+     * @param page     页码（从1开始）
+     * @param pageSize 每页条数
+     * @return 分页结果，包含售后记录VO列表
+     */
     @Override
     public PageResult pageByUser(Long userId, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
@@ -195,6 +243,13 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 用户售后详情 --------
 
+    /**
+     * 查询指定售后单的详情（需校验归属权）。
+     *
+     * @param id     售后单ID
+     * @param userId 用户ID
+     * @return 售后详情VO
+     */
     @Override
     public AfterSaleVO getDetail(Long id, Long userId) {
         AfterSale afterSale = requireAfterSale(id, userId);
@@ -203,6 +258,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 管理端分页 --------
 
+    /**
+     * 管理端分页查询所有售后记录，支持按状态和类型筛选。
+     *
+     * @param page     页码（从1开始）
+     * @param pageSize 每页条数
+     * @param status   售后状态（可选）
+     * @param type     售后类型（可选）
+     * @return 分页结果，包含售后记录VO列表
+     */
     @Override
     public PageResult pageAll(int page, int pageSize, Integer status, Integer type) {
         int offset = (page - 1) * pageSize;
@@ -214,6 +278,12 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 管理端详情 --------
 
+    /**
+     * 管理端根据ID查询售后单详情（无需校验用户归属）。
+     *
+     * @param id 售后单ID
+     * @return 售后详情VO
+     */
     @Override
     public AfterSaleVO getDetailById(Long id) {
         AfterSale afterSale = afterSaleMapper.getById(id);
@@ -225,6 +295,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 管理端审核 --------
 
+    /**
+     * 管理员审核售后申请。
+     * <p>
+     * 审核通过时：仅退款 → 退款中，退货退款 → 退货中，并发送通知给用户；
+     * 审核拒绝时：售后单状态变更为已拒绝，发送通知给用户。
+     *
+     * @param empId 审核员工ID
+     * @param dto   审核参数（含售后单ID、是否通过、备注）
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void audit(Long empId, AfterSaleAuditDTO dto) {
@@ -315,6 +394,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 管理端确认退款 --------
 
+    /**
+     * 管理员确认退款。
+     * <p>
+     * 将售后单状态变更为已完成，订单状态变更为已退款并回滚库存，同时执行：
+     * 退款到钱包、退还优惠券、按比例退还积分，并发送通知给用户。
+     *
+     * @param empId 操作员工ID
+     * @param id    售后单ID
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void confirmRefund(Long empId, Long id) {
@@ -368,6 +456,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     // -------- 根据订单ID查询售后单 --------
 
+    /**
+     * 根据订单ID查询用户的售后单详情。
+     * <p>
+     * 校验订单归属权后再查询，若无售后记录则返回 null。
+     *
+     * @param orderId 订单ID
+     * @param userId  用户ID
+     * @return 售后详情VO，若无售后记录返回 null
+     */
     @Override
     public AfterSaleVO getByOrderId(Long orderId, Long userId) {
         if (orderId == null || userId == null) {

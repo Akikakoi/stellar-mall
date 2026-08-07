@@ -125,6 +125,9 @@ const STATUS_TAG_MAP = {
 }
 function statusTag(s) { return STATUS_TAG_MAP[s] || 'info' }
 
+/**
+ * 根据售后状态返回对应的提示文案
+ */
 const statusHint = computed(() => {
   const s = afterSale.value?.status
   switch (s) {
@@ -139,6 +142,9 @@ const statusHint = computed(() => {
   }
 })
 
+/**
+ * 根据路由参数加载售后详情数据
+ */
 async function load() {
   const id = route.params.id
   if (!id) return
@@ -153,6 +159,9 @@ async function load() {
   }
 }
 
+/**
+ * 取消当前售后申请，弹出确认框后调用取消接口并刷新数据
+ */
 async function onCancel() {
   try {
     await ElMessageBox.confirm('确定取消该售后申请吗？', '提示', { type: 'warning' })
@@ -162,11 +171,17 @@ async function onCancel() {
   } catch (e) { /* user cancelled */ }
 }
 
+/**
+ * 打开退货物流填写弹窗，重置输入状态
+ */
 function openReturnDialog() {
   returnTracking.value = ''
   returnVisible.value = true
 }
 
+/**
+ * 提交退货物流单号，校验后调用接口并刷新详情
+ */
 async function submitReturn() {
   if (!returnTracking.value.trim()) {
     ElMessage.warning('请输入快递单号')
@@ -185,6 +200,9 @@ async function submitReturn() {
   }
 }
 
+/**
+ * 跳转到关联的订单详情页
+ */
 function goOrder() {
   if (afterSale.value?.orderId) {
     router.push(`/order/${afterSale.value.orderId}`)

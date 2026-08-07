@@ -153,8 +153,8 @@ public class SpuEsSyncService {
     static SpuDocument toDocument(Spu spu) {
         return SpuDocument.builder()
                 .id(spu.getId()).name(spu.getName()).subTitle(spu.getSubTitle())
-                .categoryId(spu.getCategoryId()).category2Id(spu.getCategory2Id())
-                .categoryName(spu.getCategoryName()).category2Name(spu.getCategory2Name())
+                .categoryId(spu.getCategoryId())
+                .categoryName(spu.getCategoryName())
                 .mainImage(spu.getMainImage()).minPrice(spu.getMinPrice())
                 .maxPrice(spu.getMaxPrice()).saleCount(spu.getSaleCount())
                 .commentCount(spu.getCommentCount()).totalStock(spu.getTotalStock())

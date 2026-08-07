@@ -6,8 +6,6 @@
     <resultMap id="CategoryMap" type="com.stellar.entity.Category">
         <id     property="id"         column="id"/>
         <result property="name"       column="name"/>
-        <result property="parentId"   column="parent_id"/>
-        <result property="level"      column="level"/>
         <result property="type"       column="type"/>
         <result property="sort"       column="sort"/>
         <result property="status"     column="status"/>
@@ -22,10 +20,10 @@
     <insert id="insert" parameterType="com.stellar.entity.Category"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_category (
-            name, parent_id, level, type, sort, status,
+            name, type, sort, status,
             create_time, create_user, update_time, update_user
         ) VALUES (
-            #{name}, #{parentId}, #{level}, #{type}, #{sort}, #{status},
+            #{name}, #{type}, #{sort}, #{status},
             #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
         )
     </insert>
@@ -53,14 +51,10 @@
         SELECT * FROM stellar_category WHERE id = #{id}
     </select>
 
-    <select id="getByParentNameType" resultMap="CategoryMap">
+    <select id="getByNameType" resultMap="CategoryMap">
         SELECT * FROM stellar_category
-        WHERE parent_id = #{parentId} AND name = #{name} AND type = #{type}
+        WHERE name = #{name} AND type = #{type}
         LIMIT 1
-    </select>
-
-    <select id="countByParentId" resultType="long">
-        SELECT COUNT(*) FROM stellar_category WHERE parent_id = #{parentId}
     </select>
 
     <sql id="whereClause">
@@ -107,7 +101,6 @@
         SELECT * FROM stellar_category
         <where>
             1 = 1
-            <if test="level != null">AND level = #{level}</if>
             <if test="status != null">AND status = #{status}</if>
             <if test="type != null">AND type = #{type}</if>
         </where>

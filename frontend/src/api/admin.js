@@ -1,5 +1,12 @@
+/**
+ * 管理后台 API 接口模块。
+ * 所有请求通过 adminRequest 实例发送，自动携带管理员 token 和 empId。
+ */
 import { adminRequest } from './request'
 
+// =========================== 管理员认证 ===========================
+
+/** 管理员登录 */
 export function loginAdmin(data) {
   return adminRequest({
     url: '/admin/employee/login',
@@ -8,6 +15,7 @@ export function loginAdmin(data) {
   })
 }
 
+/** 获取当前管理员信息 */
 export function getAdminProfile() {
   return adminRequest({
     url: '/admin/employee/me',
@@ -15,6 +23,9 @@ export function getAdminProfile() {
   })
 }
 
+// =========================== 商品管理 (SPU) ===========================
+
+/** 分页查询商品列表（支持 ES 中文分词搜索） */
 export function pageSpu(params) {
   return adminRequest({
     url: '/admin/spu/page',
@@ -23,6 +34,7 @@ export function pageSpu(params) {
   })
 }
 
+/** 查询商品详情（含 SKU） */
 export function getAdminSpu(id) {
   return adminRequest({
     url: `/admin/spu/${id}`,
@@ -30,6 +42,7 @@ export function getAdminSpu(id) {
   })
 }
 
+/** 新增商品（含嵌套 SKU） */
 export function saveSpu(data) {
   return adminRequest({
     url: '/admin/spu',
@@ -38,6 +51,7 @@ export function saveSpu(data) {
   })
 }
 
+/** 更新商品（传 SKU 则覆盖，不传则保留） */
 export function updateSpu(data) {
   return adminRequest({
     url: '/admin/spu',
@@ -46,6 +60,7 @@ export function updateSpu(data) {
   })
 }
 
+/** 删除商品（同步删除关联 SKU） */
 export function deleteSpu(id) {
   return adminRequest({
     url: `/admin/spu/${id}`,
@@ -53,6 +68,7 @@ export function deleteSpu(id) {
   })
 }
 
+/** 单个商品上下架：status=1 上架 / 0 下架 */
 export function setSpuStatus(id, status) {
   return adminRequest({
     url: `/admin/spu/status/${status}`,
@@ -61,6 +77,7 @@ export function setSpuStatus(id, status) {
   })
 }
 
+/** 批量上下架 */
 export function batchSetSpuStatus(ids, status) {
   return adminRequest({
     url: `/admin/spu/batch-status/${status}`,
@@ -69,6 +86,9 @@ export function batchSetSpuStatus(ids, status) {
   })
 }
 
+// =========================== 分类管理 ===========================
+
+/** 分页查询分类 */
 export function pageCategory(params) {
   return adminRequest({
     url: '/admin/category/page',
@@ -77,6 +97,7 @@ export function pageCategory(params) {
   })
 }
 
+/** 获取分类列表（可按 type 筛选） */
 export function listAdminCategory(type) {
   return adminRequest({
     url: '/admin/category/list',
@@ -85,6 +106,7 @@ export function listAdminCategory(type) {
   })
 }
 
+/** 新增分类 */
 export function saveCategory(data) {
   return adminRequest({
     url: '/admin/category',
@@ -93,6 +115,7 @@ export function saveCategory(data) {
   })
 }
 
+/** 更新分类 */
 export function updateCategory(data) {
   return adminRequest({
     url: '/admin/category',
@@ -101,6 +124,7 @@ export function updateCategory(data) {
   })
 }
 
+/** 删除分类 */
 export function deleteCategory(id) {
   return adminRequest({
     url: `/admin/category/${id}`,
@@ -121,6 +145,7 @@ export function checkCategoryDeletable(id) {
   })
 }
 
+/** 启用/禁用分类 */
 export function setCategoryStatus(id, status) {
   return adminRequest({
     url: `/admin/category/status/${status}`,
@@ -129,6 +154,9 @@ export function setCategoryStatus(id, status) {
   })
 }
 
+// =========================== RAG 同步 ===========================
+
+/** 查询待同步记录 */
 export function listRagSyncPending(params) {
   return adminRequest({
     url: '/admin/rag-sync/pending',
@@ -137,6 +165,7 @@ export function listRagSyncPending(params) {
   })
 }
 
+/** 查询全部同步记录 */
 export function listRagSyncAll(params) {
   return adminRequest({
     url: '/admin/rag-sync/list',
@@ -145,6 +174,7 @@ export function listRagSyncAll(params) {
   })
 }
 
+/** 重试单条同步 */
 export function retryRagSyncOne(id) {
   return adminRequest({
     url: `/admin/rag-sync/retry/${id}`,
@@ -152,6 +182,7 @@ export function retryRagSyncOne(id) {
   })
 }
 
+/** 批量处理全部待同步记录 */
 export function processAllRagSync() {
   return adminRequest({
     url: '/admin/rag-sync/process-all',
@@ -159,6 +190,7 @@ export function processAllRagSync() {
   })
 }
 
+/** 获取同步统计信息 */
 export function getRagSyncStats() {
   return adminRequest({
     url: '/admin/rag-sync/stats',
@@ -166,6 +198,9 @@ export function getRagSyncStats() {
   })
 }
 
+// =========================== 员工管理 ===========================
+
+/** 分页查询员工 */
 export function pageEmployee(params) {
   return adminRequest({
     url: '/admin/employee/page',
@@ -174,6 +209,7 @@ export function pageEmployee(params) {
   })
 }
 
+/** 新增员工 */
 export function saveEmployee(data) {
   return adminRequest({
     url: '/admin/employee',
@@ -182,6 +218,7 @@ export function saveEmployee(data) {
   })
 }
 
+/** 更新员工 */
 export function updateEmployee(data) {
   return adminRequest({
     url: '/admin/employee',
@@ -190,6 +227,7 @@ export function updateEmployee(data) {
   })
 }
 
+/** 查询员工详情 */
 export function getEmployee(id) {
   return adminRequest({
     url: `/admin/employee/${id}`,
@@ -197,6 +235,7 @@ export function getEmployee(id) {
   })
 }
 
+/** 启用/禁用员工 */
 export function setEmployeeStatus(id, status) {
   return adminRequest({
     url: `/admin/employee/status/${status}`,
@@ -205,6 +244,9 @@ export function setEmployeeStatus(id, status) {
   })
 }
 
+// =========================== 仪表盘 ===========================
+
+/** 获取仪表盘统计数据 */
 export function getDashboardStats() {
   return adminRequest({
     url: '/admin/dashboard/stats',
@@ -212,6 +254,9 @@ export function getDashboardStats() {
   })
 }
 
+// =========================== 订单管理 ===========================
+
+/** 分页查询订单 */
 export function pageOrder(params) {
   return adminRequest({
     url: '/admin/order/page',
@@ -220,6 +265,7 @@ export function pageOrder(params) {
   })
 }
 
+/** 发货（填写快递单号） */
 export function shipOrder(id, data = {}) {
   return adminRequest({
     url: `/admin/order/${id}/ship`,
@@ -228,6 +274,7 @@ export function shipOrder(id, data = {}) {
   })
 }
 
+/** 删除订单 */
 export function deleteOrder(id) {
   return adminRequest({
     url: `/admin/order/${id}`,
@@ -235,7 +282,9 @@ export function deleteOrder(id) {
   })
 }
 
-// -------- 售后管理 --------
+// =========================== 售后管理 ===========================
+
+/** 分页查询售后单 */
 export function pageAfterSale(params) {
   return adminRequest({
     url: '/admin/aftersale/page',
@@ -244,6 +293,7 @@ export function pageAfterSale(params) {
   })
 }
 
+/** 查询售后详情 */
 export function getAdminAfterSale(id) {
   return adminRequest({
     url: `/admin/aftersale/${id}`,
@@ -251,6 +301,7 @@ export function getAdminAfterSale(id) {
   })
 }
 
+/** 审核售后单（通过/拒绝） */
 export function auditAfterSale(data) {
   return adminRequest({
     url: '/admin/aftersale/audit',
@@ -259,6 +310,7 @@ export function auditAfterSale(data) {
   })
 }
 
+/** 确认退款 */
 export function confirmRefund(id) {
   return adminRequest({
     url: `/admin/aftersale/${id}/confirm-refund`,
@@ -266,7 +318,9 @@ export function confirmRefund(id) {
   })
 }
 
-// ========== 积分管理 ==========
+// =========================== 积分管理 ===========================
+
+/** 获取积分规则列表 */
 export function listPointsRules() {
   return adminRequest({
     url: '/admin/points/rules',
@@ -274,6 +328,7 @@ export function listPointsRules() {
   })
 }
 
+/** 新增或更新积分规则 */
 export function savePointsRule(data) {
   return adminRequest({
     url: '/admin/points/rules',
@@ -282,6 +337,7 @@ export function savePointsRule(data) {
   })
 }
 
+/** 删除积分规则 */
 export function deletePointsRule(id) {
   return adminRequest({
     url: `/admin/points/rules/${id}`,
@@ -289,6 +345,7 @@ export function deletePointsRule(id) {
   })
 }
 
+/** 手动调整用户积分 */
 export function adjustPoints(data) {
   return adminRequest({
     url: '/admin/points/adjust',
@@ -297,6 +354,7 @@ export function adjustPoints(data) {
   })
 }
 
+/** 分页查询积分商品 */
 export function pagePointsProducts(params) {
   return adminRequest({
     url: '/admin/points/products',
@@ -305,6 +363,7 @@ export function pagePointsProducts(params) {
   })
 }
 
+/** 查询积分商品详情 */
 export function getAdminPointsProduct(id) {
   return adminRequest({
     url: `/admin/points/products/${id}`,
@@ -312,6 +371,7 @@ export function getAdminPointsProduct(id) {
   })
 }
 
+/** 新增或更新积分商品（有 id 则更新，无 id 则新增） */
 export function savePointsProduct(data) {
   if (data.id) {
     return adminRequest({
@@ -327,6 +387,7 @@ export function savePointsProduct(data) {
   })
 }
 
+/** 删除积分商品 */
 export function deletePointsProduct(id) {
   return adminRequest({
     url: `/admin/points/products/${id}`,
@@ -334,11 +395,12 @@ export function deletePointsProduct(id) {
   })
 }
 
-// ========== 文件上传 ==========
+// =========================== 文件上传 ===========================
+
 /**
  * 上传图片文件到 OSS。
  * @param {File|File[]} files - 单个 File 或 File 数组
- * @param {string} module - 业务模块名，默认 "spu"
+ * @param {string} [module='spu'] - 业务模块名，默认 "spu"
  * @returns {Promise<string[]>} OSS URL 列表
  */
 export function uploadImages(files, module = 'spu') {

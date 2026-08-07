@@ -8,6 +8,10 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * 商品分类 Mapper，支持多级分类树结构的增删改查及分页。
+ * 表：stellar_category。
+ */
 @Mapper
 public interface CategoryMapper {
 
@@ -21,12 +25,9 @@ public interface CategoryMapper {
 
     Category getById(@Param("id") Long id);
 
-    /** 唯一键 (parent_id, name, type) 查询。 */
-    Category getByParentNameType(@Param("parentId") Long parentId,
-                                 @Param("name") String name,
-                                 @Param("type") Integer type);
-
-    long countByParentId(@Param("parentId") Long parentId);
+    /** 唯一键 (name, type) 查询。 */
+    Category getByNameType(@Param("name") String name,
+                           @Param("type") Integer type);
 
     long count(@Param("name") String name,
                @Param("type") Integer type,
@@ -39,8 +40,7 @@ public interface CategoryMapper {
                         @Param("sortBy") String sortBy,
                         @Param("sortOrder") String sortOrder);
 
-    /** flat 查询：level/status/type 过滤。 */
-    List<Category> list(@Param("level") Integer level,
-                        @Param("status") Integer status,
+    /** flat 查询：status/type 过滤。 */
+    List<Category> list(@Param("status") Integer status,
                         @Param("type") Integer type);
 }

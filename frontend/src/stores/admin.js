@@ -1,3 +1,7 @@
+/**
+ * 管理后台状态管理 Store。
+ * 管理管理员登录态、个人信息，数据持久化到 localStorage。
+ */
 import { defineStore } from 'pinia'
 import { loginAdmin, getAdminProfile } from '@/api/admin'
 import { storage } from '@/utils/storage'
@@ -7,10 +11,12 @@ const EMPID_KEY = 'stellar_admin_empid'
 const USERNAME_KEY = 'stellar_admin_username'
 const NAME_KEY = 'stellar_admin_name'
 
+/** 从 localStorage 读取 */
 function safeGet(key) {
   return storage.local.get(key)
 }
 
+/** 写入 localStorage，值为 null/undefined 时删除 */
 function safeSet(key, value) {
   if (value === null || value === undefined) {
     storage.local.remove(key)
@@ -19,23 +25,30 @@ function safeSet(key, value) {
   }
 }
 
+/** 从 localStorage 删除 */
 function safeRemove(key) {
   storage.local.remove(key)
 }
 
 export const useAdminStore = defineStore('admin', {
   state: () => ({
+    /** 员工 ID */
     empId: safeGet(EMPID_KEY) ? Number(safeGet(EMPID_KEY)) : null,
+    /** 登录 Token */
     token: safeGet(TOKEN_KEY) || '',
+    /** 用户名 */
     username: safeGet(USERNAME_KEY) || '',
+    /** 真实姓名 */
     name: safeGet(NAME_KEY) || ''
   }),
 
   getters: {
+    /** 是否已登录 */
     isLoggedIn: (state) => !!state.token
   },
 
   actions: {
+    /** 管理员登录 */
     async login(payload) {
       const res = await loginAdmin(payload)
       this.token = res.token || ''
@@ -51,6 +64,7 @@ export const useAdminStore = defineStore('admin', {
       return res
     },
 
+    /** 从服务端拉取最新管理员信息 */
     async fetchProfile() {
       try {
         const res = await getAdminProfile()
@@ -72,11 +86,13 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
+    /** 手动设置 Token */
     setToken(token) {
       this.token = token || ''
       safeSet(TOKEN_KEY, this.token)
     },
 
+    /** 手动设置管理员信息（用于跨页面同步） */
     setAdminInfo(info) {
       if (!info) return
       if (info.empId || info.id || info.EMP_ID) {
@@ -97,6 +113,7 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
+    /** 退出登录，清除所有状态和本地存储 */
     logout() {
       this.empId = null
       this.token = ''

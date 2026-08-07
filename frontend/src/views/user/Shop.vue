@@ -35,30 +35,6 @@
         <!-- 侧栏：聚合筛选 -->
         <aside class="filter-sidebar">
           <h3 class="sidebar-title">筛选</h3>
-          <!-- 价格区间 -->
-          <div class="filter-section">
-            <h3 class="filter-title">价格区间</h3>
-            <div class="price-input-row">
-              <el-input
-                v-model="customPriceFrom"
-                placeholder="最低价"
-                size="small"
-                class="price-input"
-                @keyup.enter="applyPriceFilter"
-                @blur="applyPriceFilter"
-              />
-              <span class="price-separator">—</span>
-              <el-input
-                v-model="customPriceTo"
-                placeholder="最高价"
-                size="small"
-                class="price-input"
-                @keyup.enter="applyPriceFilter"
-                @blur="applyPriceFilter"
-              />
-            </div>
-          </div>
-
           <!-- 排序 -->
           <div class="filter-section">
             <h3 class="filter-title">排序</h3>
@@ -87,24 +63,19 @@
           </div>
 
           <!-- 分类 -->
-          <div class="filter-section" v-if="aggCategories.length > 0">
+          <div class="filter-section" v-if="allCategories.length > 0">
             <h3 class="filter-title">商品分类</h3>
             <ul class="filter-list">
-              <li v-for="b in aggCategories" :key="b.key"
+              <li v-for="c in displayCategories" :key="c.key"
                 class="filter-item"
-                :class="{ active: activeCategoryId === b.key }"
-                @click="toggleCategoryFilter(b.key)">
-                <span class="filter-label">{{ categoryNameById(b.key) || '分类 ' + b.key }}</span>
-                <span class="filter-count">{{ b.docCount }}</span>
+                :class="{ active: activeCategoryId === c.key }"
+                @click="toggleCategoryFilter(c.key)">
+                <span class="filter-label">{{ c.name }}</span>
               </li>
             </ul>
           </div>
 
-          <!-- 清除全部 -->
-          <div class="filter-section" v-if="hasActiveFilters">
-            <el-button size="small" text type="danger" @click="clearAllFilters">清除全部筛选</el-button>
-          </div>
-          <div class="filter-empty" v-if="!hasActiveFilters && aggCategories.length === 0">
+          <div class="filter-empty" v-if="!hasActiveFilters && allCategories.length === 0">
             <span class="empty-text">暂无筛选条件</span>
           </div>
         </aside>
@@ -133,12 +104,24 @@
           </div>
 
           <!-- 商品网格 -->
-          <div class="spu-grid" v-loading="loading"
+          <div class="spu-grid"
             :style="{ gridTemplateColumns: `repeat(${columns}, 1fr)` }"
             v-infinite-scroll="loadMore"
             :infinite-scroll-disabled="!hasMore || loading || loadingMore"
             :infinite-scroll-distance="120"
             :infinite-scroll-immediate="false">
+            <!-- 骨架屏：首次加载时显示 -->
+            <div v-if="loading && spus.length === 0" v-for="i in columns * 2" :key="'skeleton-'+i" class="spu-card spu-card--skeleton">
+              <div class="spu-image skeleton-box"></div>
+              <div class="spu-info">
+                <div class="skeleton-line skeleton-line--long"></div>
+                <div class="skeleton-line skeleton-line--short"></div>
+                <div class="spu-bottom">
+                  <div class="skeleton-line skeleton-line--price"></div>
+                  <div class="skeleton-line skeleton-line--btn"></div>
+                </div>
+              </div>
+            </div>
             <div v-for="spu in spus" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
               <div class="spu-image">
                 <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy"
@@ -221,7 +204,6 @@ const loadingMore = ref(false)
 const keyword = ref('')
 const searchKeyword = ref('')  // 顶部大搜索框的输入绑定
 const categoryId = ref(null)
-const category2Id = ref(null)
 const categoryName = ref('')
 const spus = ref([])
 const favSet = reactive(new Set())
@@ -236,6 +218,7 @@ const highlights = ref({})
 // 聚合数据
 const aggCategories = ref([])
 const aggPriceRanges = ref([])
+const initialAggCategories = ref([]) // 保存初始（无筛选）聚合，用于始终显示全部分类数量
 const activeCategoryId = ref(null)
 // 自定义价格筛选
 const customPriceFrom = ref('')
@@ -250,6 +233,19 @@ const categoryMap = reactive({})
 
 const hasActiveFilters = computed(() => !!activeCategoryId.value || customPriceFrom.value !== '' || customPriceTo.value !== '' || activeSort.value !== 'default')
 
+// 展示所有分类，合并聚合中的商品数量
+// 使用 initialAggCategories（初始无筛选聚合）确保数量始终显示全量，不受后续筛选影响
+const displayCategories = computed(() => {
+  const aggMap = {}
+  const source = initialAggCategories.value.length > 0 ? initialAggCategories.value : aggCategories.value
+  source.forEach(a => { aggMap[Number(a.key)] = a.docCount })
+  return allCategories.value.map(c => ({
+    key: c.id,
+    name: c.name,
+    docCount: aggMap[c.id] || 0
+  }))
+})
+
 // --- 规格弹窗 ---
 const skuDialogVisible = ref(false)
 const currentSpu = ref(null)
@@ -259,18 +255,32 @@ const addingCart = ref(false)
 const selectedSku = computed(() => currentSkus.value.find(s => s.id === selectedSkuId.value))
 
 // --- 高亮渲染 ---
+/**
+ * 渲染商品名称，优先使用搜索高亮片段，否则返回 HTML 转义后的原始名称
+ * @param {number|string} spuId - 商品 SPU ID
+ * @param {string} fallback - 无高亮时的回退文本
+ * @returns {string} 高亮 HTML 或转义后的名称
+ */
 function highlightedName(spuId, fallback) {
   const hl = highlights.value[String(spuId)]
   if (hl && hl.length > 0) return hl[0]
   // 用内置 HTML 转义后的 fallback
   return escapeHtml(String(fallback || ''))
 }
+/**
+ * HTML 特殊字符转义，防止 XSS
+ * @param {string} str - 原始字符串
+ * @returns {string} 转义后的字符串
+ */
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
 // --- 聚合交互 ---
+/**
+ * 执行商城搜索，更新 URL 并重置筛选条件后重新加载商品列表
+ */
 function doShopSearch() {
   const kw = searchKeyword.value.trim()
   if (!kw) return
@@ -282,10 +292,15 @@ function doShopSearch() {
   customPriceFrom.value = ''
   customPriceTo.value = ''
   activeSort.value = 'default'
+  initialAggCategories.value = []
+  aggCategories.value = []
   page.value = 1; spus.value = []
   loadSpu()
 }
 
+/**
+ * 应用自定义价格区间筛选，校验最低价不能高于最高价
+ */
 function applyPriceFilter() {
   // 校验：最低价不能大于最高价
   const from = Number(customPriceFrom.value)
@@ -298,6 +313,10 @@ function applyPriceFilter() {
   loadSpu()
 }
 
+/**
+ * 切换排序方式，再次点击同一排序则恢复默认排序
+ * @param {string} sortKey - 排序键值
+ */
 function setSort(sortKey) {
   if (activeSort.value === sortKey) {
     activeSort.value = 'default'
@@ -308,22 +327,34 @@ function setSort(sortKey) {
   loadSpu()
 }
 
+/**
+ * 切换分类筛选，再次点击同一分类则取消筛选
+ * @param {number|string} catId - 分类 ID
+ */
 function toggleCategoryFilter(catId) {
   if (activeCategoryId.value === catId) {
     activeCategoryId.value = null
+    router.replace({ query: { ...route.query, categoryId: undefined } })
   } else {
     activeCategoryId.value = catId
+    router.replace({ query: { ...route.query, categoryId: catId } })
   }
   page.value = 1; spus.value = []
   loadSpu()
 }
 
+/**
+ * 清除所有筛选条件（分类、价格、排序）并重新加载
+ */
 function clearAllFilters() {
   activeCategoryId.value = null
   customPriceFrom.value = ''
   customPriceTo.value = ''
   activeSort.value = 'default'
+  initialAggCategories.value = []
+  aggCategories.value = []
   page.value = 1; spus.value = []
+  router.replace({ query: { ...route.query, categoryId: undefined } })
   loadSpu()
 }
 
@@ -332,6 +363,10 @@ function categoryNameById(id) {
 }
 
 // --- 价格区间 → 请求参数 ---
+/**
+ * 将自定义价格区间转换为请求参数
+ * @returns {Object} 包含 priceFrom / priceTo 的参数对象
+ */
 function priceFilterParams() {
   const params = {}
   if (customPriceFrom.value !== '') {
@@ -346,6 +381,10 @@ function priceFilterParams() {
 }
 
 // --- 排序 → 请求参数 ---
+/**
+ * 将当前排序方式转换为请求参数
+ * @returns {Object} 包含 sortBy / sortOrder 的参数对象
+ */
 function sortParams() {
   switch (activeSort.value) {
     case 'price_asc':  return { sortBy: 'minPrice', sortOrder: 'asc' }
@@ -356,6 +395,10 @@ function sortParams() {
 }
 
 // --- 数据加载 ---
+/**
+ * 加载商品列表，支持追加模式（滚动加载更多）和首次加载模式
+ * @param {boolean} [append=false] - 是否为追加模式
+ */
 async function loadSpu(append = false) {
   if (append) {
     loadingMore.value = true
@@ -366,14 +409,13 @@ async function loadSpu(append = false) {
     total.value = 0
     favSet.clear()
     highlights.value = {}
-    aggCategories.value = []
+    // 聚合数据不重置，保持初始全量数据
     aggPriceRanges.value = []
   }
   try {
     const params = { page: page.value, pageSize: pageSize.value }
     if (keyword.value) params.name = keyword.value
     if (categoryId.value) params.categoryId = categoryId.value
-    if (category2Id.value) params.category2Id = category2Id.value
 
     // 聚合筛选参数
     if (activeCategoryId.value) params.categoryId = Number(activeCategoryId.value)
@@ -400,10 +442,20 @@ async function loadSpu(append = false) {
         if (res.highlights) {
           highlights.value = res.highlights
         }
-        // 聚合（只在首页加载时更新）
-        if (res.aggregations) {
-          if (res.aggregations.categories) aggCategories.value = res.aggregations.categories
-          if (res.aggregations.priceRanges) aggPriceRanges.value = res.aggregations.priceRanges
+        // 聚合：首次加载时保存全量聚合数据，后续不再更新
+        const isFirstLoad = initialAggCategories.value.length === 0 && aggCategories.value.length === 0
+        console.log('[Shop] aggregations:', JSON.stringify(res.aggregations), 'isFirstLoad:', isFirstLoad)
+        if (res.aggregations && !append && isFirstLoad) {
+          if (res.aggregations.categories && res.aggregations.categories.length > 0) {
+            aggCategories.value = res.aggregations.categories
+            initialAggCategories.value = res.aggregations.categories
+            console.log('[Shop] categories saved:', res.aggregations.categories.length, 'buckets')
+          } else {
+            console.warn('[Shop] categories is null/empty in response')
+          }
+          if (res.aggregations.priceRanges && res.aggregations.priceRanges.length > 0) {
+            aggPriceRanges.value = res.aggregations.priceRanges
+          }
         }
         await batchCheckFavs()
       }
@@ -416,12 +468,19 @@ async function loadSpu(append = false) {
   }
 }
 
+/**
+ * 滚动加载更多商品，页码递增后调用 loadSpu 追加模式
+ */
 async function loadMore() {
   if (loading.value || loadingMore.value || !hasMore.value) return
   page.value += 1
   await loadSpu(true)
 }
 
+/**
+ * 批量检查商品收藏状态，仅登录用户生效
+ * @param {Array} [items] - 商品列表，默认使用当前 spus
+ */
 async function batchCheckFavs(items) {
   const target = items || spus.value
   if (!userStore.token || target.length === 0) return
@@ -432,6 +491,10 @@ async function batchCheckFavs(items) {
   } catch (e) { }
 }
 
+/**
+ * 切换商品收藏状态，未登录时跳转登录页
+ * @param {Object} spu - 商品对象
+ */
 async function toggleFav(spu) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
@@ -452,6 +515,10 @@ function goDetail(id) {
   window.open(r.href, '_blank')
 }
 
+/**
+ * 处理加入购物车：获取商品 SKU 列表，单个 SKU 直接加入，多个 SKU 弹出规格选择弹窗
+ * @param {Object} spu - 商品对象
+ */
 async function handleAddToCart(spu) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
@@ -469,6 +536,10 @@ async function handleAddToCart(spu) {
   }
 }
 
+/**
+ * 执行加入购物车操作，调用接口并刷新购物车数据
+ * @param {number} skuId - SKU ID
+ */
 async function doAddCart(skuId) {
   if (!skuId) { ElMessage.warning('请选择商品规格'); return }
   addingCart.value = true
@@ -492,7 +563,6 @@ onMounted(async () => {
     searchKeyword.value = q      // 顶部搜索框预填
   }
   categoryId.value = route.query.categoryId || null
-  category2Id.value = route.query.category2Id || null
 
   // 加载分类列表（用于聚合面板名称映射）
   try {
@@ -508,7 +578,7 @@ onMounted(async () => {
     walk(cats || [])
     allCategories.value = flat
     flat.forEach(c => { categoryMap[c.id] = c.name })
-    const cat = flat.find(c => c.id == category2Id.value || c.id == categoryId.value)
+    const cat = flat.find(c => c.id == categoryId.value)
     if (cat) categoryName.value = cat.name
   } catch (e) { }
 
@@ -817,5 +887,30 @@ onMounted(async () => {
   .price-input-row { flex-wrap: nowrap; }
   .price-input { min-width: 50px; }
   .spu-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+
+/* ===== 骨架屏 ===== */
+.spu-card--skeleton { cursor: default; pointer-events: none; }
+.spu-card--skeleton:hover { transform: none; box-shadow: none; border-color: var(--border-base); }
+.skeleton-box {
+  background: linear-gradient(90deg, var(--bg-hover, #f0f0f0) 25%, var(--bg-card, #e8e8e8) 50%, var(--bg-hover, #f0f0f0) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+}
+.skeleton-line {
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--bg-hover, #f0f0f0) 25%, var(--bg-card, #e8e8e8) 50%, var(--bg-hover, #f0f0f0) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  margin-bottom: 10px;
+}
+.skeleton-line--long { width: 100%; height: 16px; }
+.skeleton-line--short { width: 60%; }
+.skeleton-line--price { width: 80px; height: 20px; margin-bottom: 0; }
+.skeleton-line--btn { width: 70px; height: 28px; border-radius: 8px; margin-bottom: 0; }
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 </style>

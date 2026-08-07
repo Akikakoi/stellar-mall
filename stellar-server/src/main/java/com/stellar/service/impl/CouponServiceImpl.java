@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 优惠券服务实现类。
+ * 提供优惠券的创建、编辑、删除、分页查询，以及用户端优惠券的查看、领取、使用、退还等核心功能。
+ */
 @Service
 @RequiredArgsConstructor
 public class CouponServiceImpl implements CouponService {
@@ -21,6 +25,14 @@ public class CouponServiceImpl implements CouponService {
     private final CouponMapper couponMapper;
 
     // ===== Admin =====
+
+    /**
+     * 创建优惠券。
+     * 初始化领取/使用计数，设置创建与更新时间及操作用户，写入数据库后返回新优惠券ID。
+     *
+     * @param coupon 待创建的优惠券对象
+     * @return 创建成功后返回的优惠券ID
+     */
     @Override
     @Transactional
     public Long create(Coupon coupon) {
@@ -35,6 +47,12 @@ public class CouponServiceImpl implements CouponService {
         return coupon.getId();
     }
 
+    /**
+     * 更新优惠券信息。
+     * 刷新更新时间与操作用户后，将变更持久化到数据库。
+     *
+     * @param coupon 包含更新字段的优惠券对象
+     */
     @Override
     @Transactional
     public void update(Coupon coupon) {
@@ -44,12 +62,27 @@ public class CouponServiceImpl implements CouponService {
         couponMapper.updateCoupon(coupon);
     }
 
+    /**
+     * 删除指定ID的优惠券。
+     *
+     * @param id 要删除的优惠券ID
+     */
     @Override
     @Transactional
     public void delete(Long id) {
         couponMapper.deleteCoupon(id);
     }
 
+    /**
+     * 分页查询优惠券列表。
+     * 支持按名称和状态筛选，返回分页结果。
+     *
+     * @param name     优惠券名称（模糊匹配，可为空）
+     * @param status   优惠券状态（可为空）
+     * @param page     当前页码（默认1）
+     * @param pageSize 每页条数（默认10）
+     * @return 包含总条数和数据列表的分页结果
+     */
     @Override
     public PageResult pageCoupon(String name, Integer status, Integer page, Integer pageSize) {
         int p = (page == null || page < 1) ? 1 : page;
@@ -60,11 +93,28 @@ public class CouponServiceImpl implements CouponService {
     }
 
     // ===== User =====
+
+    /**
+     * 查询用户当前可领取的优惠券列表。
+     *
+     * @param userId 用户ID
+     * @return 可用优惠券列表
+     */
     @Override
     public List<Coupon> listAvailable(Long userId) {
         return couponMapper.listAvailableCoupons(userId);
     }
 
+    /**
+     * 用户领取优惠券。
+     * 校验优惠券是否存在、是否启用、库存是否充足、用户是否已达领取上限。
+     * 领取成功后增加已领取计数，创建用户优惠券记录并返回记录ID。
+     *
+     * @param couponId 优惠券ID
+     * @param userId   领取用户ID
+     * @return 用户优惠券记录ID
+     * @throws RuntimeException 优惠券不存在、已禁用、已领完或已达领取上限时抛出
+     */
     @Override
     @Transactional
     public Long claim(Long couponId, Long userId) {
@@ -89,16 +139,37 @@ public class CouponServiceImpl implements CouponService {
         return uc.getId();
     }
 
+    /**
+     * 查询用户持有的优惠券列表。
+     * 可按状态筛选，返回用户优惠券记录。
+     *
+     * @param userId 用户ID
+     * @param status 优惠券状态（可为空，表示查询全部）
+     * @return 用户优惠券列表
+     */
     @Override
     public List<UserCoupon> listUserCoupons(Long userId, Integer status) {
         return couponMapper.listUserCoupons(userId, status);
     }
 
+    /**
+     * 根据ID查询用户优惠券记录详情。
+     *
+     * @param id 用户优惠券记录ID
+     * @return 用户优惠券对象，不存在时返回null
+     */
     @Override
     public UserCoupon getUserCoupon(Long id) {
         return couponMapper.getUserCouponById(id);
     }
 
+    /**
+     * 使用优惠券（核销）。
+     * 将用户优惠券状态更新为已使用，关联订单ID，并递增优惠券的已使用计数。
+     *
+     * @param userCouponId 用户优惠券记录ID
+     * @param orderId      关联的订单ID
+     */
     @Override
     @Transactional
     public void useCoupon(Long userCouponId, Long orderId) {
@@ -109,6 +180,13 @@ public class CouponServiceImpl implements CouponService {
         }
     }
 
+    /**
+     * 根据订单ID退还优惠券。
+     * 用于订单退款/取消时，将已使用的优惠券恢复为可用状态，并递减已使用计数。
+     * 若订单未使用优惠券或优惠券已退还，则直接返回不做处理。
+     *
+     * @param orderId 订单ID
+     */
     @Override
     @Transactional
     public void returnCouponByOrderId(Long orderId) {

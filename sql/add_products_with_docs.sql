@@ -8,13 +8,13 @@ USE stellar_mall;
 -- 1. 智能手机 (category_id=1)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 X200 5G 影像旗舰', '徕卡光学镜头 · 1英寸大底 · 骁龙8 Gen4',
-    1, NULL,
+    1,
     '# 星耀 X200 5G 影像旗舰
 
 ## 产品概述
@@ -70,13 +70,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 3, total_stock = 450 WHERE id = @spu_x200;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 Note 14 Pro', '2亿像素 · 120W快充 · 轻薄长续航',
-    1, NULL,
+    1,
     '# 星耀 Note 14 Pro
 
 ## 产品概述
@@ -121,13 +121,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 3, total_stock = 750 WHERE id = @spu_note14;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 A60 5G 学生机', '5000mAh · 护眼屏 · 学生模式',
-    1, NULL,
+    1,
     '# 星耀 A60 5G 学生机
 
 ## 产品概述
@@ -169,13 +169,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 900 WHERE id = @spu_a60;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 Flip 折叠屏', '竖折设计 · 3.6寸外屏 · 轻薄时尚',
-    1, NULL,
+    1,
     '# 星耀 Flip 折叠屏
 
 ## 产品概述
@@ -226,13 +226,13 @@ UPDATE stellar_spu SET sku_count = 2, total_stock = 250 WHERE id = @spu_flip;
 -- 2. 笔记本电脑 (category_id=4)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 ThinkBook 16 商务本', 'Ultra 9 · 32GB · 2.5K · 1.8kg',
-    4, NULL,
+    4,
     '# 星耀 ThinkBook 16 商务本
 
 ## 产品概述
@@ -279,13 +279,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 250 WHERE id = @spu_tb16;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 Creator 14 设计师本', 'RTX 4070 · 3.2K OLED · 100% DCI-P3',
-    4, NULL,
+    4,
     '# 星耀 Creator 14 设计师本
 
 ## 产品概述
@@ -330,13 +330,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 130 WHERE id = @spu_creator;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 Book 14 学生本', 'i5-13500H · 16GB · 2.2K · 高性价比',
-    4, NULL,
+    4,
     '# 星耀 Book 14 学生本
 
 ## 产品概述
@@ -378,13 +378,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 500 WHERE id = @spu_book14;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 GamePro 16 游戏本', 'RTX 4060 · i9-14900HX · 240Hz 电竞屏',
-    4, NULL,
+    4,
     '# 星耀 GamePro 16 游戏本
 
 ## 产品概述
@@ -436,13 +436,13 @@ UPDATE stellar_spu SET sku_count = 2, total_stock = 180 WHERE id = @spu_gamepro;
 -- 3. 智能影音 (category_id=6)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 VividBar Ultra 旗舰回音壁', '11.1.4声道 · Dolby Atmos · 无线后环绕',
-    6, NULL,
+    6,
     '# 逸彩 VividBar Ultra 旗舰回音壁
 
 ## 产品概述
@@ -484,13 +484,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 100 WHERE id = @spu_soundbar;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 VividStudio Pro 监听音箱', '5寸低音 · 独立功放 · XLR平衡输入',
-    6, NULL,
+    6,
     '# 逸彩 VividStudio Pro 监听音箱
 
 ## 产品概述
@@ -534,13 +534,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 200 WHERE id = @spu_studio;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 VividBeam 4K 投影仪', '4K HDR · 2800ANSI流明 · 自动对焦梯形校正',
-    6, NULL,
+    6,
     '# 逸彩 VividBeam 4K 投影仪
 
 ## 产品概述
@@ -587,13 +587,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 150 WHERE id = @spu_projector;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 VividMix 直播声卡', '专业DSP · 48V幻象电源 · 实时监聽',
-    6, NULL,
+    6,
     '# 逸彩 VividMix 直播声卡
 
 ## 产品概述
@@ -637,13 +637,13 @@ UPDATE stellar_spu SET sku_count = 1, total_stock = 500 WHERE id = @spu_mixer;
 -- 4. 智能穿戴 (category_id=8)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 Watch 4 Ultra 旗舰手表', '钛合金 · 蓝宝石玻璃 · 双频GPS · 14天续航',
-    8, NULL,
+    8,
     '# 星耀 Watch 4 Ultra 旗舰手表
 
 ## 产品概述
@@ -694,13 +694,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 200 WHERE id = @spu_watch4u;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 Band 9 智能手环', '1.74寸AMOLED · 120种运动 · 磁吸快充',
-    8, NULL,
+    8,
     '# 星耀 Band 9 智能手环
 
 ## 产品概述
@@ -743,13 +743,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 3, total_stock = 950 WHERE id = @spu_band9;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 Buds Pro 3 降噪耳机', '自适应降噪 · 空间音频 · 36小时续航',
-    8, NULL,
+    8,
     '# 星耀 Buds Pro 3 降噪耳机
 
 ## 产品概述
@@ -794,13 +794,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 350 WHERE id = @spu_buds3;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 AR Glasses Air 智能眼镜', 'Micro-OLED · 201寸巨幕 · 49g超轻',
-    8, NULL,
+    8,
     '# 星耀 AR Glasses Air 智能眼镜
 
 ## 产品概述
@@ -845,13 +845,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 100 WHERE id = @spu_glass;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('星耀 SmartRing Nova 智能戒指', '钛合金 · 健康监测 · 7天续航 · 3g超轻',
-    8, NULL,
+    8,
     '# 星耀 SmartRing Nova 智能戒指
 
 ## 产品概述
@@ -896,16 +896,16 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 UPDATE stellar_spu SET sku_count = 1, total_stock = 300 WHERE id = @spu_ring;
 
 -- ============================================================
--- 5. 家用电冰箱 (category_id=9, category2_id=2)
+-- 5. 家用电冰箱 (category_id=2)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 FreshBox 500 十字对开冰箱', '500L · 双变频 · 风冷无霜 · 净味杀菌',
-    9, 2,
+    2,
     '# 极净 FreshBox 500 十字对开冰箱
 
 ## 产品概述
@@ -956,13 +956,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 250 WHERE id = @spu_fridge500;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 MiniBar 120 小冰箱', '120L · 静音 · 宿舍/办公室/卧室',
-    9, 2,
+    2,
     '# 极净 MiniBar 120 小冰箱
 
 ## 产品概述
@@ -1003,13 +1003,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 700 WHERE id = @spu_minibar;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 CoolPro 650 法式四门冰箱', '650L · 双系统 · 独立制冰 · 全空间净化',
-    9, 2,
+    2,
     '# 极净 CoolPro 650 法式四门冰箱
 
 ## 产品概述
@@ -1050,13 +1050,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 100 WHERE id = @spu_coolpro;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 IceBar 200 冰吧/红酒柜', '200L · 双温区 · 恒温恒湿 · UV杀菌',
-    9, 2,
+    2,
     '# 极净 IceBar 200 冰吧/红酒柜
 
 ## 产品概述
@@ -1096,16 +1096,16 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 UPDATE stellar_spu SET sku_count = 1, total_stock = 150 WHERE id = @spu_icebar;
 
 -- ============================================================
--- 6. 家用空调 (category_id=9, category2_id=3)
+-- 6. 家用空调 (category_id=3)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('御风 FreshAir Pro 新风空调', '1.5匹 · 新一级 · 60m³/h新风 · UV杀菌',
-    9, 3,
+    3,
     '# 御风 FreshAir Pro 新风空调
 
 ## 产品概述
@@ -1151,13 +1151,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 400 WHERE id = @spu_freshair;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('御风 CoolMate 移动空调', '免安装 · 1匹 · 冷暖两用 · 除湿',
-    9, 3,
+    3,
     '# 御风 CoolMate 移动空调
 
 ## 产品概述
@@ -1201,13 +1201,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 500 WHERE id = @spu_coolmate;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('御风 EcoSilence 3匹柜机', '3匹 · 新一级 · 22dB静音 · 1550m³/h大风量',
-    9, 3,
+    3,
     '# 御风 EcoSilence 3匹柜机
 
 ## 产品概述
@@ -1247,13 +1247,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 160 WHERE id = @spu_eco3;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('御风 SmartCool 2匹挂机', '2匹 · 新一级 · 自清洁 · 智能温控',
-    9, 3,
+    3,
     '# 御风 SmartCool 2匹挂机
 
 ## 产品概述
@@ -1292,16 +1292,16 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 UPDATE stellar_spu SET sku_count = 1, total_stock = 300 WHERE id = @spu_smartcool;
 
 -- ============================================================
--- 7. 平板电视 (category_id=9, category2_id=5)
+-- 7. 平板电视 (category_id=5)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 85 寸 QD-OLED 电视', '85寸 · QD-OLED · 4K 144Hz · 无限对比度',
-    9, 5,
+    5,
     '# 逸彩 85 寸 QD-OLED 电视
 
 ## 产品概述
@@ -1353,13 +1353,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 50 WHERE id = @spu_tv85;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 50 寸 QLED 游戏电视', '50寸 · QLED · 4K 144Hz · HDMI2.1 · 游戏优化',
-    9, 5,
+    5,
     '# 逸彩 50 寸 QLED 游戏电视
 
 ## 产品概述
@@ -1401,13 +1401,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 300 WHERE id = @spu_tv50;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 43 寸 FHD 智能电视', '43寸 · 1080P · 智能系统 · 卧室/厨房',
-    9, 5,
+    5,
     '# 逸彩 43 寸 FHD 智能电视
 
 ## 产品概述
@@ -1447,13 +1447,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 600 WHERE id = @spu_tv43;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('逸彩 The Wall 120 寸巨幕电视', '120寸 · MicroLED · 模块化拼接 · 商用/豪宅',
-    9, 5,
+    5,
     '# 逸彩 The Wall 120 寸巨幕电视
 
 ## 产品概述
@@ -1498,16 +1498,16 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 UPDATE stellar_spu SET sku_count = 1, total_stock = 5 WHERE id = @spu_thewall;
 
 -- ============================================================
--- 8. 生活家电直挂 (category_id=9, category2_id=NULL)
+-- 8. 生活家电直挂 → 家用电冰箱 (category_id=2)
 -- ============================================================
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 SteamPro 手持挂烫机', '1200W · 25g/min蒸汽 · 杀菌除螨 · 小巧便携',
-    9, NULL,
+    2,
     '# 极净 SteamPro 手持挂烫机
 
 ## 产品概述
@@ -1547,13 +1547,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 800 WHERE id = @spu_steamer;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 HeatChef 空气炸锅', '5.5L · 360°热风 · 智能菜单 · 免翻面',
-    9, NULL,
+    2,
     '# 极净 HeatChef 空气炸锅
 
 ## 产品概述
@@ -1598,13 +1598,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 800 WHERE id = @spu_airfry;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 AquaBloom 智能加湿器', '5L · UV杀菌 · 恒湿50% · 静音加湿',
-    9, NULL,
+    2,
     '# 极净 AquaBloom 智能加湿器
 
 ## 产品概述
@@ -1648,13 +1648,13 @@ INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price,
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 600 WHERE id = @spu_humid;
 
-INSERT INTO stellar_spu (name, sub_title, category_id, category2_id, description_md,
+INSERT INTO stellar_spu (name, sub_title, category_id, description_md,
     main_image, sub_images, sort, status, on_shelf_time,
     min_price, max_price, total_stock, sku_count, is_new, is_hot,
     create_time, create_user, update_time, update_user) VALUES
 
 ('极净 CleanBot S1 扫拖一体机器人', '激光导航 · 5000Pa吸力 · 自动洗拖布 · AI避障',
-    9, NULL,
+    2,
     '# 极净 CleanBot S1 扫拖一体机器人
 
 ## 产品概述
@@ -1705,11 +1705,7 @@ UPDATE stellar_spu SET sku_count = 2, total_stock = 450 WHERE id = @spu_cleanbot
 SELECT '商品数据扩充完成!' AS result;
 SELECT c.name AS 类别, COUNT(s.id) AS 商品数
 FROM stellar_category c
-LEFT JOIN stellar_spu s ON (
-    (c.parent_id = 0 AND s.category_id = c.id AND s.category2_id IS NULL)
-    OR (c.parent_id != 0 AND s.category2_id = c.id)
-    OR (c.parent_id != 0 AND s.category_id = c.parent_id AND s.category2_id = c.id) -- This was fixed
-)
+LEFT JOIN stellar_spu s ON s.category_id = c.id
 WHERE c.type = 1 AND c.status = 1
 GROUP BY c.id, c.name
 ORDER BY COUNT(s.id) DESC;

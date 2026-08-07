@@ -43,6 +43,16 @@ public class SkuStockServiceImpl implements SkuStockService {
     @Value("${stellar.stock.lock-mode:optimistic}")
     private String lockMode;
 
+    /**
+     * 扣减 SKU 库存。
+     *
+     * <p>根据 {@code stellar.stock.lock-mode} 配置选择锁模式：
+     * Redis 分布式锁模式或本地乐观锁模式。</p>
+     *
+     * @param skuId SKU ID
+     * @param qty   扣减数量
+     * @throws StockInsufficientException 库存不足或并发冲突时抛出
+     */
     @Override
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     public void deduct(Long skuId, int qty) {
@@ -55,6 +65,16 @@ public class SkuStockServiceImpl implements SkuStockService {
         }
     }
 
+    /**
+     * 回滚 SKU 库存（将已扣减的库存加回）。
+     *
+     * <p>根据 {@code stellar.stock.lock-mode} 配置选择锁模式：
+     * Redis 分布式锁模式或本地乐观锁模式。</p>
+     *
+     * @param skuId SKU ID
+     * @param qty   回滚数量
+     * @throws BaseException 回滚失败时抛出
+     */
     @Override
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     public void rollback(Long skuId, int qty) {

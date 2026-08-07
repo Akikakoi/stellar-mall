@@ -1,3 +1,11 @@
+/**
+ * Axios 请求封装模块。
+ * 提供三种预配置的请求实例：
+ *   userRequest  - C 端用户请求，自动携带用户 token 和 userId
+ *   adminRequest - 管理后台请求，自动携带管理员 token 和 empId
+ *   ragRequest   - RAG 服务请求，智能判断用户端/管理端 token
+ * 统一处理认证、401 拦截、错误提示等逻辑。
+ */
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { useAdminStore } from '@/stores/admin'
@@ -10,10 +18,17 @@ const USER_ID_KEY = 'stellar_user_id'
 const ADMIN_TOKEN_KEY = 'stellar_admin_token'
 const ADMIN_EMPID_KEY = 'stellar_admin_empid'
 
+/** 从 localStorage 安全读取 */
 function safeGetItem(key) {
   return storage.local.get(key)
 }
 
+/**
+ * 创建 Axios 实例并配置拦截器。
+ * @param {string} baseURL - 请求基础路径
+ * @param {string} type - 请求类型：'user' | 'admin' | 'rag'
+ * @returns {import('axios').AxiosInstance}
+ */
 function createInstance(baseURL, type) {
   const instance = axios.create({
     baseURL,
@@ -158,12 +173,16 @@ function createInstance(baseURL, type) {
   return instance
 }
 
+/** C 端用户请求实例，自动携带用户 token 和 userId */
 export const userRequest = createInstance('', 'user')
+/** 管理后台请求实例，自动携带管理员 token 和 empId */
 export const adminRequest = createInstance('', 'admin')
+/** RAG 服务请求实例，智能判断 token 来源 */
 export const ragRequest = createInstance('', 'rag')
 
 export default userRequest
 
+/** 获取当前用户 token 的便捷方法 */
 export const getAccessToken = () => {
   const userStore = useUserStore()
   return userStore.token || safeGetItem(USER_TOKEN_KEY)

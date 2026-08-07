@@ -28,6 +28,16 @@ spring:
         max-active: 32
         max-idle: 16
         min-idle: 4
+  # 邮件（SMTP）配置：与 stellar.mail.* 联动
+  mail:
+    host: ${stellar.mail.host:}
+    port: ${stellar.mail.port:587}
+    username: ${stellar.mail.username:}
+    password: ${stellar.mail.password:}
+    default-encoding: UTF-8
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -46,6 +56,9 @@ logging:
 
 # ======== 星耀商城自定义配置 ========
 stellar:
+  # CORS 跨域：允许的来源域名（逗号分隔），dev 默认 *，prod 须显式指定
+  cors:
+    allowed-origins: ${STELLAR_CORS_ALLOWED_ORIGINS:*}
   jwt:
     # 管理端员工 token 密钥（≥32 强密钥，和 RAG 端 STELLAR_ADMIN_SECRET_KEY 完全一致！）
     admin-secret-key: ${STELLAR_ADMIN_SECRET_KEY:CHANGE_ME_ADMIN_JWT_SECRET_AT_LEAST_32_CHARS}
@@ -78,6 +91,15 @@ stellar:
   rag:
     base-url: ${STELLAR_RAG_BASE_URL:http://127.0.0.1:8000}
     internal-sync-secret: ${STELLAR_RAG_INTERNAL_SYNC_SECRET:CHANGE_ME_RAG_SYNC_SECRET}
+  # 邮件发送（邮箱验证码）
+  # enabled=true 走真实 SMTP 发送；enabled=false（默认）为开发模式，
+  # 不真实发信，接口直接返回验证码方便本地调试
+  mail:
+    enabled: ${STELLAR_MAIL_ENABLED:false}
+    host: ${STELLAR_MAIL_HOST:}
+    port: ${STELLAR_MAIL_PORT:587}
+    username: ${STELLAR_MAIL_USERNAME:}
+    password: ${STELLAR_MAIL_PASSWORD:}
   # Elasticsearch 搜索配置
   elasticsearch:
     enabled: true

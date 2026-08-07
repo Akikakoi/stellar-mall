@@ -72,6 +72,9 @@ const loading = ref(false)
 const availableCoupons = ref([])
 const myCoupons = ref([])
 
+/**
+ * 加载可领取的优惠券列表
+ */
 async function loadAvailable() {
   loading.value = true
   try {
@@ -80,6 +83,9 @@ async function loadAvailable() {
   } catch (e) {} finally { loading.value = false }
 }
 
+/**
+ * 加载我的优惠券列表（已领取、已使用、已过期）
+ */
 async function loadMy() {
   loading.value = true
   try {
@@ -88,6 +94,10 @@ async function loadMy() {
   } catch (e) {} finally { loading.value = false }
 }
 
+/**
+ * 领取优惠券，领取成功后刷新可领取列表和我的优惠券列表
+ * @param {Object} coupon - 要领取的优惠券对象
+ */
 async function handleClaim(coupon) {
   coupon.claiming = true
   try {

@@ -25,6 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 员工服务实现类。
+ * <p>
+ * 提供员工登录认证、分页查询、启停、创建及更新等功能。
+ * 密码使用 BCrypt 加密存储，登录时签发 JWT。
+ * </p>
+ */
 @Slf4j
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -89,6 +96,19 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .build();
     }
 
+    /**
+     * 分页查询员工列表。
+     * <p>
+     * 返回前会清空 password_hash 字段，避免密码泄漏。
+     * </p>
+     *
+     * @param name     员工姓名（可选，模糊匹配）
+     * @param status   状态（可选）
+     * @param role     角色（可选）
+     * @param page     页码
+     * @param pageSize 每页条数
+     * @return 分页结果
+     */
     @Override
     public PageResult page(String name, Integer status, Integer role, int page, int pageSize) {
         int offset = (page - 1) * pageSize;
@@ -99,6 +119,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new PageResult(total, list);
     }
 
+    /**
+     * 根据ID查询员工。
+     * <p>
+     * 返回前会清空 password_hash 字段。
+     * </p>
+     *
+     * @param id 员工ID
+     * @return 员工实体，不存在时返回null
+     */
     @Override
     public Employee getById(Long id) {
         Employee e = employeeMapper.getById(id);
@@ -106,6 +135,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         return e;
     }
 
+    /**
+     * 设置员工状态（启用/禁用）。
+     *
+     * @param id     员工ID
+     * @param status 状态值
+     */
     @Override
     public void setStatus(Long id, Integer status) {
         Employee upd = Employee.builder()
@@ -116,6 +151,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeMapper.update(upd);
     }
 
+    /**
+     * 创建新员工。
+     * <p>
+     * 校验用户名唯一性，密码使用 BCrypt 加密存储。
+     * </p>
+     *
+     * @param dto 员工创建请求
+     */
     @Override
     public void create(EmployeeCreateDTO dto) {
         if (employeeMapper.getByUsername(dto.getUsername()) != null) {
@@ -141,6 +184,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeMapper.insert(employee);
     }
 
+    /**
+     * 更新员工信息。
+     * <p>
+     * 如果传入了新密码，会使用 BCrypt 加密后更新；否则不修改密码。
+     * </p>
+     *
+     * @param dto 员工更新请求
+     */
     @Override
     public void update(EmployeeUpdateDTO dto) {
         Employee employee = Employee.builder()

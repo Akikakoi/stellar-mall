@@ -92,21 +92,39 @@ const redPage = ref(1)
 const redPageSize = ref(15)
 const redTotal = ref(0)
 
+/**
+ * 根据积分流水类型返回对应的 Element Plus Tag 样式
+ * @param {number} type - 积分流水类型
+ * @returns {string} Tag 类型
+ */
 function recTypeTag(type) {
   const map = { 1: 'success', 2: 'danger', 3: 'warning', 4: 'info' }
   return map[type] || 'info'
 }
 
+/**
+ * 根据兑换状态返回对应的 Element Plus Tag 样式
+ * @param {number} status - 兑换状态
+ * @returns {string} Tag 类型
+ */
 function redStatusTag(status) {
   const map = { 1: 'warning', 2: 'success', 3: 'info' }
   return map[status] || 'info'
 }
 
+/**
+ * 根据兑换状态码返回对应的中文文本
+ * @param {number} status - 兑换状态
+ * @returns {string} 状态文本
+ */
 function redStatusText(status) {
   const map = { 1: '已兑换', 2: '已发放', 3: '已取消' }
   return map[status] || '未知'
 }
 
+/**
+ * 加载积分概览信息
+ */
 async function loadSummary() {
   try {
     const res = await getUserPoints()
@@ -116,6 +134,9 @@ async function loadSummary() {
   }
 }
 
+/**
+ * 加载积分流水记录，分页查询
+ */
 async function loadRecords() {
   recLoading.value = true
   try {
@@ -130,6 +151,9 @@ async function loadRecords() {
   }
 }
 
+/**
+ * 加载积分兑换记录，分页查询
+ */
 async function loadRedemptions() {
   redLoading.value = true
   try {
@@ -144,6 +168,10 @@ async function loadRedemptions() {
   }
 }
 
+/**
+ * Tab 切换回调，首次切换到对应 tab 时懒加载数据
+ * @param {string} tab - 当前激活的 tab 名称
+ */
 function onTabChange(tab) {
   if (tab === 'records' && records.value.length === 0) loadRecords()
   if (tab === 'redemptions' && redemptions.value.length === 0) loadRedemptions()

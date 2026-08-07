@@ -7,6 +7,10 @@ import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
+/**
+ * 优惠券 Mapper，管理优惠券模板和用户领取记录。
+ * 表：stellar_coupon（优惠券模板）、stellar_user_coupon（用户优惠券）。
+ */
 @Mapper
 public interface CouponMapper {
     // Coupon CRUD

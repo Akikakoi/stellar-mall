@@ -9,7 +9,7 @@ import com.stellar.vo.MallUserVO;
 public interface MallUserService {
 
     /**
-     * C 端用户手机号 + 密码登录。返回 userId + token。
+     * C 端用户邮箱 + 密码登录。返回 userId + token。
      * 校验失败抛 LoginFailedException / AccountLockedException。
      */
     MallUserLoginVO login(MallUserLoginDTO dto);
@@ -23,6 +23,9 @@ public interface MallUserService {
     /** 更新用户资料（nickname 等可选字段，传哪个改哪个）。 */
     void updateProfile(Long id, MallUserProfileUpdateDTO dto);
 
-    /** 手机号登录或注册（无需密码，由短信验证码校验后调用）。 */
-    MallUserLoginVO loginOrRegisterByPhone(String phone);
+    /** 邮箱验证码登录或注册（无需密码，由邮箱验证码校验后调用）。 */
+    MallUserLoginVO loginOrRegisterByEmail(String email);
+
+    /** 注销当前账号（将账号状态置为已注销）。 */
+    void deactivateAccount(Long id);
 }

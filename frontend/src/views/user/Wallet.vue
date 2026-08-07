@@ -92,15 +92,26 @@ const rechargeVisible = ref(false)
 const recharging = ref(false)
 const rechargeForm = ref({ amount: 100, channel: 'WECHAT' })
 
+/**
+ * 根据交易类型返回对应的 Element UI tag 样式
+ * @param {number} type - 交易类型
+ * @returns {string} tag 类型
+ */
 function txTypeTag(type) {
   const map = { 1: 'success', 2: 'danger', 3: 'primary', 4: 'warning' }
   return map[type] || 'info'
 }
 
+/**
+ * 根据金额正负返回对应的 CSS 类名
+ * @param {number} amount - 金额
+ * @returns {string} CSS 类名
+ */
 function amountClass(amount) {
   return Number(amount || 0) >= 0 ? 'amount-plus' : 'amount-minus'
 }
 
+/** 加载钱包余额及累计充值/消费信息 */
 async function loadWallet() {
   loading.value = true
   try {
@@ -113,6 +124,7 @@ async function loadWallet() {
   }
 }
 
+/** 分页加载钱包交易流水 */
 async function loadTx() {
   txLoading.value = true
   try {
@@ -127,11 +139,13 @@ async function loadTx() {
   }
 }
 
+/** 打开充值弹窗并重置充值表单 */
 function openRecharge() {
   rechargeForm.value = { amount: 100, channel: 'WECHAT' }
   rechargeVisible.value = true
 }
 
+/** 执行钱包充值，成功后刷新余额和交易流水 */
 async function doRecharge() {
   if (!rechargeForm.value.amount || rechargeForm.value.amount <= 0) {
     ElMessage.warning('请输入充值金额')

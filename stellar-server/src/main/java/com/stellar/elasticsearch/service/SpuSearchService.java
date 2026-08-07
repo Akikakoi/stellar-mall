@@ -107,7 +107,6 @@ public class SpuSearchService {
 
         // 过滤条件（filter 上下文，不参与评分）
         addFilter(boolQuery, "categoryId", dto.getCategoryId());
-        addFilter(boolQuery, "category2Id", dto.getCategory2Id());
         addFilter(boolQuery, "status", dto.getStatus());
         addFilter(boolQuery, "isNew", dto.getIsNew());
         addFilter(boolQuery, "isHot", dto.getIsHot());
@@ -178,8 +177,7 @@ public class SpuSearchService {
 
         // --- 聚合 ---
         builder.withAggregations(
-                AggregationBuilders.terms("by_category").field("categoryId").size(20));
-        builder.withAggregations(
+                AggregationBuilders.terms("by_category").field("categoryId").size(20),
                 AggregationBuilders.range("by_price")
                         .field("minPrice")
                         .addUnboundedTo(50).addRange(50, 100).addRange(100, 200)
@@ -210,6 +208,15 @@ public class SpuSearchService {
         org.elasticsearch.search.aggregations.Aggregations esAggs = null;
         if (aggContainer instanceof ElasticsearchAggregations) {
             esAggs = ((ElasticsearchAggregations) aggContainer).aggregations();
+        } else if (aggContainer != null) {
+            // 尝试通过反射获取底层 ES aggregations（兼容不同版本 Spring Data ES）
+            try {
+                java.lang.reflect.Method m = aggContainer.getClass().getMethod("aggregations");
+                Object result = m.invoke(aggContainer);
+                if (result instanceof org.elasticsearch.search.aggregations.Aggregations) {
+                    esAggs = (org.elasticsearch.search.aggregations.Aggregations) result;
+                }
+            } catch (Exception ignored) { }
         }
         if (esAggs != null) {
             // 分类聚合
@@ -230,6 +237,19 @@ public class SpuSearchService {
                 }
                 aggVO.setPriceRanges(priceBuckets);
             }
+        }
+        // ES 聚合提取失败时，回退到 MySQL 聚合查询
+        if (aggVO.getCategories() == null || aggVO.getCategories().isEmpty()) {
+            aggVO.setCategories(spuMapper.aggCategories(
+                    dto.getName(), dto.getCategoryId(),
+                    dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
+                    dto.getPriceFrom(), dto.getPriceTo()));
+        }
+        if (aggVO.getPriceRanges() == null || aggVO.getPriceRanges().isEmpty()) {
+            aggVO.setPriceRanges(spuMapper.aggPriceRanges(
+                    dto.getName(), dto.getCategoryId(),
+                    dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
+                    dto.getPriceFrom(), dto.getPriceTo()));
         }
 
         // --- 组装结果 ---
@@ -325,11 +345,11 @@ public class SpuSearchService {
         // MySQL 聚合：不再返回空 AggregationVO，让侧栏有数据
         AggregationVO aggVO = new AggregationVO();
         aggVO.setCategories(spuMapper.aggCategories(
-                dto.getName(), dto.getCategoryId(), dto.getCategory2Id(),
+                dto.getName(), dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
                 dto.getPriceFrom(), dto.getPriceTo()));
         aggVO.setPriceRanges(spuMapper.aggPriceRanges(
-                dto.getName(), dto.getCategoryId(), dto.getCategory2Id(),
+                dto.getName(), dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
                 dto.getPriceFrom(), dto.getPriceTo()));
         vo.setAggregations(aggVO);
@@ -346,9 +366,9 @@ public class SpuSearchService {
         String sortBy = hasKeyword ? "relevance" : dto.getSortBy();
         String sortOrder = hasKeyword ? null : dto.getSortOrder();
 
-        long total = spuMapper.count(dto.getName(), dto.getCategoryId(), dto.getCategory2Id(),
+        long total = spuMapper.count(dto.getName(), dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(), dto.getPriceFrom(), dto.getPriceTo());
-        List<Spu> records = spuMapper.page(offset, size, dto.getName(), dto.getCategoryId(), dto.getCategory2Id(),
+        List<Spu> records = spuMapper.page(offset, size, dto.getName(), dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(), dto.getPriceFrom(), dto.getPriceTo(),
                 sortBy, sortOrder);
         return new PageResult(total, records);

@@ -125,12 +125,14 @@ const rules = {
   perUserLimit: [{ required: true }]
 }
 
+/** 重置表单为默认初始值 */
 function resetForm() {
   form.name = ''; form.type = 1; form.conditionAmount = 0; form.discountAmount = 10
   form.totalCount = 100; form.perUserLimit = 1; form.status = 1
   editId.value = null; isEdit.value = false; dateRange.value = []
 }
 
+/** 加载优惠券分页列表，根据当前搜索条件筛选 */
 async function load() {
   loading.value = true
   try {
@@ -144,7 +146,9 @@ async function load() {
   } catch (e) {} finally { loading.value = false }
 }
 
+/** 打开新增优惠券对话框，重置表单 */
 function openAdd() { resetForm(); dialogVisible.value = true }
+/** 打开编辑优惠券对话框，回填已有数据 */
 function openEdit(row) {
   isEdit.value = true; editId.value = row.id
   form.name = row.name; form.type = row.type; form.conditionAmount = row.conditionAmount
@@ -154,6 +158,7 @@ function openEdit(row) {
   dialogVisible.value = true
 }
 
+/** 保存优惠券：校验后创建或更新 */
 async function handleSave() {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
@@ -177,6 +182,7 @@ async function handleSave() {
   } catch (e) { ElMessage.error('操作失败') } finally { submitting.value = false }
 }
 
+/** 删除优惠券，二次确认后执行 */
 async function handleDelete(id) {
   try {
     await ElMessageBox.confirm('确定删除？', '提示', { type: 'warning' })
