@@ -328,9 +328,9 @@ public class SpuServiceImpl implements SpuService {
         int p = (page == null || page < 1) ? 1 : page;
         int ps = (pageSize == null || pageSize < 1) ? 10 : pageSize;
         List<Spu> list = spuMapper.page((p - 1) * ps, ps, name,
-                categoryId, null, status, isNew, isHot, priceFrom, priceTo,
+                categoryId, status, isNew, isHot, priceFrom, priceTo,
                 null, null);
-        long total = spuMapper.count(name, categoryId, null,
+        long total = spuMapper.count(name, categoryId,
                 status, isNew, isHot, priceFrom, priceTo);
         return new PageResult(total, list == null ? new ArrayList<>() : list);
     }
@@ -347,11 +347,11 @@ public class SpuServiceImpl implements SpuService {
         int p = (dto.getPage() == null || dto.getPage() < 1) ? 1 : dto.getPage();
         int ps = (dto.getPageSize() == null || dto.getPageSize() < 1) ? 10 : dto.getPageSize();
         List<Spu> list = spuMapper.page((p - 1) * ps, ps,
-                dto.getName(), dto.getCategoryId(), null,
+                dto.getName(), dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
                 dto.getPriceFrom(), dto.getPriceTo(),
                 dto.getSortBy(), dto.getSortOrder());
-        long total = spuMapper.count(dto.getName(), dto.getCategoryId(), null,
+        long total = spuMapper.count(dto.getName(), dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(),
                 dto.getPriceFrom(), dto.getPriceTo());
         return new PageResult(total, list == null ? new ArrayList<>() : list);

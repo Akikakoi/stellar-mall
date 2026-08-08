@@ -441,7 +441,7 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
     /** 按名称精确匹配查找已有 SPU（用于导入时去重）。 */
     private Spu findSpuByName(String name) {
         // 通过 page 接口查询，但这里需要一个更直接的方法
-        List<Spu> list = spuMapper.page(0, 1, name, null, null, null, null, null, null, null, null, null);
+        List<Spu> list = spuMapper.page(0, 1, name, null, null, null, null, null, null, null, null);
         return (list != null && !list.isEmpty()) ? list.get(0) : null;
     }
 

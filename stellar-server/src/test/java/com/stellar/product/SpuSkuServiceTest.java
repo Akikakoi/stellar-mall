@@ -139,7 +139,7 @@ class SpuSkuServiceTest {
         dto.setSkuList(Arrays.asList());
         Long id = spuService.saveWithSkus(dto);
 
-        PageResult pr = spuService.pageQuery(1, 10, "分页SPU", null, null, null);
+        PageResult pr = spuService.pageQuery(1, 10, "分页SPU", null, null);
         assertTrue(pr.getTotal() >= 1);
 
         SpuSaveDTO update = new SpuSaveDTO();
