@@ -16,8 +16,12 @@ public class JwtProperties {
     private String adminSecretKey;
     private long   adminTtl;
     private String adminTokenName;
+    /** 管理端 refresh token TTL（毫秒） */
+    private long   adminRefreshTtl;
 
     private String userSecretKey;
     private long   userTtl;
     private String userTokenName;
+    /** C 端 refresh token TTL（毫秒） */
+    private long   userRefreshTtl;
 }

@@ -107,7 +107,7 @@ class JwtCrossPlatformTest {
     @Test
     void secretKey_isUsedAsRawUtf8Bytes_notBase64Decoded() {
         // 用一段包含非 ASCII 的密钥验证：如果是 Base64 解码会失败；如果是 UTF-8 原始字节就 OK
-        String nonAsciiSecret = "星耀密钥-2024-✓🚀中文";
+        String nonAsciiSecret = "星耀密钥-2024-✓🚀中文测试!!";
         byte[] expectedBytes = nonAsciiSecret.getBytes(StandardCharsets.UTF_8);
         assertTrue(expectedBytes.length > nonAsciiSecret.length()); // UTF-8 变长编码，中文字节 > 字符数
 

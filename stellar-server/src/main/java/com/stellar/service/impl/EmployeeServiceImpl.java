@@ -14,16 +14,19 @@ import com.stellar.mapper.EmployeeMapper;
 import com.stellar.properties.JwtProperties;
 import com.stellar.result.PageResult;
 import com.stellar.service.EmployeeService;
+import com.stellar.service.LoginAttemptService;
 import com.stellar.utils.JwtUtil;
 import com.stellar.vo.EmployeeLoginVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 员工服务实现类。
@@ -38,13 +41,22 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private static final BCryptPasswordEncoder BCRYPT = new BCryptPasswordEncoder(10);
 
+    /** Redis key 前缀：refresh:{type}:{id}，单设备登录时新登录覆盖旧 refresh */
+    private static final String REFRESH_KEY_PREFIX = "refresh:employee:";
+
     private final EmployeeMapper employeeMapper;
     private final JwtProperties jwtProperties;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final LoginAttemptService loginAttemptService;
 
     @Autowired
-    public EmployeeServiceImpl(EmployeeMapper employeeMapper, JwtProperties jwtProperties) {
+    public EmployeeServiceImpl(EmployeeMapper employeeMapper, JwtProperties jwtProperties,
+                                StringRedisTemplate stringRedisTemplate,
+                                LoginAttemptService loginAttemptService) {
         this.employeeMapper = employeeMapper;
         this.jwtProperties = jwtProperties;
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.loginAttemptService = loginAttemptService;
     }
 
     /**
@@ -56,16 +68,24 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public EmployeeLoginVO login(EmployeeLoginDTO dto) {
+        // E2: 登录前检查账号是否被临时锁定（失败次数过多）
+        loginAttemptService.checkLocked("employee", dto.getUsername());
+
         Employee emp = employeeMapper.getByUsername(dto.getUsername());
         if (emp == null) {
+            loginAttemptService.recordFailure("employee", dto.getUsername());
             throw new LoginFailedException(MessageConstant.LOGIN_FAILED);
         }
         if (!BCRYPT.matches(dto.getPassword(), emp.getPasswordHash())) {
+            loginAttemptService.recordFailure("employee", dto.getUsername());
             throw new LoginFailedException(MessageConstant.LOGIN_FAILED);
         }
         if (emp.getStatus() != null && emp.getStatus().equals(StatusConstant.DISABLE)) {
             throw new LoginFailedException(MessageConstant.ACCOUNT_LOCKED);
         }
+
+        // E2: 登录成功，清零失败计数
+        loginAttemptService.clearAttempts("employee", dto.getUsername());
 
         // 构造 claims（字段名必须和 JwtClaimsConstant + RAG 端约定一致，大小写敏感）
         Map<String, Object> claims = new HashMap<>();
@@ -80,10 +100,22 @@ public class EmployeeServiceImpl implements EmployeeService {
         claims.put(JwtClaimsConstant.ROLE, roleStr);
         claims.put(JwtClaimsConstant.NAME, emp.getName());
 
-        String token = JwtUtil.createJWT(
+        String accessToken = JwtUtil.createJWT(
                 jwtProperties.getAdminSecretKey(),
                 jwtProperties.getAdminTtl(),
                 claims
+        );
+        String refreshToken = JwtUtil.createRefreshJWT(
+                jwtProperties.getAdminSecretKey(),
+                jwtProperties.getAdminRefreshTtl(),
+                claims
+        );
+        // 单设备登录：新 refresh 覆盖旧 refresh
+        stringRedisTemplate.opsForValue().set(
+                REFRESH_KEY_PREFIX + emp.getId(),
+                refreshToken,
+                jwtProperties.getAdminRefreshTtl(),
+                TimeUnit.MILLISECONDS
         );
         log.info("[EmployeeService] login OK: username={}, EMP_ID={}, role={}", dto.getUsername(), emp.getId(), roleStr);
 
@@ -92,7 +124,83 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .userName(emp.getUsername())
                 .name(emp.getName())
                 .role(emp.getRole())
-                .token(token)
+                .token(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    /**
+     * 用 refresh token 换新的 access + refresh token。
+     * 校验：token 可解析 + type=refresh + Redis 存的 token 与传入一致（单设备 + 一次性使用）。
+     */
+    @Override
+    public EmployeeLoginVO refresh(String refreshToken) {
+        io.jsonwebtoken.Claims claims;
+        try {
+            claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), refreshToken);
+        } catch (Exception e) {
+            log.warn("[EmployeeService] refresh token 解析失败: {}", e.getMessage());
+            throw new BaseException("refresh token 无效或已过期");
+        }
+        // 必须是 refresh 类型
+        String type = claims.get(JwtClaimsConstant.TOKEN_TYPE, String.class);
+        if (!JwtUtil.TYPE_REFRESH.equals(type)) {
+            throw new BaseException("refresh token 无效或已过期");
+        }
+        Long empId = ((Number) claims.get(JwtClaimsConstant.EMP_ID)).longValue();
+
+        // 校验 Redis 中的 refresh token 是否匹配（单设备 + 一次性）
+        String stored = stringRedisTemplate.opsForValue().get(REFRESH_KEY_PREFIX + empId);
+        if (stored == null || !stored.equals(refreshToken)) {
+            throw new BaseException("refresh token 无效或已过期");
+        }
+
+        Employee emp = employeeMapper.getById(empId);
+        if (emp == null) {
+            throw new BaseException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        if (emp.getStatus() != null && emp.getStatus().equals(StatusConstant.DISABLE)) {
+            throw new BaseException(MessageConstant.ACCOUNT_LOCKED);
+        }
+
+        // 重新构造 claims（不沿用旧 claims，避免 jti 重复）
+        Map<String, Object> newClaims = new HashMap<>();
+        newClaims.put(JwtClaimsConstant.EMP_ID, emp.getId());
+        String roleStr = switch (emp.getRole()) {
+            case 1 -> "admin";
+            case 2 -> "operator";
+            case 3 -> "customer-service";
+            case 4 -> "finance";
+            default -> "user";
+        };
+        newClaims.put(JwtClaimsConstant.ROLE, roleStr);
+        newClaims.put(JwtClaimsConstant.NAME, emp.getName());
+
+        String newAccess = JwtUtil.createJWT(
+                jwtProperties.getAdminSecretKey(),
+                jwtProperties.getAdminTtl(),
+                newClaims
+        );
+        String newRefresh = JwtUtil.createRefreshJWT(
+                jwtProperties.getAdminSecretKey(),
+                jwtProperties.getAdminRefreshTtl(),
+                newClaims
+        );
+        // 覆盖 Redis：旧 refresh 失效（一次性使用）
+        stringRedisTemplate.opsForValue().set(
+                REFRESH_KEY_PREFIX + emp.getId(),
+                newRefresh,
+                jwtProperties.getAdminRefreshTtl(),
+                TimeUnit.MILLISECONDS
+        );
+        log.info("[EmployeeService] refresh OK: EMP_ID={}", empId);
+        return EmployeeLoginVO.builder()
+                .id(emp.getId())
+                .userName(emp.getUsername())
+                .name(emp.getName())
+                .role(emp.getRole())
+                .token(newAccess)
+                .refreshToken(newRefresh)
                 .build();
     }
 

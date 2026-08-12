@@ -14,6 +14,14 @@ public interface MallUserService {
      */
     MallUserLoginVO login(MallUserLoginDTO dto);
 
+    /**
+     * 用 refresh token 换新的 access + refresh token。
+     * 校验 refresh token 有效性与 Redis 存储一致性，单设备登录时旧 refresh 失效。
+     * @param refreshToken 前端保存的 refresh token
+     * @return 新的登录 VO（含新 access + refresh token）
+     */
+    MallUserLoginVO refresh(String refreshToken);
+
     /** 根据 id 查询用户（已锁定的也返回，由调用方判断）。 */
     MallUser getById(Long id);
 
