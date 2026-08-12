@@ -19,4 +19,8 @@ public class JwtClaimsConstant {
     public static final String NAME = "NAME";
     /** 昵称（可选 String） */
     public static final String NICKNAME = "NICKNAME";
+    /** JWT ID（唯一标识，用于黑名单吊销，String） */
+    public static final String JTI = "jti";
+    /** token 类型：access / refresh（String） */
+    public static final String TOKEN_TYPE = "type";
 }

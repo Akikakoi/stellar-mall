@@ -34,6 +34,9 @@ public class EmployeeLoginVO implements Serializable {
     @ApiModelProperty("角色：1 超级管理员 2 运营 3 客服 4 财务")
     private Integer role;
 
-    @ApiModelProperty("JWT token（前端 header: token=xxx / Authorization=Bearer xxx）")
+    @ApiModelProperty("JWT access token（前端 header: token=xxx / Authorization=Bearer xxx）")
     private String token;
+
+    @ApiModelProperty("JWT refresh token（用于 access 过期后换新 token）")
+    private String refreshToken;
 }

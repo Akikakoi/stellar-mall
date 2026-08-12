@@ -22,6 +22,9 @@ public class MallUserLoginVO implements Serializable {
     @ApiModelProperty("用户ID")
     private Long userId;
 
-    @ApiModelProperty("JWT token（前端 header: authentication=<token> 或 Authorization=Bearer <token>）")
+    @ApiModelProperty("JWT access token（前端 header: authentication=<token> 或 Authorization=Bearer <token>）")
     private String token;
+
+    @ApiModelProperty("JWT refresh token（用于 access 过期后换新 token）")
+    private String refreshToken;
 }
