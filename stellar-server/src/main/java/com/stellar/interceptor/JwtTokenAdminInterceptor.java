@@ -5,6 +5,7 @@ import com.stellar.constant.MessageConstant;
 import com.stellar.context.BaseContext;
 import com.stellar.exception.UnauthorizedException;
 import com.stellar.properties.JwtProperties;
+import com.stellar.service.TokenBlacklistService;
 import com.stellar.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -15,8 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * 管理端（Employee）JWT 拦截器。
@@ -34,10 +35,12 @@ import javax.servlet.http.HttpServletResponse;
 public class JwtTokenAdminInterceptor implements HandlerInterceptor {
 
     private final JwtProperties jwtProperties;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Autowired
-    public JwtTokenAdminInterceptor(JwtProperties jwtProperties) {
+    public JwtTokenAdminInterceptor(JwtProperties jwtProperties, TokenBlacklistService tokenBlacklistService) {
         this.jwtProperties = jwtProperties;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -65,6 +68,14 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
         }
 
         Long empId = ((Number) claims.get(JwtClaimsConstant.EMP_ID)).longValue();
+
+        // E4: 检查 token 是否已被加入黑名单（登出后立即失效）
+        String jti = claims.getId();
+        if (tokenBlacklistService.isBlacklisted(jti)) {
+            log.warn("[JwtTokenAdminInterceptor] token 已被加入黑名单: jti={}", jti);
+            throw new UnauthorizedException(MessageConstant.UNAUTHORIZED);
+        }
+
         // 写入线程上下文：Service / @AutoFill AOP 用 BaseContext.getCurrentId() 读取
         BaseContext.setCurrentId(empId);
         return true;

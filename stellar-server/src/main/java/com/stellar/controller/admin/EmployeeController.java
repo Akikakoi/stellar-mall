@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.annotation.RateLimit;
 import com.stellar.constant.JwtClaimsConstant;
 import com.stellar.constant.MessageConstant;
@@ -12,6 +13,8 @@ import com.stellar.exception.BaseException;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
 import com.stellar.service.EmployeeService;
+import com.stellar.service.LoginAttemptService;
+import com.stellar.service.TokenBlacklistService;
 import com.stellar.vo.EmployeeLoginVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,10 +34,15 @@ import org.springframework.web.bind.annotation.*;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final LoginAttemptService loginAttemptService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Autowired
-    public EmployeeController(EmployeeService employeeService) {
+    public EmployeeController(EmployeeService employeeService, LoginAttemptService loginAttemptService,
+                              TokenBlacklistService tokenBlacklistService) {
         this.employeeService = employeeService;
+        this.loginAttemptService = loginAttemptService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @RateLimit(key = "admin-login", maxRequests = 10, windowSeconds = 60)
@@ -50,10 +58,67 @@ public class EmployeeController {
     }
 
     @PostMapping("/logout")
-    @ApiOperation("员工登出（JWT 无状态，前端清 localStorage 即可，后端清 BaseContext）")
-    public Result<Void> logout() {
+    @ApiOperation("员工登出（E4：access+refresh 写黑名单，前端清 localStorage）")
+    public Result<Void> logout(@RequestHeader(value = "token", required = false) String tokenHeader,
+                               @RequestHeader(value = "Authorization", required = false) String authHeader,
+                               @RequestBody(required = false) LogoutRequest req) {
+        // E4: access token 写黑名单（从 token 或 Authorization header 提取）
+        String accessToken = extractToken(tokenHeader, authHeader);
+        if (accessToken != null) {
+            tokenBlacklistService.blacklist(accessToken);
+        }
+        // E4: refresh token 写黑名单（从 body 传入）
+        if (req != null && req.getRefreshToken() != null && !req.getRefreshToken().isEmpty()) {
+            tokenBlacklistService.blacklist(req.getRefreshToken());
+        }
         employeeService.logout();
         return Result.success();
+    }
+
+    /**
+     * 从多种 header 形式中提取 JWT。
+     */
+    private String extractToken(String tokenHeader, String authHeader) {
+        if (tokenHeader != null && !tokenHeader.isEmpty()) {
+            return tokenHeader;
+        }
+        if (authHeader != null && authHeader.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
+
+    @PostMapping("/refresh")
+    @ApiOperation("用 refresh token 换新的 access + refresh token")
+    public Result<EmployeeLoginVO> refresh(@RequestBody RefreshRequest req) {
+        EmployeeLoginVO vo = employeeService.refresh(req.getRefreshToken());
+        return Result.success(vo);
+    }
+
+    @PostMapping("/unlock")
+    @ApiOperation("手动解锁被临时锁定的账号（E2 登录失败次数过多）")
+    public Result<Void> unlock(@RequestBody UnlockRequest req) {
+        loginAttemptService.unlock(req.getType(), req.getAccount());
+        return Result.success();
+    }
+
+    @lombok.Data
+    public static class RefreshRequest {
+        private String refreshToken;
+    }
+
+    @lombok.Data
+    public static class UnlockRequest {
+        /** 账号类型：employee / mall_user */
+        private String type;
+        /** 账号标识：username / email */
+        private String account;
+    }
+
+    @lombok.Data
+    public static class LogoutRequest {
+        /** refresh token（access token 从 header 提取，不放在 body） */
+        private String refreshToken;
     }
 
     @GetMapping("/page")
@@ -74,6 +139,7 @@ public class EmployeeController {
         return Result.success(employeeService.getById(id));
     }
 
+    @Idempotent(keyPrefix = "admin-employee-create", windowSeconds = 300)
     @PostMapping
     @ApiOperation("新增员工")
     public Result<Void> create(@RequestBody EmployeeCreateDTO dto) {
