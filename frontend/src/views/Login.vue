@@ -42,6 +42,28 @@
           </div>
         </el-form-item>
 
+        <!-- 验证码模式：图形验证码（E3，防机器人） -->
+        <el-form-item v-if="loginMode === 'email'" prop="captchaCode">
+          <div class="captcha-row">
+            <el-input
+              v-model="form.captchaCode"
+              placeholder="请输入图形验证码"
+              size="large"
+              style="flex:1"
+              autocomplete="off"
+            />
+            <img
+              v-if="captchaImage"
+              :src="captchaImage"
+              alt="图形验证码"
+              class="captcha-img"
+              title="点击刷新"
+              @click="refreshCaptcha"
+            />
+            <div v-else class="captcha-placeholder" @click="refreshCaptcha">点击加载</div>
+          </div>
+        </el-form-item>
+
         <el-button type="primary" size="large" class="submit-btn" :loading="loading" @click="handleLogin">
           {{ loginMode === 'password' ? '登 录' : '登录 / 注册' }}
         </el-button>
@@ -59,6 +81,7 @@ import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { userRequest } from '@/api/request'
+import { getCaptcha } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -71,10 +94,15 @@ const sendingCode = ref(false)
 const codeCountdown = ref(0)
 let timer = null
 
+// E3: 图形验证码状态
+const captchaId = ref('')
+const captchaImage = ref('')
+
 const form = reactive({
   email: '',
   password: '',
-  code: ''
+  code: '',
+  captchaCode: ''
 })
 
 const emailRule = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
@@ -82,7 +110,22 @@ const emailRule = { type: 'email', message: '邮箱格式不正确', trigger: 'b
 const rules = {
   email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, emailRule],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+  captchaCode: [{ required: true, message: '请输入图形验证码', trigger: 'blur' }]
+}
+
+/**
+ * 拉取图形验证码图片（E3）
+ */
+async function refreshCaptcha() {
+  try {
+    const res = await getCaptcha()
+    captchaId.value = res.captchaId
+    captchaImage.value = res.imageBase64
+    form.captchaCode = ''
+  } catch (e) {
+    // 拦截器已统一提示，这里静默
+  }
 }
 
 /**
@@ -93,15 +136,24 @@ function switchMode(mode) {
   loginMode.value = mode
   form.code = ''
   form.password = ''
+  form.captchaCode = ''
+  // 切到验证码模式时自动加载一张图形验证码
+  if (mode === 'email' && !captchaImage.value) {
+    refreshCaptcha()
+  }
 }
 
 /**
  * 发送邮箱验证码，含 60 秒倒计时
- * 需先校验邮箱格式
+ * E3：必须先输入图形验证码，连同 captchaId 一起提交到后端校验
  */
 async function sendCode() {
   if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     ElMessage.warning('请输入正确的邮箱地址')
+    return
+  }
+  if (!captchaId.value || !form.captchaCode) {
+    ElMessage.warning('请先输入图形验证码')
     return
   }
   sendingCode.value = true
@@ -109,7 +161,12 @@ async function sendCode() {
     const res = await userRequest({
       url: '/user/email-code/send',
       method: 'post',
-      data: { email: form.email, type: 'LOGIN' },
+      data: {
+        email: form.email,
+        type: 'LOGIN',
+        captchaId: captchaId.value,
+        captchaCode: form.captchaCode
+      },
       __silent: true
     })
     if (res && res.devCode) {
@@ -124,8 +181,11 @@ async function sendCode() {
       codeCountdown.value--
       if (codeCountdown.value <= 0) clearInterval(timer)
     }, 1000)
+    // 发送成功后刷新图形验证码（一次性使用，下次发送需要新图）
+    refreshCaptcha()
   } catch (e) {
-    ElMessage.error('发送失败，请重试')
+    // 图形验证码错误或失效时，后端返回 CAPTCHA_INVALID，刷新图片让用户重试
+    refreshCaptcha()
   } finally {
     sendingCode.value = false
   }
@@ -220,6 +280,30 @@ async function handleLogin() {
   white-space: nowrap;
   min-width: 120px;
   font-size: 14px;
+}
+
+.captcha-row { display: flex; gap: 10px; align-items: center; }
+.captcha-img {
+  height: 40px;
+  width: 120px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-base);
+  object-fit: cover;
+  user-select: none;
+}
+.captcha-placeholder {
+  height: 40px;
+  width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border-base);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .submit-btn {
