@@ -1,8 +1,11 @@
 package com.stellar.controller.user;
 
 import com.stellar.annotation.RateLimit;
+import com.stellar.constant.MessageConstant;
 import com.stellar.entity.EmailCode;
+import com.stellar.exception.BaseException;
 import com.stellar.result.Result;
+import com.stellar.service.CaptchaService;
 import com.stellar.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -11,14 +14,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * C 端：邮箱验证码接口（无需登录）
+ * <p>
+ * E3 增强：send-code 接口入参必须含 captchaId + captchaCode，先校验图形验证码防机器人。
  */
 @RestController
 @RequestMapping("/user/email-code")
@@ -27,6 +32,7 @@ import java.util.Map;
 public class EmailController {
 
     private final NotificationService notificationService;
+    private final CaptchaService captchaService;
 
     /** 是否启用真实 SMTP 发送；false 时（开发模式）接口直接返回验证码 */
     @Value("${stellar.mail.enabled:false}")
@@ -34,8 +40,16 @@ public class EmailController {
 
     @RateLimit(key = "send-code", maxRequests = 5, windowSeconds = 60)
     @PostMapping("/send")
-    @ApiOperation("发送邮箱验证码")
+    @ApiOperation("发送邮箱验证码（E3：需先校验图形验证码）")
     public Result<Map<String, Object>> sendCode(@RequestBody @Valid EmailSendDTO dto) {
+        // E3: 先校验图形验证码（防机器人）
+        if (dto.getCaptchaId() == null || dto.getCaptchaCode() == null) {
+            throw new BaseException(MessageConstant.CAPTCHA_REQUIRED);
+        }
+        if (!captchaService.validate(dto.getCaptchaId(), dto.getCaptchaCode())) {
+            throw new BaseException(MessageConstant.CAPTCHA_INVALID);
+        }
+
         EmailCode emailCode = notificationService.sendEmailCode(dto.getEmail(), dto.getType());
         Map<String, Object> data = new HashMap<>();
         data.put("sent", mailEnabled);
@@ -61,6 +75,10 @@ public class EmailController {
         private String email;
         @NotBlank
         private String type; // LOGIN / REGISTER
+        /** E3：图形验证码 ID（来自 /captcha/image 返回） */
+        private String captchaId;
+        /** E3：用户识别出的图形验证码 */
+        private String captchaCode;
     }
 
     @Data

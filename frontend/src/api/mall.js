@@ -15,6 +15,17 @@ export function loginUser(data) {
   })
 }
 
+/**
+ * 获取图形验证码（E3，公开接口，无需登录）
+ * @returns {Promise<{captchaId: string, imageBase64: string}>}
+ */
+export function getCaptcha() {
+  return userRequest({
+    url: '/captcha/image',
+    method: 'get'
+  })
+}
+
 /** 获取当前登录用户信息 */
 export function getCurrentUser() {
   return userRequest({

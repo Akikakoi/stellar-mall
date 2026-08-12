@@ -6,7 +6,7 @@
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
         <groupId>org.springframework.boot</groupId>
-        <version>2.7.3</version>
+        <version>3.3.6</version>
     </parent>
 
     <groupId>com.stellar</groupId>
@@ -23,20 +23,20 @@
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mybatis.spring>2.2.0</mybatis.spring>
+        <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
         <!-- 本机实际运行 JDK 24，lombok 1.18.38 支持 JDK 21~24 -->
         <lombok>1.18.38</lombok>
-        <fastjson>1.2.76</fastjson>
-        <commons.lang>2.6</commons.lang>
-        <druid>1.2.1</druid>
-        <pagehelper>1.4.6</pagehelper>
+        <commons.lang3>3.14.0</commons.lang3>
+        <druid>1.2.23</druid>
+        <pagehelper>2.1.0</pagehelper>
         <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
-        <knife4j>3.0.2</knife4j>
-        <aspectj>1.9.4</aspectj>
-        <jjwt>0.9.1</jjwt>
-        <jaxb-api>2.3.1</jaxb-api>
+        <knife4j>4.5.0</knife4j>
+        <aspectj>1.9.22</aspectj>
+        <jjwt>0.12.6</jjwt>
+        <jaxb-api>4.0.2</jaxb-api>
         <poi>3.16</poi>
         <wechatpay>0.4.8</wechatpay>
+        <hutool>5.8.32</hutool>
     </properties>
 
     <dependencyManagement>
@@ -45,7 +45,7 @@
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
-                <version>${mybatis.spring}</version>
+                <version>${mybatis-spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -54,14 +54,14 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>${fastjson}</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons.lang3}</version>
             </dependency>
             <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons.lang}</version>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.14</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
@@ -75,7 +75,7 @@
             </dependency>
             <dependency>
                 <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-spring-boot-starter</artifactId>
+                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
                 <version>${knife4j}</version>
             </dependency>
             <dependency>
@@ -90,8 +90,20 @@
             </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt</artifactId>
+                <artifactId>jjwt-api</artifactId>
                 <version>${jjwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt}</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>com.aliyun.oss</groupId>
@@ -99,8 +111,8 @@
                 <version>${aliyun.sdk.oss}</version>
             </dependency>
             <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
                 <version>${jaxb-api}</version>
             </dependency>
             <!-- POI Excel 报表 -->
@@ -120,7 +132,13 @@
                 <artifactId>wechatpay-apache-httpclient</artifactId>
                 <version>${wechatpay}</version>
             </dependency>
-            <!-- Elasticsearch 7.17（Spring Data ES 4.4.x 兼容版本） -->
+            <!-- Hutool 工具集（图形验证码 captcha 用） -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-captcha</artifactId>
+                <version>${hutool}</version>
+            </dependency>
+            <!-- Elasticsearch: Spring Boot 3.x 自带管理版本, 代码待迁移到新 client API -->
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-elasticsearch</artifactId>
@@ -176,10 +194,32 @@
                     <version>3.1.2</version>
                     <configuration>
                         <useSystemClassLoader>false</useSystemClassLoader>
-                        <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+                        <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED -Dnet.bytebuddy.experimental=true</argLine>
                     </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>unit-only</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/CategoryServiceTest.java</exclude>
+                                <exclude>**/SkuStockServiceTest.java</exclude>
+                                <exclude>**/SpuSkuServiceTest.java</exclude>
+                                <exclude>**/RagSyncServiceTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
