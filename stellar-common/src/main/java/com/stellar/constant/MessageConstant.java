@@ -9,6 +9,8 @@ public class MessageConstant {
     public static final String ILLEGAL_PARAMETER = "参数非法";
     public static final String LOGIN_FAILED = "登录失败，用户名或密码错误";
     public static final String ACCOUNT_LOCKED = "账号已被锁定";
+    /** 登录失败次数过多导致的临时锁定，{0}=剩余分钟数 */
+    public static final String ACCOUNT_LOCKED_BY_ATTEMPTS = "登录失败次数过多，账号已被临时锁定，请 %d 分钟后重试";
     public static final String ACCOUNT_CLOSED = "账号已注销，无法登录";
     public static final String ACCOUNT_NOT_FOUND = "账号不存在";
     public static final String PASSWORD_ERROR = "密码错误";
@@ -20,6 +22,10 @@ public class MessageConstant {
     public static final String ADDRESS_BOOK_IS_NULL = "请先添加收货地址";
     public static final String STOCK_NOT_ENOUGH = "库存不足";
     public static final String UPLOAD_FAILED = "文件上传失败";
+
+    // -------- E3 图形验证码 --------
+    public static final String CAPTCHA_REQUIRED = "请先完成图形验证码校验";
+    public static final String CAPTCHA_INVALID = "图形验证码错误或已失效";
 
     // -------- M1 商品域 --------
     public static final String CATEGORY_NOT_FOUND = "分类不存在";
