@@ -9,6 +9,7 @@ import com.stellar.exception.BaseException;
 import com.stellar.result.Result;
 import com.stellar.service.MallUserService;
 import com.stellar.service.NotificationService;
+import com.stellar.service.TokenBlacklistService;
 import com.stellar.vo.MallUserLoginVO;
 import com.stellar.vo.MallUserVO;
 import io.swagger.annotations.Api;
@@ -17,9 +18,9 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/user/user")
@@ -29,6 +30,7 @@ public class UserController {
 
     private final MallUserService mallUserService;
     private final NotificationService notificationService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @RateLimit(key = "login", maxRequests = 10, windowSeconds = 60)
     @PostMapping("/login")
@@ -46,6 +48,47 @@ public class UserController {
             throw new BaseException("验证码错误或已过期");
         }
         return Result.success(mallUserService.loginOrRegisterByEmail(dto.getEmail()));
+    }
+
+    @PostMapping("/refresh")
+    @ApiOperation("用 refresh token 换新的 access + refresh token")
+    public Result<MallUserLoginVO> refresh(@RequestBody RefreshRequest req) {
+        return Result.success(mallUserService.refresh(req.getRefreshToken()));
+    }
+
+    @PostMapping("/logout")
+    @ApiOperation("C 端用户登出（E4：access+refresh 写黑名单）")
+    public Result<Void> logout(@RequestHeader(value = "authentication", required = false) String tokenHeader,
+                               @RequestHeader(value = "Authorization", required = false) String authHeader,
+                               @RequestBody(required = false) RefreshRequest req) {
+        // E4: access token 写黑名单（从 authentication 或 Authorization header 提取）
+        String accessToken = extractToken(tokenHeader, authHeader);
+        if (accessToken != null) {
+            tokenBlacklistService.blacklist(accessToken);
+        }
+        // E4: refresh token 写黑名单
+        if (req != null && req.getRefreshToken() != null && !req.getRefreshToken().isEmpty()) {
+            tokenBlacklistService.blacklist(req.getRefreshToken());
+        }
+        return Result.success();
+    }
+
+    /**
+     * 从多种 header 形式中提取 JWT。
+     */
+    private String extractToken(String tokenHeader, String authHeader) {
+        if (tokenHeader != null && !tokenHeader.isEmpty()) {
+            return tokenHeader;
+        }
+        if (authHeader != null && authHeader.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
+
+    @lombok.Data
+    public static class RefreshRequest {
+        private String refreshToken;
     }
 
     @GetMapping("/me")

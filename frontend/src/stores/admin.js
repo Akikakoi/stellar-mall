@@ -4,12 +4,14 @@
  */
 import { defineStore } from 'pinia'
 import { loginAdmin, getAdminProfile } from '@/api/admin'
+import { adminRequest } from '@/api/request'
 import { storage } from '@/utils/storage'
 
 const TOKEN_KEY = 'stellar_admin_token'
 const EMPID_KEY = 'stellar_admin_empid'
 const USERNAME_KEY = 'stellar_admin_username'
 const NAME_KEY = 'stellar_admin_name'
+const REFRESH_TOKEN_KEY = 'stellar_admin_refresh_token'
 
 /** 从 localStorage 读取 */
 function safeGet(key) {
@@ -34,8 +36,10 @@ export const useAdminStore = defineStore('admin', {
   state: () => ({
     /** 员工 ID */
     empId: safeGet(EMPID_KEY) ? Number(safeGet(EMPID_KEY)) : null,
-    /** 登录 Token */
+    /** 登录 Token（access） */
     token: safeGet(TOKEN_KEY) || '',
+    /** Refresh Token（用于 access 过期后换新） */
+    refreshToken: safeGet(REFRESH_TOKEN_KEY) || '',
     /** 用户名 */
     username: safeGet(USERNAME_KEY) || '',
     /** 真实姓名 */
@@ -52,11 +56,13 @@ export const useAdminStore = defineStore('admin', {
     async login(payload) {
       const res = await loginAdmin(payload)
       this.token = res.token || ''
+      this.refreshToken = res.refreshToken || ''
       this.empId = res.empId || res.EMP_ID || res.id || null
       this.username = res.username || payload.username || ''
       this.name = res.name || res.NAME || ''
 
       safeSet(TOKEN_KEY, this.token)
+      safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
       safeSet(EMPID_KEY, this.empId)
       safeSet(USERNAME_KEY, this.username)
       safeSet(NAME_KEY, this.name)
@@ -92,6 +98,12 @@ export const useAdminStore = defineStore('admin', {
       safeSet(TOKEN_KEY, this.token)
     },
 
+    /** 手动设置 Refresh Token */
+    setRefreshToken(refreshToken) {
+      this.refreshToken = refreshToken || ''
+      safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
+    },
+
     /** 手动设置管理员信息（用于跨页面同步） */
     setAdminInfo(info) {
       if (!info) return
@@ -113,13 +125,31 @@ export const useAdminStore = defineStore('admin', {
       }
     },
 
-    /** 退出登录，清除所有状态和本地存储 */
-    logout() {
+    /**
+     * 退出登录（E4：先调后端写黑名单，再清本地状态）
+     * 即使后端调用失败，仍清本地，保证前端一定登出。
+     */
+    async logout() {
+      // E4: 通知后端把 access+refresh token 加入黑名单
+      if (this.token) {
+        try {
+          await adminRequest({
+            url: '/admin/employee/logout',
+            method: 'post',
+            data: { refreshToken: this.refreshToken },
+            __silent: true
+          })
+        } catch (e) {
+          // 后端调用失败不阻断前端登出
+        }
+      }
       this.empId = null
       this.token = ''
+      this.refreshToken = ''
       this.username = ''
       this.name = ''
       safeRemove(TOKEN_KEY)
+      safeRemove(REFRESH_TOKEN_KEY)
       safeRemove(EMPID_KEY)
       safeRemove(USERNAME_KEY)
       safeRemove(NAME_KEY)

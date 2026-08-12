@@ -12,6 +12,7 @@ const USER_ID_KEY = 'stellar_user_id'
 const NICKNAME_KEY = 'stellar_user_nickname'
 const PHONE_KEY = 'stellar_user_phone'
 const ROLE_KEY = 'stellar_user_role'
+const REFRESH_TOKEN_KEY = 'stellar_user_refresh_token'
 
 /** 从 localStorage 读取 */
 function safeGet(key) {
@@ -36,8 +37,10 @@ export const useUserStore = defineStore('user', {
   state: () => ({
     /** 用户 ID */
     userId: safeGet(USER_ID_KEY) ? Number(safeGet(USER_ID_KEY)) : null,
-    /** 登录 Token */
+    /** 登录 Token（access） */
     token: safeGet(TOKEN_KEY) || '',
+    /** Refresh Token（用于 access 过期后换新） */
+    refreshToken: safeGet(REFRESH_TOKEN_KEY) || '',
     /** 用户昵称 */
     nickname: safeGet(NICKNAME_KEY) || '',
     /** 手机号 */
@@ -65,12 +68,14 @@ export const useUserStore = defineStore('user', {
     async login(payload) {
       const res = await loginUser(payload)
       this.token = res.token || ''
+      this.refreshToken = res.refreshToken || ''
       this.userId = res.userId || res.USER_ID || res.id || null
       this.nickname = res.nickname || res.NICKNAME || res.name || ''
       this.phone = res.phone || payload.email || ''
       this.role = res.role || res.ROLE || ''
 
       safeSet(TOKEN_KEY, this.token)
+      safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
       safeSet(USER_ID_KEY, this.userId)
       safeSet(NICKNAME_KEY, this.nickname)
       safeSet(PHONE_KEY, this.phone)
@@ -87,12 +92,14 @@ export const useUserStore = defineStore('user', {
         data: payload
       })
       this.token = res.token || ''
+      this.refreshToken = res.refreshToken || ''
       this.userId = res.userId || res.USER_ID || res.id || null
       this.nickname = res.nickname || res.NICKNAME || res.name || ''
       this.phone = res.phone || payload.email || ''
       this.role = res.role || res.ROLE || ''
 
       safeSet(TOKEN_KEY, this.token)
+      safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
       safeSet(USER_ID_KEY, this.userId)
       safeSet(NICKNAME_KEY, this.nickname)
       safeSet(PHONE_KEY, this.phone)
@@ -133,6 +140,12 @@ export const useUserStore = defineStore('user', {
       safeSet(TOKEN_KEY, this.token)
     },
 
+    /** 手动设置 Refresh Token */
+    setRefreshToken(refreshToken) {
+      this.refreshToken = refreshToken || ''
+      safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
+    },
+
     /** 手动设置用户信息（用于跨页面同步） */
     setUserInfo(info) {
       if (!info) return
@@ -158,14 +171,32 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    /** 退出登录，清除所有状态和本地存储 */
-    logout() {
+    /**
+     * 退出登录（E4：先调后端写黑名单，再清本地状态）
+     * 即使后端调用失败，仍清本地，保证前端一定登出。
+     */
+    async logout() {
+      // E4: 通知后端把 access+refresh token 加入黑名单
+      if (this.token) {
+        try {
+          await userRequest({
+            url: '/user/user/logout',
+            method: 'post',
+            data: { refreshToken: this.refreshToken },
+            __silent: true
+          })
+        } catch (e) {
+          // 后端调用失败不阻断前端登出（token 在本地清掉后即不可用）
+        }
+      }
       this.userId = null
       this.token = ''
+      this.refreshToken = ''
       this.nickname = ''
       this.phone = ''
       this.role = ''
       safeRemove(TOKEN_KEY)
+      safeRemove(REFRESH_TOKEN_KEY)
       safeRemove(USER_ID_KEY)
       safeRemove(NICKNAME_KEY)
       safeRemove(PHONE_KEY)
