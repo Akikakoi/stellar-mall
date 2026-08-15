@@ -64,6 +64,9 @@ frontend/pnpm-debug.log*
 **/node_modules/
 **/dist/
 
+# Vite 配置临时文件（dev server 运行时生成）
+*.timestamp-*.mjs
+
 # ---------- 通用日志 ----------
 *.log
 logs/
@@ -108,3 +111,6 @@ Stellar_Mall_AI_面试题_追问篇.pdf
 
 # ---------- WorkBuddy 项目数据 ----------
 .workbuddy/
+
+# ---------- Cowork 临时工作目录 ----------
+.cowork-temp/
