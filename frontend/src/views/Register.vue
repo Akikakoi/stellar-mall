@@ -24,6 +24,26 @@
             </el-button>
           </div>
         </el-form-item>
+        <el-form-item prop="captchaCode">
+          <div class="captcha-row">
+            <el-input
+              v-model="form.captchaCode"
+              placeholder="请输入图形验证码"
+              size="large"
+              style="flex:1"
+              autocomplete="off"
+            />
+            <img
+              v-if="captchaImage"
+              :src="captchaImage"
+              alt="图形验证码"
+              class="captcha-img"
+              title="点击刷新"
+              @click="refreshCaptcha"
+            />
+            <div v-else class="captcha-placeholder" @click="refreshCaptcha">点击加载</div>
+          </div>
+        </el-form-item>
         <el-button type="primary" size="large" class="submit-btn" :loading="loading" @click="handleRegister">
           注 册
         </el-button>
@@ -36,10 +56,11 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { userRequest } from '@/api/request'
+import { getCaptcha } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -50,18 +71,40 @@ const sendingCode = ref(false)
 const codeCountdown = ref(0)
 let timer = null
 
+// 图形验证码状态
+const captchaId = ref('')
+const captchaImage = ref('')
+
 const form = reactive({
   email: '',
   nickname: '',
-  code: ''
+  code: '',
+  captchaCode: ''
 })
 
 const emailRule = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
 
 const rules = {
   email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, emailRule],
-  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+  code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+  captchaCode: [{ required: true, message: '请输入图形验证码', trigger: 'blur' }]
 }
+
+/** 拉取图形验证码图片 */
+async function refreshCaptcha() {
+  try {
+    const res = await getCaptcha()
+    captchaId.value = res.captchaId
+    captchaImage.value = res.imageBase64
+    form.captchaCode = ''
+  } catch (e) {
+    // 拦截器已统一提示
+  }
+}
+
+onMounted(() => {
+  refreshCaptcha()
+})
 
 /**
  * 发送邮箱注册验证码，含 60 秒倒计时
@@ -100,7 +143,7 @@ async function sendCode() {
 }
 
 /**
- * 处理注册提交：邮箱验证码校验通过后自动注册并登录，
+ * 处理注册提交：图形验证码 + 邮箱验证码校验通过后自动注册并登录，
  * 若填写了昵称则同步更新
  */
 async function handleRegister() {
@@ -112,7 +155,13 @@ async function handleRegister() {
   }
   loading.value = true
   try {
-    await userStore.emailLogin({ email: form.email, type: 'REGISTER', code: form.code })
+    await userStore.emailLogin({
+      email: form.email,
+      type: 'REGISTER',
+      code: form.code,
+      captchaId: captchaId.value,
+      captchaCode: form.captchaCode
+    })
     if (form.nickname) {
       try {
         await userRequest({
@@ -127,7 +176,8 @@ async function handleRegister() {
     ElMessage.success('注册成功')
     router.push('/')
   } catch (e) {
-    // error shown
+    // 注册失败时刷新图形验证码（一次性使用），让用户重试
+    refreshCaptcha()
   } finally {
     loading.value = false
   }
@@ -175,6 +225,25 @@ async function handleRegister() {
   white-space: nowrap;
   min-width: 120px;
   font-size: 14px;
+}
+.captcha-row { display: flex; gap: 10px; align-items: center; }
+.captcha-img {
+  height: 40px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--border-base);
+}
+.captcha-placeholder {
+  height: 40px;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--border-base);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
 }
 
 .submit-btn {

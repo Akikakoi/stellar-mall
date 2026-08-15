@@ -15,7 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.stellar.TestRedisConfig;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SpringBootTest
 @Transactional
+@Import(TestRedisConfig.class)
 class CategoryServiceTest {
 
     @Autowired(required = false)

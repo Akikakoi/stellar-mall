@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.dto.CategoryPageQueryDTO;
 import com.stellar.dto.CategorySaveDTO;
 import com.stellar.dto.CategoryUpdateDTO;
@@ -15,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +53,7 @@ public class CategoryController {
         return vo;
     }
 
+    @Idempotent(keyPrefix = "admin-category-save", windowSeconds = 300)
     @PostMapping
     @ApiOperation("新增分类")
     public Result<Map<String, Long>> save(@RequestBody @Valid CategorySaveDTO dto) {
@@ -67,6 +69,7 @@ public class CategoryController {
         return Result.success(toVo(categoryService.getById(id)));
     }
 
+    @Idempotent(keyPrefix = "admin-category-update", windowSeconds = 300)
     @PutMapping
     @ApiOperation("更新分类")
     public Result<String> update(@RequestBody @Valid CategoryUpdateDTO dto) {

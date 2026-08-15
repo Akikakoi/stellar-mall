@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.entity.Banner;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
@@ -21,6 +22,7 @@ public class BannerAdminController {
 
     private final BannerService bannerService;
 
+    @Idempotent(keyPrefix = "admin-banner-create", windowSeconds = 300)
     @PostMapping
     @ApiOperation("新增轮播图")
     public Result<Long> create(@RequestBody Banner banner) {

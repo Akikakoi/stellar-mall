@@ -1,6 +1,7 @@
 package com.stellar.utils;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stellar.json.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -22,6 +23,8 @@ import java.util.Map;
  */
 @Slf4j
 public class HttpClientUtil {
+
+    private static final ObjectMapper MAPPER = new JacksonObjectMapper();
 
     private static final int CONNECT_TIMEOUT_MS = 5_000;
     private static final int SOCKET_TIMEOUT_MS  = 30_000; // 同步 RAG 大文档切向量可能慢，给 30s
@@ -56,7 +59,7 @@ public class HttpClientUtil {
     public static String doPost(String url, Map<String, String> headers, Object jsonBody) throws IOException {
         HttpPost post = new HttpPost(url);
         post.addHeader("Content-Type", "application/json; charset=utf-8");
-        String json = JSON.toJSONString(jsonBody);
+        String json = MAPPER.writeValueAsString(jsonBody);
         post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
         return execute(post, headers);
     }
@@ -67,7 +70,7 @@ public class HttpClientUtil {
             @Override public String getMethod() { return "DELETE"; }
         };
         post.addHeader("Content-Type", "application/json; charset=utf-8");
-        String json = JSON.toJSONString(jsonBody);
+        String json = MAPPER.writeValueAsString(jsonBody);
         post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
         return execute(post, headers);
     }

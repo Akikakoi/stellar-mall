@@ -93,15 +93,15 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         }
     }
 
-    /** 为 nameVec 字段添加 dense_vector 映射（1024 维，cosine 相似度）。 */
+    /** 为 nameVec 字段添加 dense_vector 映射（1536 维，cosine 相似度）。 */
     private void putDenseVectorMapping() {
         try {
             org.elasticsearch.client.Request request = new org.elasticsearch.client.Request("PUT",
                     "/" + spuIndexName() + "/_mapping");
-                request.setJsonEntity("{"
-                        + "\"properties\":{"
-                        + "\"nameVec\":{\"type\":\"dense_vector\",\"dims\":1536}"
-                        + "}}");
+            request.setJsonEntity("{"
+                    + "\"properties\":{"
+                    + "\"nameVec\":{\"type\":\"dense_vector\",\"dims\":1536}"
+                    + "}}");
             elasticsearchClient().getLowLevelClient().performRequest(request);
             log.info("dense_vector mapping added to {}", spuIndexName());
         } catch (Exception e) {
@@ -117,7 +117,6 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         org.apache.http.HttpHost[] hosts = new org.apache.http.HttpHost[parts.length];
         for (int i = 0; i < parts.length; i++) {
             String uri = parts[i].trim();
-            // 支持 http://host:port 格式
             try {
                 java.net.URL url = new java.net.URL(uri);
                 hosts[i] = new org.apache.http.HttpHost(

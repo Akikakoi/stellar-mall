@@ -1,6 +1,8 @@
 package com.stellar.ragsync.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stellar.json.JacksonObjectMapper;
 import com.stellar.entity.RagSyncOutbox;
 import com.stellar.entity.Spu;
 import com.stellar.ragsync.client.RagSyncClient;
@@ -26,6 +28,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RagSyncServiceImpl implements RagSyncService {
 
+    private static final ObjectMapper MAPPER = new JacksonObjectMapper();
+
     private final RagSyncOutboxMapper outboxMapper;
     private final RagSyncClient ragSyncClient;
     private final RagSyncProperties properties;
@@ -43,7 +47,7 @@ public class RagSyncServiceImpl implements RagSyncService {
         Map<String, Object> snap = new HashMap<>();
         snap.put("spu_id", spuId);
         snap.put("op_type", opType);
-        box.setPayloadJson(JSON.toJSONString(snap));
+        box.setPayloadJson(toJson(snap));
         outboxMapper.insert(box);
         log.info("[RagSyncService] enqueue SPU id={}, opType={}, outboxId={}",
                 spuId, opType, box.getId());
@@ -65,11 +69,19 @@ public class RagSyncServiceImpl implements RagSyncService {
         snap.put("content_md", contentMd != null ? contentMd : "");
         snap.put("status", status);
         if (tags != null && !tags.isEmpty()) snap.put("tags", tags);
-        box.setPayloadJson(JSON.toJSONString(snap));
+        box.setPayloadJson(toJson(snap));
         outboxMapper.insert(box);
         log.info("[RagSyncService] enqueue DOC docId={}, docType={}, opType={}, outboxId={}",
                 docId, docType, opType, box.getId());
         return box.getId();
+    }
+
+    private static String toJson(Object obj) {
+        try {
+            return MAPPER.writeValueAsString(obj);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new RuntimeException("JSON serialization failed", e);
+        }
     }
 
     private RagSyncOutbox newOutbox(String bizType, Long bizId, String opType) {
@@ -150,7 +162,7 @@ public class RagSyncServiceImpl implements RagSyncService {
         Map<String, Object> payload = new HashMap<>();
         try {
             if (box.getPayloadJson() != null && !box.getPayloadJson().isEmpty()) {
-                Map<String, Object> snap = JSON.parseObject(box.getPayloadJson(), Map.class);
+                Map<String, Object> snap = MAPPER.readValue(box.getPayloadJson(), new TypeReference<Map<String, Object>>() {});
                 if (snap != null) payload.putAll(snap);
             }
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
 import com.stellar.service.OrderService;
@@ -37,6 +38,7 @@ public class AdminOrderController {
         return Result.success(orderService.pageOrders(page, pageSize, status, orderNo, startTime, endTime));
     }
 
+    @Idempotent(keyPrefix = "admin-order-ship", windowSeconds = 300)
     @PostMapping("/{id}/ship")
     @ApiOperation("发货：PAID → SHIPPED，可传入物流信息并自动通知用户")
     public Result<String> ship(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {

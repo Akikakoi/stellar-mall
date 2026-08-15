@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.AfterSaleAuditDTO;
 import com.stellar.result.PageResult;
@@ -39,6 +40,7 @@ public class AfterSaleAdminController {
         return Result.success(afterSaleService.getDetailById(id));
     }
 
+    @Idempotent(keyPrefix = "admin-aftersale-audit", windowSeconds = 300)
     @PostMapping("/audit")
     @ApiOperation("审核售后单")
     public Result<Void> audit(@RequestBody AfterSaleAuditDTO dto) {
@@ -47,6 +49,7 @@ public class AfterSaleAdminController {
         return Result.success();
     }
 
+    @Idempotent(keyPrefix = "admin-aftersale-refund", windowSeconds = 300)
     @PostMapping("/{id}/confirm-refund")
     @ApiOperation("确认退款完成")
     public Result<Void> confirmRefund(@PathVariable Long id) {

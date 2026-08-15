@@ -1,12 +1,14 @@
 package com.stellar.controller.user;
 
 import com.stellar.annotation.RateLimit;
+import com.stellar.constant.MessageConstant;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.MallUserLoginDTO;
 import com.stellar.dto.MallUserProfileUpdateDTO;
 import com.stellar.entity.MallUser;
 import com.stellar.exception.BaseException;
 import com.stellar.result.Result;
+import com.stellar.service.CaptchaService;
 import com.stellar.service.MallUserService;
 import com.stellar.service.NotificationService;
 import com.stellar.service.TokenBlacklistService;
@@ -31,6 +33,7 @@ public class UserController {
     private final MallUserService mallUserService;
     private final NotificationService notificationService;
     private final TokenBlacklistService tokenBlacklistService;
+    private final CaptchaService captchaService;
 
     @RateLimit(key = "login", maxRequests = 10, windowSeconds = 60)
     @PostMapping("/login")
@@ -41,8 +44,16 @@ public class UserController {
 
     @RateLimit(key = "email-login", maxRequests = 10, windowSeconds = 60)
     @PostMapping("/email-login")
-    @ApiOperation("C 端用户邮箱验证码登录/注册")
+    @ApiOperation("C 端用户邮箱验证码登录/注册（需图形验证码）")
     public Result<MallUserLoginVO> emailLogin(@RequestBody @Valid EmailLoginDTO dto) {
+        // 图形验证码校验
+        if (dto.getCaptchaId() == null || dto.getCaptchaCode() == null) {
+            throw new BaseException(MessageConstant.CAPTCHA_REQUIRED);
+        }
+        if (!captchaService.validate(dto.getCaptchaId(), dto.getCaptchaCode())) {
+            throw new BaseException(MessageConstant.CAPTCHA_INVALID);
+        }
+        // 邮箱验证码校验
         boolean ok = notificationService.verifyEmailCode(dto.getEmail(), dto.getType(), dto.getCode());
         if (!ok) {
             throw new BaseException("验证码错误或已过期");
@@ -136,5 +147,9 @@ public class UserController {
         private String type;    // LOGIN / REGISTER
         @NotBlank
         private String code;
+        /** 图形验证码 ID（来自 /captcha/image 返回） */
+        private String captchaId;
+        /** 用户识别出的图形验证码 */
+        private String captchaCode;
     }
 }

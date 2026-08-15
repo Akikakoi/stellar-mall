@@ -25,6 +25,7 @@ public class Spu implements Serializable {
     private String subTitle;
     private Long brandId;
     private Long categoryId;
+    private Long category2Id;       // 二级分类（三级分类结构中）
     private String description;
     private String descriptionMd;
     private String mainImage;

@@ -1,6 +1,8 @@
 package com.stellar.ragsync.client.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stellar.json.JacksonObjectMapper;
 import com.stellar.entity.Sku;
 import com.stellar.entity.Spu;
 import com.stellar.ragsync.client.RagSyncClient;
@@ -35,6 +37,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DefaultRagSyncClient implements RagSyncClient {
 
+    private static final ObjectMapper MAPPER = new JacksonObjectMapper();
+
     private static final String SYNC_SPU_PATH = "/api/internal/sync_spu";
     private static final String SYNC_DOC_PATH = "/api/internal/sync_doc";
     private static final String HEADER_SECRET = "X-Stellar-Rag-Sync-Secret";
@@ -68,7 +72,7 @@ public class DefaultRagSyncClient implements RagSyncClient {
 
     private boolean doPost(String path, Map<String, Object> body, String bizType, Object bizId) {
         String url = trimSlash(properties.getBaseUrl()) + path;
-        String json = JSON.toJSONString(body);
+        String json = toJson(body);
 
         try (CloseableHttpClient client = httpClient()) {
             HttpPost post = new HttpPost(url);
@@ -83,7 +87,7 @@ public class DefaultRagSyncClient implements RagSyncClient {
                 if (code < 200 || code >= 300) {
                     throw new RuntimeException("RAG " + path + " 返回非 2xx 状态码：" + code + "，body=" + respText);
                 }
-                Map parsed = JSON.parseObject(respText, Map.class);
+                Map<String, Object> parsed = MAPPER.readValue(respText, new TypeReference<Map<String, Object>>() {});
                 Object ok = parsed == null ? null : parsed.get("ok");
                 if (!Boolean.TRUE.equals(ok) && !"true".equals(String.valueOf(ok))) {
                     throw new RuntimeException("RAG " + path + " ok=false，响应：" + respText);
@@ -93,6 +97,14 @@ public class DefaultRagSyncClient implements RagSyncClient {
             }
         } catch (IOException e) {
             throw new RuntimeException("RAG " + path + " HTTP 调用失败：" + e.getMessage(), e);
+        }
+    }
+
+    private static String toJson(Object obj) {
+        try {
+            return MAPPER.writeValueAsString(obj);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new RuntimeException("JSON serialization failed", e);
         }
     }
 

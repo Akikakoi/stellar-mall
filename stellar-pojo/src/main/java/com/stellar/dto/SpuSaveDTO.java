@@ -5,10 +5,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ public class SpuSaveDTO implements Serializable {
     @NotNull(message = "分类不能为空")
     @ApiModelProperty(value = "分类 id", required = true)
     private Long categoryId;
+    private Long category2Id;  // 二级分类
 
     // ========= 图片：mainImage（标准）+ image（前端常用别名，兼容保存） =========
     @Size(max = 255)

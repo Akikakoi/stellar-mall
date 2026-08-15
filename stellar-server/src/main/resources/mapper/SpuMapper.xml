@@ -177,6 +177,9 @@
               <when test="'minPrice'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
                 ORDER BY s.min_price ${sortOrder}, s.id ASC
               </when>
+              <when test="'id'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY s.id ${sortOrder}
+              </when>
               <otherwise>
                 ORDER BY s.sort DESC, s.create_time DESC
               </otherwise>

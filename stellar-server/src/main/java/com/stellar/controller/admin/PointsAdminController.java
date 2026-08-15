@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.annotation.RequireRole;
 import com.stellar.dto.PointsAdjustDTO;
 import com.stellar.dto.PointsProductSaveDTO;
@@ -12,7 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -53,6 +54,7 @@ public class PointsAdminController {
 
     // ===== 积分调整 =====
 
+    @Idempotent(keyPrefix = "admin-points-adjust", windowSeconds = 300)
     @PostMapping("/adjust")
     @ApiOperation("管理员调整用户积分")
     @RequireRole({1, 2})
@@ -80,6 +82,7 @@ public class PointsAdminController {
         return Result.success(pointsService.getProductById(id));
     }
 
+    @Idempotent(keyPrefix = "admin-points-product-create", windowSeconds = 300)
     @PostMapping("/products")
     @ApiOperation("创建积分商品")
     @RequireRole({1, 2})
@@ -88,6 +91,7 @@ public class PointsAdminController {
         return Result.success();
     }
 
+    @Idempotent(keyPrefix = "admin-points-product-update", windowSeconds = 300)
     @PutMapping("/products")
     @ApiOperation("更新积分商品")
     @RequireRole({1, 2})

@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -13,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * <p>
  * 技术栈：
  *   Spring Boot 2.7.18 (Java 17) / MyBatis + PageHelper / Spring Security Crypto (BCrypt) /
- *   Redis (Lettuce) / Knife4j 4.4.0 / Apache HttpClient / FastJSON / JJWT 0.9.1
+ *   Redis (Lettuce) / Knife4j 4.4.0 / Apache HttpClient / Jackson / JJWT 0.9.1
  * <p>
  * ⚠️ 本地启动前：
  *   1) 在 MySQL 创建 stellar_mall 库 + stellar / stellar_ro 两个账号（见 sql/stellar_mall_accounts.sql）
@@ -23,7 +25,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  *   5) 启动后访问：http://127.0.0.1:8082/doc.html （Swagger/Knife4j 文档）
  */
 @Slf4j
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+        ElasticsearchClientAutoConfiguration.class,
+        ElasticsearchRestClientAutoConfiguration.class
+})
 @MapperScan(basePackages = {"com.stellar.mapper", "com.stellar.ragsync.mapper"})
 @EnableScheduling
 @EnableAsync
