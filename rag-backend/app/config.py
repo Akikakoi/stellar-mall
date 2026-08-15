@@ -114,6 +114,13 @@ class Settings(BaseSettings):
     RETRIEVER_TOP_K: int = 20
     RERANK_TOP_K: int = 5
     SIMILARITY_THRESHOLD: float = 0.25   # 降到 0.25：自然语言问句 vs 结构化 spec 的语义相似度本身偏低
+
+    # Reranker（BGE CrossEncoder 精排）
+    RERANKER_ENABLED: bool = True
+    RERANKER_MODEL_NAME: str = "./data/models/bge-reranker-v2-m3"
+    RERANKER_DEVICE: str = "cpu"       # cpu | cuda | mps
+    RERANKER_USE_FP16: bool = False    # True 只在 GPU 环境下有用
+    RERANKER_BATCH_SIZE: int = 16
     CHUNK_SIZE: int = 1024
     CHUNK_OVERLAP: int = 200
     QUERY_REWRITE_ENABLED: bool = True

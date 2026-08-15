@@ -42,7 +42,7 @@
           </div>
         </el-form-item>
 
-        <!-- 验证码模式：图形验证码（E3，防机器人） -->
+        <!-- 验证码模式：图形验证码（登录提交时校验） -->
         <el-form-item v-if="loginMode === 'email'" prop="captchaCode">
           <div class="captcha-row">
             <el-input
@@ -145,15 +145,11 @@ function switchMode(mode) {
 
 /**
  * 发送邮箱验证码，含 60 秒倒计时
- * E3：必须先输入图形验证码，连同 captchaId 一起提交到后端校验
+ * 直接发送，无需图形验证码；图形验证码在登录提交时校验
  */
 async function sendCode() {
   if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     ElMessage.warning('请输入正确的邮箱地址')
-    return
-  }
-  if (!captchaId.value || !form.captchaCode) {
-    ElMessage.warning('请先输入图形验证码')
     return
   }
   sendingCode.value = true
@@ -163,9 +159,7 @@ async function sendCode() {
       method: 'post',
       data: {
         email: form.email,
-        type: 'LOGIN',
-        captchaId: captchaId.value,
-        captchaCode: form.captchaCode
+        type: 'LOGIN'
       },
       __silent: true
     })
@@ -181,11 +175,8 @@ async function sendCode() {
       codeCountdown.value--
       if (codeCountdown.value <= 0) clearInterval(timer)
     }, 1000)
-    // 发送成功后刷新图形验证码（一次性使用，下次发送需要新图）
-    refreshCaptcha()
   } catch (e) {
-    // 图形验证码错误或失效时，后端返回 CAPTCHA_INVALID，刷新图片让用户重试
-    refreshCaptcha()
+    // 拦截器已统一提示
   } finally {
     sendingCode.value = false
   }
@@ -193,7 +184,7 @@ async function sendCode() {
 
 /**
  * 处理登录提交
- * 根据当前登录模式调用密码登录或邮箱验证码登录，成功后跳转至重定向地址
+ * 邮箱验证码模式：连同图形验证码一起提交，后端先校验图形验证码再校验邮箱验证码
  */
 async function handleLogin() {
   if (!formRef.value) return
@@ -205,7 +196,13 @@ async function handleLogin() {
   loading.value = true
   try {
     if (loginMode.value === 'email') {
-      await userStore.emailLogin({ email: form.email, type: 'LOGIN', code: form.code })
+      await userStore.emailLogin({
+        email: form.email,
+        type: 'LOGIN',
+        code: form.code,
+        captchaId: captchaId.value,
+        captchaCode: form.captchaCode
+      })
     } else {
       await userStore.login({ email: form.email, password: form.password })
     }
@@ -213,6 +210,10 @@ async function handleLogin() {
     const redirect = route.query.redirect || '/'
     router.push(redirect)
   } catch (e) {
+    // 邮箱登录失败时刷新图形验证码（一次性使用），让用户重试
+    if (loginMode.value === 'email') {
+      refreshCaptcha()
+    }
   } finally {
     loading.value = false
   }

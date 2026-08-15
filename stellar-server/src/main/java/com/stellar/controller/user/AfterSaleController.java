@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.AfterSaleReturnDTO;
 import com.stellar.dto.AfterSaleSubmitDTO;
@@ -24,6 +25,7 @@ public class AfterSaleController {
 
     private final AfterSaleService afterSaleService;
 
+    @Idempotent(keyPrefix = "aftersale-submit", windowSeconds = 300)
     @PostMapping
     @ApiOperation("提交售后申请")
     public Result<AfterSale> submit(@RequestBody AfterSaleSubmitDTO dto) {

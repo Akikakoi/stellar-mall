@@ -1,0 +1,6 @@
+-- V1.0__baseline.sql — Flyway baseline placeholder (no-op)
+-- 现有数据库 schema 已通过 baseline-on-migrate=true 注册为 V1。
+-- 后续所有 schema 变更请创建 V2__xxx.sql, V3__xxx.sql ...
+--
+-- 表结构定义详见: src/main/resources/sql/stellar_mall_ddl.sql
+-- 初始化数据详见: src/main/resources/sql/stellar_mall_init_data.sql

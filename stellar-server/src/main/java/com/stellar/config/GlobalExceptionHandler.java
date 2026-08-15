@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 /**
  * 全局异常处理器（对齐 sky-take-out GlobalExceptionHandler）。

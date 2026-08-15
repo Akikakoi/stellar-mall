@@ -7,6 +7,10 @@ from app.core.logger import logger
 from app.rag.embeddings import get_embeddings
 from app.rag.vector_store import get_vector_store
 
+# BGE Reranker 单例（懒加载）
+_reranker_instance = None
+_reranker_load_attempted = False
+
 
 # =====================================================
 # 1) 混合检索：EnsembleRetriever
@@ -92,38 +96,102 @@ def hybrid_retrieve(query: str, top_k: int | None = None, tags_filter: Optional[
 
 
 # =====================================================
-# 2) Rerank 精排：直接用 Embedding 余弦相似度 + DashScope（用户要求云端API）
+# 2) Rerank 精排：BGE CrossEncoder（主力）→ Embedding 余弦相似度（兜底）
 # =====================================================
+def _get_reranker():
+    """懒加载 BGE Reranker（CrossEncoder），单例。加载失败返回 None。"""
+    global _reranker_instance, _reranker_load_attempted
+    if _reranker_load_attempted:
+        return _reranker_instance
+    _reranker_load_attempted = True
+    if not settings.RERANKER_ENABLED:
+        logger.info("[Reranker] RERANKER_ENABLED=False，跳过加载")
+        return None
+    try:
+        from FlagEmbedding import FlagReranker
+        _reranker_instance = FlagReranker(
+            settings.RERANKER_MODEL_NAME,
+            use_fp16=settings.RERANKER_USE_FP16,
+            device=settings.RERANKER_DEVICE,
+        )
+        logger.info(f"[Reranker] BGE CrossEncoder 已加载: {settings.RERANKER_MODEL_NAME} "
+                     f"device={settings.RERANKER_DEVICE} fp16={settings.RERANKER_USE_FP16}")
+        return _reranker_instance
+    except Exception as e:
+        logger.warning(f"[Reranker] FlagReranker 加载失败，将回退到余弦相似度: {e}")
+        return None
+
+
+def _rerank_with_cross_encoder(reranker, query: str, docs, top_k: int) -> List[Tuple]:
+    """用 BGE CrossEncoder 做 pairwise 精排。"""
+    import numpy as np
+    pairs = [[query, d.page_content] for d in docs]
+    try:
+        raw_scores = reranker.compute_score(
+            pairs,
+            batch_size=settings.RERANKER_BATCH_SIZE,
+            normalize=True,
+        )
+    except TypeError:
+        # 旧版 FlagEmbedding 不支持 normalize 参数
+        raw_scores = reranker.compute_score(pairs, batch_size=settings.RERANKER_BATCH_SIZE)
+
+    # compute_score 可能返回单个 float（只有 1 个 pair 时），统一为 list
+    if isinstance(raw_scores, (int, float)):
+        raw_scores = [float(raw_scores)]
+    else:
+        raw_scores = [float(s) for s in raw_scores]
+
+    scored = list(zip(docs, raw_scores))
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return scored[:top_k]
+
+
+def _rerank_with_cosine(query: str, docs, top_k: int) -> List[Tuple]:
+    """兜底方案：Embedding 余弦相似度打分。"""
+    emb = get_embeddings()
+    q_emb = emb.embed_query(query)
+    import numpy as np
+    contents = [d.page_content for d in docs]
+    doc_embs = emb.embed_documents(contents)
+    q_np = np.asarray(q_emb, dtype=np.float32)
+    d_np = np.asarray(doc_embs, dtype=np.float32)
+    if q_np.ndim == 1:
+        q_np = q_np.reshape(1, -1)
+    scores = (d_np @ q_np.T).ravel() / (
+        np.linalg.norm(d_np, axis=1) * np.linalg.norm(q_np) + 1e-9
+    )
+    scored = list(zip(docs, [float(s) for s in scores.tolist()]))
+    scored.sort(key=lambda x: x[1], reverse=True)
+    thr = settings.SIMILARITY_THRESHOLD
+    filtered = [(d, s) for (d, s) in scored if s >= thr]
+    if not filtered:
+        filtered = scored[:1]
+    return filtered[:top_k]
+
+
 def rerank(query: str, docs, top_k: int | None = None) -> List[Tuple]:
-    """返回 [(doc, score)] 已按得分倒序；top_k=精排数量。"""
+    """返回 [(doc, score)] 已按得分倒序；top_k=精排数量。
+
+    优先使用 BGE CrossEncoder（FlagReranker），加载失败则回退到 Embedding 余弦相似度。
+    """
     top_k = top_k or settings.RERANK_TOP_K
     if not docs:
         return []
+
+    # 1) 主力：BGE CrossEncoder
+    reranker = _get_reranker()
+    if reranker is not None:
+        try:
+            return _rerank_with_cross_encoder(reranker, query, docs, top_k)
+        except Exception as e:
+            logger.warning(f"[Reranker] CrossEncoder 推理失败，回退余弦相似度: {e}")
+
+    # 2) 兜底：Embedding 余弦相似度
     try:
-        # 直接用 Embedding 余弦相似度打分（DashScope 向量）
-        emb = get_embeddings()
-        q_emb = emb.embed_query(query)
-        import numpy as np
-        # 批量 embedding 文档，减少调用次数
-        contents = [d.page_content for d in docs]
-        doc_embs = emb.embed_documents(contents)
-        q_np = np.asarray(q_emb, dtype=np.float32)
-        d_np = np.asarray(doc_embs, dtype=np.float32)
-        if q_np.ndim == 1:
-            q_np = q_np.reshape(1, -1)
-        scores = (d_np @ q_np.T).ravel() / (
-            np.linalg.norm(d_np, axis=1) * np.linalg.norm(q_np) + 1e-9
-        )
-        scored = list(zip(docs, [float(s) for s in scores.tolist()]))
-        scored.sort(key=lambda x: x[1], reverse=True)
-        thr = settings.SIMILARITY_THRESHOLD
-        filtered = [(d, s) for (d, s) in scored if s >= thr]
-        if not filtered:
-            # 若全部低于阈值，至少返回最相关的一条（让系统能给低置信度参考）
-            filtered = scored[:1]
-        return filtered[:top_k]
-    except Exception as e:  # noqa
-        logger.warning(f"精排异常，返回原始 docs: {e}")
+        return _rerank_with_cosine(query, docs, top_k)
+    except Exception as e:
+        logger.warning(f"[Reranker] 精排异常，返回原始 docs: {e}")
         return [(d, 0.5) for d in docs[:top_k]]
 
 

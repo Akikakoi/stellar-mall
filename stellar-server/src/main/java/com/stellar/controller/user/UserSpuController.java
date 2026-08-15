@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.RateLimit;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.elasticsearch.service.SearchSuggestService;
 import com.stellar.elasticsearch.service.SpuSearchService;
@@ -29,6 +30,7 @@ public class UserSpuController {
     private final SpuSearchService spuSearchService;
     private final SearchSuggestService suggestService;
 
+    @RateLimit(key = "spu-search", maxRequests = 60, windowSeconds = 60)
     @GetMapping("/page")
     @ApiOperation("C 端 SPU 分页搜索（含高亮 + 聚合，默认过滤上架）")
     public Result<SearchResultVO> page(SpuPageQueryDTO dto) {

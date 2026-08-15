@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
 import io.swagger.annotations.Api;
@@ -47,6 +48,7 @@ public class InventoryController {
         return Result.success(new PageResult(total == null ? 0L : total, list == null ? new ArrayList<>() : list));
     }
 
+    @Idempotent(keyPrefix = "admin-inventory-update", windowSeconds = 300)
     @PutMapping("/stock")
     @ApiOperation("调整库存")
     public Result<String> updateStock(@RequestBody Map<String, Object> body) {

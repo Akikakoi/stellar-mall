@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.entity.Review;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
@@ -19,6 +20,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @Idempotent(keyPrefix = "review-submit", windowSeconds = 300)
     @PostMapping
     @ApiOperation("提交评价")
     public Result<Long> submit(@RequestBody Review review) {

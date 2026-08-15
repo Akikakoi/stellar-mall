@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.dto.SpuSaveDTO;
 import com.stellar.elasticsearch.service.SpuSearchService;
@@ -12,7 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class SpuController {
     private final SpuService spuService;
     private final SpuSearchService spuSearchService;
 
+    @Idempotent(keyPrefix = "admin-spu-save", windowSeconds = 300)
     @PostMapping
     @ApiOperation("新增 SPU（含嵌套 SKU）")
     public Result<Map<String, Long>> save(@RequestBody @Valid SpuSaveDTO dto) {
@@ -41,6 +43,7 @@ public class SpuController {
         return Result.success(spuService.getById(id));
     }
 
+    @Idempotent(keyPrefix = "admin-spu-update", windowSeconds = 300)
     @PutMapping
     @ApiOperation("更新 SPU（传 SKU 则覆盖原 SKU，不传则保留）")
     public Result<String> update(@RequestBody @Valid SpuSaveDTO dto) {

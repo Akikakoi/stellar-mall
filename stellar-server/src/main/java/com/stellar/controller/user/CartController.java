@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.RateLimit;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.CartAddDTO;
 import com.stellar.dto.CartUpdateDTO;
@@ -34,6 +35,7 @@ public class CartController {
         return Result.success(cartService.list(BaseContext.getCurrentId()));
     }
 
+    @RateLimit(key = "cart-add", maxRequests = 30, windowSeconds = 60)
     @PostMapping
     @ApiOperation("添加购物车：同 SKU 合并数量")
     public Result<String> add(@RequestBody CartAddDTO dto) {

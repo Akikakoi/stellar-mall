@@ -4,7 +4,12 @@ import com.stellar.entity.*;
 import com.stellar.enumeration.OrderStatus;
 import com.stellar.exception.BaseException;
 import com.stellar.mapper.*;
+import com.stellar.service.CouponService;
 import com.stellar.service.SkuStockService;
+import com.stellar.service.UserMessageService;
+import com.stellar.service.WalletService;
+import com.stellar.service.NotificationService;
+import com.stellar.service.PointsService;
 import com.stellar.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +47,17 @@ class OrderCancelRollbackTest {
     private MallOrderMapper mallOrderMapper;
     @Mock
     private MallOrderItemMapper mallOrderItemMapper;
+
+    @Mock
+    private CouponService couponService;
+    @Mock
+    private UserMessageService userMessageService;
+    @Mock
+    private WalletService walletService;
+    @Mock
+    private NotificationService notificationService;
+    @Mock
+    private PointsService pointsService;
 
     @InjectMocks
     private OrderServiceImpl orderService;

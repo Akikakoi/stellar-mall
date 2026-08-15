@@ -3,7 +3,6 @@ package com.stellar.product;
 import com.stellar.dto.SpuSaveDTO;
 import com.stellar.entity.Sku;
 import com.stellar.entity.Spu;
-import com.stellar.mapper.CategoryMapper;
 import com.stellar.mapper.SkuMapper;
 import com.stellar.mapper.SpuMapper;
 import com.stellar.ragsync.service.RagSyncService;
@@ -43,8 +42,6 @@ class SpuRagSyncOutboxTest {
     private SpuMapper spuMapper;
     @Mock
     private SkuMapper skuMapper;
-    @Mock
-    private CategoryMapper categoryMapper;
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
@@ -116,7 +113,7 @@ class SpuRagSyncOutboxTest {
         lenient().when(spuMapper.getById(any())).thenReturn(base);
 
         ragSyncSpy = new RecordingRagSyncService();
-        spuService = new SpuServiceImpl(spuMapper, skuMapper, categoryMapper, ragSyncSpy, eventPublisher);
+        spuService = new SpuServiceImpl(spuMapper, skuMapper, ragSyncSpy, eventPublisher);
     }
 
     // ---- 辅助：最小 SpuSaveDTO ----

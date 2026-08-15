@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stellar.elasticsearch.doc.SpuDocument;
 import com.stellar.elasticsearch.event.SpuChangedEvent;
-import com.stellar.elasticsearch.repo.SpuEsRepository;
 import com.stellar.entity.Spu;
 import com.stellar.mapper.SpuMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class SpuEsSyncService {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private final SpuEsRepository spuEsRepository;
+    private final ElasticsearchOperations esOps;
     private final SpuMapper spuMapper;
 
     @Value("${stellar.elasticsearch.enabled:false}")
@@ -36,8 +36,8 @@ public class SpuEsSyncService {
     @Value("${stellar.rag.base-url:http://127.0.0.1:8000}")
     private String ragBaseUrl;
 
-    public SpuEsSyncService(SpuEsRepository spuEsRepository, SpuMapper spuMapper) {
-        this.spuEsRepository = spuEsRepository;
+    public SpuEsSyncService(ElasticsearchOperations esOps, SpuMapper spuMapper) {
+        this.esOps = esOps;
         this.spuMapper = spuMapper;
     }
 
@@ -60,12 +60,12 @@ public class SpuEsSyncService {
         Spu spu = spuMapper.getById(spuId);
         if (spu == null) { log.warn("SPU {} not found, skip ES sync", spuId); return; }
         SpuDocument doc = toDocumentWithEmbedding(spu);
-        spuEsRepository.save(doc);
+        esOps.save(doc);
         log.debug("SPU {} synced to ES", spuId);
     }
 
     private void syncDelete(Long spuId) {
-        spuEsRepository.deleteById(spuId);
+        esOps.delete(String.valueOf(spuId), SpuDocument.class);
         log.debug("SPU {} removed from ES", spuId);
     }
 
@@ -93,7 +93,7 @@ public class SpuEsSyncService {
             docs.add(doc);
         }
 
-        spuEsRepository.saveAll(docs);
+        esOps.save(docs);
         log.info("ES rebuild complete: {} docs with embeddings", docs.size());
         return docs.size();
     }

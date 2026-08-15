@@ -4,6 +4,12 @@ server:
 spring:
   profiles:
     active: dev
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+    locations: classpath:db/migration
+    clean-disabled: true
   main:
     allow-circular-references: true
   servlet:
@@ -62,14 +68,19 @@ stellar:
   jwt:
     # 管理端员工 token 密钥（≥32 强密钥，和 RAG 端 STELLAR_ADMIN_SECRET_KEY 完全一致！）
     admin-secret-key: ${STELLAR_ADMIN_SECRET_KEY:CHANGE_ME_ADMIN_JWT_SECRET_AT_LEAST_32_CHARS}
-    # 管理端 token TTL（毫秒，2 小时 = 7200000）
-    admin-ttl: 7200000
+    # 管理端 access token TTL（毫秒，30 分钟 = 1800000）
+    admin-ttl: 1800000
     # 管理端前端传递 token 的 header 名
     admin-token-name: token
+    # 管理端 refresh token TTL（毫秒，12 小时 = 43200000）
+    admin-refresh-ttl: 43200000
     # C 端用户 token 密钥（≥32，和 RAG 端 STELLAR_USER_SECRET_KEY 完全一致！）
     user-secret-key: ${STELLAR_USER_SECRET_KEY:CHANGE_ME_USER_JWT_SECRET_AT_LEAST_32_CHARS}
-    user-ttl: 604800000   # 7 天
+    # C 端 access token TTL（毫秒，2 小时 = 7200000）
+    user-ttl: 7200000
     user-token-name: authentication
+    # C 端 refresh token TTL（毫秒，30 天 = 2592000000）
+    user-refresh-ttl: 2592000000
   # 阿里云 OSS（和 RAG 共用一个桶，目录前缀 stellar-mall/）
   alioss:
     endpoint: ${STELLAR_OSS_ENDPOINT:}

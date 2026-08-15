@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.context.BaseContext;
 import com.stellar.entity.Coupon;
 import com.stellar.entity.UserCoupon;
@@ -27,6 +28,7 @@ public class CouponUserController {
         return Result.success(couponService.listAvailable(BaseContext.getCurrentId()));
     }
 
+    @Idempotent(keyPrefix = "coupon-claim", windowSeconds = 300)
     @PostMapping("/claim/{couponId}")
     @ApiOperation("领取优惠券")
     public Result<Long> claim(@PathVariable Long couponId) {

@@ -1,5 +1,7 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.RateLimit;
+import com.stellar.annotation.Idempotent;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.OrderSubmitDTO;
 import com.stellar.entity.MallOrder;
@@ -33,6 +35,8 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @Idempotent(keyPrefix = "order", windowSeconds = 300)
+    @RateLimit(key = "order-submit", maxRequests = 10, windowSeconds = 60)
     @PostMapping("/submit")
     @ApiOperation("提交订单：读购物车 checked 项或前端直传商品，乐观锁扣库存，写主单+明细，清已下单购物车")
     public Result<Map<String, Object>> submit(@RequestBody(required = false) OrderSubmitDTO dto) {
@@ -59,6 +63,7 @@ public class OrderController {
         return Result.success(data);
     }
 
+    @Idempotent(keyPrefix = "order-pay", windowSeconds = 300)
     @PostMapping("/{id}/pay")
     @ApiOperation("模拟支付：状态 PENDING → PAID。payMethod: 1微信 2支付宝 4钱包")
     public Result<String> pay(@PathVariable Long id,
@@ -71,6 +76,7 @@ public class OrderController {
         return Result.success();
     }
 
+    @Idempotent(keyPrefix = "order-cancel", windowSeconds = 300)
     @PostMapping("/{id}/cancel")
     @ApiOperation("取消订单：逐条回滚库存 + 改状态 CANCELLED")
     public Result<String> cancel(@PathVariable Long id,
@@ -94,6 +100,7 @@ public class OrderController {
         return Result.success(orderService.listByUser(userId, status));
     }
 
+    @Idempotent(keyPrefix = "order-confirm", windowSeconds = 300)
     @PostMapping("/{id}/confirm")
     @ApiOperation("确认收货：状态 SHIPPED → COMPLETED")
     public Result<String> confirm(@PathVariable Long id) {

@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.WalletRechargeDTO;
 import com.stellar.result.PageResult;
@@ -29,6 +30,7 @@ public class WalletController {
         return Result.success(walletService.getOrCreateWallet(userId));
     }
 
+    @Idempotent(keyPrefix = "wallet-recharge", windowSeconds = 600)
     @PostMapping("/recharge")
     @ApiOperation("模拟充值")
     public Result<WalletVO> recharge(@RequestBody WalletRechargeDTO dto) {

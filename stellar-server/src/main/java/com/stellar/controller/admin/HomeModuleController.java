@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.dto.HomeModuleSaveDTO;
 import com.stellar.entity.HomeModule;
 import com.stellar.result.Result;
@@ -9,7 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ public class HomeModuleController {
 
     private final HomeModuleService homeModuleService;
 
+    @Idempotent(keyPrefix = "admin-home-module-create", windowSeconds = 300)
     @PostMapping
     @ApiOperation("新增模块")
     public Result<Long> create(@Valid @RequestBody HomeModuleSaveDTO dto) {

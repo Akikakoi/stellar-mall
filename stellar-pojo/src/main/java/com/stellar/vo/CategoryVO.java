@@ -40,4 +40,7 @@ public class CategoryVO implements Serializable {
 
     @ApiModelProperty("该分类下的关联商品数，0 表示无商品。")
     private Integer spuCount;
+
+    @ApiModelProperty("子分类列表（树形结构）")
+    private java.util.List<CategoryVO> children;
 }

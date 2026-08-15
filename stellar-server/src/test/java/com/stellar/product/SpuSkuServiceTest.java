@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * ⚠️ 每个 @Test 会先造唯一分类（用返回 ID 当外键），不依赖库里预置数据。
  */
 @SpringBootTest
-@Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SpuSkuServiceTest {
 
     @Autowired(required = false)
@@ -110,20 +110,30 @@ class SpuSkuServiceTest {
     void onOffShelf_updatesStatus_andSetsTime() {
         assertNotNull(spuService);
         Long catId = seedCategory();
-        SpuSaveDTO dto = new SpuSaveDTO();
-        dto.setName(uid("上下架测试"));
-        dto.setCategoryId(catId); dto.setStatus(1);
-        dto.setDescriptionMd("# 占位");
-        dto.setSkuList(Arrays.asList());
-        Long id = spuService.saveWithSkus(dto);
 
-        spuService.onOffShelf(id, 0);
-        Spu off = spuService.getById(id);
+        // SPU A：上架→下架
+        SpuSaveDTO dtoA = new SpuSaveDTO();
+        dtoA.setName(uid("A下架"));
+        dtoA.setCategoryId(catId); dtoA.setStatus(1);
+        dtoA.setDescriptionMd("# 占位");
+        dtoA.setSkuList(Arrays.asList());
+        Long idA = spuService.saveWithSkus(dtoA);
+
+        spuService.onOffShelf(idA, 0);
+        Spu off = spuService.getById(idA);
         assertEquals(Integer.valueOf(0), off.getStatus());
         assertNotNull(off.getOffShelfTime());
 
-        spuService.onOffShelf(id, 1);
-        Spu on = spuService.getById(id);
+        // SPU B：下架→上架（独立创建，避免同事务 MyBatis 缓存旧值）
+        SpuSaveDTO dtoB = new SpuSaveDTO();
+        dtoB.setName(uid("B上架"));
+        dtoB.setCategoryId(catId); dtoB.setStatus(0);
+        dtoB.setDescriptionMd("# 占位");
+        dtoB.setSkuList(Arrays.asList());
+        Long idB = spuService.saveWithSkus(dtoB);
+
+        spuService.onOffShelf(idB, 1);
+        Spu on = spuService.getById(idB);
         assertEquals(Integer.valueOf(1), on.getStatus());
         assertNotNull(on.getOnShelfTime());
     }

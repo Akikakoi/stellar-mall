@@ -1,5 +1,6 @@
 package com.stellar.controller.admin;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.entity.Coupon;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
@@ -21,12 +22,14 @@ public class CouponAdminController {
 
     private final CouponService couponService;
 
+    @Idempotent(keyPrefix = "admin-coupon-create", windowSeconds = 300)
     @PostMapping
     @ApiOperation("创建优惠券")
     public Result<Long> create(@RequestBody Coupon coupon) {
         return Result.success(couponService.create(coupon));
     }
 
+    @Idempotent(keyPrefix = "admin-coupon-update", windowSeconds = 300)
     @PutMapping
     @ApiOperation("更新优惠券")
     public Result<String> update(@RequestBody Coupon coupon) {

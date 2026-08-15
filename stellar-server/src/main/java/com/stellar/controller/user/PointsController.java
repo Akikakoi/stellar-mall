@@ -1,5 +1,6 @@
 package com.stellar.controller.user;
 
+import com.stellar.annotation.Idempotent;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.PointsRedeemDTO;
 import com.stellar.result.PageResult;
@@ -14,7 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 /**
@@ -55,6 +56,7 @@ public class PointsController {
 
     // ===== 签到 =====
 
+    @Idempotent(keyPrefix = "points-checkin", windowSeconds = 300)
     @PostMapping("/checkin")
     @ApiOperation("每日签到")
     public Result<CheckinVO> checkin() {
@@ -77,6 +79,7 @@ public class PointsController {
         return Result.success(pointsService.listProducts());
     }
 
+    @Idempotent(keyPrefix = "points-redeem", windowSeconds = 300)
     @PostMapping("/redeem")
     @ApiOperation("积分兑换")
     public Result<PointsRedeemVO> redeem(@RequestBody @Valid PointsRedeemDTO dto) {
