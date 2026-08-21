@@ -190,7 +190,6 @@ async function handleRegister() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-base);
   padding: 40px 20px;
 }
 

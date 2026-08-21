@@ -457,11 +457,15 @@ async function handleAddAddress() {
 }
 
 // ==================== 优惠券 ====================
-/** 加载用户拥有的可用优惠券列表 */
+/** 加载用户拥有的可用优惠券列表（过滤已过期/未到生效时间的券） */
 async function loadCoupons() {
   try {
     const res = await userRequest({ url: '/user/coupon/my', method: 'get', params: { status: 1 } })
-    availableCoupons.value = Array.isArray(res) ? res : (res?.data || [])
+    const list = Array.isArray(res) ? res : (res?.data || [])
+    const now = new Date()
+    availableCoupons.value = list.filter(c =>
+      (!c.endTime || new Date(c.endTime) >= now) && (!c.startTime || new Date(c.startTime) <= now)
+    )
   } catch (e) {}
 }
 
@@ -476,12 +480,18 @@ function couponLabel(c) {
   return `${c.couponName || c.name} 满${c.conditionAmount}打${(c.discountAmount * 10).toFixed(1)}折`
 }
 
-/** 根据选中的优惠券计算优惠金额，若订单金额不满足门槛则自动取消选中 */
+/** 根据选中的优惠券计算优惠金额，券过期或订单金额不满足门槛则自动取消选中 */
 function calcAmount() {
   couponDiscount.value = 0
   if (!selectedCouponId.value) return
   const c = availableCoupons.value.find(x => x.id === selectedCouponId.value)
   if (!c) return
+  // 兜底：页面停留期间所选券可能已过期
+  if (c.endTime && new Date(c.endTime) < new Date()) {
+    ElMessage.warning('优惠券已过期，无法使用')
+    selectedCouponId.value = null
+    return
+  }
   const amount = orderAmount.value
   const cond = Number(c.conditionAmount || 0)
   if (amount < cond) {
@@ -512,6 +522,16 @@ async function handleSubmit() {
   if (addr && (!addr.consignee || !addr.phone)) {
     ElMessage.warning('所选地址信息不完整')
     return
+  }
+  // 提交前兜底：所选优惠券若已过期，直接提示并中止
+  if (selectedCouponId.value) {
+    const c = availableCoupons.value.find(x => x.id === selectedCouponId.value)
+    if (c && c.endTime && new Date(c.endTime) < new Date()) {
+      ElMessage.warning('优惠券已过期，无法使用')
+      selectedCouponId.value = null
+      couponDiscount.value = 0
+      return
+    }
   }
   submitting.value = true
   try {

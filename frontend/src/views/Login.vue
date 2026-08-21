@@ -226,7 +226,6 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-base);
   padding: 40px 20px;
 }
 .login-card {

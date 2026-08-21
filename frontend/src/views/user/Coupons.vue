@@ -8,6 +8,7 @@
     <el-tabs v-model="tab" class="tabs">
       <el-tab-pane label="可领取" name="available" />
       <el-tab-pane label="我的优惠券" name="my" />
+      <el-tab-pane label="已过期" name="expired" />
     </el-tabs>
 
     <div class="coupon-list" v-loading="loading">
@@ -34,9 +35,9 @@
         <el-empty v-if="!loading && availableCoupons.length === 0" description="暂无可领取的优惠券" />
       </template>
 
-      <!-- 我的优惠券 -->
+      <!-- 我的优惠券（不含已过期） -->
       <template v-if="tab === 'my'">
-        <div v-for="c in myCoupons" :key="c.id" class="coupon-card" :class="{ used: c.status === 2, expired: c.status === 3 }">
+        <div v-for="c in activeCoupons" :key="c.id" class="coupon-card" :class="{ used: c.status === 2 }">
           <div class="coupon-left">
             <div class="coupon-amount">
               <template v-if="c.couponType === 1">
@@ -52,18 +53,40 @@
             <div class="coupon-name">{{ c.couponName }}</div>
             <div class="coupon-time">有效期至 {{ c.endTime?.substring(0, 10) }}</div>
             <el-tag v-if="c.status === 2" type="info" size="small">已使用</el-tag>
-            <el-tag v-else-if="c.status === 3" type="info" size="small">已过期</el-tag>
             <el-tag v-else type="success" size="small">可使用</el-tag>
           </div>
         </div>
-        <el-empty v-if="!loading && myCoupons.length === 0" description="暂无优惠券" />
+        <el-empty v-if="!loading && activeCoupons.length === 0" description="暂无优惠券" />
+      </template>
+
+      <!-- 已过期 -->
+      <template v-if="tab === 'expired'">
+        <div v-for="c in expiredCoupons" :key="c.id" class="coupon-card expired">
+          <div class="coupon-left">
+            <div class="coupon-amount">
+              <template v-if="c.couponType === 1">
+                <span class="symbol">¥</span><span class="value">{{ c.discountAmount }}</span>
+              </template>
+              <template v-else>
+                <span class="value">{{ (c.discountAmount * 10).toFixed(1) }}</span><span class="symbol">折</span>
+              </template>
+            </div>
+            <div class="coupon-condition">满{{ c.conditionAmount }}可用</div>
+          </div>
+          <div class="coupon-right">
+            <div class="coupon-name">{{ c.couponName }}</div>
+            <div class="coupon-time">有效期至 {{ c.endTime?.substring(0, 10) }}</div>
+            <el-tag type="info" size="small">已过期</el-tag>
+          </div>
+        </div>
+        <el-empty v-if="!loading && expiredCoupons.length === 0" description="暂无已过期的优惠券" />
       </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { userRequest } from '@/api/request'
 
@@ -71,6 +94,24 @@ const tab = ref('available')
 const loading = ref(false)
 const availableCoupons = ref([])
 const myCoupons = ref([])
+
+/**
+ * 判断优惠券是否已过期（后端不主动清算 status=3，前端按有效期实时判断）
+ * @param {Object} c - 用户优惠券对象（含 endTime）
+ * @returns {boolean} 已过期返回 true
+ */
+function isExpired(c) {
+  return c.status === 3 || (!!c.endTime && new Date(c.endTime) < new Date())
+}
+
+/** 我的优惠券（未过期：可使用 + 已使用） */
+const activeCoupons = computed(() => myCoupons.value.filter(c => !isExpired(c)))
+
+/** 已过期的优惠券，按过期时间倒序（最近过期的在前） */
+const expiredCoupons = computed(() =>
+  myCoupons.value.filter(c => isExpired(c))
+    .sort((a, b) => new Date(b.endTime || 0) - new Date(a.endTime || 0))
+)
 
 /**
  * 加载可领取的优惠券列表
@@ -84,7 +125,7 @@ async function loadAvailable() {
 }
 
 /**
- * 加载我的优惠券列表（已领取、已使用、已过期）
+ * 加载我的优惠券列表（已领取、已使用、已过期，过期分栏展示见 computed）
  */
 async function loadMy() {
   loading.value = true
