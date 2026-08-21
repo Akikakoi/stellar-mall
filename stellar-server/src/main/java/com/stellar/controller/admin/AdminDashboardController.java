@@ -1,9 +1,11 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.service.DailyReportService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin/dashboard")
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ import java.util.*;
 public class AdminDashboardController {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DailyReportService dailyReportService;
 
     @GetMapping("/stats")
     @ApiOperation("仪表盘统计：员工数 / SPU 数 / SKU 数 / 订单数 / 用户数")
@@ -87,6 +91,17 @@ public class AdminDashboardController {
         data.put("orderTrend", orderTrend);
         data.put("salesTrend", salesTrend);
         return Result.success(data);
+    }
+
+    @GetMapping("/ai-report")
+    @ApiOperation("AI 经营日报：汇总当日经营数据，调用 LLM 生成分析报告（耗时较长，前端需放宽超时）")
+    public Result<Map<String, Object>> aiReport() {
+        try {
+            return Result.success(dailyReportService.generate());
+        } catch (Exception e) {
+            log.error("[AI日报] 生成失败", e);
+            return Result.error("生成经营日报失败：" + e.getMessage());
+        }
     }
 
     private long count(String tableName) {

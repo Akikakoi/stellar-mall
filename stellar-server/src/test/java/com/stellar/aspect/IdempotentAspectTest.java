@@ -104,11 +104,12 @@ class IdempotentAspectTest {
 
     // ================================================================
     @Test
-    @DisplayName("2. 未命中缓存 → 执行目标方法 → 成功则写入 Redis")
+    @DisplayName("2. 未命中缓存 → 抢占处理标记成功 → 执行目标方法 → 成功则写入 Redis 并释放标记")
     void cacheMiss_proceedAndCacheSuccess() throws Throwable {
         when(request.getHeader(HEADER_KEY)).thenReturn(CLIENT_KEY);
         stubRedisOps();
         when(valueOps.get(REDIS_KEY)).thenReturn(null);
+        when(valueOps.setIfAbsent(eq(REDIS_KEY + ":processing"), anyString(), any(Duration.class))).thenReturn(true);
 
         Result<?> freshResult = Result.success(1001L);
         when(pjp.proceed()).thenReturn(freshResult);
@@ -120,15 +121,39 @@ class IdempotentAspectTest {
 
         // 验证写入了 Redis（key 正确，TTL=300s）
         verify(valueOps).set(eq(REDIS_KEY), contains("\"code\":1"), eq(Duration.ofSeconds(300)));
+        // 执行完毕后释放"处理中"标记
+        verify(redisTemplate).delete(REDIS_KEY + ":processing");
     }
 
     // ================================================================
     @Test
-    @DisplayName("3. 目标方法抛异常 → 不缓存，异常向上抛")
+    @DisplayName("2b. 并发重复请求抢占标记失败 → 直接返回处理中错误，不执行目标方法")
+    void concurrentDuplicate_blockedByProcessingMarker() throws Throwable {
+        when(request.getHeader(HEADER_KEY)).thenReturn(CLIENT_KEY);
+        stubRedisOps();
+        when(valueOps.get(REDIS_KEY)).thenReturn(null);
+        // setIfAbsent 返回 false = 另一个相同幂等键的请求正在执行
+        when(valueOps.setIfAbsent(eq(REDIS_KEY + ":processing"), anyString(), any(Duration.class))).thenReturn(false);
+
+        Object result = aspect.around(pjp, idempotentAnnotation);
+
+        // 返回"处理中"错误而非执行目标方法
+        assertInstanceOf(Result.class, result);
+        assertEquals(0, ((Result<?>) result).getCode());
+        verify(pjp, never()).proceed();
+        // 不应写结果缓存，也不应误删别人的处理标记
+        verify(valueOps, never()).set(anyString(), anyString(), any(Duration.class));
+        verify(redisTemplate, never()).delete(anyString());
+    }
+
+    // ================================================================
+    @Test
+    @DisplayName("3. 目标方法抛异常 → 不缓存，异常向上抛，处理标记被释放")
     void targetThrowsException_notCached_exceptionPropagates() throws Throwable {
         when(request.getHeader(HEADER_KEY)).thenReturn(CLIENT_KEY);
         stubRedisOps();
         when(valueOps.get(REDIS_KEY)).thenReturn(null);
+        when(valueOps.setIfAbsent(eq(REDIS_KEY + ":processing"), anyString(), any(Duration.class))).thenReturn(true);
 
         RuntimeException boom = new RuntimeException("库存不足");
         when(pjp.proceed()).thenThrow(boom);
@@ -140,6 +165,8 @@ class IdempotentAspectTest {
 
         // 不应该写缓存
         verify(valueOps, never()).set(anyString(), anyString(), any(Duration.class));
+        // 但要释放处理标记，让客户端可以重试
+        verify(redisTemplate).delete(REDIS_KEY + ":processing");
     }
 
     // ================================================================
@@ -149,6 +176,7 @@ class IdempotentAspectTest {
         when(request.getHeader(HEADER_KEY)).thenReturn(CLIENT_KEY);
         stubRedisOps();
         when(valueOps.get(REDIS_KEY)).thenReturn(null);
+        when(valueOps.setIfAbsent(eq(REDIS_KEY + ":processing"), anyString(), any(Duration.class))).thenReturn(true);
 
         Result<?> failResult = Result.error("库存不足");
         when(pjp.proceed()).thenReturn(failResult);

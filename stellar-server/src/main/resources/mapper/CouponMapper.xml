@@ -118,12 +118,13 @@
         VALUES (#{userId}, #{couponId}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 核销用户优惠券：仅当当前 status=1（未使用）时才生效，防止并发重复核销 -->
     <update id="updateUserCouponStatus">
         UPDATE stellar_user_coupon SET status = #{status}
         <if test="orderId != null">, order_id = #{orderId}</if>
         <if test="usedTime != null">, used_time = #{usedTime}</if>
         , update_time = NOW()
-        WHERE id = #{id}
+        WHERE id = #{id} AND status = 1
     </update>
 
     <update id="returnUserCoupon">

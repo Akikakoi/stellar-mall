@@ -16,6 +16,10 @@
           <el-icon><DataBoard /></el-icon>
           <template #title>控制台</template>
         </el-menu-item>
+        <el-menu-item index="/admin/chatbi">
+          <el-icon><TrendCharts /></el-icon>
+          <template #title>智能查数</template>
+        </el-menu-item>
         <!-- ===== 管理类（连续排列） ===== -->
         <el-menu-item index="/admin/spu">
           <el-icon><Goods /></el-icon>
@@ -143,7 +147,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   DataBoard, Goods, Menu, Refresh, User,
   Fold, Expand, ArrowDown, Document, Monitor, Setting, Tickets,
-  Discount, ChatLineSquare, Box, Delete, Picture, Warning, Sunny, Moon, Stamp, Star
+  Discount, ChatLineSquare, Box, Delete, Picture, Warning, Sunny, Moon, Stamp, Star, TrendCharts
 } from '@element-plus/icons-vue'
 
 const route = useRoute()

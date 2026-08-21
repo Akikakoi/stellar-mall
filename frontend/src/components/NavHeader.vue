@@ -76,7 +76,6 @@
             <el-dropdown-menu class="user-menu-dropdown">
               <el-dropdown-item command="profile">个人中心</el-dropdown-item>
               <el-dropdown-item command="messages">我的消息</el-dropdown-item>
-              <el-dropdown-item command="orders">我的订单</el-dropdown-item>
               <el-dropdown-item command="aftersale">我的售后</el-dropdown-item>
               <el-dropdown-item command="wallet">我的钱包</el-dropdown-item>
               <el-dropdown-item command="address">收货地址</el-dropdown-item>
@@ -383,8 +382,7 @@ onUnmounted(() => {
 function handleCommand(cmd) {
   if (cmd === 'profile') window.open('/me', '_blank')
   else if (cmd === 'messages') window.open('/me/messages', '_blank')
-  else if (cmd === 'orders') router.push('/order/list')
-  else if (cmd === 'aftersale') router.push('/aftersale/list')
+  else if (cmd === 'aftersale') window.open('/aftersale/list', '_blank')
   else if (cmd === 'wallet') window.open('/wallet', '_blank')
   else if (cmd === 'coupons') router.push('/coupons')
   else if (cmd === 'points') window.open('/points', '_blank')

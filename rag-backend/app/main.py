@@ -273,7 +273,7 @@ def create_app() -> FastAPI:
         return body
 
     # ---------- API 路由挂载 ----------
-    from app.api import auth, conversation, chat, knowledge_base, admin as admin_api, internal as internal_sync, embed
+    from app.api import auth, conversation, chat, knowledge_base, admin as admin_api, internal as internal_sync, embed, daily_report, chat_bi
     API_PREFIX = "/api"
     app.include_router(auth.router, prefix=API_PREFIX, tags=["认证授权"])
     app.include_router(conversation.router, prefix=API_PREFIX, tags=["会话管理"])
@@ -281,6 +281,8 @@ def create_app() -> FastAPI:
     app.include_router(knowledge_base.router, prefix=API_PREFIX, tags=["知识库管理(管理员)"])
     app.include_router(admin_api.router, prefix=API_PREFIX, tags=["系统管理(管理员)"])
     app.include_router(internal_sync.router, prefix=f"{API_PREFIX}/internal", tags=["Mall 内部同步桥"])
+    app.include_router(daily_report.router, prefix=f"{API_PREFIX}/internal", tags=["AI 经营日报(内部)"])
+    app.include_router(chat_bi.router, prefix=f"{API_PREFIX}/internal", tags=["AI 智能查数 ChatBI(内部)"])
     app.include_router(embed.router, prefix=API_PREFIX, tags=["Embedding"])
 
     return app

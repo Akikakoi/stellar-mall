@@ -514,11 +514,19 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
         Map<Long, MallOrder> orderMap = loadOrders(orderIds);
         Map<Long, Sku> skuMap = loadSkus(skuIds);
-        Set<Long> spuIds = skuMap.values().stream().map(Sku::getSpuId).collect(Collectors.toSet());
-        Map<Long, Spu> spuMap = loadSpus(spuIds);
 
-        // 批量查订单明细（得到购买数量）
+        // 批量查订单明细（购买数量 + 下单时的商品快照）
         Map<Long, List<MallOrderItem>> itemsMap = loadOrderItems(orderIds);
+
+        // SPU 优先经 SKU 反查；SKU 已被删除时，用订单明细快照里的 spuId 兜底加载
+        Set<Long> spuIds = skuMap.values().stream().map(Sku::getSpuId).collect(Collectors.toSet());
+        itemsMap.values().stream().flatMap(List::stream)
+                .filter(it -> it.getSpuId() != null
+                        && it.getSkuId() != null
+                        && skuIds.contains(it.getSkuId())
+                        && !skuMap.containsKey(it.getSkuId()))
+                .forEach(it -> spuIds.add(it.getSpuId()));
+        Map<Long, Spu> spuMap = loadSpus(spuIds);
 
         List<AfterSaleVO> vos = new ArrayList<>(list.size());
         for (AfterSale a : list) {
@@ -529,12 +537,8 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     private AfterSaleVO toVO(AfterSale a) {
         if (a == null) return null;
-        Map<Long, MallOrder> orderMap = loadOrders(Collections.singleton(a.getOrderId()));
-        Map<Long, Sku> skuMap = loadSkus(Collections.singleton(a.getSkuId()));
-        Set<Long> spuIds = skuMap.values().stream().map(Sku::getSpuId).collect(Collectors.toSet());
-        Map<Long, Spu> spuMap = spuIds.isEmpty() ? Collections.emptyMap() : loadSpus(spuIds);
-        Map<Long, List<MallOrderItem>> itemsMap = loadOrderItems(Collections.singleton(a.getOrderId()));
-        return buildVO(a, orderMap, skuMap, spuMap, itemsMap);
+        List<AfterSaleVO> vos = toVOList(Collections.singletonList(a));
+        return vos.isEmpty() ? null : vos.get(0);
     }
 
     private AfterSaleVO buildVO(AfterSale a, Map<Long, MallOrder> orderMap,
@@ -542,19 +546,26 @@ public class AfterSaleServiceImpl implements AfterSaleService {
                                  Map<Long, List<MallOrderItem>> itemsMap) {
         MallOrder order = orderMap.get(a.getOrderId());
         Sku sku = skuMap.get(a.getSkuId());
-        Spu spu = sku != null && sku.getSpuId() != null ? spuMap.get(sku.getSpuId()) : null;
 
-        // 从订单明细获取购买数量
-        int qty = 1;
+        // 匹配售后单对应的订单明细（含下单时的商品名/规格/spuId 快照，SKU 被删后兜底）
+        MallOrderItem matchedItem = null;
         List<MallOrderItem> items = itemsMap.get(a.getOrderId());
         if (items != null) {
             for (MallOrderItem item : items) {
-                if (a.getSkuId().equals(item.getSkuId())) {
-                    qty = item.getQty() == null ? 1 : item.getQty();
+                if (item.getSkuId() != null && item.getSkuId().equals(a.getSkuId())) {
+                    matchedItem = item;
                     break;
                 }
             }
         }
+
+        // SPU 优先经 SKU 反查，SKU 已删除时退回订单明细快照里的 spuId
+        Long spuId = sku != null && sku.getSpuId() != null ? sku.getSpuId()
+                : (matchedItem != null ? matchedItem.getSpuId() : null);
+        Spu spu = spuId != null ? spuMap.get(spuId) : null;
+
+        // 购买数量：优先订单明细，缺省 1
+        int qty = matchedItem != null && matchedItem.getQty() != null ? matchedItem.getQty() : 1;
 
         AfterSaleType type = AfterSaleType.fromCode(a.getType());
         AfterSaleStatus status = AfterSaleStatus.fromCode(a.getStatus());
@@ -564,9 +575,12 @@ public class AfterSaleServiceImpl implements AfterSaleService {
                 .orderId(a.getOrderId())
                 .orderNo(order != null ? order.getOrderNo() : null)
                 .skuId(a.getSkuId())
-                .skuSpecs(sku != null ? sku.getSpecs() : null)
-                .spuId(spu != null ? spu.getId() : null)
-                .spuName(spu != null ? spu.getName() : (sku != null ? sku.getName() : null))
+                .skuSpecs(sku != null ? sku.getSpecs()
+                        : (matchedItem != null ? matchedItem.getSkuSpecs() : null))
+                .spuId(spu != null ? spu.getId() : spuId)
+                .spuName(spu != null ? spu.getName()
+                        : (matchedItem != null ? matchedItem.getSpuName()
+                        : (sku != null ? sku.getName() : null)))
                 .spuImage(spu != null ? spu.getMainImage() : null)
                 .qty(qty)
                 .userId(a.getUserId())

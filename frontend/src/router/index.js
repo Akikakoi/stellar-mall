@@ -186,6 +186,12 @@ const routes = [
         meta: { title: '控制台', requiresAdminAuth: true }
       },
       {
+        path: 'chatbi',
+        name: 'AdminChatBI',
+        component: () => import('@/views/admin/ChatBI.vue'),
+        meta: { title: '智能查数', requiresAdminAuth: true }
+      },
+      {
         path: 'spu',
         name: 'AdminSpuMgmt',
         component: () => import('@/views/admin/SpuMgmt.vue'),

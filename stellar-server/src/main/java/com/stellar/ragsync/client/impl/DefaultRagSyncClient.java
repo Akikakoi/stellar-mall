@@ -41,12 +41,15 @@ public class DefaultRagSyncClient implements RagSyncClient {
 
     private static final String SYNC_SPU_PATH = "/api/internal/sync_spu";
     private static final String SYNC_DOC_PATH = "/api/internal/sync_doc";
+    private static final String DAILY_REPORT_PATH = "/api/internal/daily_report";
+    private static final String CHAT_BI_SQL_PATH = "/api/internal/chat_bi/sql";
+    private static final String CHAT_BI_SUMMARY_PATH = "/api/internal/chat_bi/summary";
     private static final String HEADER_SECRET = "X-Stellar-Rag-Sync-Secret";
 
     private final RagSyncProperties properties;
 
-    private CloseableHttpClient httpClient() {
-        int timeout = properties.getTimeoutMs() > 0 ? properties.getTimeoutMs() : 10_000;
+    private CloseableHttpClient httpClient(int timeoutMs) {
+        int timeout = timeoutMs > 0 ? timeoutMs : 10_000;
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout)
                 .setSocketTimeout(timeout)
@@ -70,11 +73,81 @@ public class DefaultRagSyncClient implements RagSyncClient {
                 docPayload.getOrDefault("doc_id", "?").toString());
     }
 
+    @Override
+    public String generateDailyReport(Map<String, Object> statsPayload) {
+        int timeout = properties.getReportTimeoutMs() > 0 ? properties.getReportTimeoutMs() : 90_000;
+        Map<String, Object> parsed = postJson(DAILY_REPORT_PATH, statsPayload, timeout);
+
+        // RAG 端统一响应包装：{code: 0, message, data: {report, model}}
+        Object code = parsed == null ? null : parsed.get("code");
+        if (code == null || !"0".equals(String.valueOf(code))) {
+            throw new RuntimeException("RAG daily_report 返回业务失败："
+                    + (parsed == null ? "空响应" : String.valueOf(parsed.get("message"))));
+        }
+        Object dataObj = parsed.get("data");
+        Object report = dataObj instanceof Map ? ((Map<?, ?>) dataObj).get("report") : null;
+        if (report == null || String.valueOf(report).trim().isEmpty()) {
+            throw new RuntimeException("RAG daily_report 未返回日报内容");
+        }
+        log.info("[RagSyncClient] AI 经营日报生成成功，长度={}", String.valueOf(report).length());
+        return String.valueOf(report);
+    }
+
+    @Override
+    public Map<String, Object> chatBiGenerateSql(Map<String, Object> payload) {
+        return postForData(CHAT_BI_SQL_PATH, payload);
+    }
+
+    @Override
+    public String chatBiSummary(Map<String, Object> payload) {
+        Map<String, Object> data = postForData(CHAT_BI_SUMMARY_PATH, payload);
+        Object summary = data.get("summary");
+        if (summary == null || String.valueOf(summary).trim().isEmpty()) {
+            throw new RuntimeException("RAG chat_bi/summary 未返回总结内容");
+        }
+        return String.valueOf(summary);
+    }
+
+    /**
+     * 调 RAG 内部接口并返回统一包装里的 data（必须是 JSON 对象）。
+     * LLM 类接口超时统一走 reportTimeoutMs。
+     */
+    private Map<String, Object> postForData(String path, Map<String, Object> payload) {
+        int timeout = properties.getReportTimeoutMs() > 0 ? properties.getReportTimeoutMs() : 90_000;
+        Map<String, Object> parsed = postJson(path, payload, timeout);
+        Object code = parsed == null ? null : parsed.get("code");
+        if (code == null || !"0".equals(String.valueOf(code))) {
+            throw new RuntimeException("RAG " + path + " 返回业务失败："
+                    + (parsed == null ? "空响应" : String.valueOf(parsed.get("message"))));
+        }
+        Object data = parsed.get("data");
+        if (!(data instanceof Map)) {
+            throw new RuntimeException("RAG " + path + " 响应 data 不是 JSON 对象：" + data);
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> dataMap = (Map<String, Object>) data;
+        return dataMap;
+    }
+
     private boolean doPost(String path, Map<String, Object> body, String bizType, Object bizId) {
+        Map<String, Object> parsed = postJson(path, body, properties.getTimeoutMs());
+        Object ok = parsed == null ? null : parsed.get("ok");
+        if (!Boolean.TRUE.equals(ok) && !"true".equals(String.valueOf(ok))) {
+            throw new RuntimeException("RAG " + path + " ok=false，响应：" + parsed);
+        }
+        log.info("[RagSyncClient] {} id={} 同步成功", bizType, bizId);
+        return true;
+    }
+
+    /**
+     * 通用 POST：发送 JSON + 共享密钥，返回解析后的响应 Map。
+     * 非 2xx / 网络异常 / JSON 解析失败统一抛 RuntimeException。
+     */
+    private Map<String, Object> postJson(String path, Map<String, Object> body, int timeoutMs) {
         String url = trimSlash(properties.getBaseUrl()) + path;
         String json = toJson(body);
 
-        try (CloseableHttpClient client = httpClient()) {
+        try (CloseableHttpClient client = httpClient(timeoutMs)) {
             HttpPost post = new HttpPost(url);
             post.setHeader("Content-Type", "application/json; charset=utf-8");
             post.setHeader(HEADER_SECRET, properties.getInternalSyncSecret());
@@ -87,13 +160,7 @@ public class DefaultRagSyncClient implements RagSyncClient {
                 if (code < 200 || code >= 300) {
                     throw new RuntimeException("RAG " + path + " 返回非 2xx 状态码：" + code + "，body=" + respText);
                 }
-                Map<String, Object> parsed = MAPPER.readValue(respText, new TypeReference<Map<String, Object>>() {});
-                Object ok = parsed == null ? null : parsed.get("ok");
-                if (!Boolean.TRUE.equals(ok) && !"true".equals(String.valueOf(ok))) {
-                    throw new RuntimeException("RAG " + path + " ok=false，响应：" + respText);
-                }
-                log.info("[RagSyncClient] {} id={} 同步成功", bizType, bizId);
-                return true;
+                return MAPPER.readValue(respText, new TypeReference<Map<String, Object>>() {});
             }
         } catch (IOException e) {
             throw new RuntimeException("RAG " + path + " HTTP 调用失败：" + e.getMessage(), e);
