@@ -228,6 +228,59 @@ class OrderServiceProxyTest {
             assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(250)));
             verify(couponService).useCoupon(100L, ORDER_ID);
         }
+
+        @Test @DisplayName("使用已过期优惠券下单 → BaseException，不创建订单")
+        void withExpiredCoupon_throwsBaseException() {
+            Cart c = cart(1L, 10L, 1L, 1);
+            when(cartMapper.listCheckedByUserId(USER_ID)).thenReturn(Collections.singletonList(c));
+            when(skuMapper.listByIds(anyList())).thenReturn(
+                    Collections.singletonList(sku(10L, 1L, "S1", "默认", BigDecimal.valueOf(300))));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "P1")));
+
+            // 有效期已于昨天结束
+            UserCoupon uc = UserCoupon.builder().id(100L).userId(USER_ID).status(1)
+                    .startTime(LocalDateTime.now().minusDays(10))
+                    .endTime(LocalDateTime.now().minusDays(1))
+                    .conditionAmount(BigDecimal.valueOf(200)).build();
+            when(couponService.getUserCoupon(100L)).thenReturn(uc);
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setUserCouponId(100L);
+            dto.setDiscountAmount(BigDecimal.valueOf(50));
+
+            BaseException ex = assertThrows(BaseException.class,
+                    () -> orderService.submit(USER_ID, dto));
+            assertTrue(ex.getMessage().contains("过期"));
+            // 库存扣减发生在 createOrder 之前（失败后由事务回滚补偿），此处只断言订单未落库、券未核销
+            verify(mallOrderMapper, never()).insert(any());
+            verify(couponService, never()).useCoupon(anyLong(), anyLong());
+        }
+
+        @Test @DisplayName("使用未到生效时间优惠券下单 → BaseException，不创建订单")
+        void withNotStartedCoupon_throwsBaseException() {
+            Cart c = cart(1L, 10L, 1L, 1);
+            when(cartMapper.listCheckedByUserId(USER_ID)).thenReturn(Collections.singletonList(c));
+            when(skuMapper.listByIds(anyList())).thenReturn(
+                    Collections.singletonList(sku(10L, 1L, "S1", "默认", BigDecimal.valueOf(300))));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "P1")));
+
+            // 明天才生效
+            UserCoupon uc = UserCoupon.builder().id(100L).userId(USER_ID).status(1)
+                    .startTime(LocalDateTime.now().plusDays(1))
+                    .endTime(LocalDateTime.now().plusDays(10))
+                    .conditionAmount(BigDecimal.valueOf(200)).build();
+            when(couponService.getUserCoupon(100L)).thenReturn(uc);
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setUserCouponId(100L);
+            dto.setDiscountAmount(BigDecimal.valueOf(50));
+
+            BaseException ex = assertThrows(BaseException.class,
+                    () -> orderService.submit(USER_ID, dto));
+            assertTrue(ex.getMessage().contains("未到"));
+            verify(mallOrderMapper, never()).insert(any());
+            verify(couponService, never()).useCoupon(anyLong(), anyLong());
+        }
     }
 
     // ================================================================

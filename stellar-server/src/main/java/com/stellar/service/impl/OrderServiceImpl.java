@@ -247,6 +247,14 @@ public class OrderServiceImpl implements OrderService {
             if (userCoupon.getStatus() == null || userCoupon.getStatus() != 1) {
                 throw new BaseException("优惠券状态异常，无法使用");
             }
+            // 校验有效期：未开始或已过期的优惠券均不可使用
+            LocalDateTime now = LocalDateTime.now();
+            if (userCoupon.getStartTime() != null && now.isBefore(userCoupon.getStartTime())) {
+                throw new BaseException("优惠券未到使用时间");
+            }
+            if (userCoupon.getEndTime() != null && now.isAfter(userCoupon.getEndTime())) {
+                throw new BaseException("优惠券已过期，无法使用");
+            }
             if (total.compareTo(userCoupon.getConditionAmount() == null ? BigDecimal.ZERO : userCoupon.getConditionAmount()) < 0) {
                 throw new BaseException("订单金额未达到优惠券使用门槛");
             }

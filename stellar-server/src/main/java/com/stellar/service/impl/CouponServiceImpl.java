@@ -121,6 +121,14 @@ public class CouponServiceImpl implements CouponService {
         Coupon coupon = couponMapper.getCouponById(couponId);
         if (coupon == null) throw new RuntimeException("优惠券不存在");
         if (coupon.getStatus() != 1) throw new RuntimeException("优惠券已禁用");
+        // 校验有效期：未开始或已过期的优惠券均不可领取
+        LocalDateTime now = LocalDateTime.now();
+        if (coupon.getStartTime() != null && now.isBefore(coupon.getStartTime())) {
+            throw new RuntimeException("优惠券未开始发放");
+        }
+        if (coupon.getEndTime() != null && now.isAfter(coupon.getEndTime())) {
+            throw new RuntimeException("优惠券已过期");
+        }
         if (coupon.getReceivedCount() >= coupon.getTotalCount()) throw new RuntimeException("优惠券已领完");
         long count = couponMapper.countUserCouponByCouponId(userId, couponId);
         if (coupon.getPerUserLimit() != null && coupon.getPerUserLimit() > 0 && count >= coupon.getPerUserLimit()) {
