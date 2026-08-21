@@ -15,6 +15,7 @@ import com.stellar.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -190,10 +191,14 @@ public class PointsServiceImpl implements PointsService {
     // ================================================================
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     /**
      * 下单赚取积分。根据 ORDER 规则按消费金额计算积分，受每单上限约束。
      * 发放成功后发送积分到账通知。
+     * <p>
+     * REQUIRES_NEW：订单服务在外层事务中 catch 本方法异常并"静默降级"，
+     * 若加入外层事务（REQUIRED），异常时内层会标记 rollback-only，外层提交时抛
+     * UnexpectedRollbackException。独立事务保证积分失败不影响支付/下单主流程。
      *
      * @param userId    用户ID
      * @param orderId   订单ID
@@ -276,10 +281,13 @@ public class PointsServiceImpl implements PointsService {
     // ================================================================
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     /**
      * 冻结积分用于订单支付。将用户请求抵扣金额转换为积分并冻结，不足时用尽可用积分。
      * 100积分 = 1元，向下取整。
+     * <p>
+     * REQUIRES_NEW：见 {@link #earnByOrder} 说明 —— 下单服务 catch 本方法异常后静默降级，
+     * 独立事务避免 rollback-only 标记污染外层订单事务。
      *
      * @param userId          用户ID
      * @param orderId         订单ID
@@ -366,9 +374,11 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     /**
      * 实际扣除冻结积分。订单支付成功后将冻结积分转为实际消费，写入积分流水和支付追溯记录。
+     * <p>
+     * REQUIRES_NEW：见 {@link #earnByOrder} 说明 —— 支付服务 catch 本方法异常后静默降级。
      *
      * @param userId  用户ID
      * @param orderId 订单ID
@@ -440,9 +450,11 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     /**
      * 解冻积分。订单取消时将冻结积分归还用户可用余额，写入支付追溯记录。
+     * <p>
+     * REQUIRES_NEW：见 {@link #earnByOrder} 说明 —— 取消服务 catch 本方法异常后静默降级。
      *
      * @param userId  用户ID
      * @param orderId 订单ID

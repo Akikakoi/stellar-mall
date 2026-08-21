@@ -414,3 +414,33 @@ export function uploadImages(files, module = 'spu') {
     data: formData
   })
 }
+
+// =========================== AI 经营日报 ===========================
+
+/**
+ * 生成 AI 经营日报（后端汇总当日经营数据并调用 LLM 分析）。
+ * LLM 生成耗时较长（通常 5~30 秒），此接口单独放宽超时到 120 秒。
+ * @returns {Promise<{date: string, report: string, generatedAt: string}>}
+ */
+export function generateDailyReport() {
+  return adminRequest({
+    url: '/admin/dashboard/ai-report',
+    method: 'get',
+    timeout: 120000
+  })
+}
+
+/**
+ * AI 智能查数（ChatBI）：自然语言问题 → LLM 生成 SQL 并执行 → 图表数据 + 回答。
+ * 链路包含两次 LLM 调用（生成 SQL + 结果总结），耗时较长，单独放宽超时到 180 秒。
+ * @param {string} question - 自然语言问题，如"上周哪个类目卖得最好"
+ * @returns {Promise<{question, sql, title, chartType, xField, yField, columns, rows, summary}>}
+ */
+export function chatBiQuery(question) {
+  return adminRequest({
+    url: '/admin/chatbi/query',
+    method: 'post',
+    data: { question },
+    timeout: 180000
+  })
+}

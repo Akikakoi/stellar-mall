@@ -23,11 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class JwtCrossPlatformTest {
 
-    // ======= 与 Python 端约定的两套共享密钥（P0 硬编码，实现后读取配置） =======
+    // 测试专用密钥（非生产密钥！仅验证 JwtUtil 生成/解析自洽性）。
+    // 如需与生产环境跨端联调，可通过环境变量 STELLAR_ADMIN_SECRET / STELLAR_USER_SECRET 注入真实密钥。
     private static final String STELLAR_ADMIN_SECRET =
-            "StellarMall_Admin_SecretKey_2024_Strong_32bytes_!@#";
+            System.getenv().getOrDefault("STELLAR_ADMIN_SECRET", "test-only-admin-secret-not-for-production-0000");
     private static final String STELLAR_USER_SECRET =
-            "StellarMall_User_SecretKey_2024_Strong_32bytes_$%^";
+            System.getenv().getOrDefault("STELLAR_USER_SECRET", "test-only-user-secret-not-for-production-0000");
     private static final long TTL_MILLIS = 7_200_000L; // 2 小时
 
     // ---------------------------------------------------------------

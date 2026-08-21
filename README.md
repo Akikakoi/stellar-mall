@@ -6,7 +6,7 @@
 
 | 层级 | 技术 |
 |------|------|
-| 后端 | Spring Boot 2.7.3 + MyBatis + Maven 多模块 |
+| 后端 | Spring Boot 3.3.6 + MyBatis + Maven 多模块 |
 | 前端 | Vue 3 + Vite + Element Plus + Pinia + ECharts |
 | 数据库 | MySQL 8.0 |
 | 缓存 | Redis 7.2 |
@@ -26,7 +26,6 @@ stellar-mall/
 ├── stellar-server/          # 主服务（Controller、Service、配置）
 ├── frontend/                # Vue 3 前端（商城 + 管理后台）
 ├── rag-backend/             # RAG 智能问答服务（FastAPI）
-├── sql/                     # 数据库迁移脚本
 ├── docker/                  # Docker 构建文件
 ├── docker-compose.yml       # 基础设施编排
 └── start-mall.ps1           # Windows 一键启动脚本
@@ -85,7 +84,9 @@ docker compose up -d
 
 ### 2. 初始化数据库
 
-在 MySQL 中创建 `stellar_mall` 数据库，按顺序执行 `sql/` 目录下的迁移脚本。
+在 MySQL 中创建 `stellar_mall` 数据库，首次建库先执行基础表结构与初始化数据（各一次）：
+`stellar-server/src/main/resources/sql/stellar_mall_ddl.sql`、`stellar_mall_init_data.sql`。
+后续增量迁移由 Flyway 在应用启动时自动执行（`db/migration/` 下 V2 起的脚本），无需手工操作。
 
 ### 3. 配置密钥
 

@@ -368,8 +368,12 @@ public class OrderServiceImpl implements OrderService {
         if (actualPayMethod == 4) {
             walletService.payByWallet(userId, orderId);
         } else {
-            // 其他支付方式：模拟直接变更为已支付
-            mallOrderMapper.updateStatus(orderId, OrderStatus.PAID.getBackendValue());
+            // 其他支付方式：模拟直接变更为已支付（CAS 防止与自动取消并发竞态）
+            int rows = mallOrderMapper.casUpdateStatus(orderId,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.PAID.getBackendValue());
+            if (rows == 0) {
+                throw new BaseException(MessageConstant.ORDER_STATUS_ERROR + "（订单状态已变更，请刷新后重试）");
+            }
         }
         // 累加商品销量
         incrSaleCountForOrder(orderId);
@@ -450,14 +454,22 @@ public class OrderServiceImpl implements OrderService {
         }
 
         List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(orderId);
+
+        // 先 CAS 占住状态变更（PENDING → CANCELLED），竞争失败说明订单刚被支付，中止取消，
+        // 避免"先回滚库存、后改状态失败"导致已支付订单丢库存
+        int rows = mallOrderMapper.casUpdateStatus(orderId,
+                OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
+        if (rows == 0) {
+            throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
+                    + "（订单状态已变更，无法取消；若已支付请走售后退款）");
+        }
+
         if (items != null) {
             for (MallOrderItem it : items) {
                 skuStockService.rollback(it.getSkuId(),
                         it.getQty() == null ? 0 : it.getQty());
             }
         }
-
-        mallOrderMapper.updateStatus(orderId, OrderStatus.CANCELLED.getBackendValue());
 
         // 解冻积分
         unfreezeOrderPointsQuietly(userId, orderId);
@@ -649,7 +661,12 @@ public class OrderServiceImpl implements OrderService {
             throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
                     + "（当前状态=" + order.getStatus() + "，仅 " + OrderStatus.SHIPPED.getDescription() + " 可确认收货）");
         }
-        mallOrderMapper.updateStatus(orderId, OrderStatus.COMPLETED.getBackendValue());
+        // CAS：SHIPPED → COMPLETED，防止与售后退款等并发状态流转冲突
+        int rows = mallOrderMapper.casUpdateStatus(orderId,
+                OrderStatus.SHIPPED.getBackendValue(), OrderStatus.COMPLETED.getBackendValue());
+        if (rows == 0) {
+            throw new BaseException(MessageConstant.ORDER_STATUS_ERROR + "（订单状态已变更，请刷新后重试）");
+        }
 
         // 异步短信通知
         notificationService.sendOrderReceivedNotice(order);
@@ -858,8 +875,9 @@ public class OrderServiceImpl implements OrderService {
         for (MallOrder order : expiredList) {
             if (cancelled >= limit) break;
             try {
-                cancelOrderInternal(order);
-                cancelled++;
+                if (cancelOrderInternal(order)) {
+                    cancelled++;
+                }
             } catch (Exception e) {
                 log.error("[OrderService] 自动取消过期订单失败: orderId={}, orderNo={}", order.getId(), order.getOrderNo(), e);
             }
@@ -870,12 +888,22 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 内部取消订单：不校验用户归属，仅对被 CancelExpired 调用使用。
-     * 逻辑与 cancel 一致：回滚库存 + 改状态 + 解冻积分 + 退优惠券。
+     * 逻辑与 cancel 一致：CAS 占状态 → 回滚库存 + 解冻积分 + 退优惠券。
+     *
+     * @return true = 实际取消成功；false = 状态已变更（如刚被支付）跳过，不计入取消数
      */
-    private void cancelOrderInternal(MallOrder order) {
+    private boolean cancelOrderInternal(MallOrder order) {
         if (!OrderStatus.PENDING.getBackendValue().equals(order.getStatus())) {
             log.info("[OrderService] 订单 {} 已非待付款状态（当前={}），跳过自动取消", order.getId(), order.getStatus());
-            return;
+            return false;
+        }
+
+        // 先 CAS 占住 PENDING → CANCELLED，竞争失败说明订单刚被支付，跳过（不动库存）
+        int rows = mallOrderMapper.casUpdateStatus(order.getId(),
+                OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
+        if (rows == 0) {
+            log.info("[OrderService] 订单 {} CAS 竞争失败（可能刚被支付），跳过自动取消", order.getId());
+            return false;
         }
 
         List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(order.getId());
@@ -885,10 +913,10 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        mallOrderMapper.updateStatus(order.getId(), OrderStatus.CANCELLED.getBackendValue());
         unfreezeOrderPointsQuietly(order.getUserId(), order.getId());
         couponService.returnCouponByOrderId(order.getId());
 
         log.info("[OrderService] 订单 {} 已自动过期取消（超 {} 分钟未支付）", order.getId(), ORDER_EXPIRE_MINUTES);
+        return true;
     }
 }

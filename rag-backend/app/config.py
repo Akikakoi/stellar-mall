@@ -70,7 +70,9 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
-    SECRET_KEY: str = "change-me"
+    # JWT 签名密钥：必填，无默认值，须在 .env 中设置，缺失将导致启动失败
+    # 生成命令：python -c "import secrets; print(secrets.token_urlsafe(48))"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -169,12 +171,14 @@ class Settings(BaseSettings):
     #    生产请替换成：python -c "import secrets; print(secrets.token_urlsafe(48))"
     #    STELLAR_ADMIN_SECRET_KEY：Mall 管理端 /admin/** 签发 token 用
     #    STELLAR_USER_SECRET_KEY：Mall C 端  /user/** 签发 token 用
-    STELLAR_ADMIN_SECRET_KEY: str = "StellarMall_Admin_SecretKey_2024_Strong_32bytes_!@#"
-    STELLAR_USER_SECRET_KEY: str  = "StellarMall_User_SecretKey_2024_Strong_32bytes_$%^"
+    # 必填：无默认值，须在 .env 中设置（与 Mall 端 stellar.jwt.*-secret-key 完全一致），缺失将导致启动失败
+    STELLAR_ADMIN_SECRET_KEY: str
+    STELLAR_USER_SECRET_KEY: str
 
     # 2. Mall → RAG 知识库同步内部接口共享密钥
     #    （Mall 端 stellar.rag.internal-sync-secret 配置必须和这个相同）
-    STELLAR_RAG_INTERNAL_SYNC_SECRET: str = "uEvV_FYrloC6T_R8vYNZcHlt07xL-K14Vh-2-VBpMqrzylSX4BbouNZQwv90QpJL"
+    # 必填：无默认值，须在 .env 中设置（与 Mall 端 stellar.rag.internal-sync-secret 完全一致），缺失将导致启动失败
+    STELLAR_RAG_INTERNAL_SYNC_SECRET: str
 
     # 3. RAG 只读桥接（给健康检查 + 后续只读业务查询用）
     #    - MALL_BRIDGE_MYSQL_URL：stellar_ro 只读账号 Pymysql URL（没配则 health mall_mysql 显示 not configured）

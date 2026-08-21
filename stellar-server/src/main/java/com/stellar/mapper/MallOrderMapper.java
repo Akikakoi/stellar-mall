@@ -24,6 +24,15 @@ public interface MallOrderMapper {
     /** 仅更新状态（pay/cancel 场景），避免 AutoFill 带 update_user 的副作用。 */
     int updateStatus(@Param("id") Long id, @Param("status") String status);
 
+    /**
+     * CAS 条件更新状态：仅当订单当前状态等于期望状态时才更新。
+     * 用于支付/取消/确认收货等关键状态流转的并发防护，
+     * 返回受影响行数（0 = 状态已被并发修改，调用方必须中止后续业务操作）。
+     */
+    int casUpdateStatus(@Param("id") Long id,
+                        @Param("fromStatus") String fromStatus,
+                        @Param("toStatus") String toStatus);
+
     /** 更新支付方式（二次支付时用户重新选择）。 */
     int updatePayMethod(@Param("id") Long id, @Param("payMethod") Integer payMethod);
 
@@ -59,7 +68,7 @@ public interface MallOrderMapper {
     /** 管理端：删除订单（物理删除）。 */
     int deleteById(@Param("id") Long id);
 
-    /** 退款完成：状态 → COMPLETED 并标记 is_refunded = 1。 */
+    /** 退款完成：状态 → REFUNDED 并标记 is_refunded = 1。 */
     int markRefunded(@Param("id") Long id);
 
     /** 导出：查询全部订单（关联用户手机号），支持筛选。 */

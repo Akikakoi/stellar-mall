@@ -17,10 +17,13 @@ public class RagSyncProperties {
 
     /** 共享密钥，RAG 端通过 X-Stellar-Rag-Sync-Secret Header 校验���
      *  ⚠️ 必须和 RAG 端 .env 里 STELLAR_RAG_INTERNAL_SYNC_SECRET 完全一致！ */
-    private String internalSyncSecret = "uEvV_FYrloC6T_R8vYNZcHlt07xL-K14Vh-2-VBpMqrzylSX4BbouNZQwv90QpJL";
+    private String internalSyncSecret;
 
     /** 读取超时（毫秒）。 */
     private int timeoutMs = 10000;
+
+    /** AI 日报生成读取超时（毫秒）。LLM 生成耗时远长于普通同步，默认 90s。 */
+    private int reportTimeoutMs = 90000;
 
     /** 最大重试次数（outbox 兜底），默认 3。 */
     private int maxAttempt = 3;

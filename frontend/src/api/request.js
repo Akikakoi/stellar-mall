@@ -250,7 +250,21 @@ function createInstance(baseURL, type) {
             return Promise.reject(refreshErr)
           }
         } else if (type === 'rag') {
-          handleLogout('user')
+          // RAG 请求 401：先尝试用 refresh token 换新 token 再重试（与 user/admin 行为对齐）
+          const url = String(error.config?.url || '')
+          const isAdminEndpoint = url.startsWith('/ragapi/api/admin') || url.startsWith('/ragapi/api/kb')
+          const refreshType = isAdminEndpoint ? 'admin' : 'user'
+          const refreshInstance = refreshType === 'user' ? userRequest : adminRequest
+          try {
+            const { token } = await doRefresh(refreshInstance, refreshType)
+            const retryConfig = { ...error.config, headers: { ...error.config.headers } }
+            retryConfig.headers.Authorization = `Bearer ${token}`
+            return instance.request(retryConfig)
+          } catch (refreshErr) {
+            handleLogout(refreshType)
+            ElMessage.error('登录已过期，请重新登录')
+            return Promise.reject(refreshErr)
+          }
         }
         ElMessage.error('登录已过期，请重新登录')
       } else if (status === 403) {

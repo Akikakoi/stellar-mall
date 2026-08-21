@@ -126,7 +126,11 @@ public class CouponServiceImpl implements CouponService {
         if (coupon.getPerUserLimit() != null && coupon.getPerUserLimit() > 0 && count >= coupon.getPerUserLimit()) {
             throw new RuntimeException("已达领取上限");
         }
-        couponMapper.incrReceivedCount(couponId);
+        // 条件更新原子扣减库存：received_count < total_count 才 +1，返回 0 行说明已被并发领完
+        int rows = couponMapper.incrReceivedCount(couponId);
+        if (rows == 0) {
+            throw new RuntimeException("优惠券已领完");
+        }
         UserCoupon uc = new UserCoupon();
         uc.setUserId(userId);
         uc.setCouponId(couponId);
@@ -173,7 +177,11 @@ public class CouponServiceImpl implements CouponService {
     @Override
     @Transactional
     public void useCoupon(Long userCouponId, Long orderId) {
-        couponMapper.updateUserCouponStatus(userCouponId, 2, orderId, LocalDateTime.now());
+        // SQL 带 AND status = 1 条件，返回 0 行说明已被核销/退还过，防止并发重复核销
+        int rows = couponMapper.updateUserCouponStatus(userCouponId, 2, orderId, LocalDateTime.now());
+        if (rows == 0) {
+            throw new RuntimeException("优惠券状态异常，无法使用（可能已被核销或退还）");
+        }
         UserCoupon uc = couponMapper.getUserCouponById(userCouponId);
         if (uc != null && uc.getCouponId() != null) {
             couponMapper.incrUsedCount(uc.getCouponId());

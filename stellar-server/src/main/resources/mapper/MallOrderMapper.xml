@@ -64,6 +64,11 @@
         UPDATE stellar_mall_order SET status = #{status} WHERE id = #{id}
     </update>
 
+    <!-- CAS 条件状态更新：仅当当前状态 = fromStatus 时才更新为 toStatus，防止支付/取消并发竞态 -->
+    <update id="casUpdateStatus">
+        UPDATE stellar_mall_order SET status = #{toStatus} WHERE id = #{id} AND status = #{fromStatus}
+    </update>
+
     <!-- 更新支付方式 -->
     <update id="updatePayMethod">
         UPDATE stellar_mall_order SET pay_method = #{payMethod} WHERE id = #{id}

@@ -297,7 +297,8 @@ class OrderServiceProxyTest {
             MallOrder o = order(ORDER_ID, OrderStatus.PENDING.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(400), BigDecimal.valueOf(400));
             when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
-            when(mallOrderMapper.updateStatus(ORDER_ID, OrderStatus.PAID.getBackendValue())).thenReturn(1);
+            when(mallOrderMapper.casUpdateStatus(ORDER_ID,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.PAID.getBackendValue())).thenReturn(1);
 
             List<MallOrderItem> items = Collections.singletonList(
                     orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 2, BigDecimal.valueOf(100)));
@@ -306,7 +307,8 @@ class OrderServiceProxyTest {
 
             orderService.pay(ORDER_ID, USER_ID, 1);
 
-            verify(mallOrderMapper).updateStatus(ORDER_ID, OrderStatus.PAID.getBackendValue());
+            verify(mallOrderMapper).casUpdateStatus(ORDER_ID,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.PAID.getBackendValue());
             verify(spuMapper).incrSaleCount(1L, 2);
             verify(pointsService).consumeFrozenPointsForOrder(USER_ID, ORDER_ID);
             verify(pointsService).earnByOrder(eq(USER_ID), eq(ORDER_ID), any());
@@ -324,7 +326,7 @@ class OrderServiceProxyTest {
             orderService.pay(ORDER_ID, USER_ID, 4);
 
             verify(walletService).payByWallet(USER_ID, ORDER_ID);
-            verify(mallOrderMapper, never()).updateStatus(eq(ORDER_ID), anyString());
+            verify(mallOrderMapper, never()).casUpdateStatus(eq(ORDER_ID), anyString(), anyString());
         }
 
         @Test @DisplayName("非待付款订单 → BaseException")
@@ -335,7 +337,7 @@ class OrderServiceProxyTest {
 
             assertThrows(BaseException.class,
                     () -> orderService.pay(ORDER_ID, USER_ID, 1));
-            verify(mallOrderMapper, never()).updateStatus(anyLong(), anyString());
+            verify(mallOrderMapper, never()).casUpdateStatus(anyLong(), anyString(), anyString());
         }
     }
 
@@ -352,12 +354,14 @@ class OrderServiceProxyTest {
             List<MallOrderItem> items = Collections.singletonList(
                     orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 2, BigDecimal.valueOf(100)));
             when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(items);
-            when(mallOrderMapper.updateStatus(ORDER_ID, OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
+            when(mallOrderMapper.casUpdateStatus(ORDER_ID,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
 
             orderService.cancel(ORDER_ID, USER_ID);
 
             verify(skuStockService).rollback(10L, 2);
-            verify(mallOrderMapper).updateStatus(ORDER_ID, OrderStatus.CANCELLED.getBackendValue());
+            verify(mallOrderMapper).casUpdateStatus(ORDER_ID,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
             verify(pointsService).unfreezePointsForOrder(USER_ID, ORDER_ID);
             verify(couponService).returnCouponByOrderId(ORDER_ID);
         }
@@ -446,11 +450,13 @@ class OrderServiceProxyTest {
             MallOrder o = order(ORDER_ID, OrderStatus.SHIPPED.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(400), BigDecimal.valueOf(400));
             when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
-            when(mallOrderMapper.updateStatus(ORDER_ID, OrderStatus.COMPLETED.getBackendValue())).thenReturn(1);
+            when(mallOrderMapper.casUpdateStatus(ORDER_ID,
+                    OrderStatus.SHIPPED.getBackendValue(), OrderStatus.COMPLETED.getBackendValue())).thenReturn(1);
 
             orderService.confirm(ORDER_ID, USER_ID);
 
-            verify(mallOrderMapper).updateStatus(ORDER_ID, OrderStatus.COMPLETED.getBackendValue());
+            verify(mallOrderMapper).casUpdateStatus(ORDER_ID,
+                    OrderStatus.SHIPPED.getBackendValue(), OrderStatus.COMPLETED.getBackendValue());
             verify(notificationService).sendOrderReceivedNotice(any(MallOrder.class));
         }
 
@@ -609,22 +615,23 @@ class OrderServiceProxyTest {
 
             MallOrderItem it1 = orderItem(1L, 1L, 10L, 1L, "P1", 1, BigDecimal.valueOf(100));
             when(mallOrderItemMapper.listByOrderId(1L)).thenReturn(Collections.singletonList(it1));
-            when(mallOrderMapper.updateStatus(1L, OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
+            when(mallOrderMapper.casUpdateStatus(1L,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
 
             int cancelled = orderService.cancelExpiredOrders(1);
 
             assertEquals(1, cancelled);
-            verify(mallOrderMapper).updateStatus(1L, OrderStatus.CANCELLED.getBackendValue());
-            verify(mallOrderMapper, never()).updateStatus(eq(2L), anyString());
+            verify(mallOrderMapper).casUpdateStatus(1L,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
+            verify(mallOrderMapper, never()).casUpdateStatus(eq(2L), anyString(), anyString());
             verify(skuStockService).rollback(10L, 1);
         }
 
-        @Test @DisplayName("过期列表中某笔已是PAID → 内部跳过但cancelled计数仍+1（已知bug）")
+        @Test @DisplayName("过期列表中某笔已是PAID → CAS竞争失败被跳过，cancelled计数不虚高")
         void expiredButPaid_skipped() {
             MallOrder o1 = order(1L, OrderStatus.PENDING.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(100), BigDecimal.valueOf(100));
             // 第2笔虽在过期列表中，但状态已变为PAID（极端情况）
-            // ⚠️ 已知问题：cancelOrderInternal 对非PENDING订单不抛异常，cancelled++ 照常执行，导致计数虚高
             MallOrder o2 = order(2L, OrderStatus.PAID.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(200), BigDecimal.valueOf(200));
 
@@ -632,14 +639,16 @@ class OrderServiceProxyTest {
 
             MallOrderItem it = orderItem(1L, 1L, 10L, 1L, "P1", 1, BigDecimal.valueOf(100));
             when(mallOrderItemMapper.listByOrderId(1L)).thenReturn(Collections.singletonList(it));
-            when(mallOrderMapper.updateStatus(1L, OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
+            when(mallOrderMapper.casUpdateStatus(1L,
+                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
+            // 第2笔 casUpdateStatus 默认返回 0（CAS 失败），应被跳过且不计入取消数
 
             int cancelled = orderService.cancelExpiredOrders(10);
 
-            // 当前行为：第2笔虽被内部跳过，但cancelled++未受影响 → 返回2（建议修复：cancelOrderInternal 应返回 boolean）
-            assertEquals(2, cancelled);
-            // 但第2笔确实没有被updateStatus
-            verify(mallOrderMapper, never()).updateStatus(eq(2L), anyString());
+            // 第2笔被跳过 → 返回 1（cancelOrderInternal 返回 boolean，计数不再虚高）
+            assertEquals(1, cancelled);
+            // 第2笔确实没有被 CAS 更新
+            verify(mallOrderMapper, never()).casUpdateStatus(eq(2L), anyString(), anyString());
         }
     }
 

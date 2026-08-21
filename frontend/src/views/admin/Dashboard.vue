@@ -68,6 +68,34 @@
     </div>
 
     <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">AI 经营日报</span>
+        <div class="report-head-right">
+          <span v-if="reportGeneratedAt" class="report-meta">生成于 {{ reportGeneratedAt }}</span>
+          <el-button type="primary" size="small" :loading="reportLoading" @click="handleGenerateReport">
+            {{ reportLoading ? 'AI 分析中…' : (reportText ? '重新生成' : '生成日报') }}
+          </el-button>
+        </div>
+      </div>
+      <div v-if="reportLoading" class="report-loading">
+        <el-icon class="is-loading" :size="18"><Loading /></el-icon>
+        正在汇总经营数据并调用 AI 分析，约需 5~30 秒，请稍候…
+      </div>
+      <el-empty
+        v-else-if="!reportText"
+        description="点击「生成日报」，AI 将基于当日订单、销售、库存等数据生成经营分析报告"
+        :image-size="80"
+      />
+      <div v-else class="report-body">
+        <div
+          v-for="(line, i) in reportLines"
+          :key="i"
+          :class="{ 'report-heading': isReportHeading(line) }"
+        >{{ line }}</div>
+      </div>
+    </div>
+
+    <div class="panel">
       <div class="panel-head"><span class="panel-title">数据导出</span></div>
       <div class="export-actions">
         <el-button @click="handleExport('orders')" :loading="exporting === 'orders'">导出订单</el-button>
@@ -93,9 +121,9 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getDashboardStats, getRagSyncStats } from '@/api/admin'
+import { getDashboardStats, getRagSyncStats, generateDailyReport } from '@/api/admin'
 import { adminRequest } from '@/api/request'
-import { Goods, Menu, Refresh, User, Tickets, Box, Discount, Delete } from '@element-plus/icons-vue'
+import { Goods, Menu, Refresh, User, Tickets, Box, Discount, Delete, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts/core'
 import { LineChart, BarChart } from 'echarts/charts'
@@ -236,6 +264,39 @@ onUnmounted(() => {
 })
 
 const exporting = ref(null)
+
+// ---------- AI 经营日报 ----------
+const reportLoading = ref(false)
+const reportText = ref('')
+const reportGeneratedAt = ref('')
+
+/** 把日报文本按行拆开（去掉空行），标题行单独渲染样式 */
+const reportLines = computed(() =>
+  reportText.value.split('\n').map(l => l.trim()).filter(Boolean)
+)
+
+/** 识别小节标题行：【xxx】 或 markdown # 标题（模型可能不严格遵守格式） */
+function isReportHeading(line) {
+  return /^【.+】$/.test(line) || /^#{1,3}\s+/.test(line)
+}
+
+/** 调用后端生成 AI 经营日报（后端会汇总数据并调用 RAG 端 LLM） */
+async function handleGenerateReport() {
+  reportLoading.value = true
+  try {
+    const d = await generateDailyReport()
+    reportText.value = (d && d.report) || ''
+    reportGeneratedAt.value = (d && d.generatedAt) || ''
+    if (!reportText.value) {
+      ElMessage.warning('未生成日报内容，请稍后重试')
+    }
+  } catch (e) {
+    console.error('生成 AI 经营日报失败', e)
+  } finally {
+    reportLoading.value = false
+  }
+}
+
 /** 导出数据为 Excel 文件，支持 orders / users / finance 三种类型 */
 async function handleExport(type) {
   exporting.value = type
@@ -316,4 +377,23 @@ async function handleExport(type) {
 .action-orange:hover .el-icon { color: #ff9500; }
 .action-green:hover .el-icon { color: #34c759; }
 .action-gray:hover .el-icon { color: #86868b; }
+.report-head-right { display: flex; align-items: center; gap: 12px; }
+.report-meta { color: var(--text-secondary); font-size: 12px; }
+.report-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 36px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+.report-body { line-height: 2; font-size: 14px; color: var(--text-primary); }
+.report-heading {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--brand-primary);
+  margin-top: 14px;
+}
+.report-body .report-heading:first-child { margin-top: 0; }
 </style>

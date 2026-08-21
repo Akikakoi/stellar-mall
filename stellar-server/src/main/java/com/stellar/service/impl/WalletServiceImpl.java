@@ -159,8 +159,12 @@ public class WalletServiceImpl implements WalletService {
         wallet = walletMapper.getByUserId(userId);
         walletMapper.addTotalSpent(userId, amount);
 
-        // 订单状态 → PAID
-        mallOrderMapper.updateStatus(orderId, OrderStatus.PAID.getBackendValue());
+        // 订单状态 → PAID（CAS 防止与自动取消并发；竞争失败抛异常回滚本次钱包扣款事务）
+        int statusRows = mallOrderMapper.casUpdateStatus(orderId,
+                OrderStatus.PENDING.getBackendValue(), OrderStatus.PAID.getBackendValue());
+        if (statusRows == 0) {
+            throw new BaseException(MessageConstant.ORDER_STATUS_ERROR + "（订单状态已变更，本次扣款已回滚）");
+        }
 
         // 记录流水
         WalletTransaction tx = WalletTransaction.builder()

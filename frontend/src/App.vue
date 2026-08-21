@@ -1,7 +1,7 @@
 <template>
   <div class="app-root">
     <NavHeader v-if="showHeader" />
-    <div :class="{ 'page-bg': showHeader || route.path === '/shop/search' || route.path === '/points', 'page-bg--rag': isRag }">
+    <div :class="{ 'page-bg': showHeader || route.path === '/shop/search' || route.path === '/points' || isSpuDetail, 'page-bg--rag': isRag }">
       <router-view />
     </div>
     <FloatingSidebar v-if="showFloatingSidebar" />
