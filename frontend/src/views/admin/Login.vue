@@ -70,11 +70,30 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-base);
+  background-color: var(--bg-base);
+  background-image: url('/images/background-light.webp');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   padding: 40px 20px;
+  position: relative;
+}
+
+/* 与商城全站 page-bg 一致的半透明遮罩，保证卡片可读性 */
+.admin-login-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--bg-base);
+  opacity: 0.55;
 }
 
 .admin-login-card {
+  position: relative;
+  z-index: 1;
   width: 420px;
   padding: 56px 48px;
   background: var(--bg-card);
