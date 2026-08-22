@@ -254,10 +254,17 @@ function createInstance(baseURL, type) {
           const url = String(error.config?.url || '')
           const isAdminEndpoint = url.startsWith('/ragapi/api/admin') || url.startsWith('/ragapi/api/kb')
           const refreshType = isAdminEndpoint ? 'admin' : 'user'
+          // 已重试过一次仍 401（如 RAG 端密钥/算法不匹配、账号被禁用），
+          // 不再刷新重试，避免无限 401→refresh→retry 循环导致页面一直转圈
+          if (error.config?.__ragRetried) {
+            handleLogout(refreshType)
+            ElMessage.error('登录已过期，请重新登录')
+            return Promise.reject(error)
+          }
           const refreshInstance = refreshType === 'user' ? userRequest : adminRequest
           try {
             const { token } = await doRefresh(refreshInstance, refreshType)
-            const retryConfig = { ...error.config, headers: { ...error.config.headers } }
+            const retryConfig = { ...error.config, headers: { ...error.config.headers }, __ragRetried: true }
             retryConfig.headers.Authorization = `Bearer ${token}`
             return instance.request(retryConfig)
           } catch (refreshErr) {
