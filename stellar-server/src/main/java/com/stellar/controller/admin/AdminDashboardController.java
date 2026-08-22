@@ -66,6 +66,32 @@ public class AdminDashboardController {
                 "SELECT COUNT(*) FROM stellar_mall_order WHERE status = 'PAID'", Long.class);
             data.put("pendingOrders", pendingOrders == null ? 0L : pendingOrders);
         } catch (Exception e) { data.put("pendingOrders", 0L); }
+        try {
+            // 最近 5 条待发货订单（状态 PAID）
+            List<Map<String, Object>> pendingOrderList = jdbcTemplate.queryForList(
+                "SELECT o.id, o.order_no AS orderNo, o.pay_amount AS payAmount, " +
+                "DATE_FORMAT(o.create_time, '%Y-%m-%d %H:%i') AS createTime, " +
+                "COALESCE(u.nickname, CONCAT('用户', o.user_id)) AS userName " +
+                "FROM stellar_mall_order o LEFT JOIN stellar_mall_user u ON o.user_id = u.id " +
+                "WHERE o.status = 'PAID' ORDER BY o.create_time DESC LIMIT 5");
+            data.put("pendingOrderList", pendingOrderList);
+        } catch (Exception e) { data.put("pendingOrderList", Collections.emptyList()); }
+        try {
+            // 待处理售后数：申请中(1) + 商家审核中(2)
+            Long pendingAfterSaleCount = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM stellar_after_sale WHERE status IN (1, 2)", Long.class);
+            data.put("pendingAfterSaleCount", pendingAfterSaleCount == null ? 0L : pendingAfterSaleCount);
+        } catch (Exception e) { data.put("pendingAfterSaleCount", 0L); }
+        try {
+            // 最近 5 条待处理售后
+            List<Map<String, Object>> pendingAfterSaleList = jdbcTemplate.queryForList(
+                "SELECT a.id, a.type, a.amount, a.status, " +
+                "DATE_FORMAT(a.create_time, '%Y-%m-%d %H:%i') AS createTime, " +
+                "o.order_no AS orderNo " +
+                "FROM stellar_after_sale a LEFT JOIN stellar_mall_order o ON a.order_id = o.id " +
+                "WHERE a.status IN (1, 2) ORDER BY a.create_time DESC LIMIT 5");
+            data.put("pendingAfterSaleList", pendingAfterSaleList);
+        } catch (Exception e) { data.put("pendingAfterSaleList", Collections.emptyList()); }
         // Order trend (last 7 days)
         List<Map<String, Object>> orderTrend = new ArrayList<>();
         List<Map<String, Object>> salesTrend = new ArrayList<>();
