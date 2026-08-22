@@ -6,8 +6,8 @@
     </div>
 
     <el-tabs v-model="tab" class="tabs">
-      <el-tab-pane label="可领取" name="available" />
       <el-tab-pane label="我的优惠券" name="my" />
+      <el-tab-pane label="可领取" name="available" />
       <el-tab-pane label="已过期" name="expired" />
     </el-tabs>
 
@@ -90,7 +90,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { userRequest } from '@/api/request'
 
-const tab = ref('available')
+const tab = ref('my')
 const loading = ref(false)
 const availableCoupons = ref([])
 const myCoupons = ref([])
