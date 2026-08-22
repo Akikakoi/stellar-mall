@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.core.utils import escape_sql_like
-from app.models import User, Conversation, Message, KbDocument, OperationLog, MessageRole
+from app.models import User, Conversation, Message, KbDocument, MessageRole
 from app.schemas import UserInfo, SystemSettingsReq
 
 
@@ -37,20 +37,7 @@ class AdminService:
             "top_questions": [{"q": r[0][:50], "count": int(r[1])} for r in top_q],
         }
 
-    # ---------- 操作日志 ----------
-    def list_logs(self, page: int = 1, page_size: int = 50, action: str = ""):
-        q = self.db.query(OperationLog)
-        if action:
-            q = q.filter(OperationLog.action == action)
-        total = q.count()
-        rows = (q.order_by(OperationLog.created_at.desc())
-                .offset((page - 1) * page_size).limit(page_size).all())
-        items = [{
-            "id": r.id, "user_id": r.user_id, "username": r.username,
-            "action": r.action, "resource": r.resource, "detail": r.detail,
-            "ip": r.ip, "status": r.status, "created_at": r.created_at.isoformat(),
-        } for r in rows]
-        return {"items": items, "total": total, "page": page, "page_size": page_size}
+    # ---------- 操作日志（写日志保留，读接口已移除：管理端页面已删除）----------
 
     # ---------- 系统设置 ----------
     @staticmethod

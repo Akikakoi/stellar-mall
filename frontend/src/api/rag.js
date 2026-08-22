@@ -196,15 +196,6 @@ export function apiAdminDashboard() {
   })
 }
 
-/** 查询操作日志 */
-export function apiAdminLogs(params) {
-  return ragRequest({
-    url: '/ragapi/api/admin/logs',
-    method: 'get',
-    params
-  })
-}
-
 /** 获取系统设置 */
 export function apiAdminSettingsGet() {
   return ragRequest({

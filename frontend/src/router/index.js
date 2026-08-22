@@ -204,12 +204,6 @@ const routes = [
         meta: { title: '分类管理', requiresAdminAuth: true }
       },
       {
-        path: 'rag-sync',
-        name: 'AdminRagSyncQueue',
-        component: () => import('@/views/admin/RagSyncQueue.vue'),
-        meta: { title: 'RAG 同步队列', requiresAdminAuth: true }
-      },
-      {
         path: 'employee',
         name: 'AdminEmployeeMgmt',
         component: () => import('@/views/admin/EmployeeMgmt.vue'),
@@ -220,12 +214,6 @@ const routes = [
         name: 'AdminKb',
         component: () => import('@/views/admin/KnowledgeBase.vue'),
         meta: { title: '知识库管理', requiresAdminAuth: true }
-      },
-      {
-        path: 'logs',
-        name: 'AdminLogs',
-        component: () => import('@/views/admin/OperationLogs.vue'),
-        meta: { title: '操作日志', requiresAdminAuth: true }
       },
       {
         path: 'settings',
