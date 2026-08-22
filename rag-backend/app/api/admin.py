@@ -16,15 +16,6 @@ async def dashboard(current_user: User = Depends(require_admin), db: Session = D
     return ok(AdminService(db).dashboard())
 
 
-@router.get("/logs")
-async def list_logs(
-    page: int = 1, page_size: int = 50, action: str = "",
-    current_user: User = Depends(require_admin), db: Session = Depends(get_db),
-):
-    from app.services.admin_service import AdminService
-    return ok(AdminService(db).list_logs(page, page_size, action=action))
-
-
 @router.get("/settings")
 async def get_settings(current_user: User = Depends(require_admin)):
     from app.services.admin_service import AdminService

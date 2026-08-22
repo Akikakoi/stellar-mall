@@ -154,50 +154,6 @@ export function setCategoryStatus(id, status) {
   })
 }
 
-// =========================== RAG 同步 ===========================
-
-/** 查询待同步记录 */
-export function listRagSyncPending(params) {
-  return adminRequest({
-    url: '/admin/rag-sync/pending',
-    method: 'get',
-    params
-  })
-}
-
-/** 查询全部同步记录 */
-export function listRagSyncAll(params) {
-  return adminRequest({
-    url: '/admin/rag-sync/list',
-    method: 'get',
-    params
-  })
-}
-
-/** 重试单条同步 */
-export function retryRagSyncOne(id) {
-  return adminRequest({
-    url: `/admin/rag-sync/retry/${id}`,
-    method: 'post'
-  })
-}
-
-/** 批量处理全部待同步记录 */
-export function processAllRagSync() {
-  return adminRequest({
-    url: '/admin/rag-sync/process-all',
-    method: 'post'
-  })
-}
-
-/** 获取同步统计信息 */
-export function getRagSyncStats() {
-  return adminRequest({
-    url: '/admin/rag-sync/stats',
-    method: 'get'
-  })
-}
-
 // =========================== 员工管理 ===========================
 
 /** 分页查询员工 */

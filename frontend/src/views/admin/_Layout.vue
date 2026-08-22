@@ -78,14 +78,6 @@
           <el-icon><Delete /></el-icon>
           <template #title>商品回收站</template>
         </el-menu-item>
-        <el-menu-item index="/admin/rag-sync">
-          <el-icon><Refresh /></el-icon>
-          <template #title>RAG 同步队列</template>
-        </el-menu-item>
-        <el-menu-item index="/admin/logs">
-          <el-icon><Monitor /></el-icon>
-          <template #title>操作日志</template>
-        </el-menu-item>
         <el-menu-item index="/admin/settings">
           <el-icon><Setting /></el-icon>
           <template #title>系统设置</template>
@@ -145,8 +137,8 @@ import { useSiteTitle } from '@/composables/useSiteTitle'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  DataBoard, Goods, Menu, Refresh, User,
-  Fold, Expand, ArrowDown, Document, Monitor, Setting, Tickets,
+  DataBoard, Goods, Menu, User,
+  Fold, Expand, ArrowDown, Document, Setting, Tickets,
   Discount, ChatLineSquare, Box, Delete, Picture, Warning, Sunny, Moon, Stamp, Star, TrendCharts
 } from '@element-plus/icons-vue'
 
@@ -175,8 +167,6 @@ const TITLE_MAP = {
   '/admin/banner': '轮播图管理',
   '/admin/home-module': '首页装修',
   '/admin/recycle': '商品回收站',
-  '/admin/rag-sync': 'RAG 同步队列',
-  '/admin/logs': '操作日志',
   '/admin/settings': '系统设置'
 }
 const currentPageTitle = computed(() => TITLE_MAP[route.path] || '')
