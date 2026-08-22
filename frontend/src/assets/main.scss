@@ -474,18 +474,23 @@ html.theme-dark {
   border-radius: 50%;
 }
 
-/* ===== 所有弹窗动画统一为渐入渐出 ===== */
-/* 遮罩整体淡入淡出；保持结束帧（both）避免移除前回闪 */
-.dialog-fade-enter-active {
+/* ===== 所有弹窗动画统一为渐入渐出（body 前缀提升优先级） ===== */
+/* element-plus 各组件样式是按需动态注入的，晚于本文件才注入；
+   若用同等优先级会被 element-plus 默认的「无 fill-mode」动画覆盖，
+   导致动画一结束、节点被移除前的空档里 opacity 回跳为 1 ── 即「关闭闪回」。
+   因此用 body 提升优先级确保覆盖，并保留 both 填充：动画结束到节点被移除期间保持末帧（透明），不再闪回。 */
+body .dialog-fade-enter-active {
   animation: dialog-pure-fade-in 0.25s ease-out both;
 }
-.dialog-fade-leave-active {
+body .dialog-fade-leave-active {
   animation: dialog-pure-fade-out 0.2s ease-in both;
 }
-/* 去掉默认的下移位移动画，只保留透明度变化 */
-.dialog-fade-enter-active .el-overlay-dialog,
-.dialog-fade-leave-active .el-overlay-dialog {
-  animation: none;
+/* 弹窗内容容器跟随遮罩一起纯透明度淡入淡出（覆盖 element-plus 默认的位移+透明度动画） */
+body .dialog-fade-enter-active .el-overlay-dialog {
+  animation: dialog-pure-fade-in 0.25s ease-out both;
+}
+body .dialog-fade-leave-active .el-overlay-dialog {
+  animation: dialog-pure-fade-out 0.2s ease-in both;
 }
 @keyframes dialog-pure-fade-in {
   from { opacity: 0; }
