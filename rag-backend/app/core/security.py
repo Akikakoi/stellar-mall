@@ -25,6 +25,11 @@ _SRC_RAG = "rag"
 _SRC_STELLAR_ADMIN = "stellar_admin"
 _SRC_STELLAR_USER = "stellar_user"
 
+# Mall 端 JJWT 0.12.x 的 signWith(key) 会按密钥长度自动选择 HS 算法：
+# 64 字节密钥 → HS512；早期约定/注释写的是 HS256。这里两者都接受，
+# 避免商城签发的 token 因算法不匹配被 RAG 拒绝（曾导致管理端知识库页无限 401 刷新循环）。
+_STELLAR_TOKEN_ALGORITHMS = ["HS256", "HS512"]
+
 
 # ---------- 密码 ----------
 def hash_password(plain_password: str) -> str:
@@ -53,13 +58,17 @@ def create_refresh_token(subject: str | int, expires_delta: Optional[timedelta] 
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def _decode_with_secret(token: str, secret: str, algorithm: str = settings.ALGORITHM) -> Optional[dict]:
-    """用指定密钥解析一次 JWT，失败返回 None（不抛异常）。"""
+def _decode_with_secret(token: str, secret: str, algorithms: Optional[list] = None) -> Optional[dict]:
+    """用指定密钥解析一次 JWT，失败返回 None（不抛异常）。
+
+    algorithms 为空时默认用 settings.ALGORITHM（RAG 自签 token 的算法）。
+    """
+    algs = algorithms or [settings.ALGORITHM]
     try:
         return jwt.decode(
             token,
             secret,
-            algorithms=[algorithm],
+            algorithms=algs,
             options={"require": []},  # exp 可选，缺失也不报错；如果有 exp 仍会自动校验过期
         )
     except jwt.ExpiredSignatureError:
@@ -124,7 +133,7 @@ def decode_token(token: str) -> Optional[dict]:
     except AttributeError:
         admin_key = None
     if admin_key:
-        claims = _decode_with_secret(token, admin_key, settings.ALGORITHM)
+        claims = _decode_with_secret(token, admin_key, _STELLAR_TOKEN_ALGORITHMS)
         if claims is not None and _looks_like_stellar_admin_claims(claims):
             claims[_TAG_SRC_RAG] = _SRC_STELLAR_ADMIN
             return claims
@@ -135,7 +144,7 @@ def decode_token(token: str) -> Optional[dict]:
     except AttributeError:
         user_key = None
     if user_key:
-        claims = _decode_with_secret(token, user_key, settings.ALGORITHM)
+        claims = _decode_with_secret(token, user_key, _STELLAR_TOKEN_ALGORITHMS)
         if claims is not None and _looks_like_stellar_user_claims(claims):
             claims[_TAG_SRC_RAG] = _SRC_STELLAR_USER
             return claims
