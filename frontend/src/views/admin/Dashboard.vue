@@ -35,19 +35,29 @@
     <div class="grid-row">
       <div class="panel">
         <div class="panel-head">
-          <span class="panel-title">RAG 同步状态</span>
-          <el-button type="primary" link size="small" @click="router.push('/admin/rag-sync')">查看队列 →</el-button>
+          <span class="panel-title">待处理订单</span>
+          <el-button type="primary" link size="small" @click="router.push({ path: '/admin/orders', query: { status: 'PAID' } })">查看全部 →</el-button>
         </div>
-        <el-descriptions :column="2" border v-loading="loading">
-          <el-descriptions-item label="待同步">{{ ragStats.pending || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="处理中">{{ ragStats.processing || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="成功">{{ ragStats.success || 0 }}</el-descriptions-item>
-          <el-descriptions-item label="失败">{{ ragStats.failed || 0 }}</el-descriptions-item>
-        </el-descriptions>
+        <div class="panel-stat">
+          <div class="panel-stat-num">{{ stats.pendingOrders }}</div>
+          <div class="panel-stat-label">笔订单待发货</div>
+        </div>
       </div>
       <div class="panel">
-        <div class="panel-head"><span class="panel-title">快捷操作</span></div>
-        <div class="quick-actions">
+        <div class="panel-head">
+          <span class="panel-title">售后待处理</span>
+          <el-button type="primary" link size="small" @click="router.push('/admin/aftersale')">查看全部 →</el-button>
+        </div>
+        <div class="panel-stat">
+          <div class="panel-stat-num">{{ stats.pendingAfterSaleCount }}</div>
+          <div class="panel-stat-label">条售后待处理</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">快捷操作</span></div>
+      <div class="quick-actions">
           <div class="action-item action-blue" @click="router.push('/admin/spu')">
             <el-icon :size="28"><Goods /></el-icon><span>商品管理</span>
           </div>
@@ -65,7 +75,6 @@
           </div>
         </div>
       </div>
-    </div>
 
     <div class="panel">
       <div class="panel-head">
@@ -121,7 +130,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getDashboardStats, getRagSyncStats, generateDailyReport } from '@/api/admin'
+import { getDashboardStats, generateDailyReport } from '@/api/admin'
 import { adminRequest } from '@/api/request'
 import { Goods, Menu, Refresh, User, Tickets, Box, Discount, Delete, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -134,13 +143,12 @@ import { CanvasRenderer } from 'echarts/renderers'
 echarts.use([LineChart, BarChart, GridComponent, TooltipComponent, CanvasRenderer])
 
 const router = useRouter()
-const loading = ref(false)
 const orderChartRef = ref(null)
 const salesChartRef = ref(null)
 const stats = reactive({
-  pendingOrders: 0, todayOrders: 0, todaySales: 0, lowStockCount: 0
+  pendingOrders: 0, todayOrders: 0, todaySales: 0, lowStockCount: 0,
+  pendingAfterSaleCount: 0
 })
-const ragStats = reactive({ pending: 0, processing: 0, success: 0, failed: 0 })
 const orderTrendData = ref([])
 const salesTrendData = ref([])
 
@@ -169,9 +177,8 @@ function goOrdersToday() {
 let orderChart = null
 let salesChart = null
 
-/** 加载仪表盘全部数据：核心统计、增强统计、RAG同步状态 */
+/** 加载仪表盘全部数据：核心统计、增强统计 */
 async function load() {
-  loading.value = true
   try {
     try {
       const res = await getDashboardStats()
@@ -185,19 +192,12 @@ async function load() {
       stats.todaySales = d.todaySales || 0
       stats.lowStockCount = d.lowStockCount || 0
       stats.pendingOrders = d.pendingOrders || 0
+      stats.pendingAfterSaleCount = d.pendingAfterSaleCount || 0
       renderCharts(d.orderTrend || [], d.salesTrend || [])
     } catch (e) {
       console.error('加载仪表盘增强统计失败', e)
     }
-    try {
-      const res = await getRagSyncStats()
-      const d = res || {}
-      ragStats.pending = d.pending || d.pendingCount || 0
-      ragStats.processing = d.processing || d.processingCount || 0
-      ragStats.success = d.success || d.successCount || 0
-      ragStats.failed = d.failed || d.failedCount || 0
-    } catch (e) {}
-  } finally { loading.value = false }
+  } catch (e) {}
 }
 
 /** 使用 ECharts 渲染近7天订单趋势和销售额趋势图 */
@@ -355,6 +355,14 @@ async function handleExport(type) {
 }
 .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .panel-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.panel-stat { padding: 20px 0 16px; text-align: center; }
+.panel-stat-num {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--brand-primary);
+}
+.panel-stat-label { color: var(--text-muted); font-size: 14px; margin-top: 6px; }
 .quick-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .action-item {
   display: flex;
