@@ -179,26 +179,18 @@
       </div>
     </div>
 
-    <!-- SKU 选择弹窗 -->
+    <!-- SKU 选择弹窗：选型号界面统一复用详情页 SkuSpecSelector（规格分组按钮 + 数量控件） -->
     <el-dialog v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close>
-      <div class="sku-selected-preview" v-if="selectedSku">
-        <img :src="selectedSku.image || currentSpu?.mainImage || __PH" class="sku-preview-img" />
-        <div class="sku-preview-info">
-          <div class="sku-preview-price">¥{{ Number(selectedSku.price || 0).toFixed(2) }}</div>
-          <div class="sku-preview-spec">{{ selectedSku.specs || '默认规格' }}</div>
-          <div class="sku-preview-stock">库存：{{ selectedSku.stock || 0 }}</div>
-        </div>
-      </div>
-      <div class="sku-options">
-        <div v-for="sku in currentSkus" :key="sku.id" class="sku-option" :class="{ active: selectedSkuId === sku.id, disabled: (sku.stock || 0) <= 0 }" @click="(sku.stock || 0) > 0 ? selectedSkuId = sku.id : null">
-          <div class="sku-option-name">{{ sku.name || sku.specs || '默认规格' }}</div>
-          <div class="sku-option-price">¥{{ Number(sku.price || 0).toFixed(2) }}</div>
-          <div v-if="(sku.stock || 0) <= 0" class="sku-option-soldout">缺货</div>
-        </div>
-      </div>
+      <SkuSpecSelector
+        v-if="currentSkus.length"
+        :spu="currentSpu"
+        :skus="currentSkus"
+        v-model="cartQty"
+        @sku-change="onSkuChange"
+      />
       <template #footer>
         <el-button @click="skuDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="addingCart" :disabled="!selectedSkuId" @click="confirmAddToCart">加入购物车</el-button>
+        <el-button type="primary" :loading="addingCart" :disabled="!selectedSku" @click="confirmAddToCart">加入购物车</el-button>
       </template>
     </el-dialog>
   </div>
@@ -213,6 +205,7 @@ import { useCartStore } from '@/stores/cart'
 import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
 import { userRequest } from '@/api/request'
 import { ElMessage } from 'element-plus'
+import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 
 const __PH = window.__PH
 const router = useRouter()
@@ -596,13 +589,14 @@ async function toggleFav(spu) {
   } catch (e) { ElMessage.error('操作失败') }
 }
 
-// SKU dialog
+// SKU dialog（选型号统一复用详情页 SkuSpecSelector：仅规格 + 数量，不含保障服务）
 const skuDialogVisible = ref(false)
 const currentSpu = ref(null)
 const currentSkus = ref([])
-const selectedSkuId = ref(null)
+const cartQty = ref(1)          // 数量，由 SkuSpecSelector 通过 v-model 同步
 const addingCart = ref(false)
-const selectedSku = computed(() => currentSkus.value.find(s => s.id === selectedSkuId.value))
+const selectedSku = ref(null)   // 由 SkuSpecSelector 的 sku-change 事件填充
+function onSkuChange(sku) { selectedSku.value = sku }
 
 /**
  * 处理加入购物车：获取商品 SKU 列表，单个 SKU 直接加入，多个 SKU 弹出规格选择弹窗
@@ -617,7 +611,8 @@ async function handleAddToCart(spu) {
     if (skuList.length === 1) { await doAddCart(skuList[0].id); return }
     currentSpu.value = res
     currentSkus.value = skuList.filter(s => s.status !== 0)
-    selectedSkuId.value = currentSkus.value[0]?.id || null
+    cartQty.value = 1
+    selectedSku.value = null
     skuDialogVisible.value = true
   } catch (e) { ElMessage.error(e?.response?.data?.msg || e?.message || '加载商品规格失败') }
 }
@@ -626,18 +621,18 @@ async function handleAddToCart(spu) {
  * 执行加入购物车操作，调用接口并刷新购物车数据
  * @param {number} skuId - SKU ID
  */
-async function doAddCart(skuId) {
+async function doAddCart(skuId, qty = 1) {
   if (!skuId) { ElMessage.warning('请选择商品规格'); return }
   addingCart.value = true
   try {
-    await addCart({ skuId, qty: 1 })
+    await addCart({ skuId, qty })
     ElMessage.success('已加入购物车')
     skuDialogVisible.value = false
     await cartStore.load()
   } catch (e) { ElMessage.error(e?.response?.data?.msg || e?.message || '加入购物车失败') } finally { addingCart.value = false }
 }
 
-function confirmAddToCart() { doAddCart(selectedSkuId.value) }
+function confirmAddToCart() { doAddCart(selectedSku.value?.id, cartQty.value) }
 
 // ========== 生命周期 ==========
 onMounted(async () => {
@@ -849,21 +844,7 @@ onUnmounted(() => {
 .load-more-tip { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 24px 0; color: var(--text-secondary); font-size: 14px; }
 .load-more-tip.no-more { color: var(--text-muted); }
 
-/* ===== SKU 弹窗 ===== */
-.sku-selected-preview { display: flex; align-items: center; gap: 14px; background: var(--bg-hover); padding: 14px; border-radius: var(--radius-md); margin-bottom: 18px; }
-.sku-preview-img { width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-sm); }
-.sku-preview-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
-.sku-preview-spec { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
-.sku-preview-stock { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
-.sku-options { display: flex; flex-wrap: wrap; gap: 10px; }
-.sku-option { min-width: 100px; padding: 10px 14px; border: 1px solid var(--border-base); border-radius: 8px; background: var(--bg-card); cursor: pointer; transition: all 0.2s; position: relative; }
-.sku-option:hover:not(.disabled) { border-color: var(--brand-primary); }
-.sku-option.active { border-color: var(--brand-primary); background: var(--brand-primary-soft); }
-.sku-option.disabled { opacity: 0.5; cursor: not-allowed; }
-.sku-option-name { font-size: 13px; color: var(--text-primary); }
-.sku-option-price { font-size: 13px; color: var(--brand-primary); font-weight: 600; margin-top: 4px; }
-.sku-option-soldout { position: absolute; top: 2px; right: 4px; font-size: 10px; color: var(--status-danger); }
-
+/* 移动端适配 */
 @media (max-width: 1000px) {
   .cat-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: none; }
   .cat-banner { grid-row: auto; min-height: 220px; }

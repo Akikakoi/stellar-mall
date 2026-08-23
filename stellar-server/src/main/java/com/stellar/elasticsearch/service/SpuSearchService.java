@@ -13,6 +13,7 @@ import com.stellar.vo.SearchResultVO;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.ScriptScoreFunctionBuilder;
 import org.elasticsearch.script.Script;
@@ -124,19 +125,23 @@ public class SpuSearchService {
             boolQuery.should(QueryBuilders.termQuery("name.keyword", keyword).boost(100.0f));
             // ② 精确短语匹配：次高优先级
             boolQuery.should(QueryBuilders.matchPhraseQuery("name", keyword).boost(20.0f));
-            // ③ 分词匹配（无模糊）：原词 best_fields
+            // ③ 分词匹配（无模糊）：原词 best_fields，AND 语义要求所有分词都命中同一字段，
+            //    避免 ik 把多字词切成单字后 OR 语义导致的单字误匹配（如搜“钢化膜”命中“模块化拼接”的“化”）
             boolQuery.should(QueryBuilders.multiMatchQuery(keyword, "name", "subTitle")
                     .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
+                    .operator(Operator.AND)
                     .field("name", 3.0f)
                     .field("subTitle", 1.0f));
 
             // 同义词扩展：权重低于原词
+            // 用 match_phrase（短语匹配）而非 multi_match：ik 分词器会把多字同义词
+            // （如“钢化膜”）切成单字（钢/化/膜），multi_match 的 OR 语义让任意单字都能命中，
+            // 导致搜“手机膜”时同义词“钢化膜”的单字“化”误命中副标题含“模块化拼接”的无关商品。
+            // 短语匹配要求同义词整体连续出现，杜绝单字误匹配。
             for (int i = 1; i < expandedTerms.size(); i++) {
                 String syn = expandedTerms.get(i);
-                boolQuery.should(QueryBuilders.multiMatchQuery(syn, "name", "subTitle")
-                        .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
-                        .field("name", 1.5f)
-                        .field("subTitle", 0.5f));
+                boolQuery.should(QueryBuilders.matchPhraseQuery("name", syn).boost(1.5f));
+                boolQuery.should(QueryBuilders.matchPhraseQuery("subTitle", syn).boost(0.5f));
             }
             boolQuery.minimumShouldMatch(1);
 

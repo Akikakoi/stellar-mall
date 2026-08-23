@@ -508,12 +508,12 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-.qty-btn:first-child {
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
+.qty-btn:first-of-type {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
 }
 
-.qty-btn:last-child {
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+.qty-btn:nth-of-type(2) {
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
 }
 
 .qty-btn:hover:not(:disabled) {
