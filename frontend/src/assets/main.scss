@@ -13,6 +13,9 @@ html.theme-transitioning *::after {
   --radius-lg: 18px;
   --radius-xl: 28px;
 
+  /* Element Plus 弹窗圆角与站点统一的卡片圆角保持一致 */
+  --el-dialog-border-radius: var(--radius-lg);
+
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
@@ -472,6 +475,12 @@ html.theme-dark {
 }
 .el-button.is-circle {
   border-radius: 50%;
+}
+
+/* ===== 统一所有弹窗圆角（body 前缀提升优先级，覆盖 element-plus 按需注入的默认值） ===== */
+body .el-dialog {
+  border-radius: var(--radius-lg);
+  --el-dialog-border-radius: var(--radius-lg);
 }
 
 /* ===== 所有弹窗动画统一为渐入渐出（body 前缀提升优先级） ===== */

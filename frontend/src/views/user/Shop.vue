@@ -1,32 +1,58 @@
 <template>
   <div class="shop-page">
-    <!-- 顶部大搜索框 -->
-    <div class="shop-search-bar">
-      <div class="shop-search-pill">
-        <el-icon :size="18" class="search-prefix-icon"><Search /></el-icon>
-        <input
-          v-model="searchKeyword"
-          type="text"
-          class="search-core-input"
-          placeholder="搜索商品..."
-          @keyup.enter="doShopSearch"
-        />
-        <button
-          v-if="searchKeyword"
-          class="search-clear-btn"
-          @click="searchKeyword = ''"
-          title="清除"
-        >
-          <el-icon :size="14"><Close /></el-icon>
-        </button>
-        <button
-          class="search-submit-btn"
-          :disabled="!searchKeyword.trim()"
-          @click="doShopSearch"
-        >
-          <el-icon :size="16"><Search /></el-icon>
-          <span>搜索</span>
-        </button>
+    <!-- 顶部大搜索框（分类页隐藏，带搜索历史） -->
+    <div class="shop-search-bar" v-if="!isCategoryPage">
+      <div class="shop-search-wrap">
+        <div class="shop-search-pill">
+          <el-icon :size="18" class="search-prefix-icon"><Search /></el-icon>
+          <input
+            v-model="searchKeyword"
+            type="text"
+            class="search-core-input"
+            placeholder="搜索商品..."
+            @keyup.enter="doShopSearch"
+            @focus="historyOpen = true"
+            @blur="closeHistory"
+          />
+          <button
+            v-if="searchKeyword"
+            class="search-clear-btn"
+            @click="searchKeyword = ''"
+            title="清除"
+          >
+            <el-icon :size="14"><Close /></el-icon>
+          </button>
+          <button
+            class="search-submit-btn"
+            :disabled="!searchKeyword.trim()"
+            @click="doShopSearch"
+          >
+            <el-icon :size="16"><Search /></el-icon>
+            <span>搜索</span>
+          </button>
+        </div>
+        <!-- 搜索历史下拉（与主页搜索框共享同一份历史数据） -->
+        <div class="history-panel" v-if="historyOpen && searchHistory.length > 0">
+          <div class="history-panel-head">搜索历史</div>
+          <ul class="history-list">
+            <li
+              v-for="h in searchHistory"
+              :key="h"
+              class="history-item"
+              @mousedown.prevent="pickHistory(h)"
+            >
+              <el-icon :size="14" class="history-clock"><Clock /></el-icon>
+              <span class="history-text">{{ h }}</span>
+              <span
+                class="history-del"
+                title="删除"
+                @mousedown.stop.prevent="removeHistoryItem(h)"
+              >
+                <el-icon :size="12"><Close /></el-icon>
+              </span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -152,45 +178,41 @@
       </div>
     </main>
 
-    <!-- 规格选择弹窗 -->
-    <el-dialog v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close>
-      <div class="sku-selected-preview" v-if="selectedSku">
-        <img :src="selectedSku.image || currentSpu?.mainImage || __PH" class="sku-preview-img" />
-        <div class="sku-preview-info">
-          <div class="sku-preview-price">¥{{ Number(selectedSku.price || 0).toFixed(2) }}</div>
-          <div class="sku-preview-spec">{{ selectedSku.specs || '默认规格' }}</div>
-          <div class="sku-preview-stock">库存：{{ selectedSku.stock || 0 }}</div>
-        </div>
-      </div>
-      <div class="sku-options">
-        <div v-for="sku in currentSkus" :key="sku.id" class="sku-option"
-          :class="{ active: selectedSkuId === sku.id, disabled: (sku.stock || 0) <= 0 }"
-          @click="(sku.stock || 0) > 0 ? selectedSkuId = sku.id : null">
-          <div class="sku-option-name">{{ sku.name || sku.specs || '默认规格' }}</div>
-          <div class="sku-option-price">¥{{ Number(sku.price || 0).toFixed(2) }}</div>
-          <div v-if="(sku.stock || 0) <= 0" class="sku-option-soldout">缺货</div>
-        </div>
-      </div>
+    <!-- 规格选择弹窗（append-to-body：遮罩脱离 .shop-page 的 transform 层，保持视口定位）。
+         选型号界面统一复用详情页的 SkuSpecSelector：规格分组按钮 + 数量控件。 -->
+    <el-dialog v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close append-to-body>
+      <SkuSpecSelector
+        v-if="currentSkus.length"
+        :spu="currentSpu"
+        :skus="currentSkus"
+        v-model="cartQty"
+        @sku-change="onSkuChange"
+      />
       <template #footer>
         <el-button @click="skuDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="addingCart" :disabled="!selectedSkuId" @click="confirmAddToCart">加入购物车</el-button>
+        <el-button type="primary" :loading="addingCart" :disabled="!selectedSku" @click="confirmAddToCart">加入购物车</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Loading, Search, Close } from '@element-plus/icons-vue'
+import { Loading, Search, Close, Clock } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
 import { ElMessage } from 'element-plus'
+import { useSearchHistory } from '@/composables/useSearchHistory'
+import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 
 const __PH = window.__PH
 const route = useRoute()
 const router = useRouter()
+
+// 是否分类页（URL 带 categoryId 时隐藏顶部搜索框）
+const isCategoryPage = computed(() => !!route.query.categoryId)
 const userStore = useUserStore()
 const cartStore = useCartStore()
 
@@ -203,6 +225,9 @@ const loading = ref(false)
 const loadingMore = ref(false)
 const keyword = ref('')
 const searchKeyword = ref('')  // 顶部大搜索框的输入绑定
+const historyOpen = ref(false) // 搜索历史下拉是否展开
+// 搜索历史（与导航栏/主页搜索框共享同一份数据，按用户隔离）
+const { searchHistory, addToHistory, removeHistory } = useSearchHistory()
 const categoryId = ref(null)
 const categoryName = ref('')
 const spus = ref([])
@@ -246,13 +271,14 @@ const displayCategories = computed(() => {
   }))
 })
 
-// --- 规格弹窗 ---
+// --- 规格弹窗（选型号统一复用详情页 SkuSpecSelector：仅规格 + 数量，不含保障服务） ---
 const skuDialogVisible = ref(false)
 const currentSpu = ref(null)
 const currentSkus = ref([])
-const selectedSkuId = ref(null)
+const cartQty = ref(1)          // 数量，由 SkuSpecSelector 通过 v-model 同步
 const addingCart = ref(false)
-const selectedSku = computed(() => currentSkus.value.find(s => s.id === selectedSkuId.value))
+const selectedSku = ref(null)   // 由 SkuSpecSelector 的 sku-change 事件填充
+function onSkuChange(sku) { selectedSku.value = sku }
 
 // --- 高亮渲染 ---
 /**
@@ -277,6 +303,33 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
+// --- 搜索历史交互 ---
+/**
+ * 关闭搜索历史面板（延迟执行，避免点击面板项时先触发 blur 导致无法选中）
+ */
+function closeHistory() {
+  setTimeout(() => { historyOpen.value = false }, 120)
+}
+
+/**
+ * 选中一条搜索历史：填入输入框并立即搜索
+ * @param {string} kw - 历史关键词
+ */
+function pickHistory(kw) {
+  searchKeyword.value = kw
+  historyOpen.value = false
+  doShopSearch()
+}
+
+/**
+ * 删除一条搜索历史（确认弹窗在 composable 内），删除后为空则收起面板
+ * @param {string} kw - 要删除的关键词
+ */
+async function removeHistoryItem(kw) {
+  const ok = await removeHistory(kw)
+  if (ok && searchHistory.value.length === 0) historyOpen.value = false
+}
+
 // --- 聚合交互 ---
 /**
  * 执行商城搜索，更新 URL 并重置筛选条件后重新加载商品列表
@@ -284,6 +337,8 @@ function escapeHtml(str) {
 function doShopSearch() {
   const kw = searchKeyword.value.trim()
   if (!kw) return
+  addToHistory(kw)
+  historyOpen.value = false
   keyword.value = kw
   // 更新 URL 但不跳转新页面
   router.replace({ query: { ...route.query, keyword: kw } })
@@ -361,6 +416,24 @@ function clearAllFilters() {
 function categoryNameById(id) {
   return categoryMap[id] || null
 }
+
+/**
+ * 根据 URL 中的 categoryId 刷新分类上下文：分类名 + 浏览器标签标题
+ * 分类页标签显示分类名，避免与搜索页的“商品搜索”重复
+ */
+function refreshCategoryContext() {
+  const cat = allCategories.value.find(c => c.id == route.query.categoryId)
+  categoryName.value = cat ? cat.name : ''
+  document.title = cat
+    ? `${cat.name} - 星耀商城`
+    : '商品搜索 - 星耀商城'
+}
+
+// URL 中 categoryId 变化时（进入分类页 / 侧栏切换分类 / 清除分类）更新分类上下文
+watch(
+  () => route.query.categoryId,
+  () => { refreshCategoryContext() }
+)
 
 // --- 价格区间 → 请求参数 ---
 /**
@@ -529,7 +602,8 @@ async function handleAddToCart(spu) {
     if (skuList.length === 1) { await doAddCart(skuList[0].id); return }
     currentSpu.value = detail
     currentSkus.value = skuList.filter(s => s.status !== 0)
-    selectedSkuId.value = currentSkus.value[0]?.id || null
+    cartQty.value = 1
+    selectedSku.value = null
     skuDialogVisible.value = true
   } catch (e) {
     ElMessage.error(e?.response?.data?.msg || e?.message || '加载商品规格失败')
@@ -540,11 +614,11 @@ async function handleAddToCart(spu) {
  * 执行加入购物车操作，调用接口并刷新购物车数据
  * @param {number} skuId - SKU ID
  */
-async function doAddCart(skuId) {
+async function doAddCart(skuId, qty = 1) {
   if (!skuId) { ElMessage.warning('请选择商品规格'); return }
   addingCart.value = true
   try {
-    await addCart({ skuId, qty: 1 })
+    await addCart({ skuId, qty })
     ElMessage.success('已加入购物车')
     skuDialogVisible.value = false
     await cartStore.load()
@@ -553,7 +627,7 @@ async function doAddCart(skuId) {
   } finally { addingCart.value = false }
 }
 
-function confirmAddToCart() { doAddCart(selectedSkuId.value) }
+function confirmAddToCart() { doAddCart(selectedSku.value?.id, cartQty.value) }
 
 // --- 初始化 ---
 onMounted(async () => {
@@ -578,8 +652,7 @@ onMounted(async () => {
     walk(cats || [])
     allCategories.value = flat
     flat.forEach(c => { categoryMap[c.id] = c.name })
-    const cat = flat.find(c => c.id == categoryId.value)
-    if (cat) categoryName.value = cat.name
+    refreshCategoryContext()
   } catch (e) { }
 
   if (userStore.token && !userStore.nickname) { try { await userStore.fetchProfile() } catch (e) { } }
@@ -591,12 +664,89 @@ onMounted(async () => {
 
 <style scoped>
 .shop-page { min-height: 100vh; padding-top: 48px; }
+/* 强制搜索页内容常驻 GPU 合成层：弹窗遮罩移除时内容层不会短暂丢失（约 4 帧闪烁） */
+.shop-page {
+  transform: translateZ(0);
+}
 
 /* ===== 顶部大搜索框 ===== */
 .shop-search-bar {
   display: flex;
   justify-content: center;
   padding: 0 24px 32px;
+}
+.shop-search-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+}
+/* 搜索历史下拉 */
+.history-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-base, #e4e7ed);
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+  padding: 6px 0 8px;
+  z-index: 20;
+}
+.history-panel-head {
+  padding: 6px 16px 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary);
+  transition: background 0.15s;
+}
+.history-item:hover {
+  background: var(--bg-hover);
+}
+.history-clock {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+.history-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-del {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  opacity: 0;
+}
+.history-item:hover .history-del {
+  opacity: 1;
+}
+.history-del:hover {
+  background: var(--bg-hover);
+  color: var(--status-danger, #F56C6C);
 }
 .shop-search-pill {
   display: flex;
@@ -844,23 +994,6 @@ onMounted(async () => {
   font-style: normal;
   background: transparent;
 }
-
-/* ===== 规格弹窗 ===== */
-.sku-selected-preview { display: flex; align-items: center; gap: 14px;
-  background: var(--bg-hover); padding: 14px; border-radius: var(--radius-md); margin-bottom: 18px; }
-.sku-preview-img { width: 72px; height: 72px; object-fit: cover; border-radius: var(--radius-sm); }
-.sku-preview-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
-.sku-preview-spec { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
-.sku-preview-stock { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
-.sku-options { display: flex; flex-wrap: wrap; gap: 10px; }
-.sku-option { min-width: 100px; padding: 10px 14px; border: 1px solid var(--border-base);
-  border-radius: 8px; background: var(--bg-card); cursor: pointer; transition: all 0.2s; position: relative; }
-.sku-option:hover:not(.disabled) { border-color: var(--brand-primary); }
-.sku-option.active { border-color: var(--brand-primary); background: var(--brand-primary-soft); }
-.sku-option.disabled { opacity: 0.5; cursor: not-allowed; }
-.sku-option-name { font-size: 13px; color: var(--text-primary); }
-.sku-option-price { font-size: 13px; color: var(--brand-primary); font-weight: 600; margin-top: 4px; }
-.sku-option-soldout { position: absolute; top: 2px; right: 4px; font-size: 10px; color: var(--status-danger); }
 
 /* ===== 移动端适配 ===== */
 @media (max-width: 768px) {

@@ -50,23 +50,31 @@ a {
   color: inherit;
 }
 
-/* 全站背景图（用户端页面） */
+/* 全站背景（用户端页面）。
+ * 背景图放到 ::before / ::after 这两个独立的 position:fixed 图层上，
+ * 而非挂在 .page-bg 自身并用 background-attachment: fixed。
+ * 这样背景是稳定、独立的合成层：弹窗遮罩层开合时浏览器不会重绘该层，
+ * 从根本上避免关闭弹窗瞬间整页闪烁，且视觉上仍是固定背景。 */
 .page-bg {
   min-height: 100vh;
   background-color: var(--bg-base);
-  background-image: url('/images/background-light.webp');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   position: relative;
 }
-.page-bg::before {
+.page-bg::before,
+.page-bg::after {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+}
+.page-bg::before {
+  background-image: url('/images/background-light.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.page-bg::after {
   background: var(--bg-base);
   opacity: 0.55;
 }

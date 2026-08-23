@@ -43,7 +43,7 @@
                 v-if="item.isHistory"
                 class="history-del"
                 title="删除"
-                @click.stop="removeHistory(item)"
+                @click.stop="removeHistory(item.value)"
               ><Close /></span>
             </div>
           </template>
@@ -93,7 +93,7 @@
 <script setup>
 import { computed, getCurrentInstance, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import {
   House,
   Ticket,
@@ -108,6 +108,7 @@ import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
 import { getUnreadCount, suggestSpu } from '@/api/mall'
 import { useUnreadBadge } from '@/composables/useUnreadBadge'
+import { useSearchHistory } from '@/composables/useSearchHistory'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const props = defineProps({
@@ -223,64 +224,8 @@ const userStore = useUserStore()
 const { count: unreadCount } = useUnreadBadge()
 const searchKeyword = ref('')
 
-// ===== 搜索历史 =====
-const HISTORY_MAX = 20
-
-/**
- * 获取当前用户的搜索历史 localStorage 键名
- * @returns {string} 包含用户 ID 的存储键名
- */
-function historyKey() {
-  const uid = userStore.userId
-  return uid ? `stellar_search_history_${uid}` : 'stellar_search_history'
-}
-
-/**
- * 从 localStorage 加载搜索历史记录
- * @returns {string[]} 搜索关键词数组
- */
-function loadHistory() {
-  return JSON.parse(localStorage.getItem(historyKey()) || '[]')
-}
-
-const searchHistory = ref(loadHistory())
-
-/**
- * 将搜索关键词添加到搜索历史
- * 去重后插入到数组头部，超出最大数量时截断
- * @param {string} kw - 搜索关键词
- */
-function addToHistory(kw) {
-  const arr = searchHistory.value.filter(h => h !== kw)
-  arr.unshift(kw)
-  if (arr.length > HISTORY_MAX) arr.length = HISTORY_MAX
-  searchHistory.value = arr
-  localStorage.setItem(historyKey(), JSON.stringify(arr))
-}
-
-/**
- * 删除单条搜索历史记录
- * 弹出确认框后执行删除操作
- * @param {Object} item - 搜索历史项，包含 value 属性
- */
-async function removeHistory(item) {
-  try {
-    await ElMessageBox.confirm('确定要删除这条搜索记录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    })
-  } catch {
-    return
-  }
-  searchHistory.value = searchHistory.value.filter(h => h !== item.value)
-  localStorage.setItem(historyKey(), JSON.stringify(searchHistory.value))
-}
-
-// 登录状态变化时重新加载对应用户的搜索历史
-watch(() => userStore.userId, () => {
-  searchHistory.value = loadHistory()
-})
+// ===== 搜索历史（与商城搜索页共享同一份历史数据，按用户隔离） =====
+const { searchHistory, addToHistory, removeHistory } = useSearchHistory()
 
 /**
  * 搜索建议查询回调函数，供 el-autocomplete 使用
