@@ -30,7 +30,7 @@ describe('mall.js API', () => {
       const res = await getCaptcha()
 
       expect(userRequest).toHaveBeenCalledTimes(1)
-      const config = userRequest.mock.calls[0][0]
+      const config = userRequest.mock.calls[0]![0]!
       expect(config.url).toBe('/captcha/image')
       expect(config.method).toBe('get')
       expect(res.captchaId).toBe('cap-123')

@@ -95,7 +95,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getAfterSale, cancelAfterSale, submitReturnTracking } from '@/api/mall'
@@ -107,14 +107,14 @@ const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
-const afterSale = ref(null)
+const afterSale = ref<any>(null)
 
 // 退货物流
 const returnVisible = ref(false)
 const returnTracking = ref('')
 const returnSubmitting = ref(false)
 
-const STATUS_TAG_MAP = {
+const STATUS_TAG_MAP: Record<string, any> = {
   [AFTER_SALE_STATUS.APPLIED]: 'warning',
   [AFTER_SALE_STATUS.AUDITING]: 'warning',
   [AFTER_SALE_STATUS.RETURNING]: 'primary',
@@ -123,7 +123,7 @@ const STATUS_TAG_MAP = {
   [AFTER_SALE_STATUS.REJECTED]: 'info',
   [AFTER_SALE_STATUS.CANCELLED]: 'info'
 }
-function statusTag(s) { return STATUS_TAG_MAP[s] || 'info' }
+function statusTag(s: any) { return STATUS_TAG_MAP[s] || 'info' }
 
 /**
  * 根据售后状态返回对应的提示文案
@@ -152,7 +152,7 @@ async function load() {
   try {
     const data = await getAfterSale(Number(id))
     afterSale.value = data || null
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载失败')
   } finally {
     loading.value = false
@@ -168,7 +168,7 @@ async function onCancel() {
     await cancelAfterSale(afterSale.value.id)
     ElMessage.success('已取消')
     load()
-  } catch (e) { /* user cancelled */ }
+  } catch (e: any) { /* user cancelled */ }
 }
 
 /**
@@ -193,7 +193,7 @@ async function submitReturn() {
     ElMessage.success('退货物流已提交')
     returnVisible.value = false
     load()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '提交失败')
   } finally {
     returnSubmitting.value = false

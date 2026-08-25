@@ -209,7 +209,7 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { Search, Upload, Refresh, Document, UploadFilled, Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -221,21 +221,21 @@ import {
 const kw = ref('')
 const statusFilter = ref('')
 const page = ref(1); const pageSize = ref(10); const total = ref(0)
-const items = ref([]); const loading = ref(false)
-const stats = reactive({})
-const countReady = computed(() => items.value.filter(i => i.status === 'ready').length)
-const countError = computed(() => items.value.filter(i => i.status === 'error').length)
+const items = ref<any[]>([]); const loading = ref(false)
+const stats = reactive<any>({})
+const countReady = computed(() => items.value.filter((i: any) => i.status === 'ready').length)
+const countError = computed(() => items.value.filter((i: any) => i.status === 'error').length)
 
 onMounted(() => { reload(); loadStats() })
 
 async function reload() {
   loading.value = true
   try {
-    const params = { page: page.value, page_size: pageSize.value, keyword: kw.value }
+    const params: Record<string, any> = { page: page.value, page_size: pageSize.value, keyword: kw.value }
     if (statusFilter.value) params.status = statusFilter.value
     const r = await apiKbList(params)
-    items.value = r.data.items
-    total.value = r.data.total
+    items.value = r.data.items as any[]
+    total.value = r.data.total as number
   } finally { loading.value = false }
 }
 async function loadStats() {
@@ -243,24 +243,24 @@ async function loadStats() {
   Object.assign(stats, r.data || {})
 }
 
-function humanSize(n) {
+function humanSize(n: any) {
   if (!n) return '0B'
   const u = ['B','KB','MB','GB']; let i=0; n = Number(n)
   while (n >= 1024 && i < u.length-1) { n/=1024; i++ }
   return n.toFixed(i>0?1:0) + u[i]
 }
-function fmt(v) { return v ? new Date(v).toLocaleString('zh-CN', {hour12:false}) : '' }
-function statusText(s) {
-  return {uploading:'上传中', parsing:'解析中', indexing:'向量化中', ready:'就绪', error:'失败'}[s] || s
+function fmt(v: any) { return v ? new Date(v).toLocaleString('zh-CN', {hour12:false}) : '' }
+function statusText(s: any) {
+  return ({uploading:'上传中', parsing:'解析中', indexing:'向量化中', ready:'就绪', error:'失败'} as Record<string, string>)[s] || s
 }
-function tagType(s) {
-  return {ready:'success', error:'danger', parsing:'warning', indexing:'primary', uploading:'info'}[s] || 'info'
+function tagType(s: any) {
+  return ({ready:'success', error:'danger', parsing:'warning', indexing:'primary', uploading:'info'} as Record<string, string>)[s] || 'info'
 }
 
 const dlg = ref(false); const uploading = ref(false); const uploadPct = ref(0)
-const upFile = ref(null); const tags = ref('')
+const upFile = ref<any>(null); const tags = ref('')
 const chunkSize = ref(512); const chunkOverlap = ref(64)
-const previewing = ref(false); const previewResult = ref(null)
+const previewing = ref(false); const previewResult = ref<any>(null)
 
 function openUploadDlg() {
   dlg.value = true
@@ -275,7 +275,7 @@ function closeUploadDlg() {
   }
   dlg.value = false
 }
-function onUploadFileChange(f) {
+function onUploadFileChange(f: any) {
   upFile.value = f?.raw || null
   previewResult.value = null
 }
@@ -285,13 +285,13 @@ async function doPreview() {
   try {
     const fd = new FormData()
     fd.append('file', upFile.value)
-    fd.append('chunk_size', chunkSize.value)
-    fd.append('chunk_overlap', chunkOverlap.value)
-    fd.append('limit', 50)
+    fd.append('chunk_size', chunkSize.value as any)
+    fd.append('chunk_overlap', chunkOverlap.value as any)
+    fd.append('limit', 50 as any)
     const r = await apiKbPreview(fd)
     previewResult.value = r.data
     ElMessage.success(`切分预览完成，共 ${r.data.total_chunks} 个 Chunk`)
-  } catch (e) {
+  } catch (e: any) {
   } finally { previewing.value = false }
 }
 async function doUpload() {
@@ -302,7 +302,7 @@ async function doUpload() {
     const fd = new FormData()
     fd.append('file', upFile.value)
     fd.append('tags', tags.value)
-    const r = await apiKbUpload(fd, (p) => {
+    const r = await apiKbUpload(fd, (p: any) => {
       uploadPct.value = p
     })
     const doc = r.data
@@ -320,15 +320,15 @@ async function doUpload() {
       closeUploadDlg()
     }
     reload(); loadStats()
-  } catch (e) {
+  } catch (e: any) {
   } finally {
     uploading.value = false
   }
 }
 
 const editDlg = ref(false)
-const editRow = reactive({ id: null, filename: '', tags: '' })
-function editTags(row) {
+const editRow = reactive<any>({ id: null, filename: '', tags: '' })
+function editTags(row: any) {
   editRow.id = row.id; editRow.filename = row.filename; editRow.tags = row.tags || ''
   editDlg.value = true
 }
@@ -337,13 +337,13 @@ async function doEdit() {
   ElMessage.success('已保存')
   editDlg.value = false; reload()
 }
-async function del(row) {
+async function del(row: any) {
   await apiKbDelete(row.id)
   ElMessage.success('已删除')
   reload(); loadStats()
 }
 
-async function reindexOne(row) {
+async function reindexOne(row: any) {
   try {
     await ElMessageBox.confirm(
       `确定要"${row.status === 'error' ? '重新索引' : '重建索引'}"文档「${row.filename}」吗？\n旧的向量会被清除。`,
@@ -363,12 +363,12 @@ async function reindexOne(row) {
       ElMessageBox.alert(`索引失败：\n${err}`, '错误', { type: 'error' })
     }
     reload(); loadStats()
-  } catch (e) {
+  } catch (e: any) {
     loadingMask.close()
   }
 }
 
-async function downloadFile(row) {
+async function downloadFile(row: any) {
   try {
     const res = await apiKbDownload(row.id)
     const blob = res instanceof Blob ? res : new Blob([res])
@@ -379,7 +379,7 @@ async function downloadFile(row) {
     a.click()
     document.body.removeChild(a)
     setTimeout(() => URL.revokeObjectURL(a.href), 1000)
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e.message || '下载失败')
   }
 }
@@ -388,9 +388,9 @@ const chunksDlg = ref(false)
 const chunksDlgTitle = ref('')
 const chunksFilename = ref('')
 const chunksTotal = ref(0)
-const chunksList = ref([])
+const chunksList = ref<any[]>([])
 const chunksLoading = ref(false)
-async function viewChunks(row) {
+async function viewChunks(row: any) {
   chunksDlgTitle.value = `文档 Chunk 预览 —— ${row.filename}`
   chunksFilename.value = row.filename
   chunksList.value = []
@@ -401,7 +401,7 @@ async function viewChunks(row) {
     const r = await apiKbChunks(row.id, 200)
     chunksTotal.value = r.data.total
     chunksList.value = r.data.chunks || []
-  } catch (e) {
+  } catch (e: any) {
   } finally { chunksLoading.value = false }
 }
 </script>

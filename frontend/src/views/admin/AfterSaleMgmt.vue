@@ -126,37 +126,37 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { pageAfterSale, auditAfterSale, confirmRefund } from '@/api/admin'
 import { AFTER_SALE_STATUS, AFTER_SALE_STATUS_TEXT, AFTER_SALE_TYPE_TEXT } from '@/constants/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
-const tableData = ref([])
+const tableData = ref<any[]>([])
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
-const searchForm = ref({ status: null, type: null })
+const searchForm = ref<any>({ status: null, type: null })
 
 // 审核
 const auditVisible = ref(false)
-const auditRow = ref(null)
+const auditRow = ref<any>(null)
 const auditAction = ref('approve')
 const auditRemark = ref('')
 const auditSubmitting = ref(false)
 
 // 详情
 const detailVisible = ref(false)
-const detailRow = ref(null)
+const detailRow = ref<any>(null)
 
 // 退款确认
 const confirmRefundVisible = ref(false)
-const confirmRefundRow = ref(null)
+const confirmRefundRow = ref<any>(null)
 const confirmRefundSubmitting = ref(false)
 
-const STATUS_TAG_MAP = {
+const STATUS_TAG_MAP: Record<string, any> = {
   [AFTER_SALE_STATUS.APPLIED]: 'warning',
   [AFTER_SALE_STATUS.AUDITING]: '',
   [AFTER_SALE_STATUS.RETURNING]: 'primary',
@@ -165,7 +165,7 @@ const STATUS_TAG_MAP = {
   [AFTER_SALE_STATUS.REJECTED]: 'info',
   [AFTER_SALE_STATUS.CANCELLED]: 'info'
 }
-function statusTag(s) { return STATUS_TAG_MAP[s] || 'info' }
+function statusTag(s: any) { return STATUS_TAG_MAP[s] || 'info' }
 
 async function loadData() {
   loading.value = true
@@ -176,10 +176,10 @@ async function loadData() {
       status: searchForm.value.status || undefined,
       type: searchForm.value.type || undefined
     })
-    const d = res || {}
+    const d: any = res || {}
     tableData.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载失败')
   } finally {
     loading.value = false
@@ -197,19 +197,19 @@ function reset() {
   loadData()
 }
 
-function viewDetail(row) {
+function viewDetail(row: any) {
   detailRow.value = row
   detailVisible.value = true
 }
 
-function approve(row) {
+function approve(row: any) {
   auditRow.value = row
   auditAction.value = 'approve'
   auditRemark.value = ''
   auditVisible.value = true
 }
 
-function reject(row) {
+function reject(row: any) {
   auditRow.value = row
   auditAction.value = 'reject'
   auditRemark.value = ''
@@ -231,14 +231,14 @@ async function doAudit() {
     ElMessage.success(auditAction.value === 'approve' ? '审核通过' : '已拒绝')
     auditVisible.value = false
     loadData()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '操作失败')
   } finally {
     auditSubmitting.value = false
   }
 }
 
-function confirmRefundBtn(row) {
+function confirmRefundBtn(row: any) {
   confirmRefundRow.value = row
   confirmRefundVisible.value = true
 }
@@ -250,7 +250,7 @@ async function doConfirmRefund() {
     ElMessage.success('退款已完成，库存已回滚')
     confirmRefundVisible.value = false
     loadData()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '退款失败')
   } finally {
     confirmRefundSubmitting.value = false

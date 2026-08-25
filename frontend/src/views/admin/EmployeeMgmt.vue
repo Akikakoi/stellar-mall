@@ -26,7 +26,7 @@
         <el-table-column prop="idNumber" label="身份证号" width="180" show-overflow-tooltip />
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
-            <el-switch :model-value="row.status === 1" @change="(v) => toggleStatus(row, v)" />
+            <el-switch :model-value="row.status === 1" @change="(v: any) => toggleStatus(row, v)" />
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" />
@@ -88,25 +88,25 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { pageEmployee, saveEmployee, updateEmployee, setEmployeeStatus } from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
 const submitting = ref(false)
-const records = ref([])
+const records = ref<any[]>([])
 const total = ref(0)
 
-const query = reactive({ page: 1, pageSize: 10, keyword: '', status: null })
+const query = reactive<any>({ page: 1, pageSize: 10, keyword: '', status: null })
 
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
-const formRef = ref(null)
-const form = reactive({
+const formRef = ref<any>(null)
+const form = reactive<any>({
   id: null, username: '', password: '', name: '', phone: '', idNumber: '', sex: 0, status: 1
 })
-const formRules = {
+const formRules: Record<string, any> = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '密码至少6位', trigger: 'blur' }],
   name: [{ required: true, message: '请输入姓名', trigger: 'blur' }]
@@ -116,13 +116,13 @@ async function loadPage() {
   loading.value = true
   try {
     const res = await pageEmployee({ ...query })
-    const d = res || {}
+    const d: any = res || {}
     records.value = d.records || d.list || []
     total.value = d.total || 0
   } finally { loading.value = false }
 }
 
-function openDialog(mode, row) {
+function openDialog(mode: any, row?: any) {
   dialogMode.value = mode
   if (mode === 'create') {
     Object.assign(form, { id: null, username: '', password: '', name: '', phone: '', idNumber: '', sex: 0, status: 1 })
@@ -143,7 +143,7 @@ function openDialog(mode, row) {
 
 async function submitForm() {
   if (!formRef.value) return
-  try { await formRef.value.validate() } catch (e) { return }
+  try { await formRef.value.validate() } catch (e: any) { return }
   submitting.value = true
   try {
     if (dialogMode.value === 'create') await saveEmployee({ ...form })
@@ -151,19 +151,19 @@ async function submitForm() {
     ElMessage.success(dialogMode.value === 'create' ? '新增成功' : '更新成功')
     dialogVisible.value = false
     loadPage()
-  } catch (e) {
+  } catch (e: any) {
     console.error('submitForm failed:', e)
   } finally { submitting.value = false }
 }
 
-async function toggleStatus(row, val) {
+async function toggleStatus(row: any, val: any) {
   try {
     await setEmployeeStatus(row.id, val ? 1 : 0)
     ElMessage.success(val ? '已启用' : '已禁用')
-  } catch (e) { loadPage() }
+  } catch (e: any) { loadPage() }
 }
 
-async function handleDelete(row) {
+async function handleDelete(row: any) {
   ElMessage.info('演示环境：删除接口暂未开放（员工数据建议禁用而非删除）')
 }
 
@@ -181,7 +181,7 @@ async function handleExportUsers() {
     a.href = url; a.download = '用户数据导出.xlsx'; a.click()
     URL.revokeObjectURL(url)
     ElMessage.success('导出成功')
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('导出失败')
   } finally {
     exporting.value = false

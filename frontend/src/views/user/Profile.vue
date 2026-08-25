@@ -103,7 +103,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
@@ -118,13 +118,13 @@ const loading = ref(false)
 const deactivating = ref(false)
 const activeTab = ref('info')
 
-const form = reactive({
+const form = reactive<any>({
   nickname: userStore.nickname || '',
   phone: userStore.phone || '',
   email: ''
 })
 
-const pwdForm = reactive({
+const pwdForm = reactive<any>({
   oldPwd: '',
   newPwd: '',
   confirmPwd: ''
@@ -151,7 +151,7 @@ async function handleUpdate() {
     await updateUserProfile({ ...form })
     userStore.setUserInfo({ nickname: form.nickname, phone: form.phone })
     ElMessage.success('保存成功')
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /** 校验并提交修改密码请求 */
@@ -165,7 +165,7 @@ async function handleChangePwd() {
     pwdForm.oldPwd = ''
     pwdForm.newPwd = ''
     pwdForm.confirmPwd = ''
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /** 注销账号：二次确认后调用后端接口，成功后退出登录并跳转登录页 */
@@ -181,7 +181,7 @@ async function handleDeactivate() {
         confirmButtonClass: 'el-button--danger'
       }
     )
-  } catch (e) {
+  } catch (e: any) {
     return // 用户取消
   }
   deactivating.value = true
@@ -190,7 +190,7 @@ async function handleDeactivate() {
     userStore.logout()
     ElMessage.success('账号已注销')
     router.push('/login')
-  } catch (e) {
+  } catch (e: any) {
     // error shown
   } finally {
     deactivating.value = false

@@ -47,7 +47,14 @@ vi.mock('@/stores/admin', () => ({
 }))
 
 // ── mock axios: 收集每个 createInstance 的拦截器 ──
-const instances = [] // { type, reqInterceptors, resInterceptors, resErrorInterceptors }
+interface MockAxiosRecord {
+  type: string
+  inst: any
+  reqFns: any[]
+  resFns: any[]
+  resErrFns: any[]
+}
+const instances: MockAxiosRecord[] = []
 
 vi.mock('axios', () => {
   // 每次 create 返回新实例，实例拦截器可以被触发
@@ -58,9 +65,9 @@ vi.mock('axios', () => {
     default: {
       create: vi.fn(() => {
         const type = types[createCount++] || 'unknown'
-        const reqFns = []
-        const resFns = []
-        const resErrFns = []
+        const reqFns: any[] = []
+        const resFns: any[] = []
+        const resErrFns: any[] = []
 
         const inst = {
           __type: type,
@@ -98,7 +105,7 @@ vi.mock('axios', () => {
 import { ElMessage } from 'element-plus'
 
 // 动态导入触发 createInstance
-let userReq, adminReq, ragReq, getAccessToken
+let userReq: any, adminReq: any, ragReq: any, getAccessToken: any
 
 beforeAll(async () => {
   const mod = await import('@/api/request')
@@ -108,8 +115,8 @@ beforeAll(async () => {
   getAccessToken = mod.getAccessToken
 })
 
-function getInstance(type) {
-  return instances.find(i => i.type === type)
+function getInstance(type: string): MockAxiosRecord {
+  return instances.find(i => i.type === type)!
 }
 
 // ═══════════════════════════════════════════════════
@@ -200,7 +207,7 @@ describe('request interceptor', () => {
     if (!errorFn) return // user instance 没注册 onRejected
 
     const error = new Error('test error')
-    return errorFn(error).catch(e => {
+    return errorFn(error).catch((e: any) => {
       expect(e.message).toBe('test error')
     })
   })
@@ -238,7 +245,7 @@ describe('response interceptor - user/admin code-based', () => {
 
     return fn({
       data: { code: 401, msg: 'token expired' }
-    }).catch(err => {
+    }).catch((err: any) => {
       expect(mockUserLogout).toHaveBeenCalled()
       expect(mockPush).toHaveBeenCalledWith('/login')
       expect(ElMessage.error).toHaveBeenCalled()
@@ -252,7 +259,7 @@ describe('response interceptor - user/admin code-based', () => {
 
     return fn({
       data: { code: 401, msg: 'admin token expired' }
-    }).catch(err => {
+    }).catch((err: any) => {
       expect(mockAdminLogout).toHaveBeenCalled()
       expect(mockPush).toHaveBeenCalledWith('/admin/login')
     })

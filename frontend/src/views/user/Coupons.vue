@@ -85,32 +85,32 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { userRequest } from '@/api/request'
 
 const tab = ref('my')
 const loading = ref(false)
-const availableCoupons = ref([])
-const myCoupons = ref([])
+const availableCoupons = ref<any[]>([])
+const myCoupons = ref<any[]>([])
 
 /**
  * 判断优惠券是否已过期（后端不主动清算 status=3，前端按有效期实时判断）
  * @param {Object} c - 用户优惠券对象（含 endTime）
  * @returns {boolean} 已过期返回 true
  */
-function isExpired(c) {
+function isExpired(c: any) {
   return c.status === 3 || (!!c.endTime && new Date(c.endTime) < new Date())
 }
 
 /** 我的优惠券（未过期：可使用 + 已使用） */
-const activeCoupons = computed(() => myCoupons.value.filter(c => !isExpired(c)))
+const activeCoupons = computed(() => myCoupons.value.filter((c: any) => !isExpired(c)))
 
 /** 已过期的优惠券，按过期时间倒序（最近过期的在前） */
 const expiredCoupons = computed(() =>
-  myCoupons.value.filter(c => isExpired(c))
-    .sort((a, b) => new Date(b.endTime || 0) - new Date(a.endTime || 0))
+  myCoupons.value.filter((c: any) => isExpired(c))
+    .sort((a: any, b: any) => (new Date(b.endTime || 0) as any) - (new Date(a.endTime || 0) as any))
 )
 
 /**
@@ -119,9 +119,9 @@ const expiredCoupons = computed(() =>
 async function loadAvailable() {
   loading.value = true
   try {
-    const res = await userRequest({ url: '/user/coupon/available', method: 'get' })
-    availableCoupons.value = Array.isArray(res) ? res : (res?.data || [])
-  } catch (e) {} finally { loading.value = false }
+    const res: any = await userRequest({ url: '/user/coupon/available', method: 'get' })
+    availableCoupons.value = Array.isArray(res) ? res : ((res as any)?.data || [])
+  } catch (e: any) {} finally { loading.value = false }
 }
 
 /**
@@ -130,23 +130,23 @@ async function loadAvailable() {
 async function loadMy() {
   loading.value = true
   try {
-    const res = await userRequest({ url: '/user/coupon/my', method: 'get' })
-    myCoupons.value = Array.isArray(res) ? res : (res?.data || [])
-  } catch (e) {} finally { loading.value = false }
+    const res: any = await userRequest({ url: '/user/coupon/my', method: 'get' })
+    myCoupons.value = Array.isArray(res) ? res : ((res as any)?.data || [])
+  } catch (e: any) {} finally { loading.value = false }
 }
 
 /**
  * 领取优惠券，领取成功后刷新可领取列表和我的优惠券列表
  * @param {Object} coupon - 要领取的优惠券对象
  */
-async function handleClaim(coupon) {
+async function handleClaim(coupon: any) {
   coupon.claiming = true
   try {
     await userRequest({ url: `/user/coupon/claim/${coupon.id}`, method: 'post' })
     ElMessage.success('领取成功')
     await loadAvailable()
     await loadMy()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '领取失败')
   } finally {
     coupon.claiming = false

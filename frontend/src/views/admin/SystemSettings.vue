@@ -32,13 +32,13 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { apiAdminSettingsGet, apiAdminSettingsUpdate } from '@/api/rag'
 import { useSiteTitle } from '@/composables/useSiteTitle'
 
-const form = reactive({})
+const form = reactive<any>({})
 const saving = ref(false)
 const { siteTitle, setSiteTitle } = useSiteTitle()
 const localSiteTitle = ref(siteTitle.value)
@@ -46,8 +46,8 @@ const localSiteTitle = ref(siteTitle.value)
 onMounted(() => reload())
 
 async function reload() {
-  const r = await apiAdminSettingsGet()
-  Object.keys(r.data || {}).forEach(k => { form[k] = r.data[k] })
+  const r: any = await apiAdminSettingsGet()
+  Object.keys(r.data || {}).forEach((k: any) => { form[k] = r.data[k] })
 }
 async function onSave() {
   saving.value = true

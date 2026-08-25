@@ -63,39 +63,39 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminRequest } from '@/api/request'
 
 const loading = ref(false)
 const submitting = ref(false)
-const spuIdFilter = ref(null)
+const spuIdFilter = ref<any>(null)
 const spuNameFilter = ref('')
-const statusFilter = ref(null)
-const list = ref([])
+const statusFilter = ref<any>(null)
+const list = ref<any[]>([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(10)
 const replyDialogVisible = ref(false)
-const replyTarget = reactive({})
+const replyTarget = reactive<any>({})
 const replyText = ref('')
 
 async function load() {
   loading.value = true
   try {
-    const params = { page: pageNum.value, pageSize: pageSize.value }
+    const params: Record<string, any> = { page: pageNum.value, pageSize: pageSize.value }
     if (spuIdFilter.value) params.spuId = spuIdFilter.value
     if (spuNameFilter.value) params.spuName = spuNameFilter.value
     if (statusFilter.value !== null && statusFilter.value !== undefined) params.status = statusFilter.value
-    const res = await adminRequest({ url: '/admin/review/page', method: 'get', params })
+    const res: any = await adminRequest({ url: '/admin/review/page', method: 'get', params })
     const d = res?.data || res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {} finally { loading.value = false }
+  } catch (e: any) {} finally { loading.value = false }
 }
 
-function openReply(row) {
+function openReply(row: any) {
   Object.assign(replyTarget, row)
   replyText.value = row.reply || ''
   replyDialogVisible.value = true
@@ -108,16 +108,16 @@ async function handleReply() {
     ElMessage.success('已回复')
     replyDialogVisible.value = false
     await load()
-  } catch (e) { ElMessage.error('回复失败') } finally { submitting.value = false }
+  } catch (e: any) { ElMessage.error('回复失败') } finally { submitting.value = false }
 }
 
-async function toggleStatus(id, status) {
+async function toggleStatus(id: any, status: any) {
   try {
     const url = status === 0 ? `/admin/review/${id}/hide` : `/admin/review/${id}/show`
     await adminRequest({ url, method: 'post' })
     ElMessage.success('状态已更新')
     await load()
-  } catch (e) { ElMessage.error('操作失败') }
+  } catch (e: any) { ElMessage.error('操作失败') }
 }
 
 onMounted(load)

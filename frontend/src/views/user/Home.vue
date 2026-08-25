@@ -153,7 +153,7 @@
                 </div>
               </div>
             </section>
-            <el-empty v-if="!sectionsLoading && sections.every(s => s.products.length === 0)" description="暂无商品" />
+            <el-empty v-if="!sectionsLoading && sections.every((s: any) => s.products.length === 0)" description="暂无商品" />
           </main>
         </template>
       </template>
@@ -196,7 +196,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
@@ -212,17 +212,19 @@ const router = useRouter()
 const userStore = useUserStore()
 const cartStore = useCartStore()
 
-const contentRef = ref(null)
+const contentRef = ref<any>(null)
 const loading = ref(false)
 const loadingMore = ref(false)
 const filterMode = ref(false)
 const isFiltering = computed(() => false)
+/** 筛选模式无限滚动回调(当前 filterMode 恒为 false,保留占位实现供模板引用) */
+const loadMore = () => {}
 
 // Hero
 const subtitleText = ref('')
 const showCursor = ref(true)
 const fullSubtitle = '精选好物，品质生活'
-let typewriterTimer = null
+let typewriterTimer: any = null
 
 /**
  * 启动 Hero 区域打字机动画效果，逐字显示副标题文本
@@ -241,17 +243,17 @@ function startTypewriter() {
 function scrollToContent() { contentRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
 
 // ========== 动态模块 ==========
-const modules = ref([])
+const modules = ref<any[]>([])
 const modulesLoaded = ref(false)
-const banners = ref([])
-const flatCategories = ref([])
+const banners = ref<any[]>([])
+const flatCategories = ref<any[]>([])
 const favSet = reactive(new Set())
 
-function getCfg(mod) {
+function getCfg(mod: any) {
   try { return JSON.parse(mod.config || '{}') } catch { return {} }
 }
 
-function getCatName(mod) {
+function getCatName(mod: any) {
   const cfg = getCfg(mod)
   return cfg.categoryName || ''
 }
@@ -263,20 +265,20 @@ function getCatName(mod) {
  * @param {Object} cfg - 模块配置对象
  * @returns {Object|null} 分类信息节点或 null
  */
-function resolveCategoryInfo(cfg) {
+function resolveCategoryInfo(cfg: any) {
   // 支持 categoryIds 数组配置（多分类聚合展示）
   if (cfg.categoryIds && cfg.categoryIds.length > 0) {
     const firstId = cfg.categoryIds[0]
-    const node = flatCategories.value.find(c => c.id === firstId)
+    const node = flatCategories.value.find((c: any) => c.id === firstId)
     if (node) return { id: node.id, level: node.level, categoryIds: cfg.categoryIds }
     return { id: firstId, level: 1, categoryIds: cfg.categoryIds }
   }
   if (cfg.categoryId) {
-    const node = flatCategories.value.find(c => c.id === cfg.categoryId)
+    const node = flatCategories.value.find((c: any) => c.id === cfg.categoryId)
     if (node) return { id: node.id, level: node.level }
   }
   if (!cfg.categoryName || !flatCategories.value.length) return null
-  const node = flatCategories.value.find(c => c.name === cfg.categoryName)
+  const node = flatCategories.value.find((c: any) => c.name === cfg.categoryName)
   if (!node) return null
   return { id: node.id, level: node.level }
 }
@@ -286,12 +288,12 @@ function resolveCategoryInfo(cfg) {
  * @param {Object} mod - 模块对象
  * @returns {Array} 子分类列表
  */
-function getSubCats(mod) {
+function getSubCats(mod: any) {
   const cfg = getCfg(mod)
   // 支持 categoryIds 数组配置（多分类聚合展示）
   if (cfg.categoryIds && cfg.categoryIds.length > 0) {
     return cfg.categoryIds
-      .map(id => flatCategories.value.find(c => c.id === id) || null)
+      .map((id: any) => flatCategories.value.find((c: any) => c.id === id) || null)
       .filter(Boolean)
   }
   return []
@@ -302,11 +304,11 @@ function getSubCats(mod) {
  */
 async function loadModules() {
   try {
-    const res = await userRequest({ url: '/user/home-module/list', method: 'get', __silent: true })
+    const res: any = await userRequest({ url: '/user/home-module/list', method: 'get', __silent: true })
     const list = Array.isArray(res) ? res : (res?.data || [])
     // 为每个模块附加运行时状态
-    modules.value = list.map(m => {
-      let cfg = {}
+    modules.value = list.map((m: any) => {
+      let cfg: Record<string, any> = {}
       try { cfg = JSON.parse(m.config || '{}') } catch {}
       // categoryIds 模式默认选中第一个分类
       const defaultSub = (cfg.categoryIds && cfg.categoryIds.length > 0) ? cfg.categoryIds[0] : null
@@ -319,7 +321,7 @@ async function loadModules() {
         _activeSubLabel: ''
       }
     })
-  } catch (e) {
+  } catch (e: any) {
     modules.value = []
   } finally {
     modulesLoaded.value = true
@@ -330,7 +332,7 @@ async function loadModules() {
  * 根据模块类型加载对应的商品数据，支持 CATEGORY_SHOWCASE、HOT_PRODUCTS、NEW_PRODUCTS 和 PRODUCT_GRID
  * @param {Object} mod - 模块对象
  */
-async function loadModuleProducts(mod) {
+async function loadModuleProducts(mod: any) {
   mod._loading = true
   const cfg = getCfg(mod)
   /** 将 bannerSpuId 指定的商品置顶 */
@@ -339,7 +341,7 @@ async function loadModuleProducts(mod) {
     try {
       const banner = await getSpu(cfg.bannerSpuId)
       if (banner) {
-        mod._products = mod._products.filter(p => p.id !== cfg.bannerSpuId)
+        mod._products = mod._products.filter((p: any) => p.id !== cfg.bannerSpuId)
         mod._products.unshift(banner)
         mod._total = Math.max(mod._total, mod._products.length)
       }
@@ -349,17 +351,17 @@ async function loadModuleProducts(mod) {
     if (mod.type === 'CATEGORY_SHOWCASE') {
       const catNode = resolveCategoryInfo(cfg)
       if (!catNode) { mod._products = []; mod._total = 0; mod._loading = false; return }
-      const params = { page: 1, pageSize: cfg.displayCount || 8 }
+      const params: Record<string, any> = { page: 1, pageSize: cfg.displayCount || 8 }
       if (catNode.categoryIds) {
         // 多分类聚合模式（categoryIds）：按选中的子分类或并发加载全部分类
         if (mod._activeSub) {
           params.categoryId = mod._activeSub
         } else {
           const results = await Promise.allSettled(
-            catNode.categoryIds.map(id => listSpu({ ...params, categoryId: id }))
+            catNode.categoryIds.map((id: any) => listSpu({ ...params, categoryId: id }))
           )
-          const allProducts = []
-          results.forEach(r => {
+          const allProducts: any[] = []
+          results.forEach((r: any) => {
             if (r.status === 'fulfilled' && r.value) {
               const products = r.value?.records || r.value?.list || (Array.isArray(r.value) ? r.value : [])
               allProducts.push(...products)
@@ -377,26 +379,26 @@ async function loadModuleProducts(mod) {
         params.categoryId = catNode.id
       }
       const res = await listSpu(params)
-      mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+      mod._products = res?.records || (res as any)?.list || (Array.isArray(res) ? res : [])
       mod._total = res?.total || mod._products.length
       await applyBanner()
     } else if (mod.type === 'HOT_PRODUCTS') {
       const res = await listSpu({ page: 1, pageSize: cfg.displayCount || 10, sortBy: 'saleCount', sortOrder: 'desc' })
-      mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+      mod._products = res?.records || (res as any)?.list || (Array.isArray(res) ? res : [])
       mod._total = res?.total || mod._products.length
     } else if (mod.type === 'NEW_PRODUCTS') {
       const res = await listSpu({ page: 1, pageSize: cfg.displayCount || 10, sortBy: 'createTime', sortOrder: 'desc' })
-      mod._products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+      mod._products = res?.records || (res as any)?.list || (Array.isArray(res) ? res : [])
       mod._total = res?.total || mod._products.length
     } else if (mod.type === 'PRODUCT_GRID' && cfg.spuIds?.length) {
-      const results = await Promise.allSettled(cfg.spuIds.map(id => getSpu(id)))
+      const results = await Promise.allSettled(cfg.spuIds.map((id: any) => getSpu(id)))
       mod._products = results
-        .filter(r => r.status === 'fulfilled' && r.value)
-        .map(r => r.value)
+        .filter((r: any) => r.status === 'fulfilled' && r.value)
+        .map((r: any) => r.value)
         .filter(Boolean)
       mod._total = mod._products.length
     }
-  } catch (e) {
+  } catch (e: any) {
     mod._products = []
   } finally {
     mod._loading = false
@@ -408,10 +410,10 @@ async function loadModuleProducts(mod) {
  * @param {Object} mod - 模块对象
  * @param {number|null} subId - 子分类 ID，null 表示全部
  */
-async function switchModuleSub(mod, subId) {
+async function switchModuleSub(mod: any, subId: any) {
   if (mod._activeSub === subId) return
   mod._activeSub = subId
-  mod._activeSubLabel = subId ? (getSubCats(mod).find(s => s.id === subId)?.name || '') : mod.title
+  mod._activeSubLabel = subId ? (getSubCats(mod).find((s: any) => s.id === subId)?.name || '') : mod.title
   await loadModuleProducts(mod)
 }
 
@@ -428,11 +430,11 @@ function openShopSearch(query = {}) {
  * 查看模块更多商品，解析分类信息后跳转到商城搜索页
  * @param {Object} mod - 模块对象
  */
-function viewMoreModule(mod) {
+function viewMoreModule(mod: any) {
   const cfg = getCfg(mod)
   const catNode = resolveCategoryInfo(cfg)
   if (!catNode) return
-  const query = {}
+  const query: Record<string, any> = {}
   if (catNode.categoryIds) {
     // 多分类聚合模式
     query.categoryId = mod._activeSub || catNode.categoryIds[0]
@@ -448,45 +450,45 @@ function viewMoreModule(mod) {
  * 并发加载所有模块的商品数据，并批量检查收藏状态
  */
 async function loadAllModuleProducts() {
-  await Promise.all(modules.value.map(m => loadModuleProducts(m)))
+  await Promise.all(modules.value.map((m: any) => loadModuleProducts(m)))
   // 批量检查收藏
-  const allIds = modules.value.flatMap(m => m._products.map(p => p.id))
+  const allIds = modules.value.flatMap((m: any) => m._products.map((p: any) => p.id))
   if (allIds.length > 0 && userStore.token) {
     try {
       const res = await batchCheckFavorites(allIds)
-      if (Array.isArray(res)) res.forEach(id => favSet.add(id))
-    } catch (e) {}
+      if (Array.isArray(res)) res.forEach((id: any) => favSet.add(id))
+    } catch (e: any) {}
   }
 }
 
 // ========== 回退：分类分区 ==========
-const sections = ref([])
+const sections = ref<any[]>([])
 const sectionsLoading = ref(false)
 
 /**
  * 根据分类树构建回退分区列表，每个分类对应一个展示区域
  * @param {Array} tree - 分类树
  */
-function buildSections(tree) {
-  sections.value = (tree || []).map(c => ({
+function buildSections(tree: any) {
+  sections.value = (tree || []).map((c: any) => ({
     id: c.id, name: c.name,
     activeSubId: null, products: [], total: 0, loading: false
   }))
-  sections.value.sort((a, b) => a.name === '智能手机' ? -1 : b.name === '智能手机' ? 1 : 0)
+  sections.value.sort((a: any, b: any) => a.name === '智能手机' ? -1 : b.name === '智能手机' ? 1 : 0)
 }
 
 /**
  * 加载指定分类分区的商品列表，支持子分类筛选
  * @param {Object} sec - 分区对象
  */
-async function loadSectionProducts(sec) {
+async function loadSectionProducts(sec: any) {
   sec.loading = true
   try {
-    const params = { page: 1, pageSize: 8, categoryId: sec.activeSubId || sec.id }
+    const params: Record<string, any> = { page: 1, pageSize: 8, categoryId: sec.activeSubId || sec.id }
     const res = await listSpu(params)
-    sec.products = res?.records || res?.list || (Array.isArray(res) ? res : [])
+    sec.products = res?.records || (res as any)?.list || (Array.isArray(res) ? res : [])
     sec.total = res?.total || sec.products.length
-  } catch (e) { sec.products = [] } finally { sec.loading = false }
+  } catch (e: any) { sec.products = [] } finally { sec.loading = false }
 }
 
 /**
@@ -494,7 +496,7 @@ async function loadSectionProducts(sec) {
  */
 async function loadAllSections() {
   sectionsLoading.value = true
-  try { await Promise.all(sections.value.map(s => loadSectionProducts(s))) } finally { sectionsLoading.value = false }
+  try { await Promise.all(sections.value.map((s: any) => loadSectionProducts(s))) } finally { sectionsLoading.value = false }
 }
 
 /**
@@ -502,13 +504,13 @@ async function loadAllSections() {
  * @param {Object} sec - 分区对象
  * @param {number|null} subId - 子分类 ID
  */
-function switchSub(sec, subId) {
+function switchSub(sec: any, subId: any) {
   if (sec.activeSubId === subId) return
   clearTimeout(sec._hoverTimer)
   sec._hoverTimer = setTimeout(() => { sec.activeSubId = subId; loadSectionProducts(sec) }, 200)
 }
 
-function activeSubName(sec) {
+function activeSubName(sec: any) {
   return sec.name
 }
 
@@ -516,7 +518,7 @@ function activeSubName(sec) {
  * 查看分区更多商品，跳转到商城搜索页
  * @param {Object} sec - 分区对象
  */
-function viewMore(sec) {
+function viewMore(sec: any) {
   openShopSearch({ categoryId: sec.activeSubId || sec.id })
 }
 
@@ -529,7 +531,7 @@ async function loadCategory() {
     const res = await listCategory()
     flatCategories.value = flattenCats(res || [])
     buildSections(res || [])
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /**
@@ -537,9 +539,9 @@ async function loadCategory() {
  * @param {Array} tree - 分类树
  * @returns {Array} 平铺后的分类列表
  */
-function flattenCats(tree) {
-  const result = []
-  function traverse(list) {
+function flattenCats(tree: any) {
+  const result: any[] = []
+  function traverse(list: any) {
     if (!list) return
     for (const item of list) {
       result.push({ ...item })
@@ -551,7 +553,7 @@ function flattenCats(tree) {
 }
 
 // ========== 筛选模式 + Banner ==========
-const spus = ref([])
+const spus = ref<any[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
@@ -562,9 +564,9 @@ const hasMore = computed(() => spus.value.length < total.value)
  */
 async function loadBanners() {
   try {
-    const res = await userRequest({ url: '/user/banner/list', method: 'get', __silent: true })
+    const res: any = await userRequest({ url: '/user/banner/list', method: 'get', __silent: true })
     banners.value = Array.isArray(res) ? res : (res?.data || [])
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 // ========== 通用方法 ==========
@@ -572,7 +574,7 @@ async function loadBanners() {
  * 在新标签页打开商品详情页
  * @param {number|string} id - 商品 SPU ID
  */
-function goDetail(id) {
+function goDetail(id: any) {
   const route = router.resolve(`/spu/${id}`)
   window.open(route.href, '_blank')
 }
@@ -581,47 +583,47 @@ function goDetail(id) {
  * 切换商品收藏状态，未登录时跳转登录页
  * @param {Object} spu - 商品对象
  */
-async function toggleFav(spu) {
+async function toggleFav(spu: any) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
     if (favSet.has(spu.id)) { await removeFavorite(spu.id); favSet.delete(spu.id); ElMessage.success('已取消收藏') }
     else { await addFavorite(spu.id); favSet.add(spu.id); ElMessage.success('已添加收藏') }
-  } catch (e) { ElMessage.error('操作失败') }
+  } catch (e: any) { ElMessage.error('操作失败') }
 }
 
 // SKU dialog（选型号统一复用详情页 SkuSpecSelector：仅规格 + 数量，不含保障服务）
 const skuDialogVisible = ref(false)
-const currentSpu = ref(null)
-const currentSkus = ref([])
+const currentSpu = ref<any>(null)
+const currentSkus = ref<any[]>([])
 const cartQty = ref(1)          // 数量，由 SkuSpecSelector 通过 v-model 同步
 const addingCart = ref(false)
-const selectedSku = ref(null)   // 由 SkuSpecSelector 的 sku-change 事件填充
-function onSkuChange(sku) { selectedSku.value = sku }
+const selectedSku = ref<any>(null)   // 由 SkuSpecSelector 的 sku-change 事件填充
+function onSkuChange(sku: any) { selectedSku.value = sku }
 
 /**
  * 处理加入购物车：获取商品 SKU 列表，单个 SKU 直接加入，多个 SKU 弹出规格选择弹窗
  * @param {Object} spu - 商品对象
  */
-async function handleAddToCart(spu) {
+async function handleAddToCart(spu: any) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
     const res = await getSpu(spu.id)
-    const skuList = res?.skuList || res?.skuListVo || []
+    const skuList = res?.skuList || (res as any)?.skuListVo || []
     if (!skuList.length) { ElMessage.warning('该商品暂无规格可选'); return }
     if (skuList.length === 1) { await doAddCart(skuList[0].id); return }
     currentSpu.value = res
-    currentSkus.value = skuList.filter(s => s.status !== 0)
+    currentSkus.value = skuList.filter((s: any) => s.status !== 0)
     cartQty.value = 1
     selectedSku.value = null
     skuDialogVisible.value = true
-  } catch (e) { ElMessage.error(e?.response?.data?.msg || e?.message || '加载商品规格失败') }
+  } catch (e: any) { ElMessage.error(e?.response?.data?.msg || e?.message || '加载商品规格失败') }
 }
 
 /**
  * 执行加入购物车操作，调用接口并刷新购物车数据
  * @param {number} skuId - SKU ID
  */
-async function doAddCart(skuId, qty = 1) {
+async function doAddCart(skuId: any, qty = 1) {
   if (!skuId) { ElMessage.warning('请选择商品规格'); return }
   addingCart.value = true
   try {
@@ -629,7 +631,7 @@ async function doAddCart(skuId, qty = 1) {
     ElMessage.success('已加入购物车')
     skuDialogVisible.value = false
     await cartStore.load()
-  } catch (e) { ElMessage.error(e?.response?.data?.msg || e?.message || '加入购物车失败') } finally { addingCart.value = false }
+  } catch (e: any) { ElMessage.error(e?.response?.data?.msg || e?.message || '加入购物车失败') } finally { addingCart.value = false }
 }
 
 function confirmAddToCart() { doAddCart(selectedSku.value?.id, cartQty.value) }
@@ -648,9 +650,9 @@ onMounted(async () => {
   }
 
   if (userStore.token && !userStore.nickname) {
-    try { await userStore.fetchProfile() } catch (e) {}
+    try { await userStore.fetchProfile() } catch (e: any) {}
   }
-  try { await cartStore.load() } catch (e) {}
+  try { await cartStore.load() } catch (e: any) {}
 })
 
 onUnmounted(() => {

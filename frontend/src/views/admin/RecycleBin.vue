@@ -44,50 +44,50 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest } from '@/api/request'
 
 const loading = ref(false)
 const keyword = ref('')
-const list = ref([])
+const list = ref<any[]>([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(10)
-const selectedIds = ref([])
+const selectedIds = ref<any[]>([])
 
-function handleSelectionChange(rows) {
-  selectedIds.value = rows.map(r => r.id)
+function handleSelectionChange(rows: any) {
+  selectedIds.value = rows.map((r: any) => r.id)
 }
 
 async function load() {
   loading.value = true
   try {
-    const params = { page: pageNum.value, pageSize: pageSize.value }
+    const params: Record<string, any> = { page: pageNum.value, pageSize: pageSize.value }
     if (keyword.value) params.name = keyword.value
-    const res = await adminRequest({ url: '/admin/recycle/page', method: 'get', params })
-    const d = res?.data || res || {}
+    const res: any = await adminRequest({ url: '/admin/recycle/page', method: 'get', params })
+    const d: any = res?.data || res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {} finally { loading.value = false }
+  } catch (e: any) {} finally { loading.value = false }
 }
 
-async function handleRestore(id) {
+async function handleRestore(id: any) {
   try {
     await adminRequest({ url: `/admin/recycle/${id}/restore`, method: 'post' })
     ElMessage.success('已恢复')
     await load()
-  } catch (e) { ElMessage.error('恢复失败') }
+  } catch (e: any) { ElMessage.error('恢复失败') }
 }
 
-async function handleForceDelete(id) {
+async function handleForceDelete(id: any) {
   try {
     await ElMessageBox.confirm('彻底删除后不可恢复，确定？', '警告', { type: 'warning', confirmButtonText: '确定删除' })
     await adminRequest({ url: `/admin/recycle/${id}`, method: 'delete' })
     ElMessage.success('已彻底删除')
     await load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 async function handleBatchRestore() {
@@ -96,7 +96,7 @@ async function handleBatchRestore() {
     ElMessage.success('批量恢复成功')
     selectedIds.value = []
     await load()
-  } catch (e) { ElMessage.error('操作失败') }
+  } catch (e: any) { ElMessage.error('操作失败') }
 }
 
 async function handleBatchDelete() {
@@ -106,7 +106,7 @@ async function handleBatchDelete() {
     ElMessage.success('批量删除成功')
     selectedIds.value = []
     await load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 async function handleClearAll() {
@@ -115,7 +115,7 @@ async function handleClearAll() {
     await adminRequest({ url: '/admin/recycle/clear', method: 'delete' })
     ElMessage.success('回收站已清空')
     await load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 onMounted(load)

@@ -77,7 +77,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest } from '@/api/request'
@@ -86,20 +86,20 @@ const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
-const editId = ref(null)
+const editId = ref<any>(null)
 const keyword = ref('')
-const filterStatus = ref(null)
-const list = ref([])
+const filterStatus = ref<any>(null)
+const list = ref<any[]>([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(10)
-const formRef = ref(null)
+const formRef = ref<any>(null)
 
-const form = reactive({
+const form = reactive<any>({
   title: '', imageUrl: '', linkUrl: '', sort: 0, status: 1
 })
 
-const rules = {
+const rules: Record<string, any> = {
   title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
   imageUrl: [{ required: true, message: '请输入图片URL', trigger: 'blur' }]
 }
@@ -112,18 +112,18 @@ function resetForm() {
 async function load() {
   loading.value = true
   try {
-    const params = { page: pageNum.value, pageSize: pageSize.value }
+    const params: Record<string, any> = { page: pageNum.value, pageSize: pageSize.value }
     if (keyword.value) params.title = keyword.value
     if (filterStatus.value !== null && filterStatus.value !== undefined) params.status = filterStatus.value
-    const res = await adminRequest({ url: '/admin/banner/page', method: 'get', params })
-    const d = res?.data || res || {}
+    const res: any = await adminRequest({ url: '/admin/banner/page', method: 'get', params })
+    const d: any = res?.data || res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {} finally { loading.value = false }
+  } catch (e: any) {} finally { loading.value = false }
 }
 
 function openAdd() { resetForm(); dialogVisible.value = true }
-function openEdit(row) {
+function openEdit(row: any) {
   isEdit.value = true; editId.value = row.id
   form.title = row.title; form.imageUrl = row.imageUrl; form.linkUrl = row.linkUrl || ''
   form.sort = row.sort ?? 0; form.status = row.status
@@ -135,7 +135,7 @@ async function handleSave() {
   if (!valid) return
   submitting.value = true
   try {
-    const data = { ...form }
+    const data: Record<string, any> = { ...form }
     if (isEdit.value) {
       data.id = editId.value
       await adminRequest({ url: '/admin/banner', method: 'put', data })
@@ -146,19 +146,19 @@ async function handleSave() {
     }
     dialogVisible.value = false
     await load()
-  } catch (e) { ElMessage.error('操作失败') } finally { submitting.value = false }
+  } catch (e: any) { ElMessage.error('操作失败') } finally { submitting.value = false }
 }
 
-async function handleDelete(id) {
+async function handleDelete(id: any) {
   try {
     await ElMessageBox.confirm('确定删除？', '提示', { type: 'warning' })
     await adminRequest({ url: `/admin/banner/${id}`, method: 'delete' })
     ElMessage.success('已删除')
     await load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
-async function handleToggleStatus(row) {
+async function handleToggleStatus(row: any) {
   const nextStatus = row.status === 1 ? 0 : 1
   const actionText = nextStatus === 1 ? '启用' : '禁用'
   try {
@@ -166,7 +166,7 @@ async function handleToggleStatus(row) {
     await adminRequest({ url: '/admin/banner', method: 'put', data: { id: row.id, status: nextStatus } })
     ElMessage.success(`已${actionText}`)
     await load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 onMounted(load)

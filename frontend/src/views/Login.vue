@@ -76,7 +76,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
@@ -87,27 +87,27 @@ import { ElMessage } from 'element-plus'
 const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
-const formRef = ref(null)
+const formRef = ref<any>(null)
 const loading = ref(false)
 const loginMode = ref('password')
 const sendingCode = ref(false)
 const codeCountdown = ref(0)
-let timer = null
+let timer: number | null = null
 
 // E3: 图形验证码状态
 const captchaId = ref('')
 const captchaImage = ref('')
 
-const form = reactive({
+const form = reactive<any>({
   email: '',
   password: '',
   code: '',
   captchaCode: ''
 })
 
-const emailRule = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
+const emailRule: Record<string, any> = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
 
-const rules = {
+const rules: Record<string, any> = {
   email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, emailRule],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
   code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
@@ -123,7 +123,7 @@ async function refreshCaptcha() {
     captchaId.value = res.captchaId
     captchaImage.value = res.imageBase64
     form.captchaCode = ''
-  } catch (e) {
+  } catch (e: any) {
     // 拦截器已统一提示，这里静默
   }
 }
@@ -132,7 +132,7 @@ async function refreshCaptcha() {
  * 切换登录方式（密码登录 / 验证码登录）
  * @param {'password'|'email'} mode - 登录模式
  */
-function switchMode(mode) {
+function switchMode(mode: string) {
   loginMode.value = mode
   form.code = ''
   form.password = ''
@@ -154,7 +154,7 @@ async function sendCode() {
   }
   sendingCode.value = true
   try {
-    const res = await userRequest({
+    const res: any = await userRequest({
       url: '/user/email-code/send',
       method: 'post',
       data: {
@@ -173,9 +173,9 @@ async function sendCode() {
     codeCountdown.value = 60
     timer = setInterval(() => {
       codeCountdown.value--
-      if (codeCountdown.value <= 0) clearInterval(timer)
+      if (codeCountdown.value <= 0) clearInterval(timer!)
     }, 1000)
-  } catch (e) {
+  } catch (e: any) {
     // 拦截器已统一提示
   } finally {
     sendingCode.value = false
@@ -190,7 +190,7 @@ async function handleLogin() {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-  } catch (e) {
+  } catch (e: any) {
     return
   }
   loading.value = true
@@ -208,8 +208,8 @@ async function handleLogin() {
     }
     ElMessage.success('登录成功')
     const redirect = route.query.redirect || '/'
-    router.push(redirect)
-  } catch (e) {
+    router.push(redirect as string)
+  } catch (e: any) {
     // 邮箱登录失败时刷新图形验证码（一次性使用），让用户重试
     if (loginMode.value === 'email') {
       refreshCaptcha()

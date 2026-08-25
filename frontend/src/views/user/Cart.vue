@@ -42,7 +42,7 @@
                 :model-value="item.quantity"
                 :min="1"
                 size="small"
-                @update:model-value="(v) => cartStore.updateQty(item.id || item.skuId, v)"
+                @update:model-value="(v: any) => cartStore.updateQty(item.id || item.skuId, v)"
               />
             </div>
             <div class="col col-subtotal amount">
@@ -72,7 +72,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -87,7 +87,7 @@ const loading = ref(false)
 /**
  * 删除购物车商品前弹出确认框
  */
-async function handleRemove(item) {
+async function handleRemove(item: any) {
   try {
     await ElMessageBox.confirm(`确定从购物车中删除「${item.name}」？`, '提示', {
       confirmButtonText: '确定',
@@ -109,7 +109,7 @@ async function handleRemove(item) {
  * 在新标签页打开商品详情页
  * @param {number|string} id - 商品 SPU ID
  */
-function goDetail(id) {
+function goDetail(id: any) {
   if (id) {
     const route = router.resolve(`/spu/${id}`)
     window.open(route.href, '_blank')

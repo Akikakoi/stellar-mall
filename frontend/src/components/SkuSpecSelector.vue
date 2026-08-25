@@ -97,16 +97,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import type { PropType } from 'vue'
 import { Grid, ArrowDown } from '@element-plus/icons-vue'
+import type { Sku } from '@/types/models'
 
 const props = defineProps({
-  spu: { type: Object, default: () => ({}) },
-  skus: { type: Array, default: () => [] },
+  spu: { type: Object as PropType<Record<string, any>>, default: () => ({}) },
+  skus: { type: Array as PropType<Sku[]>, default: () => [] },
   modelValue: { type: Number, default: 1 },
-  services: { type: Array, default: () => [] },
-  selectedServices: { type: Array, default: () => [] }
+  services: { type: Array as PropType<any[]>, default: () => [] },
+  selectedServices: { type: Array as PropType<number[]>, default: () => [] }
 })
 
 const emit = defineEmits(['update:modelValue', 'update:selectedServices', 'sku-change'])
@@ -114,12 +116,12 @@ const emit = defineEmits(['update:modelValue', 'update:selectedServices', 'sku-c
 const __PH = window.__PH
 
 const imageMode = ref(true)
-const selectedValues = ref({})
+const selectedValues = ref<Record<string, any>>({})
 const serviceExpanded = ref(false)
 
 const quantity = computed({
   get: () => props.modelValue,
-  set: (val) => {
+  set: (val: any) => {
     const v = Number(val) || 1
     emit('update:modelValue', v)
   }
@@ -127,7 +129,7 @@ const quantity = computed({
 
 const selectedServices = computed({
   get: () => props.selectedServices || [],
-  set: (val) => emit('update:selectedServices', val)
+  set: (val: any) => emit('update:selectedServices', val)
 })
 
 /**
@@ -136,17 +138,17 @@ const selectedServices = computed({
  * @param {Object} sku - SKU 对象
  * @returns {Object} 规格键值对，如 { 颜色: '红色', 尺寸: 'M' }
  */
-function normalizeSpecs(sku) {
+function normalizeSpecs(sku: any) {
   if (!sku) return {}
   if (sku.specsJson) {
     try {
       const parsed = typeof sku.specsJson === 'string' ? JSON.parse(sku.specsJson) : sku.specsJson
       if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed
-    } catch (e) { /* 忽略异常，继续走 specs 解析 */ }
+    } catch (e: any) { /* 忽略异常，继续走 specs 解析 */ }
   }
   if (sku.specs) {
-    const map = {}
-    sku.specs.split(/;|；/).forEach((part) => {
+    const map: Record<string, any> = {}
+    sku.specs.split(/;|；/).forEach((part: string) => {
       const [k, v] = part.split(/:|：/)
       if (k && v) map[k.trim()] = v.trim()
     })
@@ -161,7 +163,7 @@ function normalizeSpecs(sku) {
  * @param {Object} sku - SKU 对象
  * @returns {string} 格式化后的规格字符串，如 "颜色:红色；尺寸:M"
  */
-function formatSpecs(sku) {
+function formatSpecs(sku: any) {
   const map = normalizeSpecs(sku)
   return Object.entries(map).map(([k, v]) => `${k}:${v}`).join('；')
 }
@@ -171,7 +173,7 @@ function formatSpecs(sku) {
  * @returns {Array<Object>} 包含 specsMap 属性的 SKU 数组
  */
 const parsedSkus = computed(() => {
-  return props.skus.map((sku) => {
+  return props.skus.map((sku: any) => {
     const specs = normalizeSpecs(sku)
     return { ...sku, specsMap: specs }
   })
@@ -185,16 +187,16 @@ const parsedSkus = computed(() => {
 const specGroups = computed(() => {
   if (!parsedSkus.value.length) return []
 
-  const groupMap = new Map()
-  const order = []
+  const groupMap = new Map<string, any>()
+  const order: string[] = []
 
-  parsedSkus.value.forEach((sku) => {
+  parsedSkus.value.forEach((sku: any) => {
     Object.entries(sku.specsMap).forEach(([key, value]) => {
       if (!groupMap.has(key)) {
         groupMap.set(key, { key, label: key, values: new Map() })
         order.push(key)
       }
-      const group = groupMap.get(key)
+      const group: any = groupMap.get(key)
       if (!group.values.has(value)) {
         group.values.set(value, { value, skuIds: new Set(), image: null, badge: null, badgeType: null })
       }
@@ -216,20 +218,20 @@ const specGroups = computed(() => {
               }
             }
           }
-        } catch (e) {}
+        } catch (e: any) {}
       }
     })
   })
 
-  return order.map((key) => {
-    const g = groupMap.get(key)
-    const showImage = Array.from(g.values.values()).some((o) => o.image) &&
+  return order.map((key: any) => {
+    const g: any = groupMap.get(key)
+    const showImage = Array.from(g.values.values()).some((o: any) => o.image) &&
       (key.includes('颜色') || key.includes('色') || key.toLowerCase() === 'color')
     return {
       key,
       label: g.label,
       showImage,
-      options: Array.from(g.values.values())
+      options: Array.from(g.values.values()) as any[]
     }
   })
 })
@@ -238,7 +240,7 @@ const specGroups = computed(() => {
  * 是否显示图片模式切换按钮
  * @returns {boolean}
  */
-const hasImageMode = computed(() => specGroups.value.some((g) => g.showImage))
+const hasImageMode = computed(() => specGroups.value.some((g: any) => g.showImage))
 
 /**
  * 当前选中的 SKU：根据 selectedValues 匹配完整 SKU
@@ -246,7 +248,7 @@ const hasImageMode = computed(() => specGroups.value.some((g) => g.showImage))
  */
 const selectedSku = computed(() => {
   if (!parsedSkus.value.length) return null
-  return parsedSkus.value.find((sku) => {
+  return parsedSkus.value.find((sku: any) => {
     return Object.entries(selectedValues.value).every(([key, val]) => sku.specsMap[key] === val)
   }) || null
 })
@@ -256,7 +258,7 @@ const selectedSku = computed(() => {
  * @returns {number}
  */
 const maxQty = computed(() => {
-  return selectedSku.value?.stock > 0 ? Math.min(selectedSku.value.stock, 999) : 999
+  return (selectedSku.value?.stock as number) > 0 ? Math.min(selectedSku.value!.stock!, 999) : 999
 })
 
 /**
@@ -265,10 +267,10 @@ const maxQty = computed(() => {
  * @param {string} value - 规格值
  * @returns {boolean}
  */
-function isOptionDisabled(groupKey, value) {
+function isOptionDisabled(groupKey: string, value: string) {
   // 只要有任意 SKU 包含该选项，就允许点击。
   // 点击时 selectOption 会自动匹配最近的完整 SKU。
-  return !parsedSkus.value.some((sku) => sku.specsMap[groupKey] === value)
+  return !parsedSkus.value.some((sku: any) => sku.specsMap[groupKey] === value)
 }
 
 /**
@@ -276,7 +278,7 @@ function isOptionDisabled(groupKey, value) {
  * @param {string} groupKey - 规格键名
  * @param {string} value - 规格值
  */
-function selectOption(groupKey, value) {
+function selectOption(groupKey: string, value: string) {
   if (selectedValues.value[groupKey] === value) return
   selectedValues.value[groupKey] = value
   syncQuantity()
@@ -321,12 +323,12 @@ function clampQty() {
  */
 function initSelections() {
   if (!specGroups.value.length) return
-  const defaults = {}
-  specGroups.value.forEach((g) => {
+  const defaults: Record<string, any> = {}
+  specGroups.value.forEach((g: any) => {
     if (g.options.length) defaults[g.key] = g.options[0].value
   })
   // 尝试找一个完全匹配的 SKU
-  let matched = parsedSkus.value.find((sku) => {
+  let matched = parsedSkus.value.find((sku: any) => {
     return Object.entries(defaults).every(([k, v]) => sku.specsMap[k] === v)
   })
   // 默认选项组合不存在时，回退到第一个 SKU
@@ -345,7 +347,7 @@ watch(() => props.skus, () => {
   initSelections()
 }, { immediate: true, deep: true })
 
-watch(() => selectedSku.value, (sku) => {
+watch(() => selectedSku.value, (sku: any) => {
   emit('sku-change', sku)
 })
 

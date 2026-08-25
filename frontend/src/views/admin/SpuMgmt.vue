@@ -251,7 +251,7 @@
               <span style="font-size:12px;color:var(--text-muted)">（chunk_size={{ kbChunkSize }}, overlap={{ kbChunkOverlap }}）</span>
             </div>
             <div v-for="(chunk, ci) in kbPreviewResult.chunks" :key="ci" class="kb-preview-chunk">
-              <div class="kb-preview-chunk-idx">#{{ ci + 1 }}</div>
+              <div class="kb-preview-chunk-idx">#{{ (ci as number) + 1 }}</div>
               <div class="kb-preview-chunk-text">{{ chunk }}</div>
             </div>
           </div>
@@ -320,7 +320,7 @@
           <div class="sku-list">
             <div v-for="(sku, index) in form.skuList" :key="sku._uid || index" class="sku-item">
               <div class="sku-header">
-                <span class="sku-index">规格 {{ index + 1 }}：{{ sku.name || '未命名' }}</span>
+                <span class="sku-index">规格 {{ (index as number) + 1 }}：{{ sku.name || '未命名' }}</span>
                 <el-button type="danger" size="small" @click="removeSku(index)" v-if="form.skuList.length > 1">删除</el-button>
               </div>
               <div class="sku-fields">
@@ -394,7 +394,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batchSetSpuStatus, listAdminCategory, uploadImages } from '@/api/admin'
 import { apiKbUploadWithChunks, apiKbPreview, apiKbGet } from '@/api/rag'
@@ -408,16 +408,16 @@ const SORT_ORDER_ALLOWED = new Set(['asc', 'desc'])
 
 const loading = ref(false)
 const submitting = ref(false)
-const records = ref([])
-const selectedRows = ref([])
+const records = ref<any[]>([])
+const selectedRows = ref<any[]>([])
 const total = ref(0)
-const categories = ref([])
+const categories = ref<any[]>([])
 
-const query = reactive({ page: 1, pageSize: 10, name: '', categoryId: null, status: null, sortBy: null, sortOrder: null })
+const query = reactive<any>({ page: 1, pageSize: 10, name: '', categoryId: null, status: null, sortBy: null, sortOrder: null })
 
 /** 从 localStorage 恢复上次选择的排序维度与方向 */
 function restoreSort() {
-  const obj = storage.local.getObject(SORT_STORAGE_KEY)
+  const obj: any = storage.local.getObject(SORT_STORAGE_KEY)
   if (obj && SORT_BY_ALLOWED.has(obj.sortBy)) {
     query.sortBy = obj.sortBy
     if (SORT_ORDER_ALLOWED.has(obj.sortOrder)) query.sortOrder = obj.sortOrder
@@ -457,45 +457,45 @@ function onQueryClick() {
 
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
-const formRef = ref(null)
-const form = reactive({ id: null, name: '', categoryId: null, price: 0, image: '', mainImage: '', subImages: '', description: '', status: 1, skuList: [] })
-const formRules = {
+const formRef = ref<any>(null)
+const form = reactive<any>({ id: null, name: '', categoryId: null, price: 0, image: '', mainImage: '', subImages: '', description: '', status: 1, skuList: [] })
+const formRules: Record<string, any> = {
   name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
   price: [{ required: true, message: '请输入价格', trigger: 'blur' }]
 }
 
 // KB upload
-const kbUploadRef = ref(null)
-const kbFile = ref(null)
-const kbFileList = ref([])
+const kbUploadRef = ref<any>(null)
+const kbFile = ref<any>(null)
+const kbFileList = ref<any[]>([])
 const kbChunkSize = ref(512)
 const kbChunkOverlap = ref(64)
 const kbTags = ref('')
 const kbPreviewing = ref(false)
-const kbPreviewResult = ref(null)
+const kbPreviewResult = ref<any>(null)
 const kbUploadProgress = ref(0)
-const kbExistingDoc = ref(null)
-const kbExistingDocId = ref(null)
+const kbExistingDoc = ref<any>(null)
+const kbExistingDocId = ref<any>(null)
 
 // 图片上传
 const imageUploading = ref(false)
-const uploadedImages = ref([])  // { url, name } 数组：第0项为主图，其余为副图
+const uploadedImages = ref<any[]>([])  // { url, name } 数组：第0项为主图，其余为副图
 
 /** 移除指定索引的已上传图片，并同步到表单字段 */
-function removeUploadedImage(idx) {
+function removeUploadedImage(idx: any) {
   uploadedImages.value.splice(idx, 1)
   syncImagesToForm()
 }
 /** 将已上传图片列表同步到表单的 mainImage 和 subImages 字段 */
 function syncImagesToForm() {
-  const urls = uploadedImages.value.map(i => i.url)
+  const urls = uploadedImages.value.map((i: any) => i.url)
   form.mainImage = urls[0] || ''
   form.image = urls[0] || ''
   form.subImages = urls.slice(1).join(';')
 }
 /** 上传单张图片到服务器，成功后添加到已上传列表 */
-async function doImageUpload(options) {
+async function doImageUpload(options: any) {
   const { file } = options
   imageUploading.value = true
   try {
@@ -505,7 +505,7 @@ async function doImageUpload(options) {
       syncImagesToForm()
     }
     ElMessage.success(`${file.name} 上传成功`)
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(`${file.name} 上传失败：${e?.message || '未知错误'}`)
   } finally {
     imageUploading.value = false
@@ -513,12 +513,12 @@ async function doImageUpload(options) {
 }
 /** 从表单的 mainImage 和 subImages 字段初始化已上传图片预览列表 */
 function initUploadedImages() {
-  const images = []
+  const images: any[] = []
   const main = form.mainImage || form.image || ''
   if (main) images.push({ url: main, name: '主图' })
   const subs = form.subImages || ''
   if (subs) {
-    subs.split(';').filter(Boolean).forEach((u, i) => {
+    subs.split(';').filter(Boolean).forEach((u: any, i: any) => {
       images.push({ url: u.trim(), name: `副图${i + 1}` })
     })
   }
@@ -527,11 +527,11 @@ function initUploadedImages() {
 
 // Spec groups
 const presetSpecNames = ['颜色', '存储', '内存', '尺寸', '配置', '型号', '版本', '材质', '尺码', '容量', '规格']
-const specGroups = ref([{ name: '', values: [], newValue: '' }])
+const specGroups = ref<{ name: string; values: string[]; newValue: string }[]>([{ name: '', values: [], newValue: '' }])
 const generatedCount = ref(0)
 
 const canGenerateSkus = computed(() => {
-  const valid = specGroups.value.filter(g => g.name && g.name.trim() && g.values.length > 0)
+  const valid = specGroups.value.filter((g: any) => g.name && g.name.trim() && g.values.length > 0)
   return valid.length >= 1
 })
 
@@ -540,7 +540,7 @@ async function loadMeta() {
   try {
     const c = await listAdminCategory()
     categories.value = c || []
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /** 加载商品分页列表，根据当前查询条件筛选 */
@@ -548,7 +548,7 @@ async function loadPage() {
   loading.value = true
   try {
     const res = await pageSpu({ ...query })
-    const d = res || {}
+    const d: any = res || {}
     records.value = d.records || d.list || []
     total.value = d.total || 0
   } finally {
@@ -562,7 +562,7 @@ function addSpecGroup() {
 }
 
 /** 向指定规格组添加一个规格值 */
-function addSpecValue(gi) {
+function addSpecValue(gi: any) {
   const group = specGroups.value[gi]
   if (!group) return
   const val = (group.newValue || '').trim()
@@ -575,7 +575,7 @@ function addSpecValue(gi) {
 
 /** 根据规格组的笛卡尔积自动生成 SKU 组合列表 */
 function generateSkus() {
-  const valid = specGroups.value.filter(g => g.name && g.name.trim() && g.values.length > 0)
+  const valid = specGroups.value.filter((g: any) => g.name && g.name.trim() && g.values.length > 0)
   if (valid.length === 0) {
     ElMessage.warning('请至少添加一个有效的规格组（含名称和至少一个值）')
     return
@@ -583,7 +583,7 @@ function generateSkus() {
   const combinations = cartesianProduct(valid)
   const spuName = form.name || '商品'
   const basePrice = Number(form.price ?? 0)
-  form.skuList = combinations.map((combo, idx) => ({
+  form.skuList = combinations.map((combo: any, idx: any) => ({
     _uid: Date.now() + idx + Math.random(),
     name: combo.name ? `${spuName} · ${combo.name}` : `${spuName} · 规格${idx + 1}`,
     specs: combo.specs,
@@ -597,11 +597,11 @@ function generateSkus() {
 }
 
 /** 计算多个规格组的笛卡尔积，生成所有规格组合 */
-function cartesianProduct(groups) {
+function cartesianProduct(groups: any) {
   if (groups.length === 0) return []
   let result = [{ specs: '', name: '' }]
   for (const group of groups) {
-    const next = []
+    const next: any[] = []
     for (const item of result) {
       for (const val of group.values) {
         const specs = item.specs ? `${item.specs};${group.name}:${val}` : `${group.name}:${val}`
@@ -615,7 +615,7 @@ function cartesianProduct(groups) {
 }
 
 /** 从已有的 SKU 列表中反推规格组定义，用于编辑时回填 */
-function inferSpecGroups(skuList) {
+function inferSpecGroups(skuList: any) {
   if (!skuList || skuList.length === 0) {
     specGroups.value = [{ name: '', values: [], newValue: '' }]
     generatedCount.value = 0
@@ -626,7 +626,7 @@ function inferSpecGroups(skuList) {
   for (const sku of skuList) {
     const specs = sku.specs || ''
     if (!specs) { allSameStructure = false; continue }
-    const pairs = specs.split(';').map(s => s.trim()).filter(Boolean)
+    const pairs = specs.split(';').map((s: any) => s.trim()).filter(Boolean)
     for (const pair of pairs) {
       const colonIdx = pair.indexOf(':')
       if (colonIdx === -1) continue
@@ -658,20 +658,20 @@ function addManualSku() {
 }
 
 /** 移除指定索引的 SKU */
-function removeSku(index) {
+function removeSku(index: any) {
   form.skuList.splice(index, 1)
 }
 
 // KB functions
 /** 知识库文件变更时，保存文件引用并自动填充标签 */
-function onKbFileChange(f) {
+function onKbFileChange(f: any) {
   const raw = f?.raw
   if (!raw) return
   kbFile.value = raw
   kbFileList.value = [f]
   kbPreviewResult.value = null
-  const cat = categories.value.find(c => c.id === form.categoryId)
-  const parts = []
+  const cat = categories.value.find((c: any) => c.id === form.categoryId)
+  const parts: any[] = []
   if (cat) parts.push(cat.name)
   if (form.name) parts.push(form.name)
   kbTags.value = parts.join(',')
@@ -696,7 +696,7 @@ async function doKbPreview() {
     fd.append('limit', '30')
     const res = await apiKbPreview(fd)
     kbPreviewResult.value = res?.data || res
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('预览失败：' + (e?.message || '未知错误'))
   } finally {
     kbPreviewing.value = false
@@ -710,18 +710,18 @@ async function uploadKbDoc() {
   try {
     const res = await apiKbUploadWithChunks(
       kbFile.value, kbTags.value || '', kbChunkSize.value, kbChunkOverlap.value,
-      (pct) => { kbUploadProgress.value = 10 + Math.round(pct * 0.7) }
+      (pct: any) => { kbUploadProgress.value = 10 + Math.round(pct * 0.7) }
     )
     kbUploadProgress.value = 100
     return res?.data?.id || null
-  } catch (e) {
+  } catch (e: any) {
     kbUploadProgress.value = 0
     throw e
   }
 }
 
 /** 打开新增/编辑商品对话框，create 模式初始化空表单，edit 模式加载详情 */
-async function openDialog(mode, row) {
+async function openDialog(mode: any, row?: any) {
   dialogMode.value = mode
   specGroups.value = [{ name: '', values: [], newValue: '' }]
   generatedCount.value = 0
@@ -740,7 +740,7 @@ async function openDialog(mode, row) {
   } else {
     submitting.value = true
     try {
-      const detail = await getAdminSpu(row.id)
+      const detail: any = await getAdminSpu(row.id)
       const mdText = detail.descriptionMd || ''
       const kbMatch = mdText.match(/\[KB_DOC_ID:(\d+)\]/)
       if (kbMatch) {
@@ -748,7 +748,7 @@ async function openDialog(mode, row) {
         try {
           const docRes = await apiKbGet(kbExistingDocId.value)
           kbExistingDoc.value = docRes?.data || docRes
-        } catch (e) {
+        } catch (e: any) {
           kbExistingDocId.value = null
         }
       }
@@ -765,7 +765,7 @@ async function openDialog(mode, row) {
       initUploadedImages()
       const skus = detail.skuList || detail.skus || []
       if (skus.length) {
-        form.skuList = skus.map((s, idx) => ({
+        form.skuList = skus.map((s: any, idx: any) => ({
           _uid: s.id || (Date.now() + idx), id: s.id,
           name: s.name || '', specs: s.specs || '',
           price: Number(s.price ?? 0), stock: Number(s.stock ?? 0),
@@ -777,7 +777,7 @@ async function openDialog(mode, row) {
         addManualSku()
       }
       dialogVisible.value = true
-    } catch (e) {
+    } catch (e: any) {
       ElMessage.error('加载商品详情失败')
     } finally {
       submitting.value = false
@@ -792,7 +792,7 @@ function buildPayload() {
   const descStr = form.description || ''
   const subImagesStr = form.subImages || ''
   const skuPayload = form.skuList && form.skuList.length
-    ? form.skuList.map(s => ({
+    ? form.skuList.map((s: any) => ({
         id: s.id, name: s.name || '', specs: s.specs || '',
         price: Number(s.price ?? 0) || 0, originalPrice: Number(s.price ?? 0) || 0,
         stock: Number(s.stock ?? 0) || 0, sort: Number(s.sort ?? 0) || 0,
@@ -814,19 +814,19 @@ function buildPayload() {
 /** 提交商品表单：校验、上传知识库文档、保存或更新商品 */
 async function submitForm() {
   if (!formRef.value) return
-  try { await formRef.value.validate() } catch (e) { return }
+  try { await formRef.value.validate() } catch (e: any) { return }
   if (dialogMode.value === 'create' && !kbFile.value) {
     ElMessage.warning('请上传商品关联文档（产品参数/说明）到知识库')
     return
   }
   submitting.value = true
   try {
-    let kbDocId = null
+    let kbDocId: any = null
     if (kbFile.value) {
       try {
         kbDocId = await uploadKbDoc()
         ElMessage.success('知识库文档上传成功')
-      } catch (e) {
+      } catch (e: any) {
         ElMessage.error('知识库文档上传失败：' + (e?.message || '未知错误'))
         return
       }
@@ -847,64 +847,64 @@ async function submitForm() {
   }
 }
 
-function handleSelectionChange(rows) { selectedRows.value = rows }
-function tableRowClassName({ row }) { return row.status === 0 ? 'row-off-shelf' : '' }
+function handleSelectionChange(rows: any) { selectedRows.value = rows }
+function tableRowClassName({ row }: { row: any }) { return row.status === 0 ? 'row-off-shelf' : '' }
 
 /** 下架单个商品，二次确认后执行 */
-async function handleShelfOff(row) {
+async function handleShelfOff(row: any) {
   const name = row.name || ('商品#' + row.id)
-  try { await ElMessageBox.confirm(`确定下架商品「${name}」？\n下架后用户将无法搜索和购买该商品。`, '下架确认', { type: 'warning' }) } catch (e) { return }
+  try { await ElMessageBox.confirm(`确定下架商品「${name}」？\n下架后用户将无法搜索和购买该商品。`, '下架确认', { type: 'warning' }) } catch (e: any) { return }
   try { await setSpuStatus(row.id, 0); ElMessage.success(`「${name}」已下架`); loadPage() }
-  catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '下架失败') }
+  catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '下架失败') }
 }
 
 /** 上架单个商品，二次确认后执行 */
-async function handleShelfOn(row) {
+async function handleShelfOn(row: any) {
   const name = row.name || ('商品#' + row.id)
-  try { await ElMessageBox.confirm(`确定上架商品「${name}」？`, '上架确认', { type: 'warning' }) } catch (e) { return }
+  try { await ElMessageBox.confirm(`确定上架商品「${name}」？`, '上架确认', { type: 'warning' }) } catch (e: any) { return }
   try { await setSpuStatus(row.id, 1); ElMessage.success(`「${name}」已上架`); loadPage() }
-  catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '上架失败') }
+  catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '上架失败') }
 }
 
 /** 批量下架选中的商品，二次确认后执行 */
 async function handleBatchShelfOff() {
-  const names = selectedRows.value.map(r => r.name).join('、')
-  try { await ElMessageBox.confirm(`确定批量下架以下 ${selectedRows.value.length} 件商品？\n${names}\n\n下架后用户将无法搜索和购买这些商品。`, '批量下架确认', { type: 'warning', confirmButtonText: '确定下架', cancelButtonText: '取消' }) } catch (e) { return }
+  const names = selectedRows.value.map((r: any) => r.name).join('、')
+  try { await ElMessageBox.confirm(`确定批量下架以下 ${selectedRows.value.length} 件商品？\n${names}\n\n下架后用户将无法搜索和购买这些商品。`, '批量下架确认', { type: 'warning', confirmButtonText: '确定下架', cancelButtonText: '取消' }) } catch (e: any) { return }
   try {
-    const ids = selectedRows.value.map(r => r.id)
+    const ids = selectedRows.value.map((r: any) => r.id)
     await batchSetSpuStatus(ids, 0)
     ElMessage.success(`已成功下架 ${selectedRows.value.length} 件商品`)
     selectedRows.value = []
     loadPage()
-  } catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量下架失败') }
+  } catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量下架失败') }
 }
 
 /** 批量上架选中的商品，二次确认后执行 */
 async function handleBatchShelfOn() {
-  const names = selectedRows.value.map(r => r.name).join('、')
-  try { await ElMessageBox.confirm(`确定批量上架以下 ${selectedRows.value.length} 件商品？\n${names}`, '批量上架确认', { type: 'warning', confirmButtonText: '确定上架', cancelButtonText: '取消' }) } catch (e) { return }
+  const names = selectedRows.value.map((r: any) => r.name).join('、')
+  try { await ElMessageBox.confirm(`确定批量上架以下 ${selectedRows.value.length} 件商品？\n${names}`, '批量上架确认', { type: 'warning', confirmButtonText: '确定上架', cancelButtonText: '取消' }) } catch (e: any) { return }
   try {
-    const ids = selectedRows.value.map(r => r.id)
+    const ids = selectedRows.value.map((r: any) => r.id)
     await batchSetSpuStatus(ids, 1)
     ElMessage.success(`已成功上架 ${selectedRows.value.length} 件商品`)
     selectedRows.value = []
     loadPage()
-  } catch (e) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量上架失败') }
+  } catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量上架失败') }
 }
 
 /** 删除商品，二次确认后执行 */
-async function handleDelete(row) {
-  try { await ElMessageBox.confirm(`确定删除商品「${row.name}」？`, '提示', { type: 'warning' }); await deleteSpu(row.id); ElMessage.success('已删除'); loadPage() } catch (e) {}
+async function handleDelete(row: any) {
+  try { await ElMessageBox.confirm(`确定删除商品「${row.name}」？`, '提示', { type: 'warning' }); await deleteSpu(row.id); ElMessage.success('已删除'); loadPage() } catch (e: any) {}
 }
 
 onMounted(() => { restoreSort(); loadMeta(); loadPage() })
 
 // Import/Export
 const exporting = ref(false); const importing = ref(false); const importVisible = ref(false)
-const importFile = ref(null); const importResult = ref(null); const uploadRef = ref(null)
+const importFile = ref<any>(null); const importResult = ref<any>(null); const uploadRef = ref<any>(null)
 
 function openImport() { importVisible.value = true; importResult.value = null; importFile.value = null }
-function onFileChange(file) { importFile.value = file.raw; importResult.value = null }
+function onFileChange(file: any) { importFile.value = file.raw; importResult.value = null }
 function onFileRemove() { importFile.value = null }
 
 /** 下载商品导入模板 Excel 文件 */
@@ -915,7 +915,7 @@ async function downloadTemplate() {
     const blob = await resp.blob(); const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = '商品导入模板.xlsx'; a.click(); URL.revokeObjectURL(url)
     ElMessage.success('模板下载成功')
-  } catch (e) { ElMessage.error('下载模板失败') }
+  } catch (e: any) { ElMessage.error('下载模板失败') }
 }
 
 /** 导出全部商品数据为 Excel 文件 */
@@ -927,7 +927,7 @@ async function handleExport() {
     const blob = await resp.blob(); const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = '商品数据导出.xlsx'; a.click(); URL.revokeObjectURL(url)
     ElMessage.success('导出成功')
-  } catch (e) { ElMessage.error('导出失败') } finally { exporting.value = false }
+  } catch (e: any) { ElMessage.error('导出失败') } finally { exporting.value = false }
 }
 
 /** 导入 Excel 文件批量创建商品和 SKU */
@@ -943,14 +943,14 @@ async function handleImport() {
       ElMessage.success(`导入成功：${importResult.value.newSpuCount} 个 SPU，${importResult.value.newSkuCount} 个 SKU`)
       loadPage(); importFile.value = null; uploadRef.value?.clearFiles()
     }
-  } catch (e) { ElMessage.error('导入失败') } finally { importing.value = false }
+  } catch (e: any) { ElMessage.error('导入失败') } finally { importing.value = false }
 }
 
 function removeExistingDoc() { kbExistingDoc.value = null; kbExistingDocId.value = null }
-function kbDocStatusText(s) { return { uploading: '上传中', parsing: '解析中', indexing: '向量化中', ready: '就绪', error: '失败' }[s] || s || '未知' }
-function kbDocStatusTag(s) { return { ready: 'success', error: 'danger', parsing: 'warning', indexing: 'primary', uploading: 'info' }[s] || 'info' }
-function humanFileSize(n) { if (!n) return '0 B'; const u = ['B', 'KB', 'MB', 'GB']; let i = 0; n = Number(n); while (n >= 1024 && i < u.length - 1) { n /= 1024; i++ }; return n.toFixed(i > 0 ? 1 : 0) + ' ' + u[i] }
-function fmtTime(v) { return v ? new Date(v).toLocaleString('zh-CN', { hour12: false }) : '' }
+function kbDocStatusText(s: any) { return ({ uploading: '上传中', parsing: '解析中', indexing: '向量化中', ready: '就绪', error: '失败' } as Record<string, string>)[s] || s || '未知' }
+function kbDocStatusTag(s: any) { return ({ ready: 'success', error: 'danger', parsing: 'warning', indexing: 'primary', uploading: 'info' } as Record<string, string>)[s] || 'info' }
+function humanFileSize(n: any) { if (!n) return '0 B'; const u = ['B', 'KB', 'MB', 'GB']; let i = 0; n = Number(n); while (n >= 1024 && i < u.length - 1) { n /= 1024; i++ }; return n.toFixed(i > 0 ? 1 : 0) + ' ' + u[i] }
+function fmtTime(v: any) { return v ? new Date(v).toLocaleString('zh-CN', { hour12: false }) : '' }
 </script>
 
 <style scoped>

@@ -81,20 +81,20 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { getUserPoints, checkin, getCheckinDates, listPointsProducts, redeemPoints } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
-const points = ref(null)
-const products = ref([])
-const checkinDates = ref([])
+const points = ref<any>(null)
+const products = ref<any[]>([])
+const checkinDates = ref<any[]>([])
 const todayCheckedIn = ref(false)
 const checkingIn = ref(false)
 
 const redeemVisible = ref(false)
-const redeemTarget = ref(null)
+const redeemTarget = ref<any>(null)
 const redeeming = ref(false)
 
 /**
@@ -114,7 +114,7 @@ const monthDays = computed(() => {
   const year = now.getFullYear()
   const month = now.getMonth()
   const days = new Date(year, month + 1, 0).getDate()
-  const result = []
+  const result: any[] = []
   for (let d = 1; d <= days; d++) {
     const s = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
     result.push(s)
@@ -139,7 +139,7 @@ async function loadData() {
 
     const today = new Date().toISOString().slice(0, 10)
     todayCheckedIn.value = (datesRes || []).includes(today)
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载失败')
   } finally {
     loading.value = false
@@ -161,7 +161,7 @@ async function doCheckin() {
     } else {
       ElMessage.info(res?.message || '今日已签到')
     }
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '签到失败')
   } finally {
     checkingIn.value = false
@@ -172,7 +172,7 @@ async function doCheckin() {
  * 打开兑换确认弹窗
  * @param {Object} p - 要兑换的商品对象
  */
-function openRedeem(p) {
+function openRedeem(p: any) {
   redeemTarget.value = p
   redeemVisible.value = true
 }
@@ -188,7 +188,7 @@ async function doRedeem() {
     ElMessage.success(`兑换成功！消耗 ${res.pointsCost} 积分`)
     redeemVisible.value = false
     await loadData()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '兑换失败')
   } finally {
     redeeming.value = false

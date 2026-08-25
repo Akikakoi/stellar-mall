@@ -1,5 +1,6 @@
 import { storage } from '@/utils/storage'
 
+// 必须在挂载前同步设置主题,避免首帧闪白/闪黑
 (function initThemeBeforeMount() {
   const STORAGE_KEY = 'app-theme-preference'
   const saved = storage.local.get(STORAGE_KEY)
@@ -40,7 +41,7 @@ const SVG_NO_IMAGE =
 window.__PH = SVG_NO_IMAGE
 
 const app = createApp(App)
-app.config.errorHandler = (err, instance, info) => {
+app.config.errorHandler = (err: unknown, instance: unknown, info: string) => {
   console.error('[Vue error]', info, err)
 }
 const pinia = createPinia()

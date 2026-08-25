@@ -61,7 +61,7 @@
         <el-table-column prop="sort" label="排序" width="80" />
         <el-table-column label="状态" width="90">
           <template #default="{ row }">
-            <el-switch :model-value="row.status === 1" @change="(v) => toggleStatus(row, v)" />
+            <el-switch :model-value="row.status === 1" @change="(v: any) => toggleStatus(row, v)" />
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" />
@@ -113,7 +113,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { pageCategory, saveCategory, updateCategory, deleteCategory, checkCategoryDeletable, setCategoryStatus } from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -126,15 +126,15 @@ const SORT_ORDER_ALLOWED = new Set(['asc', 'desc'])
 
 const loading = ref(false)
 const submitting = ref(false)
-const records = ref([])
+const records = ref<any[]>([])
 const total = ref(0)
 
 // 新增 sortBy / sortOrder，与后端 CategoryPageQueryDTO 字段对齐（null 走默认排序 sort DESC, create_time DESC）
-const query = reactive({ page: 1, pageSize: 10, type: null, sortBy: null, sortOrder: null })
+const query = reactive<any>({ page: 1, pageSize: 10, type: null, sortBy: null, sortOrder: null })
 
 /** 从 storage 还原上次选择的排序维度 + 方向，未知值回默认，保证刷新后保持。 */
 function restoreSort() {
-  const obj = storage.local.getObject(SORT_STORAGE_KEY)
+  const obj: any = storage.local.getObject(SORT_STORAGE_KEY)
   if (obj && SORT_BY_ALLOWED.has(obj.sortBy)) {
     query.sortBy = obj.sortBy
     if (SORT_ORDER_ALLOWED.has(obj.sortOrder)) query.sortOrder = obj.sortOrder
@@ -174,9 +174,9 @@ function onQueryClick() {
 
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
-const formRef = ref(null)
-const form = reactive({ id: null, name: '', type: 1, sort: 0, status: 1 })
-const formRules = {
+const formRef = ref<any>(null)
+const form = reactive<any>({ id: null, name: '', type: 1, sort: 0, status: 1 })
+const formRules: Record<string, any> = {
   name: [{ required: true, message: '请输入分类名称', trigger: 'blur' }],
   type: [{ required: true, message: '请选择类型', trigger: 'change' }]
 }
@@ -186,7 +186,7 @@ async function loadPage() {
   loading.value = true
   try {
     const res = await pageCategory({ ...query })
-    const d = res || {}
+    const d: any = res || {}
     records.value = d.records || d.list || []
     total.value = d.total || 0
   } finally {
@@ -195,7 +195,7 @@ async function loadPage() {
 }
 
 /** 打开新增/编辑分类对话框，create 模式初始化空表单，edit 模式回填数据 */
-function openDialog(mode, row) {
+function openDialog(mode: any, row?: any) {
   dialogMode.value = mode
   if (mode === 'create') {
     Object.assign(form, { id: null, name: '', type: 1, sort: 0, status: 1 })
@@ -214,7 +214,7 @@ function openDialog(mode, row) {
 /** 提交分类表单：校验后保存或更新分类 */
 async function submitForm() {
   if (!formRef.value) return
-  try { await formRef.value.validate() } catch (e) { return }
+  try { await formRef.value.validate() } catch (e: any) { return }
   submitting.value = true
   try {
     if (dialogMode.value === 'create') await saveCategory({ ...form })
@@ -226,30 +226,30 @@ async function submitForm() {
 }
 
 /** 切换分类启用/禁用状态 */
-async function toggleStatus(row, val) {
+async function toggleStatus(row: any, val: any) {
   try {
     await setCategoryStatus(row.id, val ? 1 : 0)
     ElMessage.success(val ? '已启用' : '已禁用')
-  } catch (e) { loadPage() }
+  } catch (e: any) { loadPage() }
 }
 
 /** 删除分类：先预校验是否可删，通过后二次确认再执行删除 */
-async function handleDelete(row) {
+async function handleDelete(row: any) {
   // 阶段 1：预校验（后端 checkDeletable 会查「作用域 = 分类 + 子分类」下的商品数量与子分类数量）
   let deletable = true
   let reason = ''
   try {
     const res = await checkCategoryDeletable(row.id)
-    const d = res || {}
+    const d: any = res || {}
     deletable = d.deletable !== false
     if (!deletable) {
-      const parts = []
+      const parts: any[] = []
       if (typeof d.linkedSpuCount === 'number') parts.push(`关联商品 ${d.linkedSpuCount} 个`)
       if (typeof d.childCount === 'number') parts.push(`子分类 ${d.childCount} 个`)
       const detail = parts.length ? `（${parts.join('，')}）` : ''
       reason = (d.reason || '当前分类禁止删除') + detail
     }
-  } catch (e) {
+  } catch (e: any) {
     // 预校验接口异常：保守起见仍允许走确认 → 最终后端 Service 仍会做最终防线拦截
   }
 
@@ -264,7 +264,7 @@ async function handleDelete(row) {
   // 阶段 3：预校验通过 → 进入传统二次确认
   try {
     await ElMessageBox.confirm(`确定删除分类「${row.name}」？删除后无法恢复。`, '提示', { type: 'warning' })
-  } catch (e) {
+  } catch (e: any) {
     // 用户点取消
     return
   }
@@ -272,7 +272,7 @@ async function handleDelete(row) {
     await deleteCategory(row.id)
     ElMessage.success('已删除')
     loadPage()
-  } catch (e) {
+  } catch (e: any) {
     // 后端 Service 最终防线的拒绝消息（以防绕过预校验直接调 API 的场景）
     const msg = (e && e.response && e.response.data && e.response.data.msg) || e?.message || '删除失败'
     ElMessage.error(msg)

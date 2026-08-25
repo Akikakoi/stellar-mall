@@ -142,7 +142,7 @@
             v-for="m in chatStore.messages"
             :key="m.id"
             :msg="m"
-            :conversation-id="chatStore.activeId"
+            :conversation-id="chatStore.activeId as any"
             :current-query="currentQueryOf(m)"
           />
         </template>
@@ -193,7 +193,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import {
@@ -212,20 +212,20 @@ const userStore = useUserStore()
 const chatStore = useChatStore()
 const router = useRouter()
 const route = useRoute()
-let activeController = null
+let activeController: any = null
 let leaving = false
 
 const input = ref('')
-const msgsRef = ref(null)
+const msgsRef = ref<any>(null)
 const loadingList = ref(false)
 const loadingMsgs = ref(false)
 const inputFocused = ref(false)
 const lastAssistantStreaming = computed(() =>
-  chatStore.messages.some(m => m.streaming)
+  chatStore.messages.some((m: any) => m.streaming)
 )
 
 const currentConvTitle = computed(() => {
-  const c = chatStore.conversations.find(x => x.id === chatStore.activeId)
+  const c = chatStore.conversations.find((x: any) => x.id === chatStore.activeId)
   return c?.title
 })
 
@@ -245,11 +245,11 @@ const prompts = [
  * @param {Object} m - 消息对象
  * @returns {string} 用户问题内容
  */
-function currentQueryOf(m) {
+function currentQueryOf(m: any) {
   if (m.role !== 'assistant') return ''
   const idx = chatStore.messages.indexOf(m)
   for (let i = idx - 1; i >= 0; i--) {
-    if (chatStore.messages[i].role === 'user') return chatStore.messages[i].content
+    if (chatStore.messages[i]!.role === 'user') return chatStore.messages[i]!.content
   }
   return ''
 }
@@ -275,9 +275,9 @@ async function ensureActiveFromUrl() {
   const urlId = route.params.conversationId
   if (!urlId) return
   if (!chatStore.conversations.length) await fetchConvs()
-  const exists = chatStore.conversations.some(c => String(c.id) === String(urlId))
+  const exists = chatStore.conversations.some((c: any) => String(c.id) === String(urlId))
   if (exists && String(chatStore.activeId || '') !== String(urlId)) {
-    chatStore.setActive(String(urlId))
+    chatStore.setActive(String(urlId) as any)
   }
 }
 
@@ -299,7 +299,7 @@ function scrollToBottom(force = false) {
 async function fetchConvs() {
   loadingList.value = true
   try { await chatStore.fetchConversations() }
-  catch (e) { /* 静默处理，不影响主流程 */ }
+  catch (e: any) { /* 静默处理，不影响主流程 */ }
   finally { loadingList.value = false }
 }
 
@@ -311,13 +311,13 @@ async function loadActiveMsgs() {
   if (!chatStore.activeId) { chatStore.messages = []; return }
   loadingMsgs.value = true
   try { await chatStore.loadActive() }
-  catch (e) {
+  catch (e: any) {
     console.warn('[RagChat] 加载消息失败，跳转到新会话:', e)
     chatStore.messages = []
     chatStore.activeId = null
     syncUrlWithActiveId()
     if (chatStore.conversations.length > 0) {
-      chatStore.setActive(chatStore.conversations[0].id)
+      chatStore.setActive(chatStore.conversations[0]!.id)
     }
   }
   finally { loadingMsgs.value = false; scrollToBottom(true) }
@@ -341,23 +341,23 @@ onMounted(async () => {
   window.addEventListener('resize', updateLayoutHeight)
   try {
     await fetchConvs()
-  } catch (e) { /* 网络异常不影响页面加载 */ }
+  } catch (e: any) { /* 网络异常不影响页面加载 */ }
   const urlId = route.params.conversationId
   if (urlId) {
     await ensureActiveFromUrl()
   }
   if (!chatStore.activeId && chatStore.conversations.length) {
-    chatStore.setActive(chatStore.conversations[0].id)
+    chatStore.setActive(chatStore.conversations[0]!.id)
   }
   syncUrlWithActiveId()
   try {
     await loadActiveMsgs()
-  } catch (e) { /* 加载消息失败不影响页面 */ }
+  } catch (e: any) { /* 加载消息失败不影响页面 */ }
 })
 
 // 路由离开前标记 leaving，不再中止 SSE 连接
 // SSE 会在后台继续流式传输，确保消息不丢失
-onBeforeRouteLeave((to, from, next) => {
+onBeforeRouteLeave((to: any, from: any, next: any) => {
   leaving = true
   document.body.style.overflow = ''
   next()
@@ -403,7 +403,7 @@ async function startNew() {
  * 切换到指定会话
  * @param {string} id - 会话 ID
  */
-async function switchConv(id) {
+async function switchConv(id: any) {
   if (id === chatStore.activeId) return
   chatStore.setActive(id)
   input.value = ''
@@ -413,7 +413,7 @@ async function switchConv(id) {
  * 弹出对话框重命名会话
  * @param {Object} c - 会话对象
  */
-async function onRename(c) {
+async function onRename(c: any) {
   try {
     const { value } = await ElMessageBox.prompt('会话标题', '重命名', {
       inputValue: c.title, inputPattern: /.+/, inputErrorMessage: '不能为空',
@@ -425,7 +425,7 @@ async function onRename(c) {
  * 删除指定会话
  * @param {string} id - 会话 ID
  */
-async function onDelete(id) {
+async function onDelete(id: any) {
   await chatStore.remove(id)
   input.value = ''
   scrollToBottom(true)
@@ -435,7 +435,7 @@ async function onDelete(id) {
  * 处理用户下拉菜单命令，分发路由跳转或退出登录
  * @param {string} cmd - 命令标识 ('profile'|'kb'|'dash'|'logout')
  */
-function onUserCmd(cmd) {
+function onUserCmd(cmd: any) {
   if (cmd === 'profile') router.push('/me')
   else if (cmd === 'kb') router.push('/admin/kb')
   else if (cmd === 'dash') router.push('/admin/dashboard')
@@ -452,7 +452,7 @@ function onLogout() {
  * 返回首页（新建会话状态），清空活跃会话
  */
 function goHome() {
-  chatStore.setActive(null)
+  chatStore.setActive(null as any)
   router.replace('/rag/chat').catch(() => {})
 }
 
@@ -472,7 +472,7 @@ async function onSend() {
  * 实时解析 token 流并更新助手消息，处理 sources / done 等事件
  * @param {string} text - 用户输入的问题文本
  */
-async function send(text) {
+async function send(text: any) {
   input.value = text
   if (chatStore.loading) return
   loadingMsgRef.value = true
@@ -480,7 +480,7 @@ async function send(text) {
     if (!chatStore.activeId) {
       await chatStore.createConversation('新的对话')
     }
-  } catch (e) {
+  } catch (e: any) {
     loadingMsgRef.value = false
     ElMessage.error('创建会话失败，请重试')
     return
@@ -517,11 +517,11 @@ async function send(text) {
       throw new Error('请求失败')
     }
 
-    const reader = resp.body.getReader()
+    const reader = resp.body!.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
     let fullContent = ''
-    let sourcesData = []
+    let sourcesData: any[] = []
     let tokensUsed = 0
     let latencyMs = 0
     let mode = 'smart'
@@ -567,7 +567,7 @@ async function send(text) {
       mode,
     })
     scrollToBottom(true)
-  } catch (e) {
+  } catch (e: any) {
     if (e?.name !== 'AbortError') {
       ElMessage.error('生成失败：' + (e?.message || '未知错误'))
       chatStore.updateAssistant(asstId, {
@@ -589,9 +589,9 @@ async function send(text) {
  * @param {string} block - SSE 原始文本块（event: xxx\ndata: xxx 格式）
  * @returns {{ event: string, data: * }|null} 解析后的事件对象，失败返回 null
  */
-function parseEvent(block) {
+function parseEvent(block: any) {
   if (!block) return null
-  let event = 'token'; let data = null
+  let event = 'token'; let data: any = null
   const lines = block.split(/\r?\n/)
   for (const line of lines) {
     if (!line) continue

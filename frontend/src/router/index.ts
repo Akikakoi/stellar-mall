@@ -1,20 +1,18 @@
 /**
  * Vue Router 路由配置
  *
- * 模块职责：
- * - 定义前端所有路由（用户端 + 管理后台）
- * - 路由元信息（title、权限标识）
- * - 全局前置守卫：登录态校验、页面标题设置
+ * 模块职责:
+ * - 定义前端所有路由(用户端 + 管理后台)
+ * - 路由元信息(title、权限标识)
+ * - 全局前置守卫:登录态校验、页面标题设置
  *
- * 路由分组：
- * - 公开路由：登录、注册、首页、搜索、商品详情、购物车
- * - 用户路由：需登录的订单、售后、个人中心等
- * - 管理后台路由：嵌入 /admin/_Layout 的子路由，需管理员权限
- * - 兜底路由：未匹配路径重定向到登录页
- *
- * @module router
+ * 路由分组:
+ * - 公开路由:登录、注册、首页、搜索、商品详情、购物车
+ * - 用户路由:需登录的订单、售后、个人中心等
+ * - 管理后台路由:嵌入 /admin/_Layout 的子路由,需管理员权限
+ * - 兜底路由:未匹配路径重定向到登录页
  */
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useAdminStore } from '@/stores/admin'
 import { storage } from '@/utils/storage'
@@ -22,17 +20,13 @@ import { storage } from '@/utils/storage'
 const USER_TOKEN_KEY = 'stellar_user_token'
 const ADMIN_TOKEN_KEY = 'stellar_admin_token'
 
-/**
- * 安全地从 localStorage 读取值，封装 storage.local.get
- * @param {string} key - 存储键名
- * @returns {string|null} 存储的值
- */
-function safeGetItem(key) {
+/** 安全地从 localStorage 读取值,封装 storage.local.get */
+function safeGetItem(key: string): string | null {
   return storage.local.get(key)
 }
 
-const routes = [
-  // ==================== 公开路由（无需登录） ====================
+const routes: RouteRecordRaw[] = [
+  // ==================== 公开路由(无需登录) ====================
   {
     path: '/login',
     name: 'Login',
@@ -163,7 +157,7 @@ const routes = [
     component: () => import('@/views/user/RagChat.vue'),
     meta: { title: '智能问答', requiresUserAuth: true }
   },
-  // ==================== 管理后台路由（需管理员权限） ====================
+  // ==================== 管理后台路由(需管理员权限) ====================
   {
     path: '/admin/login',
     name: 'AdminLogin',
@@ -283,7 +277,7 @@ const routes = [
       }
     ]
   },
-  // ==================== 兜底路由（未匹配路径） ====================
+  // ==================== 兜底路由(未匹配路径) ====================
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
@@ -297,10 +291,10 @@ const router = createRouter({
 })
 
 /**
- * 全局前置守卫：页面标题设置 + 用户/管理员登录态校验
+ * 全局前置守卫:页面标题设置 + 用户/管理员登录态校验
  * - 根据路由 meta.title 设置 document.title
- * - requiresUserAuth：未登录用户重定向到 /login
- * - requiresAdminAuth：未登录管理员重定向到 /admin/login
+ * - requiresUserAuth:未登录用户重定向到 /login
+ * - requiresAdminAuth:未登录管理员重定向到 /admin/login
  */
 router.beforeEach((to, from, next) => {
   const title = to.meta?.title

@@ -92,7 +92,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest } from '@/api/request'
@@ -101,22 +101,22 @@ const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
-const editId = ref(null)
+const editId = ref<any>(null)
 const keyword = ref('')
-const filterStatus = ref(null)
-const list = ref([])
+const filterStatus = ref<any>(null)
+const list = ref<any[]>([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(10)
-const formRef = ref(null)
-const dateRange = ref([])
+const formRef = ref<any>(null)
+const dateRange = ref<any[]>([])
 
-const form = reactive({
+const form = reactive<any>({
   name: '', type: 1, conditionAmount: 0, discountAmount: 10,
   totalCount: 100, perUserLimit: 1, status: 1
 })
 
-const rules = {
+const rules: Record<string, any> = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
   type: [{ required: true }],
   conditionAmount: [{ required: true }],
@@ -136,20 +136,20 @@ function resetForm() {
 async function load() {
   loading.value = true
   try {
-    const params = { page: pageNum.value, pageSize: pageSize.value }
+    const params: Record<string, any> = { page: pageNum.value, pageSize: pageSize.value }
     if (keyword.value) params.name = keyword.value
     if (filterStatus.value !== null && filterStatus.value !== undefined) params.status = filterStatus.value
-    const res = await adminRequest({ url: '/admin/coupon/page', method: 'get', params })
-    const d = res?.data || res || {}
+    const res: any = await adminRequest({ url: '/admin/coupon/page', method: 'get', params })
+    const d: any = res?.data || res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {} finally { loading.value = false }
+  } catch (e: any) {} finally { loading.value = false }
 }
 
 /** 打开新增优惠券对话框，重置表单 */
 function openAdd() { resetForm(); dialogVisible.value = true }
 /** 打开编辑优惠券对话框，回填已有数据 */
-function openEdit(row) {
+function openEdit(row: any) {
   isEdit.value = true; editId.value = row.id
   form.name = row.name; form.type = row.type; form.conditionAmount = row.conditionAmount
   form.discountAmount = row.discountAmount; form.totalCount = row.totalCount
@@ -164,7 +164,7 @@ async function handleSave() {
   if (!valid) return
   submitting.value = true
   try {
-    const data = { ...form }
+    const data: Record<string, any> = { ...form }
     if (dateRange.value && dateRange.value.length === 2) {
       data.startTime = dateRange.value[0]
       data.endTime = dateRange.value[1]
@@ -179,17 +179,17 @@ async function handleSave() {
     }
     dialogVisible.value = false
     await load()
-  } catch (e) { ElMessage.error('操作失败') } finally { submitting.value = false }
+  } catch (e: any) { ElMessage.error('操作失败') } finally { submitting.value = false }
 }
 
 /** 删除优惠券，二次确认后执行 */
-async function handleDelete(id) {
+async function handleDelete(id: any) {
   try {
     await ElMessageBox.confirm('确定删除？', '提示', { type: 'warning' })
     await adminRequest({ url: `/admin/coupon/${id}`, method: 'delete' })
     ElMessage.success('已删除')
     await load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 onMounted(load)

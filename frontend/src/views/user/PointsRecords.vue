@@ -72,22 +72,22 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getUserPoints, listPointsRecords, listPointsRedemptions } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 
-const points = ref(null)
+const points = ref<any>(null)
 const activeTab = ref('records')
 
 const recLoading = ref(false)
-const records = ref([])
+const records = ref<any[]>([])
 const recPage = ref(1)
 const recPageSize = ref(15)
 const recTotal = ref(0)
 
 const redLoading = ref(false)
-const redemptions = ref([])
+const redemptions = ref<any[]>([])
 const redPage = ref(1)
 const redPageSize = ref(15)
 const redTotal = ref(0)
@@ -97,8 +97,8 @@ const redTotal = ref(0)
  * @param {number} type - 积分流水类型
  * @returns {string} Tag 类型
  */
-function recTypeTag(type) {
-  const map = { 1: 'success', 2: 'danger', 3: 'warning', 4: 'info' }
+function recTypeTag(type: any) {
+  const map: Record<string, any> = { 1: 'success', 2: 'danger', 3: 'warning', 4: 'info' }
   return map[type] || 'info'
 }
 
@@ -107,8 +107,8 @@ function recTypeTag(type) {
  * @param {number} status - 兑换状态
  * @returns {string} Tag 类型
  */
-function redStatusTag(status) {
-  const map = { 1: 'warning', 2: 'success', 3: 'info' }
+function redStatusTag(status: any) {
+  const map: Record<string, any> = { 1: 'warning', 2: 'success', 3: 'info' }
   return map[status] || 'info'
 }
 
@@ -117,8 +117,8 @@ function redStatusTag(status) {
  * @param {number} status - 兑换状态
  * @returns {string} 状态文本
  */
-function redStatusText(status) {
-  const map = { 1: '已兑换', 2: '已发放', 3: '已取消' }
+function redStatusText(status: any) {
+  const map: Record<string, any> = { 1: '已兑换', 2: '已发放', 3: '已取消' }
   return map[status] || '未知'
 }
 
@@ -129,7 +129,7 @@ async function loadSummary() {
   try {
     const res = await getUserPoints()
     points.value = res || { availablePoints: 0, totalEarned: 0, totalSpent: 0 }
-  } catch (e) {
+  } catch (e: any) {
     // silent
   }
 }
@@ -141,10 +141,10 @@ async function loadRecords() {
   recLoading.value = true
   try {
     const res = await listPointsRecords({ page: recPage.value, pageSize: recPageSize.value })
-    const d = res || {}
+    const d: any = res || {}
     records.value = d.records || d.list || []
     recTotal.value = d.total || 0
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载流水失败')
   } finally {
     recLoading.value = false
@@ -158,10 +158,10 @@ async function loadRedemptions() {
   redLoading.value = true
   try {
     const res = await listPointsRedemptions({ page: redPage.value, pageSize: redPageSize.value })
-    const d = res || {}
+    const d: any = res || {}
     redemptions.value = d.records || d.list || []
     redTotal.value = d.total || 0
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载兑换记录失败')
   } finally {
     redLoading.value = false
@@ -172,7 +172,7 @@ async function loadRedemptions() {
  * Tab 切换回调，首次切换到对应 tab 时懒加载数据
  * @param {string} tab - 当前激活的 tab 名称
  */
-function onTabChange(tab) {
+function onTabChange(tab: any) {
   if (tab === 'records' && records.value.length === 0) loadRecords()
   if (tab === 'redemptions' && redemptions.value.length === 0) loadRedemptions()
 }

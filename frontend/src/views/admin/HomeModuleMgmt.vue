@@ -188,7 +188,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest, userRequest } from '@/api/request'
@@ -204,11 +204,11 @@ const MODULE_TYPES = [
   { value: 'SINGLE_IMAGE',     label: '单图广告',    icon: '🖼️' }
 ]
 
-const TYPE_MAP = Object.fromEntries(MODULE_TYPES.map(t => [t.value, t]))
-function typeLabel(type) { return TYPE_MAP[type]?.label || type }
-function typeIcon(type) { return TYPE_MAP[type]?.icon || '📦' }
-function typeTagColor(type) {
-  const colors = { BANNER: 'danger', HOT_PRODUCTS: 'warning', NEW_PRODUCTS: 'success', CATEGORY_SHOWCASE: '', COUPON_ENTRY: 'primary', PRODUCT_GRID: 'warning', SINGLE_IMAGE: 'info' }
+const TYPE_MAP = Object.fromEntries(MODULE_TYPES.map((t: any) => [t.value, t]))
+function typeLabel(type: any) { return TYPE_MAP[type]?.label || type }
+function typeIcon(type: any) { return TYPE_MAP[type]?.icon || '📦' }
+function typeTagColor(type: any) {
+  const colors: Record<string, any> = { BANNER: 'danger', HOT_PRODUCTS: 'warning', NEW_PRODUCTS: 'success', CATEGORY_SHOWCASE: '', COUPON_ENTRY: 'primary', PRODUCT_GRID: 'warning', SINGLE_IMAGE: 'info' }
   return colors[type] || ''
 }
 
@@ -217,16 +217,16 @@ const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
-const editId = ref(null)
-const list = ref([])
-const formRef = ref(null)
-const allCategories = ref([])
-const spuOptions = ref([])
+const editId = ref<any>(null)
+const list = ref<any[]>([])
+const formRef = ref<any>(null)
+const allCategories = ref<any[]>([])
+const spuOptions = ref<any[]>([])
 const spuSearchLoading = ref(false)
-const bannerSpuOptions = ref([])
+const bannerSpuOptions = ref<any[]>([])
 const bannerSpuSearchLoading = ref(false)
 
-const form = reactive({
+const form = reactive<any>({
   type: 'HOT_PRODUCTS',
   title: '',
   categoryId: null,
@@ -239,7 +239,7 @@ const form = reactive({
   status: 1
 })
 
-const titlePlaceholder = {
+const titlePlaceholder: Record<string, any> = {
   BANNER: '如：首页轮播',
   HOT_PRODUCTS: '如：热门推荐',
   NEW_PRODUCTS: '如：新品上市',
@@ -249,7 +249,7 @@ const titlePlaceholder = {
   SINGLE_IMAGE: '如：限时活动'
 }
 
-const rules = {
+const rules: Record<string, any> = {
   type: [{ required: true, message: '请选择模块类型', trigger: 'change' }],
   title: [{ required: true, message: '请输入模块标题', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
@@ -257,7 +257,7 @@ const rules = {
   imageUrl: [{ required: true, message: '请输入图片URL', trigger: 'blur' }]
 }
 
-function parsedConfig(item) {
+function parsedConfig(item: any) {
   try {
     return JSON.parse(item.config || '{}')
   } catch {
@@ -269,18 +269,18 @@ function parsedConfig(item) {
 const dragIdx = ref(-1)
 const dragOverIdx = ref(-1)
 
-function onDragStart(e, idx) {
+function onDragStart(e: any, idx: any) {
   dragIdx.value = idx
   e.dataTransfer.effectAllowed = 'move'
 }
-function onDragOver(e, idx) {
+function onDragOver(e: any, idx: any) {
   dragOverIdx.value = idx
 }
 function onDragEnd() {
   dragIdx.value = -1
   dragOverIdx.value = -1
 }
-async function onDrop(e, toIdx) {
+async function onDrop(e: any, toIdx: any) {
   dragOverIdx.value = -1
   const fromIdx = dragIdx.value
   dragIdx.value = -1
@@ -291,11 +291,11 @@ async function onDrop(e, toIdx) {
   list.value.splice(toIdx, 0, moved)
 
   // 更新 sort_order 并批量提交
-  const items = list.value.map((item, i) => ({ id: item.id, sortOrder: i }))
+  const items = list.value.map((item: any, i: any) => ({ id: item.id, sortOrder: i }))
   try {
     await adminRequest({ url: '/admin/home-module/batch-sort', method: 'put', data: { items } })
     ElMessage.success('排序已更新')
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('排序更新失败')
     await load()
   }
@@ -305,9 +305,9 @@ async function onDrop(e, toIdx) {
 async function load() {
   loading.value = true
   try {
-    const res = await adminRequest({ url: '/admin/home-module/list', method: 'get' })
+    const res: any = await adminRequest({ url: '/admin/home-module/list', method: 'get' })
     list.value = (Array.isArray(res) ? res : (res?.data || []))
-  } catch (e) {
+  } catch (e: any) {
   } finally {
     loading.value = false
   }
@@ -315,39 +315,39 @@ async function load() {
 
 async function loadCategories() {
   try {
-    const res = await userRequest({ url: '/user/category/list', method: 'get', __silent: true })
+    const res: any = await userRequest({ url: '/user/category/list', method: 'get', __silent: true })
     allCategories.value = flattenCats(res || [])
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
-function flattenCats(list) {
+function flattenCats(list: any) {
   if (!list) return []
-  return list.map(c => ({ id: c.id, name: c.name }))
+  return list.map((c: any) => ({ id: c.id, name: c.name }))
 }
 
-async function searchSpu(query) {
+async function searchSpu(query: any) {
   if (!query) { spuOptions.value = []; return }
   spuSearchLoading.value = true
   try {
-    const res = await adminRequest({ url: '/admin/spu/page', method: 'get', params: { name: query, page: 1, pageSize: 20 } })
+    const res: any = await adminRequest({ url: '/admin/spu/page', method: 'get', params: { name: query, page: 1, pageSize: 20 } })
     const records = res?.records || res?.list || (res?.data?.records) || []
-    spuOptions.value = records.map(r => ({ id: r.id, name: r.name }))
-  } catch (e) {
+    spuOptions.value = records.map((r: any) => ({ id: r.id, name: r.name }))
+  } catch (e: any) {
   } finally {
     spuSearchLoading.value = false
   }
 }
 
-async function searchBannerSpu(query) {
+async function searchBannerSpu(query: any) {
   bannerSpuSearchLoading.value = true
   try {
-    const params = { page: 1, pageSize: 20 }
+    const params: Record<string, any> = { page: 1, pageSize: 20 }
     if (query) params.name = query
     if (form.categoryId) params.categoryId = form.categoryId
-    const res = await adminRequest({ url: '/admin/spu/page', method: 'get', params })
+    const res: any = await adminRequest({ url: '/admin/spu/page', method: 'get', params })
     const records = res?.records || res?.list || (res?.data?.records) || []
-    bannerSpuOptions.value = records.map(r => ({ id: r.id, name: r.name }))
-  } catch (e) {
+    bannerSpuOptions.value = records.map((r: any) => ({ id: r.id, name: r.name }))
+  } catch (e: any) {
   } finally {
     bannerSpuSearchLoading.value = false
   }
@@ -376,7 +376,7 @@ function openAdd() {
   dialogVisible.value = true
 }
 
-function openEdit(item) {
+function openEdit(item: any) {
   isEdit.value = true
   editId.value = item.id
   form.type = item.type
@@ -401,7 +401,7 @@ function openEdit(item) {
 }
 
 function buildConfig() {
-  const cfg = {}
+  const cfg: Record<string, any> = {}
   if (form.type === 'CATEGORY_SHOWCASE') {
     cfg.categoryId = form.categoryId
     cfg.displayCount = form.displayCount
@@ -430,7 +430,7 @@ async function handleSave() {
 
   submitting.value = true
   try {
-    const data = {
+    const data: Record<string, any> = {
       type: form.type,
       title: form.title,
       config: buildConfig(),
@@ -446,22 +446,22 @@ async function handleSave() {
     }
     dialogVisible.value = false
     await load()
-  } catch (e) {
+  } catch (e: any) {
   } finally {
     submitting.value = false
   }
 }
 
-async function handleDelete(id) {
+async function handleDelete(id: any) {
   try {
     await ElMessageBox.confirm('确定删除该模块？', '提示', { type: 'warning' })
     await adminRequest({ url: `/admin/home-module/${id}`, method: 'delete' })
     ElMessage.success('已删除')
     await load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
-async function toggleStatus(item) {
+async function toggleStatus(item: any) {
   item._saving = true
   const next = item.status === 1 ? 0 : 1
   try {
@@ -472,7 +472,7 @@ async function toggleStatus(item) {
     })
     item.status = next
     ElMessage.success(next === 1 ? '已启用' : '已禁用')
-  } catch (e) {
+  } catch (e: any) {
   } finally {
     item._saving = false
   }

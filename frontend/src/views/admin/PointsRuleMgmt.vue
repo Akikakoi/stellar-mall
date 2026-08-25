@@ -111,18 +111,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { listPointsRules, savePointsRule, deletePointsRule, adjustPoints } from '@/api/admin'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
-const rules = ref([])
+const rules = ref<any[]>([])
 
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const saving = ref(false)
-const formRef = ref(null)
+const formRef = ref<any>(null)
 
 const defaultForm = () => ({
   id: null, ruleType: 'CHECKIN', ruleName: '', earnPoints: 5,
@@ -131,21 +131,21 @@ const defaultForm = () => ({
 })
 const form = ref(defaultForm())
 
-const rules_validate = {
+const rules_validate: Record<string, any> = {
   ruleType: [{ required: true, message: '请选择规则类型', trigger: 'change' }],
   ruleName: [{ required: true, message: '请输入规则名称', trigger: 'blur' }],
   earnPoints: [{ required: true, message: '请输入积分数', trigger: 'blur' }],
 }
 
-const adjustForm = ref({ userId: '', points: 0, description: '' })
+const adjustForm = ref<any>({ userId: '', points: 0, description: '' })
 const adjusting = ref(false)
 
-function ruleTypeTag(type) {
-  const map = { ORDER: 'primary', CHECKIN: 'success', REVIEW: 'warning' }
+function ruleTypeTag(type: any) {
+  const map: Record<string, any> = { ORDER: 'primary', CHECKIN: 'success', REVIEW: 'warning' }
   return map[type] || 'info'
 }
-function ruleTypeText(type) {
-  const map = { ORDER: '下单', CHECKIN: '签到', REVIEW: '评价' }
+function ruleTypeText(type: any) {
+  const map: Record<string, any> = { ORDER: '下单', CHECKIN: '签到', REVIEW: '评价' }
   return map[type] || type
 }
 
@@ -154,12 +154,12 @@ async function load() {
   try {
     const res = await listPointsRules()
     rules.value = res || []
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('加载规则失败')
   } finally { loading.value = false }
 }
 
-function openEdit(row) {
+function openEdit(row: any) {
   isEdit.value = true
   form.value = { ...row }
   dialogVisible.value = true
@@ -179,17 +179,17 @@ async function doSave() {
     ElMessage.success('保存成功')
     dialogVisible.value = false
     await load()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '保存失败')
   } finally { saving.value = false }
 }
 
-async function handleDelete(id) {
+async function handleDelete(id: any) {
   try {
     await deletePointsRule(id)
     ElMessage.success('删除成功')
     await load()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '删除失败')
   }
 }
@@ -212,7 +212,7 @@ async function doAdjust() {
     })
     ElMessage.success('调整成功')
     adjustForm.value = { userId: '', points: 0, description: '' }
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '调整失败')
   } finally { adjusting.value = false }
 }

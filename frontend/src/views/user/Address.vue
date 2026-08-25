@@ -101,7 +101,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, LocationFilled } from '@element-plus/icons-vue'
@@ -117,10 +117,10 @@ const loading = ref(false)
 const submitting = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
-const formRef = ref(null)
-const addresses = ref([])
+const formRef = ref<any>(null)
+const addresses = ref<any[]>([])
 
-const form = reactive({
+const form = reactive<any>({
   id: null,
   consignee: '',
   phone: '',
@@ -133,12 +133,12 @@ const form = reactive({
 
 const PHONE_REGEXP = /^1[3-9]\d{9}$/
 
-const rules = {
+const rules: Record<string, any> = {
   consignee: [{ required: true, message: '请输入收货人', trigger: 'blur' }],
   phone: [
     { required: true, message: '请输入联系电话', trigger: 'blur' },
     {
-      validator: (_rule, value, callback) => {
+      validator: (_rule: any, value: any, callback: any) => {
         if (!value || PHONE_REGEXP.test(value)) {
           callback()
         } else {
@@ -168,8 +168,8 @@ async function loadAddresses() {
   loading.value = true
   try {
     const res = await listAddresses()
-    addresses.value = Array.isArray(res) ? res : (res?.data || [])
-  } catch (e) {
+    addresses.value = Array.isArray(res) ? res : ((res as any)?.data || [])
+  } catch (e: any) {
     ElMessage.error(e?.message || '加载地址失败')
   } finally {
     loading.value = false
@@ -187,7 +187,7 @@ function openAdd() {
  * 打开编辑地址弹窗并回填已有地址数据
  * @param {Object} addr - 要编辑的地址对象
  */
-function openEdit(addr) {
+function openEdit(addr: any) {
   isEdit.value = true
   form.id = addr.id
   form.consignee = addr.consignee || ''
@@ -218,7 +218,7 @@ async function handleSave() {
     dialogVisible.value = false
     resetForm()
     await loadAddresses()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.message || '操作失败')
   } finally {
     submitting.value = false
@@ -229,13 +229,13 @@ async function handleSave() {
  * 确认后删除指定地址
  * @param {number} id - 地址 ID
  */
-async function handleDelete(id) {
+async function handleDelete(id: any) {
   try {
     await ElMessageBox.confirm('确定删除该地址？', '提示', { type: 'warning' })
     await deleteAddress(id)
     ElMessage.success('已删除')
     await loadAddresses()
-  } catch (e) {
+  } catch (e: any) {
     // 取消删除无需提示
   }
 }
@@ -244,14 +244,14 @@ async function handleDelete(id) {
  * 将指定地址设为默认地址
  * @param {number} id - 地址 ID
  */
-async function handleSetDefault(id) {
-  const addr = addresses.value.find(a => a.id === id)
+async function handleSetDefault(id: any) {
+  const addr = addresses.value.find((a: any) => a.id === id)
   if (addr?.isDefault === 1) return
   try {
     await setDefaultAddress(id)
     ElMessage.success('已设为默认地址')
     await loadAddresses()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.message || '操作失败')
   }
 }

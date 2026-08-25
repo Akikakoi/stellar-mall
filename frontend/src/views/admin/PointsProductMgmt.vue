@@ -98,15 +98,15 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { pagePointsProducts, savePointsProduct, deletePointsProduct } from '@/api/admin'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
-const list = ref([])
+const list = ref<any[]>([])
 const keyword = ref('')
-const filterStatus = ref(null)
+const filterStatus = ref<any>(null)
 const pageNum = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -114,7 +114,7 @@ const total = ref(0)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const saving = ref(false)
-const formRef = ref(null)
+const formRef = ref<any>(null)
 
 const defaultForm = () => ({
   id: null, name: '', productType: 'COUPON', pointsPrice: 100,
@@ -123,7 +123,7 @@ const defaultForm = () => ({
 })
 const form = ref(defaultForm())
 
-const rules = {
+const rules: Record<string, any> = {
   name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
   productType: [{ required: true, message: '请选择商品类型', trigger: 'change' }],
   pointsPrice: [{ required: true, message: '请输入所需积分', trigger: 'blur' }],
@@ -138,10 +138,10 @@ async function load() {
       page: pageNum.value,
       pageSize: pageSize.value
     })
-    const d = res || {}
+    const d: any = res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('加载失败')
   } finally { loading.value = false }
 }
@@ -152,7 +152,7 @@ function openAdd() {
   dialogVisible.value = true
 }
 
-function openEdit(row) {
+function openEdit(row: any) {
   isEdit.value = true
   form.value = { ...row }
   dialogVisible.value = true
@@ -172,17 +172,17 @@ async function doSave() {
     ElMessage.success('保存成功')
     dialogVisible.value = false
     await load()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '保存失败')
   } finally { saving.value = false }
 }
 
-async function handleDelete(id) {
+async function handleDelete(id: any) {
   try {
     await deletePointsProduct(id)
     ElMessage.success('删除成功')
     await load()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '删除失败')
   }
 }

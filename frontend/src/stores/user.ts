@@ -1,11 +1,12 @@
 /**
  * 用户状态管理 Store。
- * 管理用户登录态、个人信息，数据持久化到 localStorage。
+ * 管理用户登录态、个人信息,数据持久化到 localStorage。
  */
 import { defineStore } from 'pinia'
 import { loginUser, getCurrentUser } from '@/api/mall'
 import { userRequest } from '@/api/request'
 import { storage } from '@/utils/storage'
+import type { LoginPayload, LoginResult, UserInfo } from '@/types/models'
 
 const TOKEN_KEY = 'stellar_user_token'
 const USER_ID_KEY = 'stellar_user_id'
@@ -15,12 +16,12 @@ const ROLE_KEY = 'stellar_user_role'
 const REFRESH_TOKEN_KEY = 'stellar_user_refresh_token'
 
 /** 从 localStorage 读取 */
-function safeGet(key) {
+function safeGet(key: string): string | null {
   return storage.local.get(key)
 }
 
-/** 写入 localStorage，值为 null/undefined 时删除 */
-function safeSet(key, value) {
+/** 写入 localStorage,值为 null/undefined 时删除 */
+function safeSet(key: string, value: unknown) {
   if (value === null || value === undefined) {
     storage.local.remove(key)
   } else {
@@ -29,23 +30,32 @@ function safeSet(key, value) {
 }
 
 /** 从 localStorage 删除 */
-function safeRemove(key) {
+function safeRemove(key: string) {
   storage.local.remove(key)
 }
 
+interface UserState {
+  /** 用户 ID */
+  userId: number | null
+  /** 登录 Token(access) */
+  token: string
+  /** Refresh Token(用于 access 过期后换新) */
+  refreshToken: string
+  /** 用户昵称 */
+  nickname: string
+  /** 手机号 */
+  phone: string
+  /** 角色:admin / 普通用户 */
+  role: string
+}
+
 export const useUserStore = defineStore('user', {
-  state: () => ({
-    /** 用户 ID */
+  state: (): UserState => ({
     userId: safeGet(USER_ID_KEY) ? Number(safeGet(USER_ID_KEY)) : null,
-    /** 登录 Token（access） */
     token: safeGet(TOKEN_KEY) || '',
-    /** Refresh Token（用于 access 过期后换新） */
     refreshToken: safeGet(REFRESH_TOKEN_KEY) || '',
-    /** 用户昵称 */
     nickname: safeGet(NICKNAME_KEY) || '',
-    /** 手机号 */
     phone: safeGet(PHONE_KEY) || '',
-    /** 角色：admin / 普通用户 */
     role: safeGet(ROLE_KEY) || ''
   }),
 
@@ -65,7 +75,7 @@ export const useUserStore = defineStore('user', {
 
   actions: {
     /** 密码登录 */
-    async login(payload) {
+    async login(payload: LoginPayload): Promise<LoginResult> {
       const res = await loginUser(payload)
       this.token = res.token || ''
       this.refreshToken = res.refreshToken || ''
@@ -85,8 +95,8 @@ export const useUserStore = defineStore('user', {
     },
 
     /** 邮箱验证码登录 */
-    async emailLogin(payload) {
-      const res = await userRequest({
+    async emailLogin(payload: any) {
+      const res = await userRequest<LoginResult>({
         url: '/user/user/email-login',
         method: 'post',
         data: payload
@@ -109,7 +119,7 @@ export const useUserStore = defineStore('user', {
     },
 
     /** 从服务端拉取最新用户信息并更新本地 */
-    async fetchProfile() {
+    async fetchProfile(): Promise<UserInfo | null> {
       try {
         const res = await getCurrentUser()
         if (res.nickname) {
@@ -135,19 +145,19 @@ export const useUserStore = defineStore('user', {
     },
 
     /** 手动设置 Token */
-    setToken(token) {
+    setToken(token: string) {
       this.token = token || ''
       safeSet(TOKEN_KEY, this.token)
     },
 
     /** 手动设置 Refresh Token */
-    setRefreshToken(refreshToken) {
+    setRefreshToken(refreshToken: string) {
       this.refreshToken = refreshToken || ''
       safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
     },
 
-    /** 手动设置用户信息（用于跨页面同步） */
-    setUserInfo(info) {
+    /** 手动设置用户信息(用于跨页面同步) */
+    setUserInfo(info: any) {
       if (!info) return
       if (info.userId || info.id || info.USER_ID) {
         this.userId = info.userId || info.id || info.USER_ID
@@ -172,8 +182,8 @@ export const useUserStore = defineStore('user', {
     },
 
     /**
-     * 退出登录（E4：先调后端写黑名单，再清本地状态）
-     * 即使后端调用失败，仍清本地，保证前端一定登出。
+     * 退出登录(E4:先调后端写黑名单,再清本地状态)
+     * 即使后端调用失败,仍清本地,保证前端一定登出。
      */
     async logout() {
       // E4: 通知后端把 access+refresh token 加入黑名单
@@ -186,7 +196,7 @@ export const useUserStore = defineStore('user', {
             __silent: true
           })
         } catch (e) {
-          // 后端调用失败不阻断前端登出（token 在本地清掉后即不可用）
+          // 后端调用失败不阻断前端登出(token 在本地清掉后即不可用)
         }
       }
       this.userId = null
@@ -201,7 +211,7 @@ export const useUserStore = defineStore('user', {
       safeRemove(NICKNAME_KEY)
       safeRemove(PHONE_KEY)
       safeRemove(ROLE_KEY)
-      // 清除购物车本地缓存，避免换账号后串数据
+      // 清除购物车本地缓存,避免换账号后串数据
       storage.local.remove('stellar_cart_items')
     }
   }
