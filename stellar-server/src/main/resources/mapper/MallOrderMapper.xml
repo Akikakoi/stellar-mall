@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     订单主表 Mapper（stellar_mall_order）
+     覆盖订单全生命周期：创建、状态流转（CAS 防并发）、支付方式、
+     发货、退款标记，以及 C 端列表、M 端分页、导出与财务报表。
+     状态: PENDING 待付款 / PAID 已付款 / SHIPPED 已发货 / REFUNDED 已退款 / CANCELLED 已取消。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.MallOrderMapper">
 
+    <!-- 数据库字段 → 实体属性映射（user_phone 为导出用联表字段） -->
     <resultMap id="MallOrderMap" type="com.stellar.entity.MallOrder">
         <id     property="id"          column="id"/>
         <result property="orderNo"     column="order_no"/>
@@ -26,6 +33,7 @@
         <result property="userPhone"  column="user_phone"/>
     </resultMap>
 
+    <!-- 创建订单（含积分抵扣字段） -->
     <insert id="insert" parameterType="com.stellar.entity.MallOrder"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_mall_order (
@@ -41,6 +49,7 @@
         )
     </insert>
 
+    <!-- 更新订单（动态字段，常规修改用） -->
     <update id="update" parameterType="com.stellar.entity.MallOrder">
         UPDATE stellar_mall_order
         <set>
@@ -74,7 +83,7 @@
         UPDATE stellar_mall_order SET pay_method = #{payMethod} WHERE id = #{id}
     </update>
 
-    <!-- 发货：设置 SHIPPED 状态 + 物流信息 -->
+    <!-- 发货：设置 SHIPPED 状态 + 物流信息（仅限已付款订单） -->
     <update id="ship">
         UPDATE stellar_mall_order
         SET status = 'SHIPPED',
@@ -84,20 +93,24 @@
         WHERE id = #{id} AND status = 'PAID'
     </update>
 
+    <!-- 按 id 查询订单 -->
     <select id="getById" resultMap="MallOrderMap">
         SELECT * FROM stellar_mall_order WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- 按订单号查询 -->
     <select id="getByOrderNo" resultMap="MallOrderMap">
         SELECT * FROM stellar_mall_order WHERE order_no = #{orderNo} LIMIT 1
     </select>
 
+    <!-- C 端：用户全部订单（倒序） -->
     <select id="listByUserId" resultMap="MallOrderMap">
         SELECT * FROM stellar_mall_order
         WHERE user_id = #{userId}
         ORDER BY id DESC
     </select>
 
+    <!-- C 端：用户订单按状态集合过滤（如"待付款/待发货"Tab） -->
     <select id="listByUserIdAndStatus" resultMap="MallOrderMap">
         SELECT * FROM stellar_mall_order
         WHERE user_id = #{userId}
@@ -108,6 +121,7 @@
         ORDER BY id DESC
     </select>
 
+    <!-- M 端：全量分页查询，支持状态/订单号/时间范围过滤（结束日期含当天） -->
     <select id="listAll" resultMap="MallOrderMap">
         SELECT * FROM stellar_mall_order
         <where>
@@ -128,6 +142,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- M 端：订单总数统计（条件与 listAll 一致） -->
     <select id="count" resultType="int">
         SELECT COUNT(*) FROM stellar_mall_order
         <where>
@@ -150,6 +165,7 @@
         DELETE FROM stellar_mall_order WHERE id = #{id}
     </delete>
 
+    <!-- 标记整单退款完成 -->
     <update id="markRefunded">
         UPDATE stellar_mall_order
         SET status = 'REFUNDED', is_refunded = 1
@@ -169,7 +185,7 @@
         ORDER BY o.create_time DESC
     </select>
 
-    <!-- 财务报表：按月汇总销售额 -->
+    <!-- 财务报表：按月汇总销售额（单量/总金额/实付/退款单量/退款金额，剔除已取消订单） -->
     <select id="financeMonthlySummary" resultType="java.util.HashMap">
         SELECT
             DATE_FORMAT(o.create_time, '%Y-%m') AS month,

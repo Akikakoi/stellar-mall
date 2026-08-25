@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     RAG 同步发件箱 Mapper（stellar_rag_sync_outbox）
+     基于 Outbox 模式实现商品数据到 RAG/ES 的可靠异步同步：
+     业务事务内写入本表，同步任务消费后置 synced=1，
+     失败记录置 failed=1 并累计 retry_count，支持手动重置重试。
+     管理端提供状态统计（总/成功/待同步/失败）与条件分页。
+     ============================================================ -->
 <mapper namespace="com.stellar.ragsync.mapper.RagSyncOutboxMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="OutboxMap" type="com.stellar.entity.RagSyncOutbox">
         <id     property="id"            column="id"/>
         <result property="bizType"       column="biz_type"/>
@@ -22,6 +30,7 @@
     </resultMap>
 
     <!-- =========================== insert =========================== -->
+    <!-- 写入同步事件（业务事务内调用，保证不丢事件） -->
     <insert id="insert" parameterType="com.stellar.entity.RagSyncOutbox"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_rag_sync_outbox (
@@ -55,6 +64,7 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 标记同步成功（同时记录本次尝试时间） -->
     <update id="markSynced">
         UPDATE stellar_rag_sync_outbox
         SET synced      = 1,
@@ -64,6 +74,7 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 标记一次失败尝试（累计重试次数、记录错误与失败标记） -->
     <update id="markFailedOnce">
         UPDATE stellar_rag_sync_outbox
         SET retry_count   = #{retryCount},
@@ -79,6 +90,7 @@
         SELECT * FROM stellar_rag_sync_outbox WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- 同步任务取待处理事件：未同步且未失败，按写入顺序取前 N 条 -->
     <select id="listPending" resultMap="OutboxMap">
         SELECT * FROM stellar_rag_sync_outbox
         WHERE synced = 0 AND failed = 0
@@ -94,6 +106,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- 重置为待处理（人工重试/恢复失败事件） -->
     <update id="resetForRetry">
         UPDATE stellar_rag_sync_outbox
         SET synced = 0,
@@ -107,24 +120,29 @@
 
     <!-- =========================== 管理端：全局统计 + 全量分页 =========================== -->
 
+    <!-- 事件总数 -->
     <select id="countAll" resultType="long">
         SELECT COUNT(*) FROM stellar_rag_sync_outbox
     </select>
 
+    <!-- 同步成功数 -->
     <select id="countSynced" resultType="long">
         SELECT COUNT(*) FROM stellar_rag_sync_outbox WHERE synced = 1
     </select>
 
+    <!-- 待同步数（含处理中） -->
     <select id="countPending" resultType="long">
         SELECT COUNT(*) FROM stellar_rag_sync_outbox WHERE synced = 0 AND failed = 0
     </select>
 
+    <!-- 失败数 -->
     <select id="countFailed" resultType="long">
         SELECT COUNT(*) FROM stellar_rag_sync_outbox WHERE failed = 1
     </select>
 
     <!-- =========================== 条件过滤：pageAllFiltered / countAllFiltered =========================== -->
 
+    <!-- 管理端公共过滤条件：状态映射 + 事件类型 + 业务 id -->
     <sql id="filterWhere">
         <where>
             <if test="status != null">
@@ -161,6 +179,7 @@
         <include refid="filterWhere"/>
     </select>
 
+    <!-- 管理端全量分页（最新在前） -->
     <select id="pageAllFiltered" resultMap="OutboxMap">
         SELECT * FROM stellar_rag_sync_outbox
         <include refid="filterWhere"/>

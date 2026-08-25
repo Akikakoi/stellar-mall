@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     地址簿 Mapper（stellar_user_address）
+     提供收货地址的新增 / 修改 / 删除 / 查询 / 设默认能力。
+     注意：除删除外，所有单条操作均带 user_id 条件，防止横向越权。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.AddressMapper">
+
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="AddressMap" type="com.stellar.entity.Address">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
@@ -18,11 +25,13 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 新增地址，自增主键回写到实体的 id -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_user_address (user_id, consignee, phone, province, city, district, detail, is_default, create_time, create_user, update_time, update_user)
         VALUES (#{userId}, #{consignee}, #{phone}, #{province}, #{city}, #{district}, #{detail}, #{isDefault}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 修改地址：仅更新传入的非空字段（动态 SQL），必须带 user_id 校验归属 -->
     <update id="update">
         UPDATE stellar_user_address
         <set>
@@ -38,22 +47,27 @@
         WHERE id = #{id} AND user_id = #{userId}
     </update>
 
+    <!-- 删除地址：按 id + user_id 双条件删除 -->
     <delete id="deleteById">
         DELETE FROM stellar_user_address WHERE id = #{id} AND user_id = #{userId}
     </delete>
 
+    <!-- 按 id 查询单个地址（带归属校验） -->
     <select id="getById" resultMap="AddressMap">
         SELECT * FROM stellar_user_address WHERE id = #{id} AND user_id = #{userId}
     </select>
 
+    <!-- 查询用户全部地址：默认地址置顶，其余按创建时间倒序 -->
     <select id="listByUserId" resultMap="AddressMap">
         SELECT * FROM stellar_user_address WHERE user_id = #{userId} ORDER BY is_default DESC, create_time DESC
     </select>
 
+    <!-- 清除用户所有默认标记：设置新默认地址前调用，保证默认地址全局唯一 -->
     <update id="clearDefault">
         UPDATE stellar_user_address SET is_default = 0 WHERE user_id = #{userId}
     </update>
 
+    <!-- 将指定地址设为默认（依赖先执行 clearDefault） -->
     <update id="setDefault">
         UPDATE stellar_user_address SET is_default = 1 WHERE id = #{id} AND user_id = #{userId}
     </update>

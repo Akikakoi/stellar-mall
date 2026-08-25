@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     购物车 Mapper（stellar_cart）
+     提供购物车项的新增、数量/勾选更新、批量删除、按用户查询等能力。
+     checked: 0 未勾选 / 1 勾选（下单仅取勾选项）。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.CartMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="CartMap" type="com.stellar.entity.Cart">
         <id     property="id"         column="id"/>
         <result property="userId"     column="user_id"/>
@@ -16,6 +22,7 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 加入购物车：同一 SKU 新增一行记录 -->
     <insert id="insert" parameterType="com.stellar.entity.Cart"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_cart (
@@ -27,6 +34,7 @@
         )
     </insert>
 
+    <!-- 更新购物车项：可改数量、勾选状态（动态 SQL） -->
     <update id="update" parameterType="com.stellar.entity.Cart">
         UPDATE stellar_cart
         <set>
@@ -38,10 +46,12 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 删除单个购物车项 -->
     <delete id="deleteById">
         DELETE FROM stellar_cart WHERE id = #{id}
     </delete>
 
+    <!-- 批量删除购物车项（ids 为空时 foreach 生成空 IN，注意调用方需判空） -->
     <delete id="deleteByIds">
         DELETE FROM stellar_cart WHERE id IN
         <foreach collection="ids" item="i" open="(" separator="," close=")">
@@ -49,26 +59,31 @@
         </foreach>
     </delete>
 
+    <!-- 清空用户购物车（下单成功/退出登录等场景） -->
     <delete id="deleteByUserId">
         DELETE FROM stellar_cart WHERE user_id = #{userId}
     </delete>
 
+    <!-- 按 id 查询（调用方需校验归属） -->
     <select id="getById" resultMap="CartMap">
         SELECT * FROM stellar_cart WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- 查询用户某 SKU 的购物车项：加购时判断是否已存在，用于数量累加 -->
     <select id="getByUserIdAndSkuId" resultMap="CartMap">
         SELECT * FROM stellar_cart
         WHERE user_id = #{userId} AND sku_id = #{skuId}
         LIMIT 1
     </select>
 
+    <!-- 查询用户全部购物车项（新加入的在前） -->
     <select id="listByUserId" resultMap="CartMap">
         SELECT * FROM stellar_cart
         WHERE user_id = #{userId}
         ORDER BY id DESC
     </select>
 
+    <!-- 查询用户勾选的购物车项：结算/下单时使用 -->
     <select id="listCheckedByUserId" resultMap="CartMap">
         SELECT * FROM stellar_cart
         WHERE user_id = #{userId} AND checked = 1

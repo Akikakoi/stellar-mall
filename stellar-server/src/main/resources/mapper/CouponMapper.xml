@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     优惠券 Mapper（stellar_coupon / stellar_user_coupon）
+     包含两部分：
+     1. Coupon     —— 优惠券模板（M 端维护，面额/门槛/总量/有效期）
+     2. UserCoupon —— 用户领取的优惠券实例（C 端领取、核销、退回）
+     核销与退回通过条件 UPDATE（status 校验）防止并发重复操作。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.CouponMapper">
+
+    <!-- 优惠券模板字段映射 -->
     <resultMap id="CouponMap" type="com.stellar.entity.Coupon">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
@@ -21,6 +30,7 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 用户券字段映射（含联表带出的优惠券信息，供列表/详情直接展示） -->
     <resultMap id="UserCouponMap" type="com.stellar.entity.UserCoupon">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
@@ -41,11 +51,13 @@
     </resultMap>
 
     <!-- ===== Coupon CRUD ===== -->
+    <!-- 新增优惠券模板 -->
     <insert id="insertCoupon" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_coupon (name, type, condition_amount, discount_amount, total_count, received_count, used_count, per_user_limit, start_time, end_time, status, create_time, create_user, update_time, update_user)
         VALUES (#{name}, #{type}, #{conditionAmount}, #{discountAmount}, #{totalCount}, #{receivedCount}, #{usedCount}, #{perUserLimit}, #{startTime}, #{endTime}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 更新优惠券模板（动态字段） -->
     <update id="updateCoupon">
         UPDATE stellar_coupon
         <set>
@@ -71,6 +83,7 @@
         SELECT * FROM stellar_coupon WHERE id = #{id}
     </select>
 
+    <!-- M 端分页查询（名称模糊 / 状态过滤） -->
     <select id="pageCoupon" resultMap="CouponMap">
         SELECT * FROM stellar_coupon
         <where>
@@ -89,6 +102,7 @@
         </where>
     </select>
 
+    <!-- 领券中心：可领取的券 —— 启用中 + 未领完 + 在有效期内 + 未超过单人限领数（子查询校验） -->
     <select id="listAvailableCoupons" resultMap="CouponMap">
         SELECT c.* FROM stellar_coupon c
         WHERE c.status = 1
@@ -104,15 +118,18 @@
         ORDER BY c.create_time DESC
     </select>
 
+    <!-- 领取数 +1：条件 UPDATE 保证不超过总量，防止超发 -->
     <update id="incrReceivedCount">
         UPDATE stellar_coupon SET received_count = received_count + 1, update_time = NOW() WHERE id = #{id} AND received_count &lt; total_count
     </update>
 
+    <!-- 核销数 +1 -->
     <update id="incrUsedCount">
         UPDATE stellar_coupon SET used_count = used_count + 1, update_time = NOW() WHERE id = #{id}
     </update>
 
     <!-- ===== UserCoupon ===== -->
+    <!-- 用户领取优惠券（写入实例） -->
     <insert id="insertUserCoupon" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_user_coupon (user_id, coupon_id, status, create_time, create_user, update_time, update_user)
         VALUES (#{userId}, #{couponId}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
@@ -127,15 +144,18 @@
         WHERE id = #{id} AND status = 1
     </update>
 
+    <!-- 退回优惠券（订单取消/退款）：仅当 status=2（已使用）时恢复为未使用 -->
     <update id="returnUserCoupon">
         UPDATE stellar_user_coupon SET status = 1, order_id = NULL, used_time = NULL, update_time = NOW()
         WHERE id = #{id} AND status = 2
     </update>
 
+    <!-- 核销数 -1（退回时回滚计数，最低为 0） -->
     <update id="decrUsedCount">
         UPDATE stellar_coupon SET used_count = GREATEST(used_count - 1, 0), update_time = NOW() WHERE id = #{id}
     </update>
 
+    <!-- 用户券列表（联表带出券面信息，可选状态过滤） -->
     <select id="listUserCoupons" resultMap="UserCouponMap">
         SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
         FROM stellar_user_coupon uc
@@ -145,6 +165,7 @@
         ORDER BY uc.create_time DESC
     </select>
 
+    <!-- 用户券详情（联表带出券面信息） -->
     <select id="getUserCouponById" resultMap="UserCouponMap">
         SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
         FROM stellar_user_coupon uc
@@ -152,6 +173,7 @@
         WHERE uc.id = #{id}
     </select>
 
+    <!-- 按订单查询用户券（订单页展示使用/退回用） -->
     <select id="getUserCouponByOrderId" resultMap="UserCouponMap">
         SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
         FROM stellar_user_coupon uc
@@ -159,10 +181,12 @@
         WHERE uc.order_id = #{orderId}
     </select>
 
+    <!-- 统计用户已领取某券数量（配合单人限领判断） -->
     <select id="countUserCouponByCouponId" resultType="long">
         SELECT COUNT(*) FROM stellar_user_coupon WHERE user_id = #{userId} AND coupon_id = #{couponId}
     </select>
 
+    <!-- 查询即将过期的未使用券（到期提醒任务使用） -->
     <select id="findExpiringSoon" resultMap="UserCouponMap">
         SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
         FROM stellar_user_coupon uc

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     收藏 Mapper（stellar_favorite）
+     提供收藏的添加、取消（按 id 或 用户+商品）、查询列表、
+     以及批量判断某批 SPU 是否被用户收藏。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.FavoriteMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="FavoriteMap" type="com.stellar.entity.Favorite">
         <id     property="id"         column="id"/>
         <result property="userId"     column="user_id"/>
@@ -13,6 +19,7 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 添加收藏 -->
     <insert id="insert" parameterType="com.stellar.entity.Favorite"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_favorite (
@@ -24,27 +31,32 @@
         )
     </insert>
 
+    <!-- 按记录 id 取消收藏 -->
     <delete id="deleteById">
         DELETE FROM stellar_favorite WHERE id = #{id}
     </delete>
 
+    <!-- 按 用户 + 商品 取消收藏（C 端按钮取消收藏入口） -->
     <delete id="deleteByUserIdAndSpuId">
         DELETE FROM stellar_favorite
         WHERE user_id = #{userId} AND spu_id = #{spuId}
     </delete>
 
+    <!-- 查询用户是否已收藏某商品（重复收藏判断） -->
     <select id="getByUserIdAndSpuId" resultMap="FavoriteMap">
         SELECT * FROM stellar_favorite
         WHERE user_id = #{userId} AND spu_id = #{spuId}
         LIMIT 1
     </select>
 
+    <!-- 用户收藏列表（收藏页展示，按收藏时间倒序） -->
     <select id="listByUserId" resultMap="FavoriteMap">
         SELECT * FROM stellar_favorite
         WHERE user_id = #{userId}
         ORDER BY id DESC
     </select>
 
+    <!-- 批量判断收藏状态：返回命中 spu_id 集合（配合 IN 查询减少 N+1） -->
     <select id="listSpuIdsByUserId" resultType="long">
         SELECT spu_id FROM stellar_favorite
         WHERE user_id = #{userId}

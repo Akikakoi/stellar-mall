@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     商城用户 Mapper（stellar_mall_user）
+     提供用户注册（插入）、资料更新、按 id/手机号/邮箱查询，
+     以及用户数据导出。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.MallUserMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="MallUserMap" type="com.stellar.entity.MallUser">
         <id     property="id"         column="id"/>
         <result property="phone"      column="phone"/>
@@ -16,6 +22,7 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 注册新用户 -->
     <insert id="insert" parameterType="com.stellar.entity.MallUser"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_mall_user (
@@ -27,6 +34,7 @@
         )
     </insert>
 
+    <!-- 更新用户资料：手机号/邮箱/昵称/密码/状态按需更新（动态 SQL） -->
     <update id="update" parameterType="com.stellar.entity.MallUser">
         UPDATE stellar_mall_user
         <set>
@@ -41,18 +49,22 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 按 id 查询用户 -->
     <select id="getById" resultMap="MallUserMap">
         SELECT * FROM stellar_mall_user WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- 按手机号查询（登录/注册查重用） -->
     <select id="getByPhone" resultMap="MallUserMap">
         SELECT * FROM stellar_mall_user WHERE phone = #{phone} LIMIT 1
     </select>
 
+    <!-- 按邮箱查询（邮箱登录/查重用） -->
     <select id="getByEmail" resultMap="MallUserMap">
         SELECT * FROM stellar_mall_user WHERE email = #{email} LIMIT 1
     </select>
 
+    <!-- 导出：查询全部用户 -->
     <select id="listAllForExport" resultMap="MallUserMap">
         SELECT * FROM stellar_mall_user ORDER BY id ASC
     </select>

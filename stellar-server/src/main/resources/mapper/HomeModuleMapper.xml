@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     首页模块 Mapper（stellar_home_module）
+     管理首页各渲染模块（轮播位、商品坑位、图文块等）的配置。
+     config 存 JSON 配置串，sort_order 决定展示顺序，status 控制启用。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.HomeModuleMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="HomeModuleMap" type="com.stellar.entity.HomeModule">
         <id property="id" column="id"/>
         <result property="type" column="type"/>
@@ -16,11 +22,13 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 新增首页模块 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_home_module (type, title, config, sort_order, status, create_time, create_user, update_time, update_user)
         VALUES (#{type}, #{title}, #{config}, #{sortOrder}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 更新模块配置（动态字段） -->
     <update id="update">
         UPDATE stellar_home_module
         <set>
@@ -38,18 +46,22 @@
         DELETE FROM stellar_home_module WHERE id = #{id}
     </delete>
 
+    <!-- 按 id 查询模块 -->
     <select id="getById" resultMap="HomeModuleMap">
         SELECT * FROM stellar_home_module WHERE id = #{id}
     </select>
 
+    <!-- M 端：查询全部模块（含停用，管理列表用） -->
     <select id="listAll" resultMap="HomeModuleMap">
         SELECT * FROM stellar_home_module ORDER BY sort_order ASC, id ASC
     </select>
 
+    <!-- C 端：查询启用中的模块（首页渲染用） -->
     <select id="listEnabled" resultMap="HomeModuleMap">
         SELECT * FROM stellar_home_module WHERE status = 1 ORDER BY sort_order ASC, id ASC
     </select>
 
+    <!-- 更新模块排序值（拖拽排序用） -->
     <update id="updateSortOrder">
         UPDATE stellar_home_module SET sort_order = #{sortOrder} WHERE id = #{id}
     </update>

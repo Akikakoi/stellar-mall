@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     积分兑换记录 Mapper（stellar_points_redemption）
+     记录用户在积分商城的兑换单（商品、消耗积分、发放状态、关联券/地址）。
+     支持状态流转、用户兑换记录分页查询。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.PointsRedemptionMapper">
 
+    <!-- 创建兑换记录 -->
     <insert id="insert" parameterType="com.stellar.entity.PointsRedemption"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_points_redemption (user_id, product_id, product_name, points_cost,
@@ -11,6 +17,7 @@
                 #{status}, #{couponId}, #{addressId}, #{remark}, #{createTime})
     </insert>
 
+    <!-- 更新兑换状态（发放/取消等），可选回填发放的券 id -->
     <update id="updateStatus">
         UPDATE stellar_points_redemption
         SET status = #{status}
@@ -18,12 +25,14 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 按 id 查询兑换记录 -->
     <select id="getById" resultType="com.stellar.entity.PointsRedemption">
         SELECT id, user_id, product_id, product_name, points_cost,
                status, coupon_id, address_id, remark, create_time
         FROM stellar_points_redemption WHERE id = #{id}
     </select>
 
+    <!-- C 端：用户兑换记录分页（倒序） -->
     <select id="listByUser" resultType="com.stellar.entity.PointsRedemption">
         SELECT id, user_id, product_id, product_name, points_cost,
                status, coupon_id, address_id, remark, create_time
@@ -33,6 +42,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- 用户兑换记录总数统计 -->
     <select id="countByUser" resultType="int">
         SELECT COUNT(*) FROM stellar_points_redemption WHERE user_id = #{userId}
     </select>

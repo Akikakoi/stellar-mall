@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     积分流水 Mapper（stellar_points_record）
+     只追加的积分变动流水，记录增减、余额快照、业务来源与过期时间。
+     支撑积分明细页、每日/单笔限制统计、过期积分扫描。
+     type: 1 获得 / 2 消费（-）等；biz_type 标识业务来源（签到/下单/评价等）。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.PointsRecordMapper">
 
+    <!-- 写入积分流水 -->
     <insert id="insert" parameterType="com.stellar.entity.PointsRecord"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_points_record (user_id, type, points, balance_after,
@@ -11,6 +18,7 @@
                 #{bizType}, #{bizId}, #{description}, #{expiredTime}, #{createTime})
     </insert>
 
+    <!-- C 端：用户积分流水分页（倒序） -->
     <select id="listByUser" resultType="com.stellar.entity.PointsRecord">
         SELECT id, user_id, type, points, balance_after, biz_type, biz_id,
                description, expired_time, create_time
@@ -20,10 +28,12 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- 用户流水总数统计 -->
     <select id="countByUser" resultType="int">
         SELECT COUNT(*) FROM stellar_points_record WHERE user_id = #{userId}
     </select>
 
+    <!-- 统计用户当天某业务类型的获得次数（如每日签到/每日任务上限校验） -->
     <select id="countTodayByBizType" resultType="int">
         SELECT COUNT(*)
         FROM stellar_points_record
@@ -32,6 +42,7 @@
           AND DATE(create_time) = #{today}
     </select>
 
+    <!-- 扫描即将过期的获得流水（到期时间落在 [now, deadline]，供过期处理任务） -->
     <select id="findExpiringPoints" resultType="com.stellar.entity.PointsRecord">
         SELECT id, user_id, type, points, balance_after, biz_type, biz_id,
                description, expired_time, create_time
@@ -42,6 +53,7 @@
           AND expired_time &lt;= #{deadline}
     </select>
 
+    <!-- 按业务来源查询获得流水（幂等校验：同一 biz 只发一次积分） -->
     <select id="findByBiz" resultType="com.stellar.entity.PointsRecord">
         SELECT id, user_id, type, points, balance_after, biz_type, biz_id,
                description, expired_time, create_time

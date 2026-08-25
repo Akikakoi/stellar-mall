@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     订单明细 Mapper（stellar_mall_order_item）
+     记录订单内每个商品的快照（名称/规格/单价/数量/小计/附加费）。
+     支持单条与批量插入、按订单查询（单个/多个订单）。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.MallOrderItemMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="MallOrderItemMap" type="com.stellar.entity.MallOrderItem">
         <id     property="id"        column="id"/>
         <result property="orderId"   column="order_id"/>
@@ -16,6 +22,7 @@
         <result property="extraAmount" column="extra_amount"/>
     </resultMap>
 
+    <!-- 新增单条订单明细 -->
     <insert id="insert" parameterType="com.stellar.entity.MallOrderItem"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_mall_order_item (
@@ -39,16 +46,19 @@
         </foreach>
     </insert>
 
+    <!-- 按订单删除明细（订单重建时使用） -->
     <delete id="deleteByOrderId">
         DELETE FROM stellar_mall_order_item WHERE order_id = #{orderId}
     </delete>
 
+    <!-- 查询单个订单的全部明细 -->
     <select id="listByOrderId" resultMap="MallOrderItemMap">
         SELECT * FROM stellar_mall_order_item
         WHERE order_id = #{orderId}
         ORDER BY id ASC
     </select>
 
+    <!-- 批量查询多个订单的明细（订单列表页一次带出，避免 N+1） -->
     <select id="listByOrderIds" resultMap="MallOrderItemMap">
         SELECT * FROM stellar_mall_order_item
         WHERE order_id IN

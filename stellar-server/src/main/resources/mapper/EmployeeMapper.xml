@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     员工（管理员账号）Mapper（stellar_employee）
+     提供管理后台员工账号的创建、资料/状态更新、分页查询。
+     role 区分管理员/运营等角色，status 控制账号启用停用。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.EmployeeMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="EmployeeMap" type="com.stellar.entity.Employee">
         <id     property="id"           column="id"/>
         <result property="username"     column="username"/>
@@ -52,6 +58,7 @@
     </update>
 
     <!-- =========================== count + page（动态条件） =========================== -->
+    <!-- 公共查询条件：姓名模糊 / 状态 / 角色 -->
     <sql id="whereClause">
         <where>
             1=1
@@ -61,11 +68,13 @@
         </where>
     </sql>
 
+    <!-- M 端分页总数统计 -->
     <select id="count" resultType="long">
         SELECT COUNT(*) FROM stellar_employee
         <include refid="whereClause"/>
     </select>
 
+    <!-- M 端分页查询，新账号在前 -->
     <select id="page" resultMap="EmployeeMap">
         SELECT * FROM stellar_employee
         <include refid="whereClause"/>

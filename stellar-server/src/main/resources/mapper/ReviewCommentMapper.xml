@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     评价回复/评论 Mapper（stellar_review_comment）
+     记录评价下的追评/回复，联表带出用户昵称与头像。
+     提供按评价查询、计数（单个/批量）能力，仅统计 status=1 的可见评论。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.ReviewCommentMapper">
 
+    <!-- 数据库字段 → 实体属性映射（username/avatar 为联表字段） -->
     <resultMap id="CommentMap" type="com.stellar.entity.ReviewComment">
         <id property="id" column="id"/>
         <result property="reviewId" column="review_id"/>
@@ -17,11 +23,13 @@
         <result property="avatar" column="avatar"/>
     </resultMap>
 
+    <!-- 发表评论 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_review_comment (review_id, user_id, content, status, create_time, create_user, update_time, update_user)
         VALUES (#{reviewId}, #{userId}, #{content}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 查询评价下的可见评论（联表用户信息，按时间正序） -->
     <select id="listByReviewId" resultMap="CommentMap">
         SELECT c.*, u.nickname AS username, u.avatar AS avatar
         FROM stellar_review_comment c
@@ -30,10 +38,12 @@
         ORDER BY c.create_time ASC
     </select>
 
+    <!-- 统计单条评价的可见评论数 -->
     <select id="countByReviewId" resultType="long">
         SELECT COUNT(*) FROM stellar_review_comment WHERE review_id = #{reviewId} AND status = 1
     </select>
 
+    <!-- 批量统计多条评价的评论数（按 review_id 分组返回，供列表页展示） -->
     <select id="countByReviewIds" resultType="map">
         SELECT review_id, COUNT(*) AS cnt
         FROM stellar_review_comment

@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     邮箱验证码 Mapper（stellar_email_code）
+     记录邮箱验证码的发送与使用状态，支持最新有效码查询、
+     标记已用、过期清理。
+     used: 0 未使用 / 1 已使用。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.EmailCodeMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="EmailCodeMap" type="com.stellar.entity.EmailCode">
         <id property="id" column="id"/>
         <result property="email" column="email"/>
@@ -13,21 +20,25 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
+    <!-- 保存验证码记录 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_email_code (email, code, type, used, expire_time, create_time)
         VALUES (#{email}, #{code}, #{type}, #{used}, #{expireTime}, #{createTime})
     </insert>
 
+    <!-- 查询邮箱在指定场景下最新一条未使用且未过期的验证码：校验时使用 -->
     <select id="findLatest" resultMap="EmailCodeMap">
         SELECT * FROM stellar_email_code
         WHERE email = #{email} AND type = #{type} AND used = 0 AND expire_time > NOW()
         ORDER BY create_time DESC LIMIT 1
     </select>
 
+    <!-- 标记验证码已使用（校验成功后调用，防止重复使用） -->
     <update id="markUsed">
         UPDATE stellar_email_code SET used = 1 WHERE id = #{id}
     </update>
 
+    <!-- 清理指定时间之前已过期的验证码（定时任务） -->
     <delete id="deleteExpired">
         DELETE FROM stellar_email_code WHERE expire_time &lt; #{before}
     </delete>
