@@ -185,7 +185,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
@@ -203,7 +203,7 @@ const cartStore = useCartStore()
 const submitting = ref(false)
 
 // 直接购买模式：从 query 参数解析商品
-const directItems = ref([])
+const directItems = ref<any[]>([])
 const isDirect = computed(() => directItems.value.length > 0)
 
 /**
@@ -213,12 +213,12 @@ function parseDirectItems() {
   try {
     const raw = route.query.direct
     if (raw) {
-      const parsed = JSON.parse(raw)
+      const parsed = JSON.parse(raw as string)
       if (Array.isArray(parsed) && parsed.length > 0) {
         directItems.value = parsed
       }
     }
-  } catch (e) {
+  } catch (e: any) {
     // ignore parse error
   }
 }
@@ -227,11 +227,11 @@ parseDirectItems()
 const orderItems = computed(() => isDirect.value ? directItems.value : cartStore.checkedItems)
 
 const orderCount = computed(() => {
-  return orderItems.value.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0)
+  return orderItems.value.reduce((sum: any, it: any) => sum + (Number(it.quantity) || 0), 0)
 })
 
 const orderAmount = computed(() => {
-  return orderItems.value.reduce((sum, it) => {
+  return orderItems.value.reduce((sum: any, it: any) => {
     const itemTotal = Number(it.price || 0) * Number(it.quantity || 0)
     const serviceFee = Number(it.serviceFee || 0) * Number(it.quantity || 0)
     return sum + itemTotal + serviceFee
@@ -239,12 +239,12 @@ const orderAmount = computed(() => {
 })
 
 const serviceAmount = computed(() => {
-  return orderItems.value.reduce((sum, it) => {
+  return orderItems.value.reduce((sum: any, it: any) => {
     return sum + Number(it.serviceFee || 0) * Number(it.quantity || 0)
   }, 0)
 })
 
-const form = reactive({
+const form = reactive<any>({
   consignee: '',
   phone: '',
   address: '',
@@ -253,15 +253,15 @@ const form = reactive({
 })
 
 // ==================== 地址簿 ====================
-const addresses = ref([])
-const selectedAddress = ref(null)
-const selectedAddressId = ref(null)
+const addresses = ref<any[]>([])
+const selectedAddress = ref<any>(null)
+const selectedAddressId = ref<any>(null)
 
 // 新增地址
 const showAddressDialog = ref(false)
 const addingAddress = ref(false)
-const addFormRef = ref(null)
-const addForm = reactive({
+const addFormRef = ref<any>(null)
+const addForm = reactive<any>({
   consignee: '',
   phone: '',
   province: '',
@@ -271,7 +271,7 @@ const addForm = reactive({
   isDefault: 0
 })
 
-const addRules = {
+const addRules: Record<string, any> = {
   consignee: [{ required: true, message: '请输入收货人', trigger: 'blur' }],
   phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
   province: [{ required: true, message: '请输入省', trigger: 'blur' }],
@@ -281,8 +281,8 @@ const addRules = {
 }
 
 // ==================== 优惠券 / 钱包 ====================
-const availableCoupons = ref([])
-const selectedCouponId = ref(null)
+const availableCoupons = ref<any[]>([])
+const selectedCouponId = ref<any>(null)
 const couponDiscount = ref(0)
 const walletBalance = ref(0)
 
@@ -303,7 +303,7 @@ const finalAmountWithoutPoints = computed(() => Math.max(0, orderAmount.value - 
  * 计算积分抵扣金额，积分不足或抵扣金额为 0 时自动关闭积分抵扣
  * @param {boolean} val - 是否开启积分抵扣
  */
-function calcPointsDeduction(val) {
+function calcPointsDeduction(val: any) {
   if (!val) {
     pointsDeduction.value = 0
     pointsDeductedCount.value = 0
@@ -334,7 +334,7 @@ function loadDraftAddress() {
       if (draft.phone) form.phone = draft.phone
       if (draft.address) form.address = draft.address
     }
-  } catch (e) {
+  } catch (e: any) {
     // ignore
   }
 }
@@ -342,7 +342,7 @@ function loadDraftAddress() {
 /** 将手动填写的收货信息缓存到 localStorage，地址簿模式下不缓存 */
 function saveDraftAddress() {
   if (selectedAddress.value) return // 使用了地址簿，不缓存
-  const draft = { consignee: form.consignee, phone: form.phone, address: form.address }
+  const draft: Record<string, any> = { consignee: form.consignee, phone: form.phone, address: form.address }
   if (draft.consignee || draft.phone || draft.address) {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
   }
@@ -363,8 +363,8 @@ watch(
 async function loadAddresses() {
   try {
     const res = await listAddresses()
-    addresses.value = Array.isArray(res) ? res : (res?.data || [])
-    const def = addresses.value.find(a => a.isDefault === 1) || addresses.value[0]
+    addresses.value = Array.isArray(res) ? res : ((res as any)?.data || [])
+    const def = addresses.value.find((a: any) => a.isDefault === 1) || addresses.value[0]
     if (def) {
       selectedAddress.value = def
       selectedAddressId.value = def.id
@@ -372,7 +372,7 @@ async function loadAddresses() {
       // 地址簿为空，尝试从 localStorage 恢复上次手动填写的信息
       loadDraftAddress()
     }
-  } catch (e) {
+  } catch (e: any) {
     // 加载失败时也尝试读取草稿
     loadDraftAddress()
   }
@@ -383,7 +383,7 @@ async function loadAddresses() {
  * @param {Object} addr - 地址对象
  * @returns {string} 格式化的地址标签
  */
-function addressLabel(addr) {
+function addressLabel(addr: any) {
   return `${addr.consignee} ${addr.phone} · ${addr.province}${addr.city}${addr.district} ${addr.detail}`
 }
 
@@ -391,8 +391,8 @@ function addressLabel(addr) {
  * 根据选中的地址 ID 切换收货地址，切换后清除 localStorage 草稿
  * @param {number} id - 地址 ID
  */
-function handleAddressChange(id) {
-  const addr = addresses.value.find(a => a.id === id)
+function handleAddressChange(id: any) {
+  const addr = addresses.value.find((a: any) => a.id === id)
   if (addr) {
     selectedAddress.value = addr
     localStorage.removeItem(DRAFT_KEY)
@@ -438,18 +438,18 @@ async function handleAddAddress() {
     // 重新加载地址列表
     await loadAddresses()
     // 立即选中新地址
-    const newAddr = addresses.value.find(a => a.id === res?.id || a.id === res?.data?.id)
+    const newAddr = addresses.value.find((a: any) => a.id === res?.id || a.id === res?.data?.id)
     if (newAddr) {
       selectedAddress.value = newAddr
       selectedAddressId.value = newAddr.id
     } else if (addresses.value.length > 0) {
-      const fallback = addresses.value.find(a => a.isDefault === 1) || addresses.value[0]
+      const fallback = addresses.value.find((a: any) => a.isDefault === 1) || addresses.value[0]
       selectedAddress.value = fallback
       selectedAddressId.value = fallback.id
     }
     showAddressDialog.value = false
     localStorage.removeItem(DRAFT_KEY)
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '新增地址失败')
   } finally {
     addingAddress.value = false
@@ -460,13 +460,13 @@ async function handleAddAddress() {
 /** 加载用户拥有的可用优惠券列表（过滤已过期/未到生效时间的券） */
 async function loadCoupons() {
   try {
-    const res = await userRequest({ url: '/user/coupon/my', method: 'get', params: { status: 1 } })
-    const list = Array.isArray(res) ? res : (res?.data || [])
+    const res: any = await userRequest({ url: '/user/coupon/my', method: 'get', params: { status: 1 } })
+    const list: any[] = Array.isArray(res) ? (res as any[]) : ((res as any)?.data || [])
     const now = new Date()
-    availableCoupons.value = list.filter(c =>
+    availableCoupons.value = list.filter((c: any) =>
       (!c.endTime || new Date(c.endTime) >= now) && (!c.startTime || new Date(c.startTime) <= now)
     )
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /**
@@ -474,7 +474,7 @@ async function loadCoupons() {
  * @param {Object} c - 优惠券对象
  * @returns {string} 优惠券描述标签
  */
-function couponLabel(c) {
+function couponLabel(c: any) {
   const type = c.couponType || c.type
   if (type === 1) return `${c.couponName || c.name} 满${c.conditionAmount}减${c.discountAmount}`
   return `${c.couponName || c.name} 满${c.conditionAmount}打${(c.discountAmount * 10).toFixed(1)}折`
@@ -484,7 +484,7 @@ function couponLabel(c) {
 function calcAmount() {
   couponDiscount.value = 0
   if (!selectedCouponId.value) return
-  const c = availableCoupons.value.find(x => x.id === selectedCouponId.value)
+  const c = availableCoupons.value.find((x: any) => x.id === selectedCouponId.value)
   if (!c) return
   // 兜底：页面停留期间所选券可能已过期
   if (c.endTime && new Date(c.endTime) < new Date()) {
@@ -525,7 +525,7 @@ async function handleSubmit() {
   }
   // 提交前兜底：所选优惠券若已过期，直接提示并中止
   if (selectedCouponId.value) {
-    const c = availableCoupons.value.find(x => x.id === selectedCouponId.value)
+    const c = availableCoupons.value.find((x: any) => x.id === selectedCouponId.value)
     if (c && c.endTime && new Date(c.endTime) < new Date()) {
       ElMessage.warning('优惠券已过期，无法使用')
       selectedCouponId.value = null
@@ -535,8 +535,8 @@ async function handleSubmit() {
   }
   submitting.value = true
   try {
-    const payMethodMap = { WECHAT: 1, ALIPAY: 2, WALLET: 4 }
-    const items = orderItems.value.map((it) => {
+    const payMethodMap: Record<string, any> = { WECHAT: 1, ALIPAY: 2, WALLET: 4 }
+    const items = orderItems.value.map((it: any) => {
       const skuId = Number(it.skuId || it.id)
       const quantity = Number(it.quantity || 1)
       const price = Number(it.price || 0)
@@ -546,7 +546,7 @@ async function handleSubmit() {
       const extraAmount = Number(it.serviceFee || 0) * quantity
       return { skuId, quantity, price, extraAmount: extraAmount > 0 ? extraAmount : undefined }
     })
-    const payload = {
+    const payload: Record<string, any> = {
       address: addr ? `${addr.province || ''}${addr.city || ''}${addr.district || ''} ${addr.detail || ''}` : form.address,
       consignee: addr?.consignee || form.consignee,
       phone: addr?.phone || form.phone,
@@ -582,9 +582,9 @@ async function handleSubmit() {
           '支付确认',
           { type: 'warning', confirmButtonText: '确认支付', cancelButtonText: '暂不支付' }
         )
-        await payOrder(orderId)
+        await (payOrder as any)(orderId)
         ElMessage.success('支付成功，订单已提交')
-      } catch (e) {
+      } catch (e: any) {
         if (e !== 'cancel' && e?.message) {
           ElMessage.error(e?.response?.data?.msg || e?.message || '支付失败')
         }
@@ -593,7 +593,7 @@ async function handleSubmit() {
     }
 
     router.push('/order/list')
-  } catch (e) {
+  } catch (e: any) {
     console.error('submitOrder error:', e)
     ElMessage.error(e?.message || '提交订单失败')
   } finally {
@@ -604,18 +604,18 @@ async function handleSubmit() {
 // ==================== 生命周期 ====================
 onMounted(async () => {
   if (!isDirect.value) {
-    try { await cartStore.load() } catch (e) {}
+    try { await cartStore.load() } catch (e: any) {}
   }
   await loadAddresses()
   await loadCoupons()
   try {
     const wallet = await getWallet()
     walletBalance.value = Number(wallet?.balance || 0)
-  } catch (e) { /* ignore */ }
+  } catch (e: any) { /* ignore */ }
   try {
     const pts = await getUserPoints()
-    userPoints.value = Number(pts?.availablePoints || pts?.data?.availablePoints || 0)
-  } catch (e) { /* ignore */ }
+    userPoints.value = Number(pts?.availablePoints || (pts as any)?.data?.availablePoints || 0)
+  } catch (e: any) { /* ignore */ }
 })
 </script>
 

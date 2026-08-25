@@ -39,7 +39,7 @@
           </template>
           <template v-else>
             <div class="answer-summary">{{ item.summary }}</div>
-            <div v-if="hasChartData(item)" class="chart-box" :ref="el => setChartRef(item.id, el)"></div>
+            <div v-if="hasChartData(item)" class="chart-box" :ref="(el: any) => setChartRef(item.id, el)"></div>
             <el-collapse class="detail-collapse">
               <el-collapse-item title="查看数据明细" name="data">
                 <el-table :data="item.rows" size="small" border max-height="320">
@@ -83,7 +83,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, nextTick, onUnmounted } from 'vue'
 import { chatBiQuery } from '@/api/admin'
 import { Loading } from '@element-plus/icons-vue'
@@ -105,18 +105,18 @@ const suggestions = [
 
 const input = ref('')
 const loading = ref(false)
-const items = ref([])
-const listRef = ref(null)
-const chartEls = {}
-const chartInstances = {}
+const items = ref<any[]>([])
+const listRef = ref<any>(null)
+const chartEls: Record<number, any> = {}
+const chartInstances: Record<number, any> = {}
 let idSeq = 0
 
-function setChartRef(id, el) {
+function setChartRef(id: number, el: any) {
   if (el) chartEls[id] = el
 }
 
 /** 是否有可绘制的双列数据（bar/line/pie 需要 x/y 两个有效字段） */
-function hasChartData(item) {
+function hasChartData(item: any) {
   const t = item.chartType
   if (t !== 'bar' && t !== 'line' && t !== 'pie') return false
   return !!(item.xField && item.yField && item.rows && item.rows.length > 0
@@ -124,12 +124,12 @@ function hasChartData(item) {
 }
 
 /** 提问：追加一条会话记录并调用后端 */
-async function ask(question) {
+async function ask(question: string) {
   const q = (question || '').trim()
   if (!q || loading.value) return
   input.value = ''
   loading.value = true
-  const item = { id: ++idSeq, question: q, loading: true, error: '', summary: '', sql: '', title: '', chartType: 'table', xField: '', yField: '', columns: [], rows: [] }
+  const item: Record<string, any> = { id: ++idSeq, question: q, loading: true, error: '', summary: '', sql: '', title: '', chartType: 'table', xField: '', yField: '', columns: [], rows: [] }
   items.value.push(item)
   scrollToBottom()
   try {
@@ -147,7 +147,7 @@ async function ask(question) {
     })
     await nextTick()
     if (hasChartData(item)) renderChart(item)
-  } catch (e) {
+  } catch (e: any) {
     item.loading = false
     item.error = (e && e.message) || '查询失败，请稍后重试'
   } finally {
@@ -157,7 +157,7 @@ async function ask(question) {
 }
 
 /** 按后端返回的 chartType 渲染 echarts */
-function renderChart(item) {
+function renderChart(item: any) {
   const el = chartEls[item.id]
   if (!el) return
   if (chartInstances[item.id]) {
@@ -166,9 +166,9 @@ function renderChart(item) {
   const chart = echarts.init(el)
   chartInstances[item.id] = chart
   const rows = item.rows
-  const xData = rows.map(r => String(r[item.xField] ?? ''))
-  const yData = rows.map(r => Number(r[item.yField] ?? 0))
-  let option
+  const xData = rows.map((r: any) => String(r[item.xField] ?? ''))
+  const yData = rows.map((r: any) => Number(r[item.yField] ?? 0))
+  let option: any
   if (item.chartType === 'pie') {
     option = {
       tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
@@ -177,7 +177,7 @@ function renderChart(item) {
         type: 'pie',
         radius: ['35%', '65%'],
         center: ['55%', '50%'],
-        data: rows.map(r => ({ name: String(r[item.xField] ?? ''), value: Number(r[item.yField] ?? 0) })),
+        data: rows.map((r: any) => ({ name: String(r[item.xField] ?? ''), value: Number(r[item.yField] ?? 0) })),
         label: { formatter: '{b} {d}%' }
       }]
     }
@@ -200,7 +200,7 @@ function renderChart(item) {
 }
 
 /** 表格单元格格式化：数字保留 2 位小数，其余原样 */
-function formatCell(v) {
+function formatCell(v: any) {
   if (v === null || v === undefined) return '-'
   if (typeof v === 'number') return Number.isInteger(v) ? v : v.toFixed(2)
   return String(v)
@@ -213,7 +213,7 @@ function scrollToBottom() {
 }
 
 onUnmounted(() => {
-  Object.values(chartInstances).forEach(c => c && c.dispose())
+  Object.values(chartInstances).forEach((c: any) => c && c.dispose())
 })
 </script>
 

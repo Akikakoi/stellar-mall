@@ -1,13 +1,25 @@
 /**
- * C 端（商城用户）API 接口模块。
- * 所有请求通过 userRequest 实例发送，自动携带用户 token 和 userId。
+ * C 端(商城用户)API 接口模块。
+ * 所有请求通过 userRequest 实例发送,自动携带用户 token 和 userId。
+ *
+ * 类型说明:
+ *   - userRequest<T> 的 T 是后端 {code,msg,data} 解包后的 data;
+ *   - 请求体(data)暂为显式 any,后续可改用 openapi-typescript 生成;
+ *   - 返回类型以 Java 端 VO 为 ground truth,见 src/types/models.ts。
  */
 import { userRequest } from './request'
+import type {
+  PageResult, PageParams, LoginResult, LoginPayload, UserInfo,
+  Spu, SearchSuggest, Category,
+  CartRowVO, Order, Address, Wallet, WalletTransaction,
+  PointsRecord, PointsRedeem, UserPoints, PointsProduct, CheckinResult,
+  AfterSale, Favorite, MallMessage,
+} from '@/types/models'
 
 // =========================== 用户认证 ===========================
 
 /** 用户登录 */
-export function loginUser(data) {
+export function loginUser(data: LoginPayload): Promise<LoginResult> {
   return userRequest({
     url: '/user/user/login',
     method: 'post',
@@ -16,10 +28,9 @@ export function loginUser(data) {
 }
 
 /**
- * 获取图形验证码（E3，公开接口，无需登录）
- * @returns {Promise<{captchaId: string, imageBase64: string}>}
+ * 获取图形验证码(E3,公开接口,无需登录)
  */
-export function getCaptcha() {
+export function getCaptcha(): Promise<{ captchaId: string, imageBase64: string }> {
   return userRequest({
     url: '/captcha/image',
     method: 'get'
@@ -27,7 +38,7 @@ export function getCaptcha() {
 }
 
 /** 获取当前登录用户信息 */
-export function getCurrentUser() {
+export function getCurrentUser(): Promise<UserInfo> {
   return userRequest({
     url: '/user/user/me',
     method: 'get'
@@ -35,7 +46,7 @@ export function getCurrentUser() {
 }
 
 /** 获取用户个人资料 */
-export function getUserProfile() {
+export function getUserProfile(): Promise<UserInfo> {
   return userRequest({
     url: '/user/user/profile',
     method: 'get'
@@ -43,7 +54,7 @@ export function getUserProfile() {
 }
 
 /** 更新用户个人资料 */
-export function updateUserProfile(data) {
+export function updateUserProfile(data: any): Promise<any> {
   return userRequest({
     url: '/user/user/profile',
     method: 'put',
@@ -52,7 +63,7 @@ export function updateUserProfile(data) {
 }
 
 /** 注销当前账号 */
-export function deactivateAccount() {
+export function deactivateAccount(): Promise<any> {
   return userRequest({
     url: '/user/user/deactivate',
     method: 'post'
@@ -61,8 +72,8 @@ export function deactivateAccount() {
 
 // =========================== 商品 (SPU) ===========================
 
-/** 分页查询商品列表，支持按名称/分类/状态/价格区间筛选 */
-export function listSpu(params) {
+/** 分页查询商品列表,支持按名称/分类/状态/价格区间筛选 */
+export function listSpu(params: PageParams): Promise<PageResult<Spu>> {
   return userRequest({
     url: '/user/spu/page',
     method: 'get',
@@ -70,16 +81,16 @@ export function listSpu(params) {
   })
 }
 
-/** 查询商品详情（含 SKU 列表） */
-export function getSpu(id) {
+/** 查询商品详情(含 SKU 列表) */
+export function getSpu(id: number): Promise<Spu> {
   return userRequest({
     url: `/user/spu/${id}`,
     method: 'get'
   })
 }
 
-/** 搜索建议（输入框自动补全） */
-export function suggestSpu(prefix) {
+/** 搜索建议(输入框自动补全) */
+export function suggestSpu(prefix: string): Promise<SearchSuggest> {
   return userRequest({
     url: '/user/spu/suggest',
     method: 'get',
@@ -88,7 +99,7 @@ export function suggestSpu(prefix) {
 }
 
 /** 获取分类列表 */
-export function listCategory() {
+export function listCategory(): Promise<Category[]> {
   return userRequest({
     url: '/user/category/list',
     method: 'get'
@@ -98,7 +109,7 @@ export function listCategory() {
 // =========================== 购物车 ===========================
 
 /** 查询当前用户购物车 */
-export function listCart() {
+export function listCart(): Promise<CartRowVO[]> {
   return userRequest({
     url: '/user/cart',
     method: 'get'
@@ -106,7 +117,7 @@ export function listCart() {
 }
 
 /** 加入购物车 */
-export function addCart(data) {
+export function addCart(data: any): Promise<any> {
   return userRequest({
     url: '/user/cart',
     method: 'post',
@@ -115,7 +126,7 @@ export function addCart(data) {
 }
 
 /** 更新购物车商品数量 */
-export function updateCartQty(data) {
+export function updateCartQty(data: any): Promise<any> {
   return userRequest({
     url: '/user/cart',
     method: 'put',
@@ -124,7 +135,7 @@ export function updateCartQty(data) {
 }
 
 /** 删除购物车中指定商品 */
-export function deleteCart(id) {
+export function deleteCart(id: number): Promise<any> {
   return userRequest({
     url: `/user/cart/${id}`,
     method: 'delete'
@@ -132,7 +143,7 @@ export function deleteCart(id) {
 }
 
 /** 清空购物车 */
-export function clearCart() {
+export function clearCart(): Promise<any> {
   return userRequest({
     url: '/user/cart/clear',
     method: 'delete'
@@ -142,7 +153,7 @@ export function clearCart() {
 // =========================== 订单 ===========================
 
 /** 提交订单 */
-export function submitOrder(data) {
+export function submitOrder(data: any): Promise<any> {
   return userRequest({
     url: '/user/order/submit',
     method: 'post',
@@ -151,7 +162,7 @@ export function submitOrder(data) {
 }
 
 /** 分页查询当前用户订单列表 */
-export function listOrder(params) {
+export function listOrder(params: PageParams): Promise<PageResult<Order>> {
   return userRequest({
     url: '/user/order/list',
     method: 'get',
@@ -160,7 +171,7 @@ export function listOrder(params) {
 }
 
 /** 查询订单详情 */
-export function getOrder(id) {
+export function getOrder(id: number): Promise<Order> {
   return userRequest({
     url: `/user/order/${id}`,
     method: 'get'
@@ -169,10 +180,10 @@ export function getOrder(id) {
 
 /**
  * 支付订单
- * @param {number} id - 订单 ID
- * @param {number} payMethod - 支付方式：1-微信 2-支付宝 4-钱包
+ * @param id 订单 ID
+ * @param payMethod 支付方式:1-微信 2-支付宝 4-钱包
  */
-export function payOrder(id, payMethod) {
+export function payOrder(id: number, payMethod: number): Promise<any> {
   return userRequest({
     url: `/user/order/${id}/pay`,
     method: 'post',
@@ -181,7 +192,7 @@ export function payOrder(id, payMethod) {
 }
 
 /** 取消订单 */
-export function cancelOrder(id, reason) {
+export function cancelOrder(id: number, reason?: string): Promise<any> {
   return userRequest({
     url: `/user/order/${id}/cancel`,
     method: 'post',
@@ -190,15 +201,15 @@ export function cancelOrder(id, reason) {
 }
 
 /** 确认收货 */
-export function confirmOrder(id) {
+export function confirmOrder(id: number): Promise<any> {
   return userRequest({
     url: `/user/order/${id}/confirm`,
     method: 'post'
   })
 }
 
-/** 删除订单（软删除，仅已取消/已完成/已退款状态可删除） */
-export function deleteUserOrder(id) {
+/** 删除订单(软删除,仅已取消/已完成/已退款状态可删除) */
+export function deleteUserOrder(id: number): Promise<any> {
   return userRequest({
     url: `/user/order/${id}`,
     method: 'delete'
@@ -208,7 +219,7 @@ export function deleteUserOrder(id) {
 // =========================== 收藏夹 ===========================
 
 /** 添加收藏 */
-export function addFavorite(spuId) {
+export function addFavorite(spuId: number): Promise<any> {
   return userRequest({
     url: `/user/favorite/${spuId}`,
     method: 'post'
@@ -216,7 +227,7 @@ export function addFavorite(spuId) {
 }
 
 /** 取消收藏 */
-export function removeFavorite(spuId) {
+export function removeFavorite(spuId: number): Promise<any> {
   return userRequest({
     url: `/user/favorite/${spuId}`,
     method: 'delete'
@@ -224,7 +235,7 @@ export function removeFavorite(spuId) {
 }
 
 /** 查询单个商品是否已收藏 */
-export function isFavorited(spuId) {
+export function isFavorited(spuId: number): Promise<boolean> {
   return userRequest({
     url: `/user/favorite/${spuId}`,
     method: 'get'
@@ -232,7 +243,7 @@ export function isFavorited(spuId) {
 }
 
 /** 获取收藏列表 */
-export function listFavorites() {
+export function listFavorites(): Promise<Favorite[]> {
   return userRequest({
     url: '/user/favorite',
     method: 'get'
@@ -240,7 +251,7 @@ export function listFavorites() {
 }
 
 /** 批量查询收藏状态 */
-export function batchCheckFavorites(spuIds) {
+export function batchCheckFavorites(spuIds: number[]): Promise<Record<number, boolean>> {
   return userRequest({
     url: '/user/favorite/batch-check',
     method: 'post',
@@ -251,7 +262,7 @@ export function batchCheckFavorites(spuIds) {
 // =========================== 评价 ===========================
 
 /** 提交商品评价 */
-export function submitReview(data) {
+export function submitReview(data: any): Promise<any> {
   return userRequest({
     url: '/user/review',
     method: 'post',
@@ -260,7 +271,7 @@ export function submitReview(data) {
 }
 
 /** 获取评价的评论列表 */
-export function getReviewComments(reviewId) {
+export function getReviewComments(reviewId: number): Promise<any> {
   return userRequest({
     url: `/user/review/${reviewId}/comments`,
     method: 'get'
@@ -268,7 +279,7 @@ export function getReviewComments(reviewId) {
 }
 
 /** 对评价发表评论 */
-export function submitReviewComment(reviewId, content) {
+export function submitReviewComment(reviewId: number, content: string): Promise<any> {
   return userRequest({
     url: `/user/review/${reviewId}/comment`,
     method: 'post',
@@ -279,7 +290,7 @@ export function submitReviewComment(reviewId, content) {
 // =========================== 用户消息 ===========================
 
 /** 分页查询用户消息列表 */
-export function listMessages(params) {
+export function listMessages(params: PageParams): Promise<PageResult<MallMessage>> {
   return userRequest({
     url: '/user/message/list',
     method: 'get',
@@ -288,7 +299,7 @@ export function listMessages(params) {
 }
 
 /** 获取未读消息数量 */
-export function getUnreadCount() {
+export function getUnreadCount(): Promise<number> {
   return userRequest({
     url: '/user/message/unread-count',
     method: 'get'
@@ -296,7 +307,7 @@ export function getUnreadCount() {
 }
 
 /** 标记单条消息为已读 */
-export function markMessageRead(id) {
+export function markMessageRead(id: number): Promise<any> {
   return userRequest({
     url: `/user/message/${id}/read`,
     method: 'put'
@@ -304,7 +315,7 @@ export function markMessageRead(id) {
 }
 
 /** 标记全部消息为已读 */
-export function markAllMessagesRead() {
+export function markAllMessagesRead(): Promise<any> {
   return userRequest({
     url: '/user/message/read-all',
     method: 'put'
@@ -314,7 +325,7 @@ export function markAllMessagesRead() {
 // =========================== 售后 ===========================
 
 /** 提交售后申请 */
-export function submitAfterSale(data) {
+export function submitAfterSale(data: any): Promise<any> {
   return userRequest({
     url: '/user/aftersale',
     method: 'post',
@@ -323,7 +334,7 @@ export function submitAfterSale(data) {
 }
 
 /** 取消售后申请 */
-export function cancelAfterSale(id) {
+export function cancelAfterSale(id: number): Promise<any> {
   return userRequest({
     url: `/user/aftersale/${id}/cancel`,
     method: 'post'
@@ -331,7 +342,7 @@ export function cancelAfterSale(id) {
 }
 
 /** 提交退货物流单号 */
-export function submitReturnTracking(data) {
+export function submitReturnTracking(data: any): Promise<any> {
   return userRequest({
     url: '/user/aftersale/return-tracking',
     method: 'put',
@@ -340,7 +351,7 @@ export function submitReturnTracking(data) {
 }
 
 /** 查询售后列表 */
-export function listAfterSales(params) {
+export function listAfterSales(params: PageParams): Promise<PageResult<AfterSale>> {
   return userRequest({
     url: '/user/aftersale',
     method: 'get',
@@ -349,7 +360,7 @@ export function listAfterSales(params) {
 }
 
 /** 查询售后详情 */
-export function getAfterSale(id) {
+export function getAfterSale(id: number): Promise<AfterSale> {
   return userRequest({
     url: `/user/aftersale/${id}`,
     method: 'get'
@@ -357,7 +368,7 @@ export function getAfterSale(id) {
 }
 
 /** 按订单 ID 查询售后单 */
-export function getAfterSaleByOrder(orderId) {
+export function getAfterSaleByOrder(orderId: number): Promise<AfterSale> {
   return userRequest({
     url: `/user/aftersale/by-order/${orderId}`,
     method: 'get'
@@ -367,7 +378,7 @@ export function getAfterSaleByOrder(orderId) {
 // =========================== 钱包 ===========================
 
 /** 获取钱包信息 */
-export function getWallet() {
+export function getWallet(): Promise<Wallet> {
   return userRequest({
     url: '/user/wallet',
     method: 'get'
@@ -375,7 +386,7 @@ export function getWallet() {
 }
 
 /** 钱包充值 */
-export function rechargeWallet(data) {
+export function rechargeWallet(data: any): Promise<any> {
   return userRequest({
     url: '/user/wallet/recharge',
     method: 'post',
@@ -384,7 +395,7 @@ export function rechargeWallet(data) {
 }
 
 /** 查询钱包交易流水 */
-export function listWalletTransactions(params) {
+export function listWalletTransactions(params: PageParams): Promise<PageResult<WalletTransaction>> {
   return userRequest({
     url: '/user/wallet/transactions',
     method: 'get',
@@ -395,7 +406,7 @@ export function listWalletTransactions(params) {
 // =========================== 收货地址 ===========================
 
 /** 获取地址列表 */
-export function listAddresses() {
+export function listAddresses(): Promise<Address[]> {
   return userRequest({
     url: '/user/address/list',
     method: 'get'
@@ -403,7 +414,7 @@ export function listAddresses() {
 }
 
 /** 查询单个地址 */
-export function getAddress(id) {
+export function getAddress(id: number): Promise<Address> {
   return userRequest({
     url: `/user/address/${id}`,
     method: 'get'
@@ -411,7 +422,7 @@ export function getAddress(id) {
 }
 
 /** 新增地址 */
-export function saveAddress(data) {
+export function saveAddress(data: any): Promise<any> {
   return userRequest({
     url: '/user/address',
     method: 'post',
@@ -420,7 +431,7 @@ export function saveAddress(data) {
 }
 
 /** 更新地址 */
-export function updateAddress(data) {
+export function updateAddress(data: any): Promise<any> {
   return userRequest({
     url: '/user/address',
     method: 'put',
@@ -429,7 +440,7 @@ export function updateAddress(data) {
 }
 
 /** 删除地址 */
-export function deleteAddress(id) {
+export function deleteAddress(id: number): Promise<any> {
   return userRequest({
     url: `/user/address/${id}`,
     method: 'delete'
@@ -437,7 +448,7 @@ export function deleteAddress(id) {
 }
 
 /** 设为默认地址 */
-export function setDefaultAddress(id) {
+export function setDefaultAddress(id: number): Promise<any> {
   return userRequest({
     url: `/user/address/${id}/default`,
     method: 'post'
@@ -447,7 +458,7 @@ export function setDefaultAddress(id) {
 // =========================== 积分系统 ===========================
 
 /** 获取当前用户积分 */
-export function getUserPoints() {
+export function getUserPoints(): Promise<UserPoints> {
   return userRequest({
     url: '/user/points',
     method: 'get'
@@ -455,7 +466,7 @@ export function getUserPoints() {
 }
 
 /** 分页查询积分变动记录 */
-export function listPointsRecords(params) {
+export function listPointsRecords(params: PageParams): Promise<PageResult<PointsRecord>> {
   return userRequest({
     url: '/user/points/records',
     method: 'get',
@@ -464,7 +475,7 @@ export function listPointsRecords(params) {
 }
 
 /** 分页查询积分兑换记录 */
-export function listPointsRedemptions(params) {
+export function listPointsRedemptions(params: PageParams): Promise<PageResult<PointsRedeem>> {
   return userRequest({
     url: '/user/points/redemptions',
     method: 'get',
@@ -473,7 +484,7 @@ export function listPointsRedemptions(params) {
 }
 
 /** 每日签到 */
-export function checkin() {
+export function checkin(): Promise<CheckinResult> {
   return userRequest({
     url: '/user/points/checkin',
     method: 'post'
@@ -481,7 +492,7 @@ export function checkin() {
 }
 
 /** 获取签到日期列表 */
-export function getCheckinDates() {
+export function getCheckinDates(): Promise<string[]> {
   return userRequest({
     url: '/user/points/checkin-dates',
     method: 'get'
@@ -489,7 +500,7 @@ export function getCheckinDates() {
 }
 
 /** 获取积分商城商品列表 */
-export function listPointsProducts() {
+export function listPointsProducts(): Promise<PointsProduct[]> {
   return userRequest({
     url: '/user/points/products',
     method: 'get'
@@ -497,7 +508,7 @@ export function listPointsProducts() {
 }
 
 /** 积分兑换商品 */
-export function redeemPoints(data) {
+export function redeemPoints(data: any): Promise<any> {
   return userRequest({
     url: '/user/points/redeem',
     method: 'post',

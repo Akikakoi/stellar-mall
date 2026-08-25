@@ -72,7 +72,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminRequest } from '@/api/request'
@@ -81,27 +81,27 @@ const loading = ref(false)
 const submitting = ref(false)
 const keyword = ref('')
 const filterLowStock = ref('')
-const list = ref([])
+const list = ref<any[]>([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(20)
 const stockDialogVisible = ref(false)
-const stockForm = reactive({ skuId: null, currentStock: 0, delta: 0, warnStock: 10 })
+const stockForm = reactive<any>({ skuId: null, currentStock: 0, delta: 0, warnStock: 10 })
 
 async function load() {
   loading.value = true
   try {
-    const params = { page: pageNum.value, pageSize: pageSize.value }
+    const params: Record<string, any> = { page: pageNum.value, pageSize: pageSize.value }
     if (keyword.value) params.name = keyword.value
     if (filterLowStock.value === '1') params.lowStock = 1
-    const res = await adminRequest({ url: '/admin/inventory/page', method: 'get', params })
+    const res: any = await adminRequest({ url: '/admin/inventory/page', method: 'get', params })
     const d = res?.data || res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {} finally { loading.value = false }
+  } catch (e: any) {} finally { loading.value = false }
 }
 
-function openEditStock(row) {
+function openEditStock(row: any) {
   stockForm.skuId = row.id
   stockForm.currentStock = row.stock || 0
   stockForm.delta = 0
@@ -116,12 +116,12 @@ async function handleUpdateStock() {
     ElMessage.success('库存已更新')
     stockDialogVisible.value = false
     await load()
-  } catch (e) { ElMessage.error('操作失败') } finally { submitting.value = false }
+  } catch (e: any) { ElMessage.error('操作失败') } finally { submitting.value = false }
 }
 
 function exportCSV() {
   let csv = 'SKU ID,SPU ID,名称,规格,价格,库存,预警值,状态\n'
-  list.value.forEach(r => {
+  list.value.forEach((r: any) => {
     csv += `${r.id},${r.spuId},"${r.name || ''}","${r.specs || ''}",${r.price},${r.stock},${r.warnStock},${r.status === 1 ? '在售' : '停售'}\n`
   })
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })

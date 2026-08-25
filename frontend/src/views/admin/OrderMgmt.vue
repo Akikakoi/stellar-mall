@@ -112,7 +112,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { pageOrder, shipOrder, deleteOrder } from '@/api/admin'
@@ -121,17 +121,17 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 const route = useRoute()
 
 const loading = ref(false)
-const records = ref([])
+const records = ref<any[]>([])
 const total = ref(0)
 const shipDialogVisible = ref(false)
 const shipSubmitting = ref(false)
-const shipTarget = reactive({})
-const shipForm = reactive({ trackingNo: '', deliveryCompany: '' })
+const shipTarget = reactive<any>({})
+const shipForm = reactive<any>({ trackingNo: '', deliveryCompany: '' })
 
-const query = reactive({ page: 1, pageSize: 10, orderNo: '', status: '' })
-const dateRange = ref(null)
+const query = reactive<any>({ page: 1, pageSize: 10, orderNo: '', status: '' })
+const dateRange = ref<any>(null)
 
-const STATUS_MAP = {
+const STATUS_MAP: Record<string, any> = {
   PENDING: '待付款',
   PAID: '待发货',
   SHIPPED: '待收货',
@@ -142,12 +142,12 @@ const STATUS_MAP = {
 }
 
 /** 获取订单状态的中文标签 */
-function statusLabel(s) {
+function statusLabel(s: any) {
   return STATUS_MAP[s] || s || '-'
 }
 
 /** 获取订单状态对应的 Element Plus Tag 类型 */
-function statusTagType(s) {
+function statusTagType(s: any) {
   switch (s) {
     case 'PENDING': return 'warning'
     case 'PAID': return 'primary'
@@ -167,7 +167,7 @@ function onQueryClick() {
 }
 
 /** 将日期对象或字符串转为 YYYY-MM-DD 格式 */
-function fmtDate(d) {
+function fmtDate(d: any) {
   if (!d) return ''
   const dt = d instanceof Date ? d : new Date(d)
   const y = dt.getFullYear()
@@ -180,7 +180,7 @@ function fmtDate(d) {
 async function loadPage() {
   loading.value = true
   try {
-    const params = {
+    const params: Record<string, any> = {
       page: query.page,
       pageSize: query.pageSize
     }
@@ -191,7 +191,7 @@ async function loadPage() {
       params.endTime = fmtDate(dateRange.value[1])
     }
     const res = await pageOrder(params)
-    const d = res || {}
+    const d: any = res || {}
     records.value = d.records || d.list || []
     total.value = d.total || 0
   } finally {
@@ -200,7 +200,7 @@ async function loadPage() {
 }
 
 /** 打开发货对话框，回填当前订单信息 */
-function handleShip(row) {
+function handleShip(row: any) {
   Object.assign(shipTarget, row)
   shipForm.trackingNo = ''
   shipForm.deliveryCompany = ''
@@ -218,7 +218,7 @@ async function doShip() {
     ElMessage.success('发货成功，已通知用户')
     shipDialogVisible.value = false
     loadPage()
-  } catch (e) {
+  } catch (e: any) {
     if (e !== 'cancel') {
       const msg = e?.response?.data?.msg || e?.message || '发货失败'
       ElMessage.error(msg)
@@ -227,7 +227,7 @@ async function doShip() {
 }
 
 /** 删除订单，二次确认后执行永久删除 */
-async function handleDelete(row) {
+async function handleDelete(row: any) {
   try {
     await ElMessageBox.confirm(
       `确定永久删除订单「${row.orderNo}」？此操作不可撤销。`,
@@ -237,7 +237,7 @@ async function handleDelete(row) {
     await deleteOrder(row.id)
     ElMessage.success('已删除')
     loadPage()
-  } catch (e) {
+  } catch (e: any) {
     if (e !== 'cancel' && e?.message) {
       const msg = e?.response?.data?.msg || e?.message || '删除失败'
       ElMessage.error(msg)
@@ -258,7 +258,7 @@ async function handleExportOrders() {
     if (!resp.ok) throw new Error()
     downloadBlob(await resp.blob(), '订单数据导出.xlsx')
     ElMessage.success('导出成功')
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('导出失败')
   } finally {
     exporting.value = false
@@ -267,13 +267,13 @@ async function handleExportOrders() {
 
 const exporting = ref(false)
 /** 将日期对象转为 YYYY-MM-DD 字符串 */
-function toDateStr(d) {
+function toDateStr(d: any) {
   if (!d) return ''
   const dt = new Date(d)
   return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0')
 }
 /** 下载 Blob 数据为文件 */
-function downloadBlob(blob, filename) {
+function downloadBlob(blob: any, filename: any) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url; a.download = filename; a.click()
@@ -286,7 +286,7 @@ onMounted(() => {
     query.status = route.query.status
   }
   if (route.query.startTime && route.query.endTime) {
-    dateRange.value = [new Date(route.query.startTime), new Date(route.query.endTime)]
+    dateRange.value = [new Date(route.query.startTime as string), new Date(route.query.endTime as string)]
   }
   loadPage()
 })

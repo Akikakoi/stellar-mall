@@ -1,11 +1,12 @@
 /**
  * 管理后台状态管理 Store。
- * 管理管理员登录态、个人信息，数据持久化到 localStorage。
+ * 管理管理员登录态、个人信息,数据持久化到 localStorage。
  */
 import { defineStore } from 'pinia'
 import { loginAdmin, getAdminProfile } from '@/api/admin'
 import { adminRequest } from '@/api/request'
 import { storage } from '@/utils/storage'
+import type { EmployeeLoginResult, Employee } from '@/types/models'
 
 const TOKEN_KEY = 'stellar_admin_token'
 const EMPID_KEY = 'stellar_admin_empid'
@@ -14,12 +15,12 @@ const NAME_KEY = 'stellar_admin_name'
 const REFRESH_TOKEN_KEY = 'stellar_admin_refresh_token'
 
 /** 从 localStorage 读取 */
-function safeGet(key) {
+function safeGet(key: string): string | null {
   return storage.local.get(key)
 }
 
-/** 写入 localStorage，值为 null/undefined 时删除 */
-function safeSet(key, value) {
+/** 写入 localStorage,值为 null/undefined 时删除 */
+function safeSet(key: string, value: unknown) {
   if (value === null || value === undefined) {
     storage.local.remove(key)
   } else {
@@ -28,21 +29,29 @@ function safeSet(key, value) {
 }
 
 /** 从 localStorage 删除 */
-function safeRemove(key) {
+function safeRemove(key: string) {
   storage.local.remove(key)
 }
 
+interface AdminState {
+  /** 员工 ID */
+  empId: number | null
+  /** 登录 Token(access) */
+  token: string
+  /** Refresh Token(用于 access 过期后换新) */
+  refreshToken: string
+  /** 用户名 */
+  username: string
+  /** 真实姓名 */
+  name: string
+}
+
 export const useAdminStore = defineStore('admin', {
-  state: () => ({
-    /** 员工 ID */
+  state: (): AdminState => ({
     empId: safeGet(EMPID_KEY) ? Number(safeGet(EMPID_KEY)) : null,
-    /** 登录 Token（access） */
     token: safeGet(TOKEN_KEY) || '',
-    /** Refresh Token（用于 access 过期后换新） */
     refreshToken: safeGet(REFRESH_TOKEN_KEY) || '',
-    /** 用户名 */
     username: safeGet(USERNAME_KEY) || '',
-    /** 真实姓名 */
     name: safeGet(NAME_KEY) || ''
   }),
 
@@ -53,7 +62,7 @@ export const useAdminStore = defineStore('admin', {
 
   actions: {
     /** 管理员登录 */
-    async login(payload) {
+    async login(payload: { username: string, password: string }): Promise<EmployeeLoginResult> {
       const res = await loginAdmin(payload)
       this.token = res.token || ''
       this.refreshToken = res.refreshToken || ''
@@ -71,7 +80,7 @@ export const useAdminStore = defineStore('admin', {
     },
 
     /** 从服务端拉取最新管理员信息 */
-    async fetchProfile() {
+    async fetchProfile(): Promise<Employee | null> {
       try {
         const res = await getAdminProfile()
         if (res.username) {
@@ -93,19 +102,19 @@ export const useAdminStore = defineStore('admin', {
     },
 
     /** 手动设置 Token */
-    setToken(token) {
+    setToken(token: string) {
       this.token = token || ''
       safeSet(TOKEN_KEY, this.token)
     },
 
     /** 手动设置 Refresh Token */
-    setRefreshToken(refreshToken) {
+    setRefreshToken(refreshToken: string) {
       this.refreshToken = refreshToken || ''
       safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
     },
 
-    /** 手动设置管理员信息（用于跨页面同步） */
-    setAdminInfo(info) {
+    /** 手动设置管理员信息(用于跨页面同步) */
+    setAdminInfo(info: any) {
       if (!info) return
       if (info.empId || info.id || info.EMP_ID) {
         this.empId = info.empId || info.id || info.EMP_ID
@@ -126,8 +135,8 @@ export const useAdminStore = defineStore('admin', {
     },
 
     /**
-     * 退出登录（E4：先调后端写黑名单，再清本地状态）
-     * 即使后端调用失败，仍清本地，保证前端一定登出。
+     * 退出登录(E4:先调后端写黑名单,再清本地状态)
+     * 即使后端调用失败,仍清本地,保证前端一定登出。
      */
     async logout() {
       // E4: 通知后端把 access+refresh token 加入黑名单

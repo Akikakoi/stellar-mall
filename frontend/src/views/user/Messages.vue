@@ -41,7 +41,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { listMessages, markMessageRead, markAllMessagesRead } from '@/api/mall'
 import { useUnreadBadge } from '@/composables/useUnreadBadge'
@@ -49,19 +49,19 @@ import { ElMessage } from 'element-plus'
 
 const { dec: decBadge } = useUnreadBadge()
 
-const list = ref([])
+const list = ref<any[]>([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(20)
 
-const hasUnread = computed(() => list.value.some(m => m.isRead === 0))
+const hasUnread = computed(() => list.value.some((m: any) => m.isRead === 0))
 
 /**
  * 根据消息类型返回对应的 Element Plus Tag 样式
  * @param {string} type - 消息类型
  * @returns {string} Tag 类型
  */
-function tagType(type) {
+function tagType(type: any) {
   if (type === 'ORDER_SHIPPED' || type === 'AFTER_SALE_APPROVED' || type === 'AFTER_SALE_COMPLETED') return 'success'
   if (type === 'ORDER_CANCELLED' || type === 'AFTER_SALE_REJECTED') return 'danger'
   if (type === 'COUPON') return 'warning'
@@ -73,8 +73,8 @@ function tagType(type) {
  * @param {string} type - 消息类型
  * @returns {string} 中文标签
  */
-function typeLabel(type) {
-  const map = {
+function typeLabel(type: any) {
+  const map: Record<string, any> = {
     ORDER_SHIPPED: '发货通知',
     ORDER_CANCELLED: '取消通知',
     AFTER_SALE_APPROVED: '售后通过',
@@ -91,24 +91,24 @@ function typeLabel(type) {
  */
 async function load() {
   try {
-    const res = await listMessages({ page: pageNum.value, pageSize: pageSize.value })
+    const res: any = await listMessages({ page: pageNum.value, pageSize: pageSize.value })
     const d = res?.data || res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) { /* */ }
+  } catch (e: any) { /* */ }
 }
 
 /**
  * 标记单条消息为已读，并更新未读角标
  * @param {Object} m - 消息对象
  */
-async function acknowledge(m) {
+async function acknowledge(m: any) {
   if (m.isRead === 1) return
   try {
     await markMessageRead(m.id)
     m.isRead = 1
     decBadge()
-  } catch (e) {
+  } catch (e: any) {
     const msg = e?.response?.data?.msg || e?.message || '操作失败'
     ElMessage.error(msg)
   }
@@ -121,7 +121,7 @@ async function readAll() {
   try {
     await markAllMessagesRead()
     let unreadCount = 0
-    list.value.forEach(m => {
+    list.value.forEach((m: any) => {
       if (m.isRead === 0) {
         m.isRead = 1
         unreadCount++
@@ -129,7 +129,7 @@ async function readAll() {
     })
     decBadge(unreadCount)
     ElMessage.success('已全部标记为已读')
-  } catch (e) {
+  } catch (e: any) {
     const msg = e?.response?.data?.msg || e?.message || '操作失败'
     ElMessage.error(msg)
   }

@@ -157,7 +157,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
@@ -179,13 +179,13 @@ const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
-const order = ref(null)
-const afterSale = ref(null)  // 关联的售后单
+const order = ref<any>(null)
+const afterSale = ref<any>(null)  // 关联的售后单
 
 // ---- 订单倒计时 ----
 const ORDER_EXPIRE_MINUTES = 15
 const countdownText = ref('')
-let countdownTimer = null
+let countdownTimer: any = null
 
 /**
  * 根据订单创建时间计算剩余支付倒计时，更新到 countdownText
@@ -231,8 +231,8 @@ const returnSubmitting = ref(false)
 
 // 评价弹窗
 const reviewVisible = ref(false)
-const reviewItem = ref(null)
-const reviewForm = ref({ rating: 5, content: '' })
+const reviewItem = ref<any>(null)
+const reviewForm = ref<any>({ rating: 5, content: '' })
 const reviewSubmitting = ref(false)
 const reviewedSkuIds = ref(new Set())
 
@@ -240,7 +240,7 @@ const reviewedSkuIds = ref(new Set())
  * 打开商品评价弹窗，初始化评价表单
  * @param {Object} item - 订单商品项
  */
-function openReview(item) {
+function openReview(item: any) {
   reviewItem.value = item
   reviewForm.value = { rating: 5, content: '' }
   reviewVisible.value = true
@@ -269,7 +269,7 @@ async function submitReview() {
     ElMessage.success('评价提交成功')
     reviewedSkuIds.value.add(item.skuId)
     reviewVisible.value = false
-  } catch (e) {
+  } catch (e: any) {
     const msg = e?.response?.data?.msg || e?.message || '提交失败'
     ElMessage.error(msg)
   } finally {
@@ -287,18 +287,18 @@ function load() {
     return
   }
   loading.value = true
-  apiGetOrder(id).then(res => {
+  apiGetOrder(id as any).then((res: any) => {
     order.value = res || {}
     // 加载关联售后单
-    getAfterSaleByOrder(id).then(as => { afterSale.value = as || null }).catch(() => {})
+    getAfterSaleByOrder(id as any).then((as: any) => { afterSale.value = as || null }).catch(() => {})
     // 如果从"去评价"进入，自动打开第一个未评价商品的评价弹窗
     if (route.query.review === '1' && isReviewable(order.value?.statusCode)) {
       nextTick(() => {
-        const firstItem = (order.value?.items || []).find(it => !reviewedSkuIds.value.has(it.skuId))
+        const firstItem = (order.value?.items || []).find((it: any) => !reviewedSkuIds.value.has(it.skuId))
         if (firstItem) openReview(firstItem)
       })
     }
-  }).catch(e => {
+  }).catch((e: any) => {
     const msg = e?.response?.data?.msg || e?.message || '加载失败'
     ElMessage.error(msg)
   }).finally(() => {
@@ -312,11 +312,11 @@ function load() {
  * @param {number} statusCode - 订单状态码
  * @returns {boolean}
  */
-function isReviewable(statusCode) {
+function isReviewable(statusCode: any) {
   return statusCode === ORDER_STATUS.REVIEWABLE || statusCode === ORDER_STATUS.COMPLETED
 }
 
-const STATUS_MAP = {
+const STATUS_MAP: Record<string, any> = {
   [ORDER_STATUS.CANCELLED]: ['已取消', 'info'],
   [ORDER_STATUS.PENDING]: ['待付款', 'warning'],
   [ORDER_STATUS.PAID]: ['待发货', 'warning'],
@@ -326,12 +326,12 @@ const STATUS_MAP = {
   [ORDER_STATUS.REFUNDING]: ['退款中', 'warning'],
   [ORDER_STATUS.REFUNDED]: ['已退款', 'danger']
 }
-function statusText(s) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
-function statusTag(s)  { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
+function statusText(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
+function statusTag(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
 
-function payMethodText(m) {
+function payMethodText(m: any) {
   if (m == null) return '—'
-  const map = { 1: '微信支付', 2: '支付宝', 4: '银行卡' }
+  const map: Record<string, any> = { 1: '微信支付', 2: '支付宝', 4: '银行卡' }
   return map[m] || `方式${m}`
 }
 
@@ -353,7 +353,7 @@ const showAfterSaleBtn = computed(() => {
  * 计算订单中所有商品的总数量
  */
 const totalQty = computed(() =>
-  (order.value?.items || []).reduce((s, i) => s + (Number(i.qty) || 0), 0)
+  (order.value?.items || []).reduce((s: any, i: any) => s + (Number(i.qty) || 0), 0)
 )
 
 /**
@@ -362,10 +362,10 @@ const totalQty = computed(() =>
 async function onPay() {
   try {
     await ElMessageBox.confirm('确认支付该订单？', '支付确认', { type: 'warning' })
-    await apiPayOrder(order.value.id)
+    await (apiPayOrder as any)(order.value.id)
     ElMessage.success('支付成功')
     load()
-  } catch (e) { /* 用户取消不提示 */ }
+  } catch (e: any) { /* 用户取消不提示 */ }
 }
 
 /**
@@ -377,7 +377,7 @@ async function onCancel() {
     await apiCancelOrder(order.value.id, '用户取消')
     ElMessage.success('已取消')
     load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /**
@@ -389,7 +389,7 @@ async function onConfirm() {
     await apiConfirmOrder(order.value.id)
     ElMessage.success('已确认收货')
     load()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /**
@@ -401,7 +401,7 @@ function copyOrderNo() {
   try {
     navigator.clipboard && navigator.clipboard.writeText(t)
     ElMessage.success('订单号已复制')
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.info(t)
   }
 }
@@ -410,7 +410,7 @@ function copyOrderNo() {
  * 在新标签页中打开商品详情页
  * @param {number} spuId - 商品SPU ID
  */
-function goSpu(spuId) {
+function goSpu(spuId: any) {
   if (spuId) {
     const route = router.resolve(`/spu/${spuId}`)
     window.open(route.href, '_blank')
@@ -454,7 +454,7 @@ async function onSubmitReturn() {
     ElMessage.success('退货物流已提交')
     returnVisible.value = false
     load()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '提交失败')
   } finally {
     returnSubmitting.value = false

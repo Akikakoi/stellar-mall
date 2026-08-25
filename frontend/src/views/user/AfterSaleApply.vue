@@ -75,7 +75,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { listOrder, getOrder, submitAfterSale } from '@/api/mall'
@@ -89,14 +89,14 @@ const router = useRouter()
 
 const loading = ref(false)
 const submitting = ref(false)
-const availableOrders = ref([])
-const selectedOrderId = ref(null)
-const selectedOrder = ref(null)
-const orderItems = ref([])
-const selectedSkuId = ref(null)
-const selectedItem = ref(null)
+const availableOrders = ref<any[]>([])
+const selectedOrderId = ref<any>(null)
+const selectedOrder = ref<any>(null)
+const orderItems = ref<any[]>([])
+const selectedSkuId = ref<any>(null)
+const selectedItem = ref<any>(null)
 
-const form = ref({
+const form = ref<any>({
   type: AFTER_SALE_TYPE.REFUND_ONLY,
   reason: '',
   detail: ''
@@ -125,8 +125,8 @@ const hasCouponDiscount = computed(() => {
   return total > 0 && paid < total
 })
 
-watch(selectedSkuId, (val) => {
-  selectedItem.value = orderItems.value.find(it => it.skuId === val) || null
+watch(selectedSkuId, (val: any) => {
+  selectedItem.value = orderItems.value.find((it: any) => it.skuId === val) || null
 })
 
 /**
@@ -135,15 +135,15 @@ watch(selectedSkuId, (val) => {
 async function loadAvailableOrders() {
   loading.value = true
   try {
-    const res = await listOrder({ page: 1, pageSize: 100 })
+    const res: any = await listOrder({ page: 1, pageSize: 100 }) // 兼容 records/list/裸数组多种返回结构
     const all = res?.records || res?.list || (Array.isArray(res) ? res : [])
     // 筛选可售后订单：PAID(2)/SHIPPED(3)/COMPLETED(5)
-    availableOrders.value = all.filter(o => {
+    availableOrders.value = all.filter((o: any) => {
       const s = o.statusCode
       return s === ORDER_STATUS.PAID || s === ORDER_STATUS.SHIPPED 
         || s === ORDER_STATUS.COMPLETED || s === ORDER_STATUS.REVIEWABLE
     })
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载订单失败')
   } finally {
     loading.value = false
@@ -154,7 +154,7 @@ async function loadAvailableOrders() {
  * 切换选中订单，加载订单详情和商品列表，并重置表单
  * @param {number} orderId - 订单ID
  */
-async function onOrderChange(orderId) {
+async function onOrderChange(orderId: any) {
   if (!orderId) {
     selectedOrder.value = null
     orderItems.value = []
@@ -173,7 +173,7 @@ async function onOrderChange(orderId) {
       reason: '',
       detail: ''
     }
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载订单详情失败')
   } finally {
     loading.value = false
@@ -199,7 +199,7 @@ async function onSubmit() {
     })
     ElMessage.success('售后申请已提交，请等待商家审核')
     router.push('/aftersale/list')
-  } catch (e) {
+  } catch (e: any) {
     const msg = e?.response?.data?.msg || e?.message || '提交失败'
     ElMessage.error(msg)
   } finally {

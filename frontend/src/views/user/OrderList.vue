@@ -103,7 +103,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { listOrder, cancelOrder, payOrder, confirmOrder, deleteUserOrder, listAfterSales, submitReturnTracking } from '@/api/mall'
@@ -116,19 +116,19 @@ const __PH = window.__PH
 const router = useRouter()
 const loading = ref(false)
 const activeTab = ref('')
-const orders = ref([])
+const orders = ref<any[]>([])
 
 // ---- 订单倒计时（15 分钟自动过期） ----
 const ORDER_EXPIRE_MINUTES = 15
-const countdowns = reactive({})  // orderId → { remaining, text, expired }
-let countdownTimer = null
+const countdowns = reactive<any>({})  // orderId → { remaining, text, expired }
+let countdownTimer: any = null
 
 /**
  * 为待付款订单初始化倒计时，计算截止时间并存入 countdowns 响应式对象
  * @param {Array} list - 订单列表
  */
-function initCountdowns(list) {
-  list.forEach(order => {
+function initCountdowns(list: any) {
+  list.forEach((order: any) => {
     if (order.statusCode === ORDER_STATUS.PENDING && order.createTime) {
       const deadline = new Date(order.createTime).getTime() + ORDER_EXPIRE_MINUTES * 60 * 1000
       countdowns[order.id] = { deadline, text: '', expired: false }
@@ -158,7 +158,7 @@ function updateCountdowns() {
     if (prevText !== cd.text) changed = true
   }
   // 清理已不在列表中的倒计时
-  const activeIds = new Set(orders.value.map(o => o.id))
+  const activeIds = new Set(orders.value.map((o: any) => o.id))
   for (const id of ids) {
     if (!activeIds.has(Number(id))) delete countdowns[id]
   }
@@ -176,22 +176,22 @@ function stopCountdown() {
   if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
 }
 
-function countdownText(orderId) {
+function countdownText(orderId: any) {
   return countdowns[orderId]?.text || ''
 }
 
-function isCountdownExpired(orderId) {
+function isCountdownExpired(orderId: any) {
   return !!countdowns[orderId]?.expired
 }
 
 // 售后物流
-const afterSaleMap = ref({})  // orderId → AfterSaleVO
+const afterSaleMap = ref<any>({})  // orderId → AfterSaleVO
 const returnVisible = ref(false)
-const returnOrderId = ref(null)
+const returnOrderId = ref<any>(null)
 const returnTracking = ref('')
 const returnSubmitting = ref(false)
 
-const STATUS_MAP = {
+const STATUS_MAP: Record<string, any> = {
   [ORDER_STATUS.CANCELLED]: ['已取消', 'info'],
   [ORDER_STATUS.PENDING]: ['待付款', 'warning'],
   [ORDER_STATUS.PAID]: ['待发货', 'primary'],
@@ -202,8 +202,8 @@ const STATUS_MAP = {
   [ORDER_STATUS.REFUNDED]: ['已退款', 'danger']
 }
 
-function statusText(s) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
-function statusTag(s) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
+function statusText(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
+function statusTag(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
 
 /**
  * 加载订单列表，根据当前选中的状态标签页筛选，并初始化倒计时和异步加载售后单
@@ -212,8 +212,8 @@ async function loadOrders() {
   loading.value = true
   try {
     const res = await listOrder({ status: activeTab.value || undefined, page: 1, pageSize: 50 })
-    const d = res || {}
-    orders.value = d.records || d.list || Array.isArray(res) ? res : []
+    const d: any = res || {}
+    orders.value = (d.records || d.list || Array.isArray(res) ? res : []) as any
     initCountdowns(orders.value)
     startCountdown()
   } finally {
@@ -229,36 +229,36 @@ async function loadOrders() {
 async function loadAfterSales() {
   try {
     const asRes = await listAfterSales({ page: 1, pageSize: 200 })
-    const asList = (asRes?.records || asRes?.list || [])
-    const map = {}
-    asList.forEach(a => { if (a.orderId) map[a.orderId] = a })
+    const asList = (asRes?.records || (asRes as any)?.list || [])
+    const map: Record<string, any> = {}
+    asList.forEach((a: any) => { if (a.orderId) map[a.orderId] = a })
     afterSaleMap.value = map
-  } catch (e) { /* 售后加载失败不影响订单展示 */ }
+  } catch (e: any) { /* 售后加载失败不影响订单展示 */ }
 }
 
 /**
  * 取消指定订单，弹出确认框后调用取消接口
  * @param {Object} order - 订单对象
  */
-async function cancel(order) {
+async function cancel(order: any) {
   try {
     await ElMessageBox.confirm('确定要取消该订单吗？', '提示', { type: 'warning' })
     await cancelOrder(order.id, '用户取消')
     ElMessage.success('已取消')
     loadOrders()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 const paying = ref(false)
 const payDialogVisible = ref(false)
-const pendingOrder = ref(null)
+const pendingOrder = ref<any>(null)
 const selectedPayMethod = ref('1')
 
 /**
  * 打开支付方式选择对话框
  * @param {Object} order - 待支付的订单对象
  */
-async function pay(order) {
+async function pay(order: any) {
   pendingOrder.value = order
   selectedPayMethod.value = '1'
   payDialogVisible.value = true
@@ -275,7 +275,7 @@ async function doPay() {
     ElMessage.success('支付成功')
     payDialogVisible.value = false
     loadOrders()
-  } catch (e) {
+  } catch (e: any) {
     if (e?.message) {
       ElMessage.error(e?.response?.data?.msg || e?.message || '支付失败')
     }
@@ -288,20 +288,20 @@ async function doPay() {
  * 确认收货，弹出确认框后调用确认收货接口
  * @param {Object} order - 订单对象
  */
-async function confirm(order) {
+async function confirm(order: any) {
   try {
     await ElMessageBox.confirm('确认已收到商品？', '提示', { type: 'warning' })
     await confirmOrder(order.id)
     ElMessage.success('已确认收货')
     loadOrders()
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /**
  * 永久删除指定订单，弹出二次确认后调用删除接口
  * @param {Object} order - 订单对象
  */
-async function handleDelete(order) {
+async function handleDelete(order: any) {
   try {
     await ElMessageBox.confirm(
       `确定永久删除订单「${order.orderNo || order.id}」？此操作不可撤销。`,
@@ -311,26 +311,26 @@ async function handleDelete(order) {
     await deleteUserOrder(order.id)
     ElMessage.success('已删除')
     loadOrders()
-  } catch (e) {
+  } catch (e: any) {
     if (e !== 'cancel' && e?.message) {
       ElMessage.error(e?.response?.data?.msg || e?.message || '删除失败')
     }
   }
 }
 
-function viewDetail(order) {
+function viewDetail(order: any) {
   router.push(`/order/${order.id}`)
 }
 
-function goReview(order) {
+function goReview(order: any) {
   router.push({ path: `/order/${order.id}`, query: { review: '1' } })
 }
 
-function goAfterSale(order) {
+function goAfterSale(order: any) {
   router.push(`/aftersale/apply?orderId=${order.id}`)
 }
 
-function showAfterSale(code) {
+function showAfterSale(code: any) {
   return code === ORDER_STATUS.PAID || code === ORDER_STATUS.SHIPPED || code === ORDER_STATUS.COMPLETED
 }
 
@@ -338,7 +338,7 @@ function showAfterSale(code) {
  * 打开填写退货物流弹窗
  * @param {Object} order - 订单对象
  */
-function openReturn(order) {
+function openReturn(order: any) {
   returnOrderId.value = order.id
   returnTracking.value = ''
   returnVisible.value = true
@@ -359,7 +359,7 @@ async function submitReturn() {
     ElMessage.success('退货物流已提交')
     returnVisible.value = false
     loadOrders()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '提交失败')
   } finally {
     returnSubmitting.value = false

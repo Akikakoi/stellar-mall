@@ -151,7 +151,7 @@
               </div>
               <div v-else class="comment-empty">暂无评论</div>
               <div class="comment-input-row">
-                <el-input :model-value="commentInputs[r.id] || ''" @update:model-value="val => commentInputs[r.id] = val" placeholder="写下你的评论..." size="small" maxlength="500"
+                <el-input :model-value="commentInputs[r.id] || ''" @update:model-value="(val: any) => commentInputs[r.id] = val" placeholder="写下你的评论..." size="small" maxlength="500"
                   @keyup.enter="submitComment(r)" />
                 <el-button size="small" type="primary" @click="submitComment(r)">发表</el-button>
               </div>
@@ -164,7 +164,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getSpu, addFavorite, removeFavorite, isFavorited, getReviewComments, submitReviewComment } from '@/api/mall'
@@ -183,12 +183,12 @@ const userStore = useUserStore()
 
 const loading = ref(false)
 const offShelf = ref(false)
-const spu = ref(null)
-const skus = ref([])
-const selectedSku = ref(null)
+const spu = ref<any>(null)
+const skus = ref<any[]>([])
+const selectedSku = ref<any>(null)
 const qty = ref(1)
 const isFav = ref(false)
-const selectedServices = ref([])
+const selectedServices = ref<any[]>([])
 
 // 演示：保障服务数据，后续可替换为后端接口
 const skuServices = ref([
@@ -198,15 +198,15 @@ const skuServices = ref([
 ])
 
 const serviceFee = computed(() => {
-  return selectedServices.value.reduce((sum, id) => {
-    const svc = skuServices.value.find(s => s.id === id)
+  return selectedServices.value.reduce((sum: any, id: any) => {
+    const svc = skuServices.value.find((s: any) => s.id === id)
     return sum + (svc ? svc.price : 0)
   }, 0)
 })
 
 const selectedServicesDetail = computed(() => {
-  return selectedServices.value.map(id => {
-    const svc = skuServices.value.find(s => s.id === id)
+  return selectedServices.value.map((id: any) => {
+    const svc = skuServices.value.find((s: any) => s.id === id)
     return svc ? { ...svc } : null
   }).filter(Boolean)
 })
@@ -217,15 +217,15 @@ const displayPrice = computed(() => {
 })
 
 // --- 轮播图 ---
-const carouselRef = ref(null)
+const carouselRef = ref<any>(null)
 const galleryImages = computed(() => {
   if (!spu.value) return [__PH]
-  const images = []
+  const images: any[] = []
   const main = spu.value.mainImage
   if (main) images.push(main)
   const subs = spu.value.subImages
   if (subs && typeof subs === 'string') {
-    subs.split(';').forEach(s => {
+    subs.split(';').forEach((s: any) => {
       const u = s.trim()
       if (u) images.push(u)
     })
@@ -237,13 +237,13 @@ const galleryImages = computed(() => {
 // 放大预览
 const zoomVisible = ref(false)
 const zoomIndex = ref(0)
-const zoomOverlayRef = ref(null)
+const zoomOverlayRef = ref<any>(null)
 
 /**
  * 打开图片放大预览，设置当前索引并聚焦遮罩层以支持键盘导航
  * @param {number} index - 图片索引
  */
-function openZoom(index) {
+function openZoom(index: any) {
   zoomIndex.value = index
   zoomVisible.value = true
   nextTick(() => { zoomOverlayRef.value?.focus() })
@@ -276,14 +276,14 @@ function nextImage() {
  * 处理放大预览时的键盘事件：Esc 关闭、← → 切换图片
  * @param {KeyboardEvent} e - 键盘事件
  */
-function handleZoomKeydown(e) {
+function handleZoomKeydown(e: any) {
   if (e.key === 'Escape') closeZoom()
   if (e.key === 'ArrowLeft') prevImage()
   if (e.key === 'ArrowRight') nextImage()
 }
 
 // 阻止背景滚动
-watch(zoomVisible, (v) => {
+watch(zoomVisible, (v: any) => {
   document.body.style.overflow = v ? 'hidden' : ''
 })
 
@@ -291,26 +291,26 @@ onBeforeUnmount(() => {
   document.body.style.overflow = ''
 })
 
-function onSkuChange(sku) {
+function onSkuChange(sku: any) {
   selectedSku.value = sku
 }
 
 // Reviews
-const reviews = ref([])
+const reviews = ref<any[]>([])
 const reviewTotal = ref(0)
-const avgRating = ref(0)
+const avgRating = ref<number | string>(0)
 
 // Review comments
-const expandedReviews = ref({})
-const comments = ref({})
-const commentCounts = ref({})
-const commentInputs = ref({})
+const expandedReviews = ref<any>({})
+const comments = ref<any>({})
+const commentCounts = ref<any>({})
+const commentInputs = ref<any>({})
 
 /**
  * 展开/折叠某条评价的评论列表，首次展开时异步加载评论数据
  * @param {Object} review - 评价对象
  */
-async function toggleComments(review) {
+async function toggleComments(review: any) {
   const rid = review.id
   if (expandedReviews.value[rid]) {
     expandedReviews.value[rid] = false
@@ -323,7 +323,7 @@ async function toggleComments(review) {
       const list = Array.isArray(res) ? res : (res?.data || res?.records || [])
       comments.value[rid] = list
       commentCounts.value[rid] = list.length
-    } catch (e) {
+    } catch (e: any) {
       comments.value[rid] = []
     }
   }
@@ -333,7 +333,7 @@ async function toggleComments(review) {
  * 提交评价的评论，提交后刷新该评价的评论列表
  * @param {Object} review - 评价对象
  */
-async function submitComment(review) {
+async function submitComment(review: any) {
   const rid = review.id
   const content = commentInputs.value[rid]?.trim()
   if (!content) return
@@ -345,7 +345,7 @@ async function submitComment(review) {
     comments.value[rid] = list
     commentCounts.value[rid] = list.length
     ElMessage.success('评论成功')
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('评论失败，请先登录')
   }
 }
@@ -355,15 +355,15 @@ async function submitComment(review) {
  */
 async function loadReviews() {
   try {
-    const res = await userRequest({ url: `/user/review/spu/${route.params.id}`, method: 'get', params: { page: 1, pageSize: 20 }, __silent: true })
+    const res: any = await userRequest({ url: `/user/review/spu/${route.params.id}`, method: 'get', params: { page: 1, pageSize: 20 }, __silent: true })
     const d = res?.data || res || {}
     reviews.value = d.records || d.list || []
     reviewTotal.value = d.total || 0
-  } catch (e) {}
+  } catch (e: any) {}
   try {
-    const res = await userRequest({ url: `/user/review/spu/${route.params.id}/rating`, method: 'get', __silent: true })
+    const res: any = await userRequest({ url: `/user/review/spu/${route.params.id}/rating`, method: 'get', __silent: true })
     avgRating.value = Number(res || 0).toFixed(1)
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /**
@@ -373,12 +373,12 @@ async function loadDetail() {
   loading.value = true
   offShelf.value = false
   try {
-    const res = await getSpu(route.params.id)
+    const res = await getSpu(route.params.id as unknown as number)
     spu.value = res || null
     skus.value = res?.skus || res?.skuList || []
     selectedServices.value = []
     await checkFav()
-  } catch (e) {
+  } catch (e: any) {
     const msg = (e?.response?.data?.msg) || e?.message || ''
     if (msg.includes('已下架')) {
       offShelf.value = true
@@ -396,9 +396,9 @@ async function loadDetail() {
 async function checkFav() {
   if (!userStore.token) return
   try {
-    const res = await isFavorited(route.params.id)
+    const res = await isFavorited(route.params.id as unknown as number)
     isFav.value = res === true
-  } catch (e) {
+  } catch (e: any) {
     // ignore
   }
 }
@@ -423,7 +423,7 @@ async function toggleFav() {
       isFav.value = true
       ElMessage.success('已添加收藏')
     }
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('操作失败')
   }
 }
@@ -450,7 +450,7 @@ async function handleAddCart() {
       serviceFee: serviceFee.value
     })
     ElMessage.success('已加入购物车')
-  } catch (e) {
+  } catch (e: any) {
     const msg = e?.message || e?.msg || ''
     if (!msg.includes('SKU不存在') && !msg.includes('停售')) {
       ElMessage.success('已加入购物车 (本地)')
@@ -467,7 +467,7 @@ function handleBuyNow() {
     ElMessage.warning('请先选择商品规格')
     return
   }
-  const item = {
+  const item: Record<string, any> = {
     skuId: Number(sku.id),
     spuId: Number(spu.value?.id),
     name: sku.name || spu.value?.name || '',

@@ -64,7 +64,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { listAfterSales, cancelAfterSale, submitReturnTracking } from '@/api/mall'
@@ -76,18 +76,18 @@ const __PH = window.__PH
 const router = useRouter()
 
 const loading = ref(false)
-const list = ref([])
+const list = ref<any[]>([])
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 
 // 退货物流
 const returnVisible = ref(false)
-const returnItem = ref(null)
+const returnItem = ref<any>(null)
 const returnTracking = ref('')
 const returnSubmitting = ref(false)
 
-const STATUS_TAG_MAP = {
+const STATUS_TAG_MAP: Record<string, any> = {
   [AFTER_SALE_STATUS.APPLIED]: 'warning',
   [AFTER_SALE_STATUS.AUDITING]: 'warning',
   [AFTER_SALE_STATUS.RETURNING]: 'primary',
@@ -97,7 +97,7 @@ const STATUS_TAG_MAP = {
   [AFTER_SALE_STATUS.CANCELLED]: 'info'
 }
 
-function statusTag(s) { return STATUS_TAG_MAP[s] || 'info' }
+function statusTag(s: any) { return STATUS_TAG_MAP[s] || 'info' }
 
 /**
  * 加载售后列表数据，支持分页
@@ -106,10 +106,10 @@ async function loadList() {
   loading.value = true
   try {
     const res = await listAfterSales({ page: page.value, pageSize: pageSize.value })
-    const d = res || {}
+    const d: any = res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载失败')
   } finally {
     loading.value = false
@@ -120,7 +120,7 @@ async function loadList() {
  * 跳转到售后详情页
  * @param {Object} item - 售后记录项
  */
-function viewDetail(item) {
+function viewDetail(item: any) {
   router.push(`/aftersale/${item.id}`)
 }
 
@@ -128,20 +128,20 @@ function viewDetail(item) {
  * 取消指定售后申请，弹出确认框后调用取消接口
  * @param {Object} item - 售后记录项
  */
-async function cancelItem(item) {
+async function cancelItem(item: any) {
   try {
     await ElMessageBox.confirm('确定取消该售后申请吗？', '提示', { type: 'warning' })
     await cancelAfterSale(item.id)
     ElMessage.success('已取消')
     loadList()
-  } catch (e) { /* 用户取消 */ }
+  } catch (e: any) { /* 用户取消 */ }
 }
 
 /**
  * 打开退货物流填写弹窗
  * @param {Object} item - 售后记录项
  */
-function openReturnDialog(item) {
+function openReturnDialog(item: any) {
   returnItem.value = item
   returnTracking.value = ''
   returnVisible.value = true
@@ -161,7 +161,7 @@ async function submitReturn() {
     ElMessage.success('退货物流已提交')
     returnVisible.value = false
     loadList()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '提交失败')
   } finally {
     returnSubmitting.value = false

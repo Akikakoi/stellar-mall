@@ -107,7 +107,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { Star, StarFilled, CopyDocument, Document, Cpu, Setting, CircleCheck, CircleClose, ChatDotRound, ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -136,7 +136,7 @@ const userLetter = computed(() => {
   return (u?.nickname || u?.username || '我')?.[0]
 })
 const meta = computed(() => {
-  const parts = []
+  const parts: any[] = []
   if (props.msg.mode) {
     const label = props.msg.mode === 'agent' ? 'Agent 模式' : props.msg.mode === 'rag' ? 'RAG 模式' : '智能模式'
     parts.push(label)
@@ -148,7 +148,7 @@ const meta = computed(() => {
 
 watch(
   () => props.msg.content,
-  (c) => {
+  (c: any) => {
     if (props.msg.streaming) {
       renderedMd.value = escapeHtml(c).replace(/\n/g, '<br/>')
     } else {
@@ -160,23 +160,23 @@ watch(
 
 watch(
   () => props.msg.streaming,
-  (streaming, was) => {
+  (streaming: any, was: any) => {
     if (was && !streaming) {
       renderedMd.value = DOMPurify.sanitize(md.render(props.msg.content || ''))
     }
   },
 )
 
-function escapeHtml(s) {
+function escapeHtml(s: any) {
   return String(s ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
-async function onFb(v) {
+async function onFb(v: any) {
   if (!props.conversationId || !props.msg.id) return
   try {
-    await apiFeedbackMessage(props.conversationId, props.msg.id, v)
+    await apiFeedbackMessage(props.conversationId as number, props.msg.id, v)
     chatStore.updateAssistant(props.msg.id, { feedback: v })
     ElMessage.success('已提交反馈，感谢！')
     emit('feedback', v)
@@ -188,8 +188,8 @@ function copy() {
   ElMessage.success('已复制')
 }
 
-function toolName(tool) {
-  const map = {
+function toolName(tool: any) {
+  const map: Record<string, string> = {
     kb_search: '知识库检索',
     query_order: '订单查询',
     cancel_order: '取消订单',

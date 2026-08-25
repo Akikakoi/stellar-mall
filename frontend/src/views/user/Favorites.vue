@@ -37,7 +37,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
@@ -52,14 +52,14 @@ const userStore = useUserStore()
 const cartStore = useCartStore()
 
 const loading = ref(false)
-const favorites = ref([])
+const favorites = ref<any[]>([])
 
 const LAYOUT_KEY = 'stellar_fav_cols'
 const colsPerRow = ref(Number(localStorage.getItem(LAYOUT_KEY)) || 4)
 
 /** 将每行显示列数偏好保存到 localStorage */
 function saveLayout() {
-  localStorage.setItem(LAYOUT_KEY, colsPerRow.value)
+  localStorage.setItem(LAYOUT_KEY, colsPerRow.value as any)
 }
 
 /** 加载用户收藏的商品列表 */
@@ -68,7 +68,7 @@ async function loadFavorites() {
   try {
     const res = await listFavorites()
     favorites.value = Array.isArray(res) ? res : []
-  } catch (e) {
+  } catch (e: any) {
     favorites.value = []
   } finally {
     loading.value = false
@@ -79,7 +79,7 @@ async function loadFavorites() {
  * 在新标签页中打开商品详情页
  * @param {number} spuId - 商品 SPU ID
  */
-function goDetail(spuId) {
+function goDetail(spuId: any) {
   const route = router.resolve(`/spu/${spuId}`)
   window.open(route.href, '_blank')
 }
@@ -88,7 +88,7 @@ function goDetail(spuId) {
  * 确认后取消收藏指定商品，从列表中移除
  * @param {Object} item - 收藏项对象
  */
-async function handleRemove(item) {
+async function handleRemove(item: any) {
   try {
     await ElMessageBox.confirm(`确定取消收藏「${item.spuName}」？`, '提示', {
       confirmButtonText: '确定',
@@ -101,17 +101,17 @@ async function handleRemove(item) {
   try {
     await removeFavorite(item.spuId)
     ElMessage.success('已取消收藏')
-    favorites.value = favorites.value.filter(f => f.id !== item.id)
-  } catch (e) {
+    favorites.value = favorites.value.filter((f: any) => f.id !== item.id)
+  } catch (e: any) {
     ElMessage.error('取消收藏失败')
   }
 }
 
 onMounted(async () => {
   if (userStore.token && !userStore.nickname) {
-    try { await userStore.fetchProfile() } catch (e) {}
+    try { await userStore.fetchProfile() } catch (e: any) {}
   }
-  try { await cartStore.load() } catch (e) {}
+  try { await cartStore.load() } catch (e: any) {}
   await loadFavorites()
 })
 </script>

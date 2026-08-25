@@ -1,29 +1,27 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, type Ref } from 'vue'
 
 /**
  * 订单倒计时组合式函数。
- * 根据订单创建时间和过期时长，计算剩余时间并自动更新。
- * 需要手动调用返回的 start() 方法启动倒计时，组件卸载时自动停止。
- * @param {string|number} createTime - 订单创建时间（ISO 字符串或时间戳）
- * @param {number} [expireMinutes=15] - 过期分钟数
- * @returns {{
- *   remaining: import('vue').Ref<number>,
- *   remainingText: import('vue').Ref<string>,
- *   expired: import('vue').Ref<boolean>,
- *   start: () => void,
- *   stop: () => void
- * }} 倒计时相关状态与控制方法
- *   - remaining: 剩余秒数
- *   - remainingText: 格式化后的剩余时间文本（如 "14:32"），超时时显示"已超时"
- *   - expired: 是否已超时
- *   - start: 启动倒计时
- *   - stop: 停止倒计时
+ * 根据订单创建时间和过期时长,计算剩余时间并自动更新。
+ * 需要手动调用返回的 start() 方法启动倒计时,组件卸载时自动停止。
  */
-export function useOrderCountdown(createTime, expireMinutes = 15) {
+export interface OrderCountdown {
+  remaining: Ref<number>
+  remainingText: Ref<string>
+  expired: Ref<boolean>
+  start: () => void
+  stop: () => void
+}
+
+/**
+ * @param createTime 订单创建时间(ISO 字符串或时间戳;运行时兼容空值,传入 null/undefined 时倒计时置零)
+ * @param expireMinutes 过期分钟数,默认 15
+ */
+export function useOrderCountdown(createTime?: string | number | null, expireMinutes = 15): OrderCountdown {
   const remaining = ref(0)         // 剩余秒数
   const remainingText = ref('')    // 格式化文本 "14:32"
   const expired = ref(false)
-  let timer = null
+  let timer: ReturnType<typeof setInterval> | null = null
 
   function tick() {
     if (!createTime) {
@@ -53,17 +51,13 @@ export function useOrderCountdown(createTime, expireMinutes = 15) {
     }
   }
 
-  /**
-   * 启动倒计时（立即执行一次 tick，然后每秒更新）。
-   */
+  /** 启动倒计时(立即执行一次 tick,然后每秒更新) */
   function start() {
     tick()
     timer = setInterval(tick, 1000)
   }
 
-  /**
-   * 停止倒计时，清除定时器。
-   */
+  /** 停止倒计时,清除定时器 */
   function stop() {
     if (timer) {
       clearInterval(timer)
@@ -71,7 +65,7 @@ export function useOrderCountdown(createTime, expireMinutes = 15) {
     }
   }
 
-  // 需要手动调 start() 启动，不自动启动
+  // 需要手动调 start() 启动,不自动启动
   onUnmounted(stop)
 
   return { remaining, remainingText, expired, start, stop }

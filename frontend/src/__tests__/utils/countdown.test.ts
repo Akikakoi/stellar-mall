@@ -184,7 +184,7 @@ describe('useOrderCountdown', () => {
       15
     )
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       setTimeout(() => {
         expect(remaining.value).toBe(0)
         expect(remainingText.value).toBe('')

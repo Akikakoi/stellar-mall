@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
+import type { CartItem } from '@/types/models'
 
 // mock API 模块 — cart 的 load/add/updateQty/remove/clear 都依赖这些
 vi.mock('@/api/mall', () => ({
@@ -25,12 +26,13 @@ function createStore() {
 }
 
 /** 构造一个 mock 购物车项 */
-function mockItem(overrides = {}) {
+function mockItem(overrides: Record<string, any> = {}): CartItem {
   return {
     id: 1,
     skuId: 101,
     spuId: 1001,
     name: '测试商品',
+    image: '',
     price: 99.00,
     quantity: 2,
     checked: true,
@@ -98,7 +100,7 @@ describe('useCartStore', () => {
       const store = createStore()
       store.items = [
         mockItem({ quantity: 2 }),
-        { id: 2, price: 10 } // 无 quantity
+        { id: 2, price: 10 } as CartItem // 无 quantity(测试兜底为 0)
       ]
       expect(store.totalCount).toBe(2)
     })
@@ -183,14 +185,14 @@ describe('useCartStore', () => {
       const store = createStore()
       store.items = [mockItem({ id: 1, checked: true })]
       store.toggleChecked(1)
-      expect(store.items[0].checked).toBe(false)
+      expect(store.items[0]!.checked).toBe(false)
     })
 
     it('取消选中 → 选中', () => {
       const store = createStore()
       store.items = [mockItem({ id: 1, checked: false })]
       store.toggleChecked(1)
-      expect(store.items[0].checked).toBe(true)
+      expect(store.items[0]!.checked).toBe(true)
     })
 
     it('不存在的 id 不抛异常', () => {
@@ -203,7 +205,7 @@ describe('useCartStore', () => {
       const store = createStore()
       store.items = [mockItem({ id: 10, skuId: 200, checked: true })]
       store.toggleChecked(200)
-      expect(store.items[0].checked).toBe(false)
+      expect(store.items[0]!.checked).toBe(false)
     })
   })
 
@@ -252,7 +254,7 @@ describe('useCartStore', () => {
       ]
       store.clearChecked()
       expect(store.items).toHaveLength(1)
-      expect(store.items[0].id).toBe(2)
+      expect(store.items[0]!.id).toBe(2)
     })
   })
 
@@ -271,7 +273,7 @@ describe('useCartStore', () => {
   // ── Actions: load (mocked API) ──
   describe('load', () => {
     it('服务端返回数据时覆盖本地 items', async () => {
-      listCart.mockResolvedValue([
+      vi.mocked(listCart).mockResolvedValue([
         {
           cartId: 1, skuId: 101, spuId: 1001, skuName: '商品A',
           skuPrice: 50, qty: 2, checked: true
@@ -282,14 +284,14 @@ describe('useCartStore', () => {
       await store.load()
 
       expect(store.items).toHaveLength(1)
-      expect(store.items[0].name).toBe('商品A')
-      expect(store.items[0].price).toBe(50)
-      expect(store.items[0].quantity).toBe(2)
-      expect(store.items[0].checked).toBe(true)
+      expect(store.items[0]!.name).toBe('商品A')
+      expect(store.items[0]!.price).toBe(50)
+      expect(store.items[0]!.quantity).toBe(2)
+      expect(store.items[0]!.checked).toBe(true)
     })
 
     it('服务端返回空数组时清空本地', async () => {
-      listCart.mockResolvedValue([])
+      vi.mocked(listCart).mockResolvedValue([])
 
       const store = createStore()
       // 先设一些本地数据
@@ -301,7 +303,7 @@ describe('useCartStore', () => {
     })
 
     it('请求失败时保留本地数据不覆盖', async () => {
-      listCart.mockRejectedValue(new Error('network'))
+      vi.mocked(listCart).mockRejectedValue(new Error('network'))
 
       const store = createStore()
       store.items = [mockItem()]

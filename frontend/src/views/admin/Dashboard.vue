@@ -127,7 +127,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getDashboardStats, generateDailyReport } from '@/api/admin'
@@ -143,17 +143,17 @@ import { CanvasRenderer } from 'echarts/renderers'
 echarts.use([LineChart, BarChart, GridComponent, TooltipComponent, CanvasRenderer])
 
 const router = useRouter()
-const orderChartRef = ref(null)
-const salesChartRef = ref(null)
-const stats = reactive({
+const orderChartRef = ref<any>(null)
+const salesChartRef = ref<any>(null)
+const stats = reactive<any>({
   pendingOrders: 0, todayOrders: 0, todaySales: 0, lowStockCount: 0,
   pendingAfterSaleCount: 0
 })
-const orderTrendData = ref([])
-const salesTrendData = ref([])
+const orderTrendData = ref<any[]>([])
+const salesTrendData = ref<any[]>([])
 
-const orderTrendHasData = computed(() => orderTrendData.value.some(d => (d.count || 0) > 0))
-const salesTrendHasData = computed(() => salesTrendData.value.some(d => (d.amount || 0) > 0))
+const orderTrendHasData = computed(() => orderTrendData.value.some((d: any) => (d.count || 0) > 0))
+const salesTrendHasData = computed(() => salesTrendData.value.some((d: any) => (d.amount || 0) > 0))
 
 /** 获取今天的日期字符串，格式为 YYYY-MM-DD */
 function todayStr() {
@@ -164,7 +164,7 @@ function todayStr() {
 }
 
 /** 跳转到订单管理页面，并按指定状态筛选 */
-function goOrders(status) {
+function goOrders(status: any) {
   router.push({ path: '/admin/orders', query: { status } })
 }
 
@@ -174,34 +174,34 @@ function goOrdersToday() {
   router.push({ path: '/admin/orders', query: { startTime: today, endTime: today } })
 }
 
-let orderChart = null
-let salesChart = null
+let orderChart: any = null
+let salesChart: any = null
 
 /** 加载仪表盘全部数据：核心统计、增强统计 */
 async function load() {
   try {
     try {
       const res = await getDashboardStats()
-      const d = res || {}
+      const d: any = res || {}
       stats.spuTotal = d.spuTotal || d.spuCount || 0
-    } catch (e) {}
+    } catch (e: any) {}
     try {
-      const res = await adminRequest({ url: '/admin/dashboard/enhanced', method: 'get' })
-      const d = res?.data || res || {}
+      const res: any = await adminRequest({ url: '/admin/dashboard/enhanced', method: 'get' })
+      const d: any = (res as any)?.data || res || {}
       stats.todayOrders = d.todayOrders || 0
       stats.todaySales = d.todaySales || 0
       stats.lowStockCount = d.lowStockCount || 0
       stats.pendingOrders = d.pendingOrders || 0
       stats.pendingAfterSaleCount = d.pendingAfterSaleCount || 0
       renderCharts(d.orderTrend || [], d.salesTrend || [])
-    } catch (e) {
+    } catch (e: any) {
       console.error('加载仪表盘增强统计失败', e)
     }
-  } catch (e) {}
+  } catch (e: any) {}
 }
 
 /** 使用 ECharts 渲染近7天订单趋势和销售额趋势图 */
-function renderCharts(orderTrend, salesTrend) {
+function renderCharts(orderTrend: any, salesTrend: any) {
   orderTrendData.value = Array.isArray(orderTrend) ? orderTrend : []
   salesTrendData.value = Array.isArray(salesTrend) ? salesTrend : []
 
@@ -209,14 +209,14 @@ function renderCharts(orderTrend, salesTrend) {
     try {
       if (orderChartRef.value && orderTrendHasData.value) {
         if (!orderChart) orderChart = echarts.init(orderChartRef.value)
-        const dates = orderTrendData.value.map(d => d.date)
+        const dates = orderTrendData.value.map((d: any) => d.date)
         orderChart.setOption({
           tooltip: { trigger: 'axis' },
           grid: { left: 40, right: 20, top: 20, bottom: 30 },
           xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 11 } },
           yAxis: { type: 'value', minInterval: 1 },
           series: [{
-            data: orderTrendData.value.map(d => d.count || 0),
+            data: orderTrendData.value.map((d: any) => d.count || 0),
             type: 'line',
             smooth: true,
             areaStyle: { color: 'rgba(0, 113, 227, 0.12)' },
@@ -227,20 +227,20 @@ function renderCharts(orderTrend, salesTrend) {
       }
       if (salesChartRef.value && salesTrendHasData.value) {
         if (!salesChart) salesChart = echarts.init(salesChartRef.value)
-        const dates = salesTrendData.value.map(d => d.date)
+        const dates = salesTrendData.value.map((d: any) => d.date)
         salesChart.setOption({
           tooltip: { trigger: 'axis' },
           grid: { left: 50, right: 20, top: 20, bottom: 30 },
           xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 11 } },
           yAxis: { type: 'value', axisLabel: { formatter: '¥{value}' } },
           series: [{
-            data: salesTrendData.value.map(d => Number(d.amount || 0)),
+            data: salesTrendData.value.map((d: any) => Number(d.amount || 0)),
             type: 'bar',
             itemStyle: { color: '#34c759', borderRadius: [6, 6, 0, 0] }
           }]
         }, true)
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('渲染趋势图失败', e)
     }
   })
@@ -263,7 +263,7 @@ onUnmounted(() => {
   salesChart && salesChart.dispose()
 })
 
-const exporting = ref(null)
+const exporting = ref<any>(null)
 
 // ---------- AI 经营日报 ----------
 const reportLoading = ref(false)
@@ -272,11 +272,11 @@ const reportGeneratedAt = ref('')
 
 /** 把日报文本按行拆开（去掉空行），标题行单独渲染样式 */
 const reportLines = computed(() =>
-  reportText.value.split('\n').map(l => l.trim()).filter(Boolean)
+  reportText.value.split('\n').map((l: any) => l.trim()).filter(Boolean)
 )
 
 /** 识别小节标题行：【xxx】 或 markdown # 标题（模型可能不严格遵守格式） */
-function isReportHeading(line) {
+function isReportHeading(line: any) {
   return /^【.+】$/.test(line) || /^#{1,3}\s+/.test(line)
 }
 
@@ -290,7 +290,7 @@ async function handleGenerateReport() {
     if (!reportText.value) {
       ElMessage.warning('未生成日报内容，请稍后重试')
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error('生成 AI 经营日报失败', e)
   } finally {
     reportLoading.value = false
@@ -298,12 +298,12 @@ async function handleGenerateReport() {
 }
 
 /** 导出数据为 Excel 文件，支持 orders / users / finance 三种类型 */
-async function handleExport(type) {
+async function handleExport(type: any) {
   exporting.value = type
   try {
     const token = localStorage.getItem('stellar_admin_token') || ''
-    const urls = { orders: '/admin/export/orders', users: '/admin/export/users', finance: '/admin/export/finance' }
-    const names = { orders: '订单数据导出.xlsx', users: '用户数据导出.xlsx', finance: '财务报表.xlsx' }
+    const urls: Record<string, any> = { orders: '/admin/export/orders', users: '/admin/export/users', finance: '/admin/export/finance' }
+    const names: Record<string, any> = { orders: '订单数据导出.xlsx', users: '用户数据导出.xlsx', finance: '财务报表.xlsx' }
     const resp = await fetch(urls[type], { headers: { token } })
     if (!resp.ok) throw new Error()
     const blob = await resp.blob()
@@ -311,7 +311,7 @@ async function handleExport(type) {
     const a = document.createElement('a'); a.href = url; a.download = names[type]; a.click()
     URL.revokeObjectURL(url)
     ElMessage.success('导出成功')
-  } catch (e) { ElMessage.error('导出失败') }
+  } catch (e: any) { ElMessage.error('导出失败') }
   finally { exporting.value = null }
 }
 </script>

@@ -163,7 +163,7 @@ describe('useUserStore', () => {
   // ── Actions: login ──
   describe('login', () => {
     it('登录成功后更新所有状态', async () => {
-      loginUser.mockResolvedValue({
+      vi.mocked(loginUser).mockResolvedValue({
         token: 'login-token',
         userId: 1,
         nickname: '测试用户',
@@ -181,7 +181,7 @@ describe('useUserStore', () => {
     })
 
     it('登录后 token 持久化到 localStorage', async () => {
-      loginUser.mockResolvedValue({
+      vi.mocked(loginUser).mockResolvedValue({
         token: 'persist-login-token',
         userId: 2
       })

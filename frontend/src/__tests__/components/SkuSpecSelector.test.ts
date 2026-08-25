@@ -1,23 +1,24 @@
 /**
  * SkuSpecSelector 组件测试
  *
- * 覆盖：规格解析（specsJson/specs 格式）、规格选择联动、
+ * 覆盖:规格解析(specsJson/specs 格式)、规格选择联动、
  * 数量加减、库存限制、默认选中、emit 事件。
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
-// mock Element Plus icons（组件模板中用到 Grid/ArrowDown）
+// mock Element Plus icons(组件模板中用到 Grid/ArrowDown)
 vi.mock('@element-plus/icons-vue', () => ({
   Grid: { template: '<span class="mock-icon-grid">☰</span>' },
   ArrowDown: { template: '<span class="mock-icon-arrow">▼</span>' }
 }))
 
-// mock window.__PH（组件 mounted 时用到）
-window.__PH = window.__PH || {}
+// mock window.__PH(组件 mounted 时用到)
+window.__PH = window.__PH || ''
 
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
+import type { Sku } from '@/types/models'
 
 /** 构造测试用 SKU 数据 */
 function makeSkus() {
@@ -61,7 +62,7 @@ function mountComponent(props = {}) {
   return mount(SkuSpecSelector, {
     props: {
       spu: { id: 1, name: '测试手机' },
-      skus: makeSkus(),
+      skus: makeSkus() as Sku[],
       services: [
         { id: 1, title: '延保1年', price: 99 },
         { id: 2, title: '碎屏险', price: 59 }
@@ -82,7 +83,7 @@ describe('SkuSpecSelector', () => {
       const wrapper = mountComponent()
       const labels = wrapper.findAll('.spec-label span:first-child')
       const texts = labels.map(el => el.text())
-      // 应有 "颜色"、"存储"、"数量"（总是有数量行）
+      // 应有 "颜色"、"存储"、"数量"(总是有数量行)
       expect(texts).toContain('颜色')
       expect(texts).toContain('存储')
     })
@@ -97,7 +98,7 @@ describe('SkuSpecSelector', () => {
     it('图片模式下颜色选项显示图片', () => {
       const wrapper = mountComponent()
       const images = wrapper.findAll('.option-image')
-      // 有图片的选项（颜色选项含 image）
+      // 有图片的选项(颜色选项含 image)
       expect(images.length).toBeGreaterThanOrEqual(2)
     })
 
@@ -115,28 +116,28 @@ describe('SkuSpecSelector', () => {
     it('点击选项后添加 active 样式', async () => {
       const wrapper = mountComponent()
       const options = wrapper.findAll('.spec-option')
-      // 点击第一个选项（颜色 → 红色）
-      await options[0].trigger('click')
+      // 点击第一个选项(颜色 → 红色)
+      await options[0]!.trigger('click')
 
       // 该选项应变为 active
-      expect(options[0].classes()).toContain('active')
+      expect(options[0]!.classes()).toContain('active')
     })
 
     it('emit sku-change 事件', async () => {
       const wrapper = mountComponent()
       const options = wrapper.findAll('.spec-option')
-      await options[0].trigger('click')
+      await options[0]!.trigger('click')
 
       const emitted = wrapper.emitted('sku-change')
       expect(emitted).toBeTruthy()
       // mounted 时也会 emit 一次
-      expect(emitted.length).toBeGreaterThanOrEqual(2)
+      expect(emitted!.length).toBeGreaterThanOrEqual(2)
     })
 
     it('选择完整规格后显示"已选"摘要', async () => {
       const wrapper = mountComponent()
       const options = wrapper.findAll('.spec-option')
-      // 默认选中每个维度第一个选项，应该已有匹配 SKU
+      // 默认选中每个维度第一个选项,应该已有匹配 SKU
       await nextTick()
       const summary = wrapper.find('.selected-summary')
       expect(summary.exists()).toBe(true)
@@ -156,30 +157,30 @@ describe('SkuSpecSelector', () => {
     it('点击 + 增加数量', async () => {
       const wrapper = mountComponent({ modelValue: 1 })
       await nextTick()
-      const plusBtn = wrapper.findAll('.qty-btn')[1] // 第二个按钮是 +
+      const plusBtn = wrapper.findAll('.qty-btn')[1]! // 第二个按钮是 +
       await plusBtn.trigger('click')
       expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([2])
     })
 
-    it('点击 − 减少数量', async () => {
+    it('点击 - 减少数量', async () => {
       const wrapper = mountComponent({ modelValue: 2 })
       await nextTick()
-      const minusBtn = wrapper.findAll('.qty-btn')[0] // 第一个按钮是 −
+      const minusBtn = wrapper.findAll('.qty-btn')[0]! // 第一个按钮是 -
       await minusBtn.trigger('click')
       expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual([1])
     })
 
-    it('数量为 1 时 − 按钮禁用', () => {
+    it('数量为 1 时 - 按钮禁用', () => {
       const wrapper = mountComponent({ modelValue: 1 })
-      const minusBtn = wrapper.findAll('.qty-btn')[0]
+      const minusBtn = wrapper.findAll('.qty-btn')[0]!
       expect(minusBtn.attributes('disabled')).toBeDefined()
     })
 
     it('数量达上限时 + 按钮禁用', async () => {
-      // 第一个 SKU stock=50，maxQty=50
+      // 第一个 SKU stock=50,maxQty=50
       const wrapper = mountComponent({ modelValue: 50 })
       await nextTick()
-      const plusBtn = wrapper.findAll('.qty-btn')[1]
+      const plusBtn = wrapper.findAll('.qty-btn')[1]!
       expect(plusBtn.attributes('disabled')).toBeDefined()
     })
 
@@ -209,7 +210,7 @@ describe('SkuSpecSelector', () => {
 
     it('无 services 时不渲染服务行', () => {
       const wrapper = mount(SkuSpecSelector, {
-        props: { spu: {}, skus: makeSkus(), services: [] }
+        props: { spu: {}, skus: makeSkus() as Sku[], services: [] }
       })
       expect(wrapper.find('.service-body').exists()).toBe(false)
     })
@@ -224,7 +225,7 @@ describe('SkuSpecSelector', () => {
           skus: [
             { id: 1, name: 'A', price: 10, stock: 5, specs: '颜色:红;尺寸:M' },
             { id: 2, name: 'B', price: 12, stock: 3, specs: '颜色:蓝;尺寸:L' }
-          ],
+          ] as Sku[],
           modelValue: 1
         }
       })
@@ -257,11 +258,11 @@ describe('SkuSpecSelector', () => {
               specsJson: JSON.stringify({ 颜色: '红', 尺寸: 'M' }) },
             { id: 2, name: 'B', price: 12, stock: 3,
               specsJson: JSON.stringify({ 颜色: '蓝', 尺寸: 'L' }) }
-          ],
+          ] as Sku[],
           modelValue: 1
         }
       })
-      // 颜色有红和蓝，尺寸有M和L，所有选项都有对应的SKU，不应禁用
+      // 颜色有红和蓝,尺寸有M和L,所有选项都有对应的SKU,不应禁用
       const disabledOptions = wrapper.findAll('.spec-option:disabled')
       expect(disabledOptions).toHaveLength(0)
     })

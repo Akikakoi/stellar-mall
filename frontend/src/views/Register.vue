@@ -55,7 +55,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
@@ -65,26 +65,26 @@ import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
-const formRef = ref(null)
+const formRef = ref<any>(null)
 const loading = ref(false)
 const sendingCode = ref(false)
 const codeCountdown = ref(0)
-let timer = null
+let timer: number | null = null
 
 // 图形验证码状态
 const captchaId = ref('')
 const captchaImage = ref('')
 
-const form = reactive({
+const form = reactive<any>({
   email: '',
   nickname: '',
   code: '',
   captchaCode: ''
 })
 
-const emailRule = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
+const emailRule: Record<string, any> = { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
 
-const rules = {
+const rules: Record<string, any> = {
   email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, emailRule],
   code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
   captchaCode: [{ required: true, message: '请输入图形验证码', trigger: 'blur' }]
@@ -97,7 +97,7 @@ async function refreshCaptcha() {
     captchaId.value = res.captchaId
     captchaImage.value = res.imageBase64
     form.captchaCode = ''
-  } catch (e) {
+  } catch (e: any) {
     // 拦截器已统一提示
   }
 }
@@ -117,7 +117,7 @@ async function sendCode() {
   }
   sendingCode.value = true
   try {
-    const res = await userRequest({
+    const res: any = await userRequest({
       url: '/user/email-code/send',
       method: 'post',
       data: { email: form.email, type: 'REGISTER' },
@@ -133,9 +133,9 @@ async function sendCode() {
     codeCountdown.value = 60
     timer = setInterval(() => {
       codeCountdown.value--
-      if (codeCountdown.value <= 0) clearInterval(timer)
+      if (codeCountdown.value <= 0) clearInterval(timer!)
     }, 1000)
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error('发送失败，请重试')
   } finally {
     sendingCode.value = false
@@ -150,7 +150,7 @@ async function handleRegister() {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-  } catch (e) {
+  } catch (e: any) {
     return
   }
   loading.value = true
@@ -169,13 +169,13 @@ async function handleRegister() {
           method: 'put',
           data: { nickname: form.nickname }
         })
-      } catch (e) {
+      } catch (e: any) {
         // 昵称更新失败不阻断注册流程
       }
     }
     ElMessage.success('注册成功')
     router.push('/')
-  } catch (e) {
+  } catch (e: any) {
     // 注册失败时刷新图形验证码（一次性使用），让用户重试
     refreshCaptcha()
   } finally {

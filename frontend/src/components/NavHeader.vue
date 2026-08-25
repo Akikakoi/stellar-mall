@@ -90,7 +90,7 @@
   </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, getCurrentInstance, ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -124,8 +124,8 @@ const router = useRouter()
 const instance = getCurrentInstance()
 const hasLogoClickListener = computed(() => !!instance?.vnode.props?.onLogoClick)
 
-const navRef = ref(null)
-const indicatorStyle = ref({
+const navRef = ref<any>(null)
+const indicatorStyle = ref<any>({
   transform: 'translateX(0px)',
   width: '0px',
   opacity: 0
@@ -177,7 +177,7 @@ const activeIndex = computed(() => {
   const items = navItems.value
   const path = route.path
   if (path === '/') return 0
-  return items.findIndex(item =>
+  return items.findIndex((item: any) =>
     item.to !== '/' && (path === item.to || path.startsWith(item.to + '/'))
   )
 })
@@ -233,9 +233,9 @@ const { searchHistory, addToHistory, removeHistory } = useSearchHistory()
  * @param {string} queryString - 用户输入的搜索关键词
  * @param {Function} cb - 回调函数，接收建议项数组
  */
-function querySearch(queryString, cb) {
+function querySearch(queryString: string, cb: any) {
   if (!queryString || queryString.trim().length < 1) {
-    const items = searchHistory.value.map(h => ({ value: h, isHistory: true }))
+    const items = searchHistory.value.map((h: any) => ({ value: h, isHistory: true }))
     cb(items)
     return
   }
@@ -247,7 +247,7 @@ function querySearch(queryString, cb) {
  * 填充搜索关键词并立即执行搜索
  * @param {Object} item - 选中的建议项，包含 value 属性
  */
-function onSelectSuggestion(item) {
+function onSelectSuggestion(item: any) {
   searchKeyword.value = item.value
   doSearch()
 }
@@ -257,17 +257,17 @@ function onSelectSuggestion(item) {
  * @param {string} queryString - 搜索关键词
  * @param {Function} cb - 回调函数，接收建议项数组
  */
-async function fetchSuggestions(queryString, cb) {
+async function fetchSuggestions(queryString: string, cb: any) {
   if (!queryString || queryString.trim().length < 1) {
     cb([])
     return
   }
   try {
     const res = await suggestSpu(queryString.trim())
-    const data = res || {}
-    const items = (data.completions || []).map(s => ({ value: s }))
+    const data: any = res || {}
+    const items = (data.completions || []).map((s: any) => ({ value: s }))
     cb(items)
-  } catch (e) {
+  } catch (e: any) {
     cb([])
   }
 }
@@ -280,7 +280,7 @@ function doSearch() {
   const kw = searchKeyword.value.trim()
   if (!kw) return
   addToHistory(kw)
-  const query = { keyword: kw }
+  const query: Record<string, any> = { keyword: kw }
   if (route.path === '/shop/search') {
     router.replace({ query })
   } else {
@@ -296,10 +296,10 @@ function doSearch() {
 async function fetchUnreadCount() {
   if (!userStore.token) return
   try {
-    const res = await getUnreadCount()
+    const res: any = await getUnreadCount()
     const d = res?.data || res || {}
     unreadCount.value = d.count || 0
-  } catch (e) { /* ignore */ }
+  } catch (e: any) { /* ignore */ }
 }
 
 /**
@@ -310,7 +310,7 @@ function goMessages() {
 }
 
 // 每 30 秒拉一次未读数
-let unreadTimer = null
+let unreadTimer: number | null = null
 onMounted(() => {
   fetchUnreadCount()
   unreadTimer = setInterval(fetchUnreadCount, 30000)
@@ -324,7 +324,7 @@ onUnmounted(() => {
  * 支持跳转到个人中心、消息、订单、售后、钱包、地址、收藏、优惠券、积分商城、AI 助手等页面，以及退出登录
  * @param {string} cmd - 菜单命令标识
  */
-function handleCommand(cmd) {
+function handleCommand(cmd: string) {
   if (cmd === 'profile') window.open('/me', '_blank')
   else if (cmd === 'messages') window.open('/me/messages', '_blank')
   else if (cmd === 'aftersale') window.open('/aftersale/list', '_blank')

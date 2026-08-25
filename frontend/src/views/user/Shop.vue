@@ -196,7 +196,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Loading, Search, Close, Clock } from '@element-plus/icons-vue'
@@ -217,7 +217,7 @@ const userStore = useUserStore()
 const cartStore = useCartStore()
 
 const columns = ref(Number(localStorage.getItem('stellar_shop_cols')) || 4)
-function setColumns(n) {
+function setColumns(n: any) {
   localStorage.setItem('stellar_shop_cols', String(n))
 }
 
@@ -228,9 +228,9 @@ const searchKeyword = ref('')  // 顶部大搜索框的输入绑定
 const historyOpen = ref(false) // 搜索历史下拉是否展开
 // 搜索历史（与导航栏/主页搜索框共享同一份数据，按用户隔离）
 const { searchHistory, addToHistory, removeHistory } = useSearchHistory()
-const categoryId = ref(null)
+const categoryId = ref<any>(null)
 const categoryName = ref('')
-const spus = ref([])
+const spus = ref<any[]>([])
 const favSet = reactive(new Set())
 const page = ref(1)
 const pageSize = ref(20)
@@ -238,13 +238,13 @@ const total = ref(0)
 const hasMore = computed(() => spus.value.length < total.value)
 
 // 高亮映射
-const highlights = ref({})
+const highlights = ref<any>({})
 
 // 聚合数据
-const aggCategories = ref([])
-const aggPriceRanges = ref([])
-const initialAggCategories = ref([]) // 保存初始（无筛选）聚合，用于始终显示全部分类数量
-const activeCategoryId = ref(null)
+const aggCategories = ref<any[]>([])
+const aggPriceRanges = ref<any[]>([])
+const initialAggCategories = ref<any[]>([]) // 保存初始（无筛选）聚合，用于始终显示全部分类数量
+const activeCategoryId = ref<any>(null)
 // 自定义价格筛选
 const customPriceFrom = ref('')
 const customPriceTo = ref('')
@@ -253,18 +253,18 @@ const customPriceTo = ref('')
 const activeSort = ref('default') // 'default' | 'price_asc' | 'price_desc' | 'sales_desc'
 
 // 所有分类（用于名称映射）
-const allCategories = ref([])
-const categoryMap = reactive({})
+const allCategories = ref<any[]>([])
+const categoryMap = reactive<any>({})
 
 const hasActiveFilters = computed(() => !!activeCategoryId.value || customPriceFrom.value !== '' || customPriceTo.value !== '' || activeSort.value !== 'default')
 
 // 展示所有分类，合并聚合中的商品数量
 // 使用 initialAggCategories（初始无筛选聚合）确保数量始终显示全量，不受后续筛选影响
 const displayCategories = computed(() => {
-  const aggMap = {}
+  const aggMap: Record<string, any> = {}
   const source = initialAggCategories.value.length > 0 ? initialAggCategories.value : aggCategories.value
-  source.forEach(a => { aggMap[Number(a.key)] = a.docCount })
-  return allCategories.value.map(c => ({
+  source.forEach((a: any) => { aggMap[Number(a.key)] = a.docCount })
+  return allCategories.value.map((c: any) => ({
     key: c.id,
     name: c.name,
     docCount: aggMap[c.id] || 0
@@ -273,12 +273,12 @@ const displayCategories = computed(() => {
 
 // --- 规格弹窗（选型号统一复用详情页 SkuSpecSelector：仅规格 + 数量，不含保障服务） ---
 const skuDialogVisible = ref(false)
-const currentSpu = ref(null)
-const currentSkus = ref([])
+const currentSpu = ref<any>(null)
+const currentSkus = ref<any[]>([])
 const cartQty = ref(1)          // 数量，由 SkuSpecSelector 通过 v-model 同步
 const addingCart = ref(false)
-const selectedSku = ref(null)   // 由 SkuSpecSelector 的 sku-change 事件填充
-function onSkuChange(sku) { selectedSku.value = sku }
+const selectedSku = ref<any>(null)   // 由 SkuSpecSelector 的 sku-change 事件填充
+function onSkuChange(sku: any) { selectedSku.value = sku }
 
 // --- 高亮渲染 ---
 /**
@@ -287,7 +287,7 @@ function onSkuChange(sku) { selectedSku.value = sku }
  * @param {string} fallback - 无高亮时的回退文本
  * @returns {string} 高亮 HTML 或转义后的名称
  */
-function highlightedName(spuId, fallback) {
+function highlightedName(spuId: any, fallback: any) {
   const hl = highlights.value[String(spuId)]
   if (hl && hl.length > 0) return hl[0]
   // 用内置 HTML 转义后的 fallback
@@ -298,7 +298,7 @@ function highlightedName(spuId, fallback) {
  * @param {string} str - 原始字符串
  * @returns {string} 转义后的字符串
  */
-function escapeHtml(str) {
+function escapeHtml(str: any) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
@@ -315,7 +315,7 @@ function closeHistory() {
  * 选中一条搜索历史：填入输入框并立即搜索
  * @param {string} kw - 历史关键词
  */
-function pickHistory(kw) {
+function pickHistory(kw: any) {
   searchKeyword.value = kw
   historyOpen.value = false
   doShopSearch()
@@ -325,7 +325,7 @@ function pickHistory(kw) {
  * 删除一条搜索历史（确认弹窗在 composable 内），删除后为空则收起面板
  * @param {string} kw - 要删除的关键词
  */
-async function removeHistoryItem(kw) {
+async function removeHistoryItem(kw: any) {
   const ok = await removeHistory(kw)
   if (ok && searchHistory.value.length === 0) historyOpen.value = false
 }
@@ -372,7 +372,7 @@ function applyPriceFilter() {
  * 切换排序方式，再次点击同一排序则恢复默认排序
  * @param {string} sortKey - 排序键值
  */
-function setSort(sortKey) {
+function setSort(sortKey: any) {
   if (activeSort.value === sortKey) {
     activeSort.value = 'default'
   } else {
@@ -386,7 +386,7 @@ function setSort(sortKey) {
  * 切换分类筛选，再次点击同一分类则取消筛选
  * @param {number|string} catId - 分类 ID
  */
-function toggleCategoryFilter(catId) {
+function toggleCategoryFilter(catId: any) {
   if (activeCategoryId.value === catId) {
     activeCategoryId.value = null
     router.replace({ query: { ...route.query, categoryId: undefined } })
@@ -413,7 +413,7 @@ function clearAllFilters() {
   loadSpu()
 }
 
-function categoryNameById(id) {
+function categoryNameById(id: any) {
   return categoryMap[id] || null
 }
 
@@ -422,7 +422,7 @@ function categoryNameById(id) {
  * 分类页标签显示分类名，避免与搜索页的“商品搜索”重复
  */
 function refreshCategoryContext() {
-  const cat = allCategories.value.find(c => c.id == route.query.categoryId)
+  const cat = allCategories.value.find((c: any) => c.id == route.query.categoryId)
   categoryName.value = cat ? cat.name : ''
   document.title = cat
     ? `${cat.name} - 星耀商城`
@@ -441,7 +441,7 @@ watch(
  * @returns {Object} 包含 priceFrom / priceTo 的参数对象
  */
 function priceFilterParams() {
-  const params = {}
+  const params: Record<string, any> = {}
   if (customPriceFrom.value !== '') {
     const v = Number(customPriceFrom.value)
     if (!Number.isNaN(v) && v >= 0) params.priceFrom = v
@@ -486,7 +486,7 @@ async function loadSpu(append = false) {
     aggPriceRanges.value = []
   }
   try {
-    const params = { page: page.value, pageSize: pageSize.value }
+    const params: Record<string, any> = { page: page.value, pageSize: pageSize.value }
     if (keyword.value) params.name = keyword.value
     if (categoryId.value) params.categoryId = categoryId.value
 
@@ -500,7 +500,7 @@ async function loadSpu(append = false) {
     if (sp.sortBy) params.sortBy = sp.sortBy
     if (sp.sortOrder) params.sortOrder = sp.sortOrder
 
-    const res = await listSpu(params)
+    const res: any = await listSpu(params)
     if (res && typeof res === 'object') {
       total.value = res.total || 0
       const records = Array.isArray(res.records) ? res.records
@@ -533,7 +533,7 @@ async function loadSpu(append = false) {
         await batchCheckFavs()
       }
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error('loadSpu error:', e)
   } finally {
     loading.value = false
@@ -554,21 +554,21 @@ async function loadMore() {
  * 批量检查商品收藏状态，仅登录用户生效
  * @param {Array} [items] - 商品列表，默认使用当前 spus
  */
-async function batchCheckFavs(items) {
+async function batchCheckFavs(items?: any[]) {
   const target = items || spus.value
   if (!userStore.token || target.length === 0) return
   try {
-    const ids = target.map(s => s.id)
+    const ids = target.map((s: any) => s.id)
     const res = await batchCheckFavorites(ids)
-    if (Array.isArray(res)) res.forEach(id => favSet.add(id))
-  } catch (e) { }
+    if (Array.isArray(res)) res.forEach((id: any) => favSet.add(id))
+  } catch (e: any) { }
 }
 
 /**
  * 切换商品收藏状态，未登录时跳转登录页
  * @param {Object} spu - 商品对象
  */
-async function toggleFav(spu) {
+async function toggleFav(spu: any) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
     if (favSet.has(spu.id)) {
@@ -580,10 +580,10 @@ async function toggleFav(spu) {
       favSet.add(spu.id)
       ElMessage.success('已添加收藏')
     }
-  } catch (e) { ElMessage.error('操作失败') }
+  } catch (e: any) { ElMessage.error('操作失败') }
 }
 
-function goDetail(id) {
+function goDetail(id: any) {
   const r = router.resolve(`/spu/${id}`)
   window.open(r.href, '_blank')
 }
@@ -592,20 +592,20 @@ function goDetail(id) {
  * 处理加入购物车：获取商品 SKU 列表，单个 SKU 直接加入，多个 SKU 弹出规格选择弹窗
  * @param {Object} spu - 商品对象
  */
-async function handleAddToCart(spu) {
+async function handleAddToCart(spu: any) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
     const res = await getSpu(spu.id)
-    const detail = res || {}
+    const detail: any = res || {}
     const skuList = detail.skuList || detail.skuListVo || []
     if (!skuList.length) { ElMessage.warning('该商品暂无规格可选'); return }
     if (skuList.length === 1) { await doAddCart(skuList[0].id); return }
     currentSpu.value = detail
-    currentSkus.value = skuList.filter(s => s.status !== 0)
+    currentSkus.value = skuList.filter((s: any) => s.status !== 0)
     cartQty.value = 1
     selectedSku.value = null
     skuDialogVisible.value = true
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || e?.message || '加载商品规格失败')
   }
 }
@@ -614,7 +614,7 @@ async function handleAddToCart(spu) {
  * 执行加入购物车操作，调用接口并刷新购物车数据
  * @param {number} skuId - SKU ID
  */
-async function doAddCart(skuId, qty = 1) {
+async function doAddCart(skuId: any, qty = 1) {
   if (!skuId) { ElMessage.warning('请选择商品规格'); return }
   addingCart.value = true
   try {
@@ -622,7 +622,7 @@ async function doAddCart(skuId, qty = 1) {
     ElMessage.success('已加入购物车')
     skuDialogVisible.value = false
     await cartStore.load()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || e?.message || '加入购物车失败')
   } finally { addingCart.value = false }
 }
@@ -633,16 +633,16 @@ function confirmAddToCart() { doAddCart(selectedSku.value?.id, cartQty.value) }
 onMounted(async () => {
   const q = route.query.keyword
   if (q) {
-    keyword.value = q
-    searchKeyword.value = q      // 顶部搜索框预填
+    keyword.value = q as string
+    searchKeyword.value = q as string      // 顶部搜索框预填
   }
   categoryId.value = route.query.categoryId || null
 
   // 加载分类列表（用于聚合面板名称映射）
   try {
     const cats = await listCategory()
-    const flat = []
-    function walk(list) {
+    const flat: any[] = []
+    function walk(list: any) {
       if (!list) return
       for (const c of list) {
         flat.push(c)
@@ -651,12 +651,12 @@ onMounted(async () => {
     }
     walk(cats || [])
     allCategories.value = flat
-    flat.forEach(c => { categoryMap[c.id] = c.name })
+    flat.forEach((c: any) => { categoryMap[c.id] = c.name })
     refreshCategoryContext()
-  } catch (e) { }
+  } catch (e: any) { }
 
-  if (userStore.token && !userStore.nickname) { try { await userStore.fetchProfile() } catch (e) { } }
-  try { await cartStore.load() } catch (e) { }
+  if (userStore.token && !userStore.nickname) { try { await userStore.fetchProfile() } catch (e: any) { } }
+  try { await cartStore.load() } catch (e: any) { }
   await loadSpu()
 })
 

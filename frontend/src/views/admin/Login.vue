@@ -24,7 +24,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAdminStore } from '@/stores/admin'
@@ -33,15 +33,15 @@ import { ElMessage } from 'element-plus'
 const router = useRouter()
 const route = useRoute()
 const adminStore = useAdminStore()
-const formRef = ref(null)
+const formRef = ref<any>(null)
 const loading = ref(false)
 
-const form = reactive({
+const form = reactive<any>({
   username: 'admin',
   password: ''
 })
 
-const rules = {
+const rules: Record<string, any> = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
@@ -50,14 +50,14 @@ async function handleLogin() {
   if (!formRef.value) return
   try {
     await formRef.value.validate()
-  } catch (e) { return }
+  } catch (e: any) { return }
   loading.value = true
   try {
     await adminStore.login({ ...form })
     ElMessage.success('登录成功')
     const redirect = route.query.redirect || '/admin/dashboard'
-    router.push(redirect)
-  } catch (e) {
+    router.push(redirect as string)
+  } catch (e: any) {
   } finally {
     loading.value = false
   }

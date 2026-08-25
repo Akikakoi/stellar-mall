@@ -129,7 +129,7 @@
   </el-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAdminStore } from '@/stores/admin'
@@ -151,7 +151,7 @@ const { isDark, toggleTheme } = useTheme()
 const collapsed = ref(false)
 const activeMenu = computed(() => route.path)
 
-const TITLE_MAP = {
+const TITLE_MAP: Record<string, string> = {
   '/admin/dashboard': '控制台',
   '/admin/spu': '商品管理',
   '/admin/category': '分类管理',
@@ -171,7 +171,7 @@ const TITLE_MAP = {
 }
 const currentPageTitle = computed(() => TITLE_MAP[route.path] || '')
 
-async function handleCommand(cmd) {
+async function handleCommand(cmd: string) {
   if (cmd === 'profile') {
     ElMessage.info(`账号：${adminStore.username || '-'}`)
   } else if (cmd === 'logout') {
@@ -180,13 +180,13 @@ async function handleCommand(cmd) {
       adminStore.logout()
       ElMessage.success('已退出')
       router.push('/admin/login')
-    } catch (e) {}
+    } catch (e: any) {}
   }
 }
 
 onMounted(async () => {
   if (adminStore.token && !adminStore.name) {
-    try { await adminStore.fetchProfile() } catch (e) {}
+    try { await adminStore.fetchProfile() } catch (e: any) {}
   }
 })
 </script>

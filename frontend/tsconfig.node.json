@@ -1,0 +1,12 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.json",
+  "include": ["vite.config.js", "vitest.config.js", "playwright.config.js", "e2e/**/*.js"],
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": false,
+    "noUncheckedIndexedAccess": false
+  }
+}

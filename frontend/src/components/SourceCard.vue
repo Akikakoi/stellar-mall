@@ -43,7 +43,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { ArrowUp, ArrowDown, Document, Star } from '@element-plus/icons-vue'
 
@@ -54,11 +54,11 @@ const props = defineProps({
 
 const expanded = ref(false)
 
-function fixGarbledText(str) {
+function fixGarbledText(str: any) {
   if (!str || /^[\x00-\x7F\u4e00-\u9fff\u3400-\u4dbf\s]*$/.test(str)) return str
   try {
     const decoder = new TextDecoder('gbk')
-    const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0)))
+    const bytes = new Uint8Array([...str].map((c: any) => c.charCodeAt(0)))
     const fixed = decoder.decode(bytes)
     if (/[\u4e00-\u9fff]/.test(fixed)) return fixed
   } catch {}
@@ -72,13 +72,13 @@ const tagList = computed(() => {
   if (str.startsWith('[') && str.endsWith(']')) {
     try {
       const parsed = JSON.parse(str)
-      if (Array.isArray(parsed)) return parsed.map(s => fixGarbledText(String(s))).filter(Boolean)
+      if (Array.isArray(parsed)) return parsed.map((s: any) => fixGarbledText(String(s))).filter(Boolean)
     } catch {}
   }
   return str.split(/[,，、;；|\s]+/).filter(Boolean).map(fixGarbledText)
 })
 
-function highlight(text) {
+function highlight(text: any) {
   return text || ''
 }
 </script>

@@ -74,31 +74,31 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getWallet, rechargeWallet, listWalletTransactions } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
-const wallet = ref(null)
+const wallet = ref<any>(null)
 
 const txLoading = ref(false)
-const transactions = ref([])
+const transactions = ref<any[]>([])
 const txPage = ref(1)
 const txPageSize = ref(10)
 const txTotal = ref(0)
 
 const rechargeVisible = ref(false)
 const recharging = ref(false)
-const rechargeForm = ref({ amount: 100, channel: 'WECHAT' })
+const rechargeForm = ref<any>({ amount: 100, channel: 'WECHAT' })
 
 /**
  * 根据交易类型返回对应的 Element UI tag 样式
  * @param {number} type - 交易类型
  * @returns {string} tag 类型
  */
-function txTypeTag(type) {
-  const map = { 1: 'success', 2: 'danger', 3: 'primary', 4: 'warning' }
+function txTypeTag(type: any) {
+  const map: Record<string, any> = { 1: 'success', 2: 'danger', 3: 'primary', 4: 'warning' }
   return map[type] || 'info'
 }
 
@@ -107,7 +107,7 @@ function txTypeTag(type) {
  * @param {number} amount - 金额
  * @returns {string} CSS 类名
  */
-function amountClass(amount) {
+function amountClass(amount: any) {
   return Number(amount || 0) >= 0 ? 'amount-plus' : 'amount-minus'
 }
 
@@ -117,7 +117,7 @@ async function loadWallet() {
   try {
     const res = await getWallet()
     wallet.value = res || { balance: 0, totalRecharge: 0, totalSpent: 0 }
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载失败')
   } finally {
     loading.value = false
@@ -129,10 +129,10 @@ async function loadTx() {
   txLoading.value = true
   try {
     const res = await listWalletTransactions({ page: txPage.value, pageSize: txPageSize.value })
-    const d = res || {}
+    const d: any = res || {}
     transactions.value = d.records || d.list || []
     txTotal.value = d.total || 0
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载流水失败')
   } finally {
     txLoading.value = false
@@ -159,7 +159,7 @@ async function doRecharge() {
     await loadWallet()
     txPage.value = 1
     await loadTx()
-  } catch (e) {
+  } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '充值失败')
   } finally {
     recharging.value = false
