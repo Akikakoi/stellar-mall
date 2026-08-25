@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     站内消息 Mapper（stellar_user_message）
+     用户站内信（系统通知/订单提醒等），提供分页查询、未读数统计、
+     单条/全部已读标记。
+     is_read: 0 未读 / 1 已读。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.UserMessageMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="MessageMap" type="com.stellar.entity.UserMessage">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
@@ -14,11 +21,13 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
+    <!-- 发送站内消息 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_user_message (user_id, type, title, content, ref_id, is_read, create_time)
         VALUES (#{userId}, #{type}, #{title}, #{content}, #{refId}, #{isRead}, #{createTime})
     </insert>
 
+    <!-- C 端：用户消息分页（最新在前） -->
     <select id="pageByUserId" resultMap="MessageMap">
         SELECT * FROM stellar_user_message
         WHERE user_id = #{userId}
@@ -26,18 +35,22 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <!-- 用户消息总数 -->
     <select id="countByUserId" resultType="long">
         SELECT COUNT(*) FROM stellar_user_message WHERE user_id = #{userId}
     </select>
 
+    <!-- 未读数统计（消息红点） -->
     <select id="countUnread" resultType="long">
         SELECT COUNT(*) FROM stellar_user_message WHERE user_id = #{userId} AND is_read = 0
     </select>
 
+    <!-- 单条标记已读 -->
     <update id="markAsRead">
         UPDATE stellar_user_message SET is_read = 1 WHERE id = #{id}
     </update>
 
+    <!-- 全部标记已读（一键已读） -->
     <update id="markAllAsRead">
         UPDATE stellar_user_message SET is_read = 1 WHERE user_id = #{userId} AND is_read = 0
     </update>

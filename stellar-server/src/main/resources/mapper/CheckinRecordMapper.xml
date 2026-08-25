@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     签到记录 Mapper（stellar_checkin_record）
+     记录用户每日签到，提供签到插入、当日查询（防重复签到）、
+     按月签到日期查询（前端日历高亮）。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.CheckinRecordMapper">
 
+    <!-- 新增签到记录 -->
     <insert id="insert" parameterType="com.stellar.entity.CheckinRecord"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_checkin_record (user_id, checkin_date, points_earned, create_time)
         VALUES (#{userId}, #{checkinDate}, #{pointsEarned}, #{createTime})
     </insert>
 
+    <!-- 查询用户某日的签到记录：判断当天是否已签到 -->
     <select id="getByUserAndDate" resultType="com.stellar.entity.CheckinRecord">
         SELECT id, user_id, checkin_date, points_earned, create_time
         FROM stellar_checkin_record
@@ -16,6 +23,7 @@
         LIMIT 1
     </select>
 
+    <!-- 查询用户某月内的签到日期集合（用于日历标记） -->
     <select id="listDatesByMonth" resultType="java.time.LocalDate">
         SELECT checkin_date
         FROM stellar_checkin_record

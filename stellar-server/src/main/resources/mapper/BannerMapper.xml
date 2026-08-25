@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     轮播图 Banner Mapper（stellar_banner）
+     提供首页/活动 Banner 的增删改查、M 端分页管理与 C 端启用列表。
+     status: 0 停用 / 1 启用。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.BannerMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="BannerMap" type="com.stellar.entity.Banner">
         <id property="id" column="id"/>
         <result property="title" column="title"/>
@@ -16,11 +22,13 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 新增 Banner -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_banner (title, image_url, link_url, sort, status, create_time, create_user, update_time, update_user)
         VALUES (#{title}, #{imageUrl}, #{linkUrl}, #{sort}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 更新 Banner：仅更新传入的非空字段 -->
     <update id="update">
         UPDATE stellar_banner
         <set>
@@ -34,14 +42,17 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 删除 Banner -->
     <delete id="deleteById">
         DELETE FROM stellar_banner WHERE id = #{id}
     </delete>
 
+    <!-- 按 id 查询 -->
     <select id="getById" resultMap="BannerMap">
         SELECT * FROM stellar_banner WHERE id = #{id}
     </select>
 
+    <!-- M 端分页查询：支持按标题模糊、状态过滤，按 sort 倒序 -->
     <select id="page" resultMap="BannerMap">
         SELECT * FROM stellar_banner
         <where>
@@ -52,6 +63,7 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <!-- M 端分页总数统计（条件与 page 保持一致） -->
     <select id="count" resultType="long">
         SELECT COUNT(*) FROM stellar_banner
         <where>
@@ -60,6 +72,7 @@
         </where>
     </select>
 
+    <!-- C 端：查询所有启用中的 Banner（首页轮播），sort 越大越靠前 -->
     <select id="listEnabled" resultMap="BannerMap">
         SELECT * FROM stellar_banner WHERE status = 1 ORDER BY sort DESC, id ASC
     </select>

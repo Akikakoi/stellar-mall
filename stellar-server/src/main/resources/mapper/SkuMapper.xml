@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     SKU（商品规格单元）Mapper（stellar_sku）
+     管理商品 SKU 的规格、多价格体系（售价/原价/成本/市场价）、
+     库存与状态。库存扣减/回滚提供 乐观锁(version) 与 Redis 锁 两套方案。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.SkuMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="SkuMap" type="com.stellar.entity.Sku">
         <id     property="id"           column="id"/>
         <result property="spuId"        column="spu_id"/>
@@ -107,6 +113,7 @@
         DELETE FROM stellar_sku WHERE id = #{id}
     </delete>
 
+    <!-- 删除商品下全部 SKU（删除 SPU 时级联清理） -->
     <delete id="deleteBySpuId">
         DELETE FROM stellar_sku WHERE spu_id = #{spuId}
     </delete>
@@ -115,6 +122,7 @@
         SELECT * FROM stellar_sku WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- 按 id 集合批量查询 SKU（购物车/下单批量取价） -->
     <select id="listByIds" resultMap="SkuMap">
         SELECT * FROM stellar_sku
         WHERE id IN
@@ -123,6 +131,7 @@
         </foreach>
     </select>
 
+    <!-- 查询商品下全部 SKU（详情页规格选择用，按 sort 排序） -->
     <select id="listBySpuId" resultMap="SkuMap">
         SELECT * FROM stellar_sku
         WHERE spu_id = #{spuId}

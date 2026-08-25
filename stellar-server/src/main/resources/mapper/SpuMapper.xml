@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     商品 SPU Mapper（stellar_spu）
+     管理商品主数据（基础信息、图片、价格区间、销量、上下架状态）。
+     提供 CRUD、分页（排序白名单 + 相关性排序）、侧栏聚合
+     （分类/价格区间，与 ES 聚合口径一致）、销量累计与 SKU 聚合反写。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.SpuMapper">
 
+    <!-- 数据库字段 → 实体属性映射（category_name 为联表字段） -->
     <resultMap id="SpuMap" type="com.stellar.entity.Spu">
         <id     property="id"            column="id"/>
         <result property="name"          column="name"/>
@@ -109,6 +116,7 @@
         DELETE FROM stellar_spu WHERE id = #{id}
     </delete>
 
+    <!-- 详情查询：联表带出一级分类名 -->
     <select id="getById" resultMap="SpuMap">
         SELECT s.*,
                c1.name AS category_name
@@ -118,6 +126,7 @@
         LIMIT 1
     </select>
 
+    <!-- 按 id 集合批量查询（购物车/收藏列表取商品信息） -->
     <select id="listByIds" resultMap="SpuMap">
         SELECT s.*,
                c1.name AS category_name
@@ -130,6 +139,7 @@
     </select>
 
     <!-- =========================== count + page =========================== -->
+    <!-- 公共查询条件：名称模糊 / 分类 / 状态 / 新品 / 热卖 / 价格区间 -->
     <sql id="spuWhere">
         <where>
             1 = 1
@@ -143,11 +153,13 @@
         </where>
     </sql>
 
+    <!-- 分页总数统计 -->
     <select id="count" resultType="long">
         SELECT COUNT(*) FROM stellar_spu s
         <include refid="spuWhere"/>
     </select>
 
+    <!-- 分页查询（排序白名单 + 相关性排序见下方说明） -->
     <select id="page" resultMap="SpuMap">
         SELECT s.*,
                c1.name AS category_name
@@ -221,12 +233,13 @@
     ORDER BY s.id ASC
   </select>
 
+  <!-- 销量累计（支付成功后回写） -->
   <update id="incrSaleCount">
     UPDATE stellar_spu SET sale_count = sale_count + #{qty} WHERE id = #{spuId}
   </update>
 
   <!-- =========================== MySQL 聚合（侧栏筛选） =========================== -->
-  <!-- 分类聚合：按 category_id 统计 -->
+  <!-- 分类聚合：按 category_id 统计（ES 不可用时的降级实现） -->
   <select id="aggCategories" resultType="com.stellar.vo.BucketVO">
     SELECT CAST(s.category_id AS CHAR(20)) AS `key`,
            COUNT(*) AS doc_count

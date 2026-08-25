@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     商品评价 Mapper（stellar_review）
+     管理用户对订单商品的评价：发表、商家回复、状态审核；
+     提供商品详情页的评价分页/评分统计，以及 M 端全量管理。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.ReviewMapper">
+
+    <!-- 数据库字段 → 实体属性映射（username/avatar/spu_name 为联表字段） -->
     <resultMap id="ReviewMap" type="com.stellar.entity.Review">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
@@ -24,19 +31,23 @@
         <result property="updateUser" column="update_user"/>
     </resultMap>
 
+    <!-- 发表评价 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_review (user_id, spu_id, sku_id, order_id, order_no, rating, content, pics, status, create_time, create_user, update_time, update_user)
         VALUES (#{userId}, #{spuId}, #{skuId}, #{orderId}, #{orderNo}, #{rating}, #{content}, #{pics}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 商家回复评价（回填回复内容与时间） -->
     <update id="updateReply">
         UPDATE stellar_review SET reply = #{reply}, reply_time = NOW(), update_time = NOW() WHERE id = #{id}
     </update>
 
+    <!-- 审核状态更新（通过/隐藏评价） -->
     <update id="updateStatus">
         UPDATE stellar_review SET status = #{status}, update_time = NOW() WHERE id = #{id}
     </update>
 
+    <!-- 商品详情页：按商品分页查询可见评价（联表用户昵称，最新在前） -->
     <select id="pageBySpuId" resultMap="ReviewMap">
         SELECT r.*, u.nickname AS username
         FROM stellar_review r
@@ -46,18 +57,22 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <!-- 商品可见评价总数 -->
     <select id="countBySpuId" resultType="long">
         SELECT COUNT(*) FROM stellar_review WHERE spu_id = #{spuId} AND status = 1
     </select>
 
+    <!-- 商品平均评分（详情页星级展示，无评价时返回 0） -->
     <select id="avgRatingBySpuId" resultType="java.math.BigDecimal">
         SELECT COALESCE(AVG(rating), 0) FROM stellar_review WHERE spu_id = #{spuId} AND status = 1
     </select>
 
+    <!-- 按订单 + 用户查询评价（防止同一订单重复评价） -->
     <select id="getByOrderIdAndUserId" resultMap="ReviewMap">
         SELECT * FROM stellar_review WHERE order_id = #{orderId} AND user_id = #{userId} LIMIT 1
     </select>
 
+    <!-- M 端：全量评价分页，支持按商品/状态/商品名过滤（联表用户与商品） -->
     <select id="pageAll" resultMap="ReviewMap">
         SELECT r.*, u.nickname AS username, s.name AS spu_name
         FROM stellar_review r
@@ -72,6 +87,7 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <!-- M 端：评价总数统计（spuName 过滤时需要联表，故条件内动态加 JOIN） -->
     <select id="countAll" resultType="long">
         SELECT COUNT(*) FROM stellar_review r
         <if test="spuName != null and spuName != ''">LEFT JOIN stellar_spu s ON s.id = r.spu_id</if>
@@ -82,6 +98,7 @@
         </where>
     </select>
 
+    <!-- 统计用户对某商品的历史评价数（评价资格/幂等校验） -->
     <select id="countByUserIdAndSpuId" resultType="long">
         SELECT COUNT(*) FROM stellar_review WHERE user_id = #{userId} AND spu_id = #{spuId}
     </select>

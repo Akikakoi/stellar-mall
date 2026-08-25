@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     积分支付追溯表 Mapper（stellar_points_payment）
+     记录订单积分抵扣的全链路动作，type: 1 冻结 / 2 扣除 / 3 退还 / 4 解冻，
+     用于订单页展示与对账追溯。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.PointsPaymentMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="PointsPaymentMap" type="com.stellar.entity.PointsPayment">
         <id     property="id"         column="id"/>
         <result property="orderId"    column="order_id"/>
@@ -14,16 +20,19 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
+    <!-- 写入积分支付动作记录 -->
     <insert id="insert" parameterType="com.stellar.entity.PointsPayment"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_points_payment (order_id, user_id, points, amount, type, biz_desc, create_time)
         VALUES (#{orderId}, #{userId}, #{points}, #{amount}, #{type}, #{bizDesc}, #{createTime})
     </insert>
 
+    <!-- 按订单查询积分支付记录（按发生顺序） -->
     <select id="listByOrderId" resultMap="PointsPaymentMap">
         SELECT * FROM stellar_points_payment WHERE order_id = #{orderId} ORDER BY id ASC
     </select>
 
+    <!-- 按订单 + 用户查询（用户端展示，校验归属） -->
     <select id="listByOrderAndUser" resultMap="PointsPaymentMap">
         SELECT * FROM stellar_points_payment WHERE order_id = #{orderId} AND user_id = #{userId} ORDER BY id ASC
     </select>

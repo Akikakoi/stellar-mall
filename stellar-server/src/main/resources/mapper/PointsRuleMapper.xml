@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     积分规则 Mapper（stellar_points_rule）
+     定义各类积分获取规则（签到/下单/评价等）：积分值、条件、
+     每日/每单上限。支持规则 CRUD、按类型取启用的规则、列表查询。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.PointsRuleMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="PointsRuleMap" type="com.stellar.entity.PointsRule">
         <id     property="id"             column="id"/>
         <result property="ruleType"       column="rule_type"/>
@@ -19,6 +25,7 @@
         <result property="updateUser"     column="update_user"/>
     </resultMap>
 
+    <!-- 新增积分规则 -->
     <insert id="insert" parameterType="com.stellar.entity.PointsRule"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_points_rule (rule_type, rule_name, earn_points, condition_value,
@@ -29,6 +36,7 @@
                 #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 更新积分规则（动态字段） -->
     <update id="update" parameterType="com.stellar.entity.PointsRule">
         UPDATE stellar_points_rule
         <set>
@@ -50,18 +58,22 @@
         DELETE FROM stellar_points_rule WHERE id = #{id}
     </delete>
 
+    <!-- 按 id 查询规则 -->
     <select id="getById" resultMap="PointsRuleMap">
         SELECT * FROM stellar_points_rule WHERE id = #{id}
     </select>
 
+    <!-- 按规则类型取启用中的规则（业务发放积分时按类型查规则） -->
     <select id="getByType" resultMap="PointsRuleMap">
         SELECT * FROM stellar_points_rule WHERE rule_type = #{ruleType} AND status = 1 LIMIT 1
     </select>
 
+    <!-- 全部规则（管理端列表） -->
     <select id="listAll" resultMap="PointsRuleMap">
         SELECT * FROM stellar_points_rule ORDER BY id ASC
     </select>
 
+    <!-- 启用中的规则（积分规则说明页展示） -->
     <select id="listEnabled" resultMap="PointsRuleMap">
         SELECT * FROM stellar_points_rule WHERE status = 1 ORDER BY id ASC
     </select>

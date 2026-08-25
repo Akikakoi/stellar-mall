@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     商品分类 Mapper（stellar_category）
+     支持一级/二级分类（type 区分层级），提供增删改查、分页、列表查询。
+     分页排序使用白名单机制防止 SQL 注入。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.CategoryMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="CategoryMap" type="com.stellar.entity.Category">
         <id     property="id"         column="id"/>
         <result property="name"       column="name"/>
@@ -51,12 +57,14 @@
         SELECT * FROM stellar_category WHERE id = #{id}
     </select>
 
+    <!-- 按名称 + 类型查询分类（校验同层分类名唯一） -->
     <select id="getByNameType" resultMap="CategoryMap">
         SELECT * FROM stellar_category
         WHERE name = #{name} AND type = #{type}
         LIMIT 1
     </select>
 
+    <!-- 公共查询条件：名称模糊 / 类型 / 状态 -->
     <sql id="whereClause">
         <where>
             1 = 1
@@ -66,11 +74,13 @@
         </where>
     </sql>
 
+    <!-- M 端分页总数统计 -->
     <select id="count" resultType="long">
         SELECT COUNT(*) FROM stellar_category
         <include refid="whereClause"/>
     </select>
 
+    <!-- M 端分页查询（排序白名单见下方说明） -->
     <select id="page" resultMap="CategoryMap">
         SELECT * FROM stellar_category
         <include refid="whereClause"/>
@@ -97,6 +107,7 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <!-- 分类列表：C 端分类导航使用，可选按状态/类型过滤，sort 越大越靠前 -->
     <select id="list" resultMap="CategoryMap">
         SELECT * FROM stellar_category
         <where>

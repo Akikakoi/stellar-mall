@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     积分商城商品 Mapper（stellar_points_product）
+     积分商城商品（兑换券/实物等），提供增删改查、分页、
+     C 端在售列表与库存扣减（条件扣减防超兑）。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.PointsProductMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="PointsProductMap" type="com.stellar.entity.PointsProduct">
         <id     property="id"           column="id"/>
         <result property="name"         column="name"/>
@@ -20,6 +26,7 @@
         <result property="updateUser"   column="update_user"/>
     </resultMap>
 
+    <!-- 新增积分商品 -->
     <insert id="insert" parameterType="com.stellar.entity.PointsProduct"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_points_product (name, product_type, points_price, stock, image_url,
@@ -30,6 +37,7 @@
                 #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 更新积分商品（动态字段） -->
     <update id="update" parameterType="com.stellar.entity.PointsProduct">
         UPDATE stellar_points_product
         <set>
@@ -52,10 +60,12 @@
         DELETE FROM stellar_points_product WHERE id = #{id}
     </delete>
 
+    <!-- 按 id 查询 -->
     <select id="getById" resultMap="PointsProductMap">
         SELECT * FROM stellar_points_product WHERE id = #{id}
     </select>
 
+    <!-- M 端分页：名称模糊 / 状态过滤 -->
     <select id="page" resultMap="PointsProductMap">
         SELECT * FROM stellar_points_product
         <where>
@@ -70,6 +80,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- M 端分页总数统计（条件与 page 一致） -->
     <select id="count" resultType="int">
         SELECT COUNT(*) FROM stellar_points_product
         <where>
@@ -82,12 +93,14 @@
         </where>
     </select>
 
+    <!-- C 端：在售且有库存的商品列表 -->
     <select id="listOnSale" resultMap="PointsProductMap">
         SELECT * FROM stellar_points_product
         WHERE status = 1 AND stock > 0
         ORDER BY sort_order ASC, id DESC
     </select>
 
+    <!-- 兑换扣库存：条件 UPDATE 保证库存 > 0，防超兑 -->
     <update id="deductStock">
         UPDATE stellar_points_product
         SET stock = stock - 1

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     通知发送日志 Mapper（stellar_notification_log）
+     记录短信/邮件等通知的发送结果（成功/失败及错误信息），
+     支持按用户/类型/渠道过滤分页查询。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.NotificationLogMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="NotificationLogMap" type="com.stellar.entity.NotificationLog">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
@@ -18,11 +24,13 @@
         <result property="createTime" column="create_time"/>
     </resultMap>
 
+    <!-- 写入通知发送记录 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO stellar_notification_log (user_id, phone, email, channel, type, title, content, status, error_msg, send_time, create_time)
         VALUES (#{userId}, #{phone}, #{email}, #{channel}, #{type}, #{title}, #{content}, #{status}, #{errorMsg}, #{sendTime}, #{createTime})
     </insert>
 
+    <!-- 分页查询：支持按用户 / 类型 / 渠道过滤，按创建时间倒序 -->
     <select id="page" resultMap="NotificationLogMap">
         SELECT * FROM stellar_notification_log
         <where>
@@ -34,6 +42,7 @@
         LIMIT #{pageSize} OFFSET #{offset}
     </select>
 
+    <!-- 分页总数统计（条件与 page 保持一致） -->
     <select id="count" resultType="long">
         SELECT COUNT(*) FROM stellar_notification_log
         <where>

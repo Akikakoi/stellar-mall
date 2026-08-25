@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     售后单 Mapper（stellar_after_sale）
+     提供售后单的创建、状态流转、C 端用户列表与 M 端全量列表查询。
+     status: 1 待审核 / 2 审核通过 / 3 已退货 / 4 已退款 等流转状态。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.AfterSaleMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="AfterSaleMap" type="com.stellar.entity.AfterSale">
         <id     property="id"             column="id"/>
         <result property="orderId"        column="order_id"/>
@@ -27,6 +33,7 @@
         <result property="updateUser"     column="update_user"/>
     </resultMap>
 
+    <!-- 创建售后单，自增主键回写 -->
     <insert id="insert" parameterType="com.stellar.entity.AfterSale"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_after_sale (
@@ -40,6 +47,7 @@
         )
     </insert>
 
+    <!-- 更新售后单：审核信息 / 退货物流 / 退款信息按需更新（动态 SQL） -->
     <update id="update" parameterType="com.stellar.entity.AfterSale">
         UPDATE stellar_after_sale
         <set>
@@ -57,14 +65,17 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 仅更新状态（审核通过 / 驳回等快捷操作） -->
     <update id="updateStatus">
         UPDATE stellar_after_sale SET status = #{status} WHERE id = #{id}
     </update>
 
+    <!-- 按 id 查询售后单 -->
     <select id="getById" resultMap="AfterSaleMap">
         SELECT * FROM stellar_after_sale WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- C 端：分页查询用户自己的售后单（倒序） -->
     <select id="listByUserId" resultMap="AfterSaleMap">
         SELECT * FROM stellar_after_sale
         WHERE user_id = #{userId}
@@ -72,10 +83,12 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- C 端：统计用户售后单总数（配合分页） -->
     <select id="countByUserId" resultType="int">
         SELECT COUNT(*) FROM stellar_after_sale WHERE user_id = #{userId}
     </select>
 
+    <!-- M 端：全量分页查询，支持按状态 / 类型过滤 -->
     <select id="listAll" resultMap="AfterSaleMap">
         SELECT * FROM stellar_after_sale
         <where>
@@ -90,6 +103,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- M 端：统计售后单总数（条件与 listAll 保持一致） -->
     <select id="count" resultType="int">
         SELECT COUNT(*) FROM stellar_after_sale
         <where>
@@ -102,6 +116,7 @@
         </where>
     </select>
 
+    <!-- 校验订单下某 SKU 是否已存在进行中的售后单（status 1~4 视为未完结），防止重复申请 -->
     <select id="countActiveByOrderAndSku" resultType="int">
         SELECT COUNT(*) FROM stellar_after_sale
         WHERE order_id = #{orderId}
@@ -109,6 +124,7 @@
           AND status IN (1, 2, 3, 4)
     </select>
 
+    <!-- 按订单 + 用户查询售后单（用户端校验归属） -->
     <select id="getByOrderIdAndUserId" resultMap="AfterSaleMap">
         SELECT * FROM stellar_after_sale
         WHERE order_id = #{orderId} AND user_id = #{userId}

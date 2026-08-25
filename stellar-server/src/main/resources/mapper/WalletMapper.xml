@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     钱包 Mapper（stellar_wallet / stellar_wallet_transaction）
+     用户余额钱包：充值/消费/冻结余额，所有余额变更使用
+     version 乐观锁 + 余额条件校验；交易流水只追加，
+     记录每笔变动的类型/金额/余额快照/业务来源。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.WalletMapper">
 
     <!-- ============ Wallet ============ -->
-
+    <!-- 钱包账户字段映射 -->
     <resultMap id="WalletMap" type="com.stellar.entity.Wallet">
         <id     property="id"             column="id"/>
         <result property="userId"         column="user_id"/>
@@ -19,6 +25,7 @@
         <result property="updateUser"     column="update_user"/>
     </resultMap>
 
+    <!-- 创建钱包账户 -->
     <insert id="insertWallet" parameterType="com.stellar.entity.Wallet"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_wallet (user_id, balance, frozen, total_recharge, total_spent, version,
@@ -27,10 +34,12 @@
                 #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 查询用户钱包 -->
     <select id="getByUserId" resultMap="WalletMap">
         SELECT * FROM stellar_wallet WHERE user_id = #{userId} LIMIT 1
     </select>
 
+    <!-- 扣减余额（支付）：乐观锁 + 余额充足校验，防并发透支 -->
     <update id="deductBalance">
         UPDATE stellar_wallet
         SET balance = balance - #{amount},
@@ -40,6 +49,7 @@
           AND balance >= #{amount}
     </update>
 
+    <!-- 增加余额（充值/退款入账）：乐观锁校验 -->
     <update id="addBalance">
         UPDATE stellar_wallet
         SET balance = balance + #{amount},
@@ -48,12 +58,14 @@
           AND version = #{oldVersion}
     </update>
 
+    <!-- 累计充值金额 +amount -->
     <update id="addTotalRecharge">
         UPDATE stellar_wallet
         SET total_recharge = total_recharge + #{amount}
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 累计消费金额 +amount -->
     <update id="addTotalSpent">
         UPDATE stellar_wallet
         SET total_spent = total_spent + #{amount}
@@ -61,7 +73,7 @@
     </update>
 
     <!-- ============ Transaction ============ -->
-
+    <!-- 写入交易流水（余额变更与流水在同一事务内，保证可对账） -->
     <insert id="insertTransaction" parameterType="com.stellar.entity.WalletTransaction"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_wallet_transaction (wallet_id, user_id, type, amount, balance_after,
@@ -70,6 +82,7 @@
                 #{channel}, #{bizType}, #{bizId}, #{remark}, #{createTime})
     </insert>
 
+    <!-- C 端：用户交易流水分页（最新在前） -->
     <select id="listTransactions" resultType="com.stellar.entity.WalletTransaction">
         SELECT id, wallet_id, user_id, type, amount, balance_after, channel,
                biz_type, biz_id, remark, create_time
@@ -79,6 +92,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <!-- 用户流水总数统计 -->
     <select id="countTransactions" resultType="int">
         SELECT COUNT(*) FROM stellar_wallet_transaction WHERE user_id = #{userId}
     </select>

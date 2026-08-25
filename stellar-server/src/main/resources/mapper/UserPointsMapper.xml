@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     用户积分账户 Mapper（stellar_user_points）
+     每个用户一条积分汇总记录（总额/可用/冻结/累计获得/累计消费）。
+     所有余额变更均使用 version 乐观锁 + 余额条件校验，
+     并发安全；冻结/解冻/消费均走独立 SQL，见各语句注释。
+     ============================================================ -->
 <mapper namespace="com.stellar.mapper.UserPointsMapper">
 
+    <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="UserPointsMap" type="com.stellar.entity.UserPoints">
         <id     property="id"               column="id"/>
         <result property="userId"           column="user_id"/>
@@ -16,6 +23,7 @@
         <result property="updateTime"       column="update_time"/>
     </resultMap>
 
+    <!-- 首次开户（用户首次获得积分时初始化账户） -->
     <insert id="insert" parameterType="com.stellar.entity.UserPoints"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_user_points (user_id, total_points, available_points, frozen_points,
@@ -24,10 +32,12 @@
                 #{totalEarned}, #{totalSpent}, #{version}, #{createTime}, #{updateTime})
     </insert>
 
+    <!-- 查询用户积分账户 -->
     <select id="getByUserId" resultMap="UserPointsMap">
         SELECT * FROM stellar_user_points WHERE user_id = #{userId} LIMIT 1
     </select>
 
+    <!-- 积分入账：总额/可用 +points，乐观锁 version 校验 -->
     <update id="addPoints">
         UPDATE stellar_user_points
         SET total_points = total_points + #{points},
@@ -36,6 +46,7 @@
         WHERE user_id = #{userId} AND version = #{oldVersion}
     </update>
 
+    <!-- 积分扣减（管理端调整扣减）：乐观锁 + 可用余额充足校验 -->
     <update id="deductPoints">
         UPDATE stellar_user_points
         SET total_points = total_points - #{points},
@@ -46,6 +57,7 @@
           AND available_points >= #{points}
     </update>
 
+    <!-- 冻结积分（下单抵扣）：可用 → 冻结，乐观锁 + 可用余额校验 -->
     <update id="freezePoints">
         UPDATE stellar_user_points
         SET available_points = available_points - #{points},
@@ -56,6 +68,7 @@
           AND available_points >= #{points}
     </update>
 
+    <!-- 解冻积分（订单取消）：冻结 → 可用 -->
     <update id="unfreezePoints">
         UPDATE stellar_user_points
         SET available_points = available_points + #{points},
@@ -66,18 +79,21 @@
           AND frozen_points >= #{points}
     </update>
 
+    <!-- 累计获得积分 +points（入账时同步累计，不加锁） -->
     <update id="addTotalEarned">
         UPDATE stellar_user_points
         SET total_earned = total_earned + #{points}
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 累计消费积分 +points（消费时同步累计，不加锁） -->
     <update id="addTotalSpent">
         UPDATE stellar_user_points
         SET total_spent = total_spent + #{points}
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 过期扣减：与 deductPoints 同口径（乐观锁 + 余额校验），过期任务批量调用 -->
     <update id="expirePoints">
         UPDATE stellar_user_points
         SET total_points = total_points - #{points},
