@@ -114,3 +114,9 @@ Stellar_Mall_AI_面试题_追问篇.pdf
 
 # ---------- Cowork 临时工作目录 ----------
 .cowork-temp/
+
+# ---------- TS 迁移辅助检查脚本（临时产物，勿提交）----------
+frontend/_tc_*
+frontend/_hints/
+frontend/_test_out.txt
+frontend/typecheck_errors.txt
