@@ -5,6 +5,7 @@ import com.stellar.result.Result;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,14 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 是否信任反向代理头（X-Forwarded-For / X-Real-IP 等）。
+     * 仅当服务部署在可信反向代理（Nginx 等）之后时才应开启；
+     * 直接对外暴露时开启会被伪造 IP 头绕过限流。
+     */
+    @Value("${stellar.rate-limit.trust-proxy-headers:false}")
+    private boolean trustProxyHeaders;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
@@ -102,21 +111,26 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 获取客户端真实 IP，优先取反向代理头。
+     * 获取客户端真实 IP。
+     * <p>仅在 {@code stellar.rate-limit.trust-proxy-headers=true} 时信任
+     * X-Forwarded-For 等代理头；否则直接取 TCP 连接的 RemoteAddr，
+     * 防止攻击者伪造 IP 头绕过限流。</p>
      */
     private String getClientIp(HttpServletRequest request) {
-        String[] headers = {
-                "X-Forwarded-For",
-                "X-Real-IP",
-                "Proxy-Client-IP",
-                "WL-Proxy-Client-IP"
-        };
-        for (String header : headers) {
-            String ip = request.getHeader(header);
-            if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-                // X-Forwarded-For 可能包含多个 IP，取第一个
-                int commaIdx = ip.indexOf(',');
-                return commaIdx > 0 ? ip.substring(0, commaIdx).trim() : ip.trim();
+        if (trustProxyHeaders) {
+            String[] headers = {
+                    "X-Forwarded-For",
+                    "X-Real-IP",
+                    "Proxy-Client-IP",
+                    "WL-Proxy-Client-IP"
+            };
+            for (String header : headers) {
+                String ip = request.getHeader(header);
+                if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
+                    // X-Forwarded-For 可能包含多个 IP，取第一个
+                    int commaIdx = ip.indexOf(',');
+                    return commaIdx > 0 ? ip.substring(0, commaIdx).trim() : ip.trim();
+                }
             }
         }
         return request.getRemoteAddr();

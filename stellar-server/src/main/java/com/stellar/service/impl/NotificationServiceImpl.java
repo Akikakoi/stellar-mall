@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Random;
 
 /**
  * 通知服务实现。
@@ -37,7 +36,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final MailProperties mailProperties;
 
     private static final int CODE_EXPIRE_MINUTES = 5;
-    private static final Random RANDOM = new Random();
+    /** 验证码使用加密安全随机数，防止 java.util.Random 可预测导致验证码被爆破 */
+    private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
 
     /** 是否启用真实 SMTP 发送；false 时为开发模式，不真实发信 */
     @Value("${stellar.mail.enabled:false}")
