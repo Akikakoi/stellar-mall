@@ -82,7 +82,8 @@ public class OrderServiceImpl implements OrderService {
         deductStock(lines);
         List<Long> cartIdsToDelete = carts.stream().map(Cart::getId).collect(Collectors.toList());
 
-        return createOrder(uid, dto.getAddress(), dto.getPayMethod(), dto.getRemark(),
+        return createOrder(uid, dto.getAddress(), dto.getConsignee(), dto.getPhone(),
+                dto.getPayMethod(), dto.getRemark(),
                 calculateTotal(lines), lines, cartIdsToDelete,
                 dto.getUserCouponId(), dto.getDiscountAmount(),
                 dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount());
@@ -122,7 +123,8 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        return createOrder(uid, dto.getAddress(), dto.getPayMethod(), dto.getRemark(),
+        return createOrder(uid, dto.getAddress(), dto.getConsignee(), dto.getPhone(),
+                dto.getPayMethod(), dto.getRemark(),
                 calculateTotal(lines), lines, cartIdsToDelete,
                 dto.getUserCouponId(), dto.getDiscountAmount(),
                 dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount());
@@ -233,7 +235,8 @@ public class OrderServiceImpl implements OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private MallOrder createOrder(Long uid, String address, Integer payMethod, String remark,
+    private MallOrder createOrder(Long uid, String address, String consignee, String phone,
+                                   Integer payMethod, String remark,
                                    BigDecimal total, List<OrderLine> lines, List<Long> cartIdsToDelete,
                                    Long userCouponId, BigDecimal discountAmount,
                                    boolean usePoints, BigDecimal requestedPointsAmount) {
@@ -280,6 +283,9 @@ public class OrderServiceImpl implements OrderService {
                 .payAmount(payAmountBeforePoints)
                 .status(OrderStatus.PENDING.getBackendValue())
                 .address(address)
+                // 收货人快照列是 NOT NULL，未传时兜底空串而非 null，避免老下单入口被新增字段阻塞
+                .consignee(consignee == null ? "" : consignee)
+                .phone(phone == null ? "" : phone)
                 .payMethod(payMethod == null ? 1 : payMethod)
                 .remark(remark)
                 .pointsDeducted(0)
@@ -776,6 +782,8 @@ public class OrderServiceImpl implements OrderService {
                 .totalAmount(o.getTotalAmount())
                 .payAmount(o.getPayAmount())
                 .address(o.getAddress())
+                .consignee(o.getConsignee())
+                .phone(o.getPhone())
                 .payMethod(o.getPayMethod())
                 .remark(o.getRemark())
                 .pointsDeducted(o.getPointsDeducted())

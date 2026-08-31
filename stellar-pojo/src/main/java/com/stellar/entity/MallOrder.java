@@ -41,6 +41,12 @@ public class MallOrder implements Serializable {
     /** 收货地址（冗余快照文本） */
     private String address;
 
+    /** 收货人姓名（下单时快照，地址簿变动不影响历史订单） */
+    private String consignee;
+
+    /** 收货人联系电话（下单时快照） */
+    private String phone;
+
     /** 1 微信 2 支付宝（简化版模拟支付用） */
     private Integer payMethod;
 

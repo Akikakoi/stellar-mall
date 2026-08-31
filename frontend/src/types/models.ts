@@ -287,6 +287,10 @@ export interface Order {
   totalAmount: number
   payAmount: number
   address?: string
+  /** 收货人快照 */
+  consignee?: string
+  /** 手机号快照 */
+  phone?: string
   payMethod?: number
   remark?: string
   pointsDeducted?: number

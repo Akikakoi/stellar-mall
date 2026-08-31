@@ -21,6 +21,12 @@ public class OrderSubmitDTO implements Serializable {
     @ApiModelProperty(value = "收货地址（文本快照）", required = true, example = "上海市浦东新区XX路XX号")
     private String address;
 
+    @ApiModelProperty(value = "收货人姓名（快照）", example = "张三")
+    private String consignee;
+
+    @ApiModelProperty(value = "收货人联系电话（快照）", example = "13800138000")
+    private String phone;
+
     @ApiModelProperty("支付方式：1微信 2支付宝 3货到付款")
     private Integer payMethod;
 

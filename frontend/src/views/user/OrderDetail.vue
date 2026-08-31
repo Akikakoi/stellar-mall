@@ -36,7 +36,13 @@
         <div class="panel-head"><span class="panel-title">收货信息</span></div>
         <div class="addr-row">
           <el-icon class="addr-icon"><Location /></el-icon>
-          <div class="addr-text">{{ order?.address || '（未填写）' }}</div>
+          <div class="addr-text">
+            <div v-if="order?.consignee || order?.phone" class="addr-contact">
+              <span class="addr-name">{{ order?.consignee || '（未填写）' }}</span>
+              <span v-if="order?.phone" class="addr-phone">{{ order?.phone }}</span>
+            </div>
+            <div>{{ order?.address || '（未填写）' }}</div>
+          </div>
         </div>
       </div>
 
@@ -505,6 +511,9 @@ watch(() => route.params.id, load)
 .addr-row { display: flex; align-items: flex-start; gap: 12px; padding: 6px 0; }
 .addr-icon { color: var(--brand-primary); margin-top: 2px; font-size: 18px; }
 .addr-text { color: var(--text-primary); line-height: 1.7; }
+.addr-contact { display: flex; align-items: center; gap: 12px; margin-bottom: 2px; }
+.addr-name { font-weight: 600; }
+.addr-phone { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
 .item-row {
   padding: 14px 0;

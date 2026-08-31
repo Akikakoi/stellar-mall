@@ -19,6 +19,8 @@
         <result property="status"      column="status"/>
         <result property="isRefunded"  column="is_refunded"/>
         <result property="address"     column="address"/>
+        <result property="consignee"   column="consignee"/>
+        <result property="phone"       column="phone"/>
         <result property="payMethod"   column="pay_method"/>
         <result property="remark"      column="remark"/>
         <result property="trackingNo"       column="tracking_no"/>
@@ -38,12 +40,12 @@
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_mall_order (
             order_no, user_id, total_amount, pay_amount, status,
-            address, pay_method, remark,
+            address, consignee, phone, pay_method, remark,
             points_deducted, points_amount,
             create_time, create_user, update_time, update_user
         ) VALUES (
             #{orderNo}, #{userId}, #{totalAmount}, #{payAmount}, #{status},
-            #{address}, #{payMethod}, #{remark},
+            #{address}, #{consignee}, #{phone}, #{payMethod}, #{remark},
             #{pointsDeducted}, #{pointsAmount},
             #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
         )
@@ -58,6 +60,8 @@
             <if test="payAmount != null">pay_amount = #{payAmount},</if>
             <if test="status != null">status = #{status},</if>
             <if test="address != null">address = #{address},</if>
+            <if test="consignee != null">consignee = #{consignee},</if>
+            <if test="phone != null">phone = #{phone},</if>
             <if test="payMethod != null">pay_method = #{payMethod},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="pointsDeducted != null">points_deducted = #{pointsDeducted},</if>
