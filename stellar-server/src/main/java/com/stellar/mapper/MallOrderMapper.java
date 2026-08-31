@@ -43,6 +43,9 @@ public interface MallOrderMapper {
 
     MallOrder getById(@Param("id") Long id);
 
+    /** 批量按 id 列表查询订单，用于组装售后列表等场景，避免循环单条查询。 */
+    List<MallOrder> listByIds(@Param("ids") List<Long> ids);
+
     MallOrder getByOrderNo(@Param("orderNo") String orderNo);
 
     List<MallOrder> listByUserId(@Param("userId") Long userId);

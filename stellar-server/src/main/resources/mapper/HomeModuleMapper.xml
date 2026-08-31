@@ -65,4 +65,17 @@
     <update id="updateSortOrder">
         UPDATE stellar_home_module SET sort_order = #{sortOrder} WHERE id = #{id}
     </update>
+
+    <!-- 批量更新排序值：一条 CASE WHEN 完成，调用方需保证 items 非空，否则 IN () 语法错误 -->
+    <update id="batchUpdateSortOrder">
+        UPDATE stellar_home_module
+        SET sort_order =
+        <foreach collection="items" item="it" open="CASE id" close="END">
+            WHEN #{it.id} THEN #{it.sortOrder}
+        </foreach>
+        WHERE id IN
+        <foreach collection="items" item="it" open="(" separator="," close=")">
+            #{it.id}
+        </foreach>
+    </update>
 </mapper>

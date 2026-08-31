@@ -102,6 +102,15 @@
         SELECT * FROM stellar_mall_order WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- 批量按 id 列表查询订单（调用方需保证 ids 非空，否则 IN () 语法错误） -->
+    <select id="listByIds" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <!-- 按订单号查询 -->
     <select id="getByOrderNo" resultMap="MallOrderMap">
         SELECT * FROM stellar_mall_order WHERE order_no = #{orderNo} LIMIT 1

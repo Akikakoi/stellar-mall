@@ -1,5 +1,6 @@
 package com.stellar.mapper;
 
+import com.stellar.dto.HomeModuleSaveDTO;
 import com.stellar.entity.HomeModule;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -26,6 +27,9 @@ public interface HomeModuleMapper {
     /** C 端查询所有启用的模块，按 sort_order 升序 */
     List<HomeModule> listEnabled();
 
-    /** 批量更新排序 */
+    /** 单条更新排序 */
     int updateSortOrder(@Param("id") Long id, @Param("sortOrder") Integer sortOrder);
+
+    /** 批量更新排序：一条 CASE WHEN SQL 完成，替代循环单条 UPDATE。items 不可为空。 */
+    int batchUpdateSortOrder(@Param("items") List<HomeModuleSaveDTO> items);
 }
