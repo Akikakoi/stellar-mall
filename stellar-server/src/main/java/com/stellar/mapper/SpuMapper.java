@@ -73,6 +73,9 @@ public interface SpuMapper {
     /** 累加商品销量（付款成功后调用）。 */
     int incrSaleCount(@Param("spuId") Long spuId, @Param("qty") int qty);
 
+    /** 累加/扣减商品评价数（发表+1，隐藏-1，结果不小于 0）。 */
+    int incrCommentCount(@Param("spuId") Long spuId, @Param("delta") int delta);
+
     /** MySQL 聚合：按分类统计商品数（与 ES 搜索聚合口径一致，复用 spuWhere 过滤条件）。 */
     List<BucketVO> aggCategories(@Param("name") String name,
                                  @Param("categoryId") Long categoryId,

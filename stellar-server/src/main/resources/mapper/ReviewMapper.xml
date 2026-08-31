@@ -37,6 +37,11 @@
         VALUES (#{userId}, #{spuId}, #{skuId}, #{orderId}, #{orderNo}, #{rating}, #{content}, #{pics}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
 
+    <!-- 按 ID 查询单条评价（用于隐藏/显示前判断当前状态） -->
+    <select id="getById" resultMap="ReviewMap">
+        SELECT * FROM stellar_review WHERE id = #{id} LIMIT 1
+    </select>
+
     <!-- 商家回复评价（回填回复内容与时间） -->
     <update id="updateReply">
         UPDATE stellar_review SET reply = #{reply}, reply_time = NOW(), update_time = NOW() WHERE id = #{id}

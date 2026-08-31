@@ -184,6 +184,9 @@
               <when test="'saleCount'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
                 ORDER BY s.sale_count ${sortOrder}, s.id ASC
               </when>
+              <when test="'commentCount'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
+                ORDER BY s.comment_count ${sortOrder}, s.id ASC
+              </when>
               <when test="'minPrice'.equals(sortBy) and ('asc'.equals(sortOrder) or 'desc'.equals(sortOrder))">
                 ORDER BY s.min_price ${sortOrder}, s.id ASC
               </when>
@@ -234,6 +237,14 @@
   <!-- 销量累计（支付成功后回写） -->
   <update id="incrSaleCount">
     UPDATE stellar_spu SET sale_count = sale_count + #{qty} WHERE id = #{spuId}
+  </update>
+
+  <!-- 评价数累计/扣减（评价发表+1、隐藏-1，GREATEST 防负值） -->
+  <update id="incrCommentCount">
+    UPDATE stellar_spu
+    SET comment_count = GREATEST(comment_count + #{delta}, 0),
+        update_time = NOW()
+    WHERE id = #{spuId}
   </update>
 
   <!-- =========================== MySQL 聚合（侧栏筛选） =========================== -->
