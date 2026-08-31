@@ -85,6 +85,11 @@
                 @click="setSort('sales_desc')">
                 <span class="filter-label">销量优先</span>
               </li>
+              <li class="filter-item"
+                :class="{ active: activeSort === 'comments_desc' }"
+                @click="setSort('comments_desc')">
+                <span class="filter-label">评论优先</span>
+              </li>
             </ul>
           </div>
 
@@ -159,6 +164,7 @@
               </div>
               <div class="spu-info">
                 <h3 class="spu-name" v-html="highlightedName(spu.id, spu.name)"></h3>
+                <div class="spu-meta">已售 {{ spu.saleCount || 0 }} · 评论 {{ spu.commentCount || 0 }}</div>
                 <div class="spu-bottom">
                   <div class="spu-price">¥{{ Number(spu.minPrice || 0).toFixed(2) }}</div>
                   <el-button size="small" type="primary" class="add-cart-btn" @click.stop="handleAddToCart(spu)">
@@ -250,7 +256,7 @@ const customPriceFrom = ref('')
 const customPriceTo = ref('')
 
 // 排序
-const activeSort = ref('default') // 'default' | 'price_asc' | 'price_desc' | 'sales_desc'
+const activeSort = ref('default') // 'default' | 'price_asc' | 'price_desc' | 'sales_desc' | 'comments_desc'
 
 // 所有分类（用于名称映射）
 const allCategories = ref<any[]>([])
@@ -463,6 +469,7 @@ function sortParams() {
     case 'price_asc':  return { sortBy: 'minPrice', sortOrder: 'asc' }
     case 'price_desc': return { sortBy: 'minPrice', sortOrder: 'desc' }
     case 'sales_desc': return { sortBy: 'saleCount', sortOrder: 'desc' }
+    case 'comments_desc': return { sortBy: 'commentCount', sortOrder: 'desc' }
     default:           return {}
   }
 }
@@ -981,6 +988,7 @@ onMounted(async () => {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 45px;
 }
 .spu-bottom { display: flex; justify-content: space-between; align-items: center; }
+.spu-meta { font-size: 12px; color: var(--text-muted); margin: -2px 0 8px; }
 .spu-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
 .add-cart-btn { border-radius: 8px; }
 .load-more-tip { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px;
