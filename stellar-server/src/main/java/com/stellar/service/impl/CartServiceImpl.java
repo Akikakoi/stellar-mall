@@ -88,17 +88,18 @@ public class CartServiceImpl implements CartService {
         List<Long> skuIds = carts.stream().map(Cart::getSkuId).distinct().collect(Collectors.toList());
         List<Long> spuIds = carts.stream().map(Cart::getSpuId).filter(x -> x != null).distinct().collect(Collectors.toList());
 
-        // 批量查 SKU / SPU 组装 VO（简化版：单条循环查询，真实项目可改批量 SELECT IN）
-        Map<Long, Sku> skuMap = new java.util.HashMap<>();
-        for (Long sid : skuIds) {
-            Sku s = skuMapper.getById(sid);
-            if (s != null) skuMap.put(sid, s);
-        }
-        Map<Long, Spu> spuMap = new java.util.HashMap<>();
-        for (Long pid : spuIds) {
-            Spu p = spuMapper.getById(pid);
-            if (p != null) spuMap.put(pid, p);
-        }
+        // 一次 SELECT IN 取代循环单条查询，避免 N+1
+        List<Sku> skus = skuIds.isEmpty() ? Collections.emptyList() : skuMapper.listByIds(skuIds);
+        if (skus == null) skus = Collections.emptyList();
+        Map<Long, Sku> skuMap = skus.stream()
+                .filter(s -> s != null && s.getId() != null)
+                .collect(Collectors.toMap(Sku::getId, s -> s, (a, b) -> a));
+
+        List<Spu> spus = spuIds.isEmpty() ? Collections.emptyList() : spuMapper.listByIds(spuIds);
+        if (spus == null) spus = Collections.emptyList();
+        Map<Long, Spu> spuMap = spus.stream()
+                .filter(p -> p != null && p.getId() != null)
+                .collect(Collectors.toMap(Spu::getId, p -> p, (a, b) -> a));
 
         List<CartVO> res = new ArrayList<>(carts.size());
         for (Cart c : carts) {

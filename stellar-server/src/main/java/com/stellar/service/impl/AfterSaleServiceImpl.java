@@ -602,12 +602,9 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     private Map<Long, MallOrder> loadOrders(Set<Long> ids) {
         if (ids == null || ids.isEmpty()) return Collections.emptyMap();
-        Map<Long, MallOrder> map = new java.util.HashMap<>();
-        for (Long id : ids) {
-            MallOrder o = mallOrderMapper.getById(id);
-            if (o != null) map.put(id, o);
-        }
-        return map;
+        List<MallOrder> orders = mallOrderMapper.listByIds(new ArrayList<>(ids));
+        if (orders == null) return Collections.emptyMap();
+        return orders.stream().collect(Collectors.toMap(MallOrder::getId, o -> o, (a, b) -> a));
     }
 
     private Map<Long, Sku> loadSkus(Set<Long> ids) {

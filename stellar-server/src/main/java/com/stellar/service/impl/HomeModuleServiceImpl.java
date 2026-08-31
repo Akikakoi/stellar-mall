@@ -118,8 +118,7 @@ public class HomeModuleServiceImpl implements HomeModuleService {
     @Transactional
     @CacheEvict(value = "homeModule:listEnabled", allEntries = true)
     public void batchSort(List<HomeModuleSaveDTO> items) {
-        for (HomeModuleSaveDTO item : items) {
-            homeModuleMapper.updateSortOrder(item.getId(), item.getSortOrder());
-        }
+        if (items == null || items.isEmpty()) return;
+        homeModuleMapper.batchUpdateSortOrder(items);
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 收藏夹服务实现。
@@ -86,9 +87,21 @@ public class FavoriteServiceImpl implements FavoriteService {
         List<Favorite> favs = favoriteMapper.listByUserId(userId);
         if (favs == null || favs.isEmpty()) return Collections.emptyList();
 
+        // 一次 SELECT IN 取代循环单条查询，避免 N+1
+        List<Long> spuIds = favs.stream()
+                .map(Favorite::getSpuId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        List<Spu> spus = spuIds.isEmpty() ? Collections.emptyList() : spuMapper.listByIds(spuIds);
+        if (spus == null) spus = Collections.emptyList();
+        Map<Long, Spu> spuMap = spus.stream()
+                .filter(p -> p != null && p.getId() != null)
+                .collect(Collectors.toMap(Spu::getId, p -> p, (a, b) -> a));
+
         List<FavoriteVO> res = new ArrayList<>(favs.size());
         for (Favorite f : favs) {
-            Spu spu = spuMapper.getById(f.getSpuId());
+            Spu spu = f.getSpuId() == null ? null : spuMap.get(f.getSpuId());
             if (spu == null) continue;
             FavoriteVO vo = FavoriteVO.builder()
                     .id(f.getId())
