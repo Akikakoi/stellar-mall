@@ -161,7 +161,7 @@ const TITLE_MAP: Record<string, string> = {
   '/admin/aftersale': '售后管理',
   '/admin/coupon': '优惠券管理',
   '/admin/points-rules': '积分规则管理',
-  '/admin/points-products': '积分商城���理',
+  '/admin/points-products': '积分商城管理',
   '/admin/review': '评价管理',
   '/admin/employee': '员工管理',
   '/admin/banner': '轮播图管理',
