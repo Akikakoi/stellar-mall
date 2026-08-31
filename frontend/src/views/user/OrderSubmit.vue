@@ -557,7 +557,7 @@ async function handleSubmit() {
       usePoints: usePoints.value || undefined,
       pointsAmount: usePoints.value ? Number(pointsDeduction.value.toFixed(2)) : undefined,
       items,
-      // 立即购买不清空购物车，��物车下单才清空
+      // 立即购买不清空购物车，购物车下单才清空
       clearCart: !isDirect.value
     }
     const res = await submitOrder(payload)

@@ -15,7 +15,7 @@ public class RagSyncProperties {
     /** RAG 服务 base URL，例：http://127.0.0.1:8000 */
     private String baseUrl = "http://127.0.0.1:8000";
 
-    /** 共享密钥，RAG 端通过 X-Stellar-Rag-Sync-Secret Header 校验���
+    /** 共享密钥，RAG 端通过 X-Stellar-Rag-Sync-Secret Header 校验。
      *  ⚠️ 必须和 RAG 端 .env 里 STELLAR_RAG_INTERNAL_SYNC_SECRET 完全一致！ */
     private String internalSyncSecret;
 

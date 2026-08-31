@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user/wallet")
 @RequiredArgsConstructor
-@Api(tags = "C端：钱包��理")
+@Api(tags = "C端：钱包管理")
 public class WalletController {
 
     private final WalletService walletService;
