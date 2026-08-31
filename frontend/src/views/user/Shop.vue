@@ -212,6 +212,7 @@ import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites
 import { ElMessage } from 'element-plus'
 import { useSearchHistory } from '@/composables/useSearchHistory'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
+import DOMPurify from 'dompurify'
 
 const __PH = window.__PH
 const route = useRoute()
@@ -295,7 +296,10 @@ function onSkuChange(sku: any) { selectedSku.value = sku }
  */
 function highlightedName(spuId: any, fallback: any) {
   const hl = highlights.value[String(spuId)]
-  if (hl && hl.length > 0) return hl[0]
+  if (hl && hl.length > 0) {
+    // 高亮片段来自后端搜索接口（可能包含商家可控内容），必须经 DOMPurify 净化后才能 v-html
+    return DOMPurify.sanitize(String(hl[0]))
+  }
   // 用内置 HTML 转义后的 fallback
   return escapeHtml(String(fallback || ''))
 }
