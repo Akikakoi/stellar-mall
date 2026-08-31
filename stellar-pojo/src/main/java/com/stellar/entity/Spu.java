@@ -30,7 +30,6 @@ public class Spu implements Serializable {
     private String descriptionMd;
     private String mainImage;
     private String subImages;
-    private String sliderImages;
     private Integer saleCount;
     private Integer commentCount;
     private Integer totalStock;

@@ -18,7 +18,6 @@
         <result property="price"        column="price"/>
         <result property="originalPrice" column="original_price"/>
         <result property="costPrice"    column="cost_price"/>
-        <result property="marketPrice"  column="market_price"/>
         <result property="stock"        column="stock"/>
         <result property="version"      column="version"/>
         <result property="warnStock"    column="warn_stock"/>
@@ -38,12 +37,12 @@
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_sku (
             spu_id, name, specs, specs_json,
-            price, original_price, cost_price, market_price,
+            price, original_price, cost_price,
             stock, version, warn_stock, weight_g, barcode, image, sort, status,
             create_time, create_user, update_time, update_user
         ) VALUES (
             #{spuId}, #{name}, #{specs}, #{specsJson},
-            #{price}, #{originalPrice}, #{costPrice}, #{marketPrice},
+            #{price}, #{originalPrice}, #{costPrice},
             #{stock}, #{version}, #{warnStock}, #{weightG}, #{barcode}, #{image}, #{sort}, #{status},
             #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
         )
@@ -60,7 +59,6 @@
             <if test="price != null">price = #{price},</if>
             <if test="originalPrice != null">original_price = #{originalPrice},</if>
             <if test="costPrice != null">cost_price = #{costPrice},</if>
-            <if test="marketPrice != null">market_price = #{marketPrice},</if>
             <if test="stock != null">stock = #{stock},</if>
             <if test="warnStock != null">warn_stock = #{warnStock},</if>
             <if test="weightG != null">weight_g = #{weightG},</if>

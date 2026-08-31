@@ -30,7 +30,6 @@ public class Sku implements Serializable {
     private BigDecimal price;
     private BigDecimal originalPrice;
     private BigDecimal costPrice;
-    private BigDecimal marketPrice;
     /** 当前库存（乐观锁扣减）。 */
     private Integer stock;
     /** 乐观锁版本号，初值 0。 */
