@@ -153,7 +153,9 @@ function createInstance(baseURL: string, type: 'user' | 'admin' | 'rag'): AxiosI
   const instance = axios.create({
     baseURL,
     timeout: 15000,
-    withCredentials: true,
+    // 鉴权走自定义 header（token / Authorization），不使用 Cookie；
+    // 关闭 withCredentials，避免跨域请求自动携带 Cookie 扩大攻击面（与服务端 allowCredentials 关闭一致）
+    withCredentials: false,
   })
 
   instance.interceptors.request.use((config) => {
