@@ -56,6 +56,14 @@
             </div>
           </template>
         </el-table-column>
+        <el-table-column label="收货人" width="150" show-overflow-tooltip>
+          <template #default="{ row }">
+            <span v-if="row.consignee || row.phone">
+              {{ row.consignee || '-' }}<span v-if="row.phone" class="text-muted"> / {{ row.phone }}</span>
+            </span>
+            <span v-else class="text-muted">-</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="address" label="收货地址" min-width="160" show-overflow-tooltip />
         <el-table-column label="支付方式" width="90">
           <template #default="{ row }">{{ row.payMethod === 1 ? '微信' : row.payMethod === 2 ? '支付宝' : '-' }}</template>

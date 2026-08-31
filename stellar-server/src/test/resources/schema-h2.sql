@@ -78,6 +78,7 @@ CREATE TABLE stellar_mall_order (
     user_id BIGINT NOT NULL, address_id BIGINT,
     total_amount DECIMAL(10,2) NOT NULL DEFAULT 0, pay_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
     pay_method TINYINT, status TINYINT NOT NULL DEFAULT 1,
+    address VARCHAR(500), consignee VARCHAR(50) NOT NULL DEFAULT '', phone VARCHAR(20) NOT NULL DEFAULT '',
     cancel_reason VARCHAR(500), pay_time DATETIME,
     create_time DATETIME NOT NULL, create_user BIGINT NOT NULL,
     update_time DATETIME NOT NULL, update_user BIGINT NOT NULL,

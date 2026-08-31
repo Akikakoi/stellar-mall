@@ -241,8 +241,8 @@ CREATE TABLE stellar_orders (
     pack_amount       DECIMAL(10,2) NOT NULL DEFAULT 0.00   COMMENT '包装费/服务费',
     -- 收货地址快照（下单时快照，不随用户地址簿变化）
     address_id        BIGINT        DEFAULT NULL            COMMENT '下单时的地址簿 ID',
-    consignee         VARCHAR(32)   NOT NULL                COMMENT '收货人快照',
-    phone             VARCHAR(11)   NOT NULL                COMMENT '手机号快照',
+    consignee         VARCHAR(50)   NOT NULL DEFAULT ''     COMMENT '收货人快照',
+    phone             VARCHAR(20)   NOT NULL DEFAULT ''     COMMENT '手机号快照',
     address           VARCHAR(500)  NOT NULL                COMMENT '完整地址快照：省市区+详细',
     remark            VARCHAR(255)  DEFAULT NULL            COMMENT '买家备注',
     invoice_info      VARCHAR(500)  DEFAULT NULL            COMMENT '发票信息 JSON',

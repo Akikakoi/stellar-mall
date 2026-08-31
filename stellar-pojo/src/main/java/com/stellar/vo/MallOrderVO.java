@@ -42,6 +42,12 @@ public class MallOrderVO implements Serializable {
     @ApiModelProperty("收货地址")
     private String address;
 
+    @ApiModelProperty("收货人姓名")
+    private String consignee;
+
+    @ApiModelProperty("收货人联系电话")
+    private String phone;
+
     @ApiModelProperty("支付方式")
     private Integer payMethod;
 

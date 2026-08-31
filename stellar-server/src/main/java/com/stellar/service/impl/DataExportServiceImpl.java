@@ -34,7 +34,7 @@ public class DataExportServiceImpl implements DataExportService {
 
     private static final String[] ORDER_HEADERS = {
             "订单编号", "用户手机号", "订单总额", "实付金额", "订单状态",
-            "收货地址", "快递单号", "快递公司", "创建时间"
+            "收货人", "收货电话", "收货地址", "快递单号", "快递公司", "创建时间"
     };
 
     private static final String[] USER_HEADERS = {
@@ -75,10 +75,12 @@ public class DataExportServiceImpl implements DataExportService {
                 setCell(row, 2, o.getTotalAmount(), style);
                 setCell(row, 3, o.getPayAmount(), style);
                 setCell(row, 4, STATUS_CN.getOrDefault(o.getStatus(), o.getStatus()), style);
-                setCell(row, 5, o.getAddress(), style);
-                setCell(row, 6, o.getTrackingNo(), style);
-                setCell(row, 7, o.getDeliveryCompany(), style);
-                setCell(row, 8, o.getCreateTime(), style);
+                setCell(row, 5, o.getConsignee(), style);
+                setCell(row, 6, o.getPhone(), style);
+                setCell(row, 7, o.getAddress(), style);
+                setCell(row, 8, o.getTrackingNo(), style);
+                setCell(row, 9, o.getDeliveryCompany(), style);
+                setCell(row, 10, o.getCreateTime(), style);
             }
 
             autoSize(sheet, ORDER_HEADERS.length);
