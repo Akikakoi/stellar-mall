@@ -13,8 +13,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,18 +23,20 @@ import java.util.concurrent.TimeUnit;
  *
  * <p>锁模式由 {@code stellar.stock.lock-mode} 控制，两种模式互斥，不允许同时使用：</p>
  * <ul>
- *   <li>{@code optimistic}（默认）：纯本地乐观锁（version + READ_COMMITTED 重试），不依赖 Redis。</li>
+ *   <li>{@code optimistic}（默认）：单条原子条件扣减（stock &gt;= qty 兜底 + version 递增），
+ *       不依赖 Redis，也不再有“读-判-写+重试”循环（RR 下快照读会读到旧 version 导致重试必然失败）。</li>
  *   <li>{@code redis}：先获取 Redis 分布式锁，再执行单次直接更新；<b>不</b>再使用 version 做并发控制。</li>
  * </ul>
  *
  * <p>Redis 模式且 Redis 不可用时，会打印 WARNING 并降级为乐观锁模式，保证单机可用性。</p>
+ * <p>Redis 锁的释放被延迟到事务提交/回滚之后（{@link #unlockAfterTransaction}），
+ * 确保锁保护范围不小于事务范围，避免“锁已释放但事务未提交”的临界区缺口。</p>
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class SkuStockServiceImpl implements SkuStockService {
 
-    private static final int MAX_RETRY = 20;
     private static final String LOCK_PREFIX = "lock:stock:sku:";
     private static final long LOCK_TIMEOUT_SECONDS = 10;
 
@@ -121,46 +124,29 @@ public class SkuStockServiceImpl implements SkuStockService {
                         + "（扣减失败，请稍后重试）");
             }
         } finally {
-            redisLockUtil.unlock(lockKey, token);
+            // 锁的释放延迟到事务提交/回滚之后，保证锁保护范围 ≥ 事务范围
+            unlockAfterTransaction(lockKey, token);
         }
     }
 
     /**
-     * 本地乐观锁模式扣库存：version 字段作为并发控制，失败则带指数退避重试。
+     * 本地乐观锁模式扣库存：单条原子条件扣减，无重试循环。
+     *
+     * <p>UPDATE ... WHERE id AND stock >= qty 是当前读，在 REPEATABLE READ /
+     * READ COMMITTED 下都正确。原先的“getById 读 version → UPDATE WHERE version”重试循环
+     * 在 RR 下 getById 是快照读（永远读事务开始时的旧 version），而 UPDATE 是当前读，
+     * 两者永远对不上，20 次重试必然全部失败——已实测确认。原子扣减直接消除该问题。</p>
      */
     private void deductWithOptimisticLock(Long skuId, int qty) {
-        for (int i = 0; i < MAX_RETRY; i++) {
+        int rows = skuMapper.deductStockAtomic(skuId, qty);
+        if (rows == 0) {
+            // 区分“SKU 不存在”与“库存不足”，给出可读的错误信息
             Sku sku = skuMapper.getById(skuId);
             if (sku == null) {
                 throw new BaseException(MessageConstant.SKU_NOT_FOUND);
             }
             int stock = sku.getStock() == null ? 0 : sku.getStock();
-            if (stock < qty) {
-                throw new StockInsufficientException(buildInsufficientMsg(skuId, stock, qty));
-            }
-            Integer version = sku.getVersion() == null ? 0 : sku.getVersion();
-            int rows = skuMapper.deductStockWithVersion(skuId, version, qty);
-            if (rows > 0) {
-                return;
-            }
-            // 指数退避 + 抖动，避免高并发下所有线程同频重试造成空转
-            if (i < MAX_RETRY - 1) {
-                backoff(i);
-            }
-        }
-        throw new StockInsufficientException(MessageConstant.STOCK_NOT_ENOUGH
-                + "（并发冲突，已重试 " + MAX_RETRY + " 次）");
-    }
-
-    private void backoff(int attempt) {
-        try {
-            long baseMs = 5L << attempt; // 5, 10, 20, 40...
-            long maxMs = Math.min(baseMs, 200L);
-            long jitter = ThreadLocalRandom.current().nextLong(maxMs / 2, maxMs + 1);
-            Thread.sleep(jitter);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new BaseException("库存扣减被中断");
+            throw new StockInsufficientException(buildInsufficientMsg(skuId, stock, qty));
         }
     }
 
@@ -192,29 +178,41 @@ public class SkuStockServiceImpl implements SkuStockService {
                 throw new BaseException("库存回滚失败（请稍后重试）");
             }
         } finally {
-            redisLockUtil.unlock(lockKey, token);
+            // 锁的释放延迟到事务提交/回滚之后，保证锁保护范围 ≥ 事务范围
+            unlockAfterTransaction(lockKey, token);
         }
     }
 
     /**
-     * 本地乐观锁模式回滚库存：version 字段作为并发控制，失败则带指数退避重试。
+     * 本地乐观锁模式回滚库存：单条原子回滚，无重试循环。
+     * rows==0 仅可能表示 SKU 不存在。
      */
     private void rollbackWithOptimisticLock(Long skuId, int qty) {
-        for (int i = 0; i < MAX_RETRY; i++) {
-            Sku sku = skuMapper.getById(skuId);
-            if (sku == null) {
-                throw new BaseException(MessageConstant.SKU_NOT_FOUND);
-            }
-            Integer version = sku.getVersion() == null ? 0 : sku.getVersion();
-            int rows = skuMapper.rollbackStockWithVersion(skuId, version, qty);
-            if (rows > 0) {
-                return;
-            }
-            if (i < MAX_RETRY - 1) {
-                backoff(i);
-            }
+        int rows = skuMapper.rollbackStockAtomic(skuId, qty);
+        if (rows == 0) {
+            throw new BaseException(MessageConstant.SKU_NOT_FOUND);
         }
-        throw new BaseException("库存回滚失败（并发冲突，已重试 " + MAX_RETRY + " 次）");
+    }
+
+    /**
+     * 释放 Redis 锁：若当前线程处于 Spring 事务同步中，则注册 afterCompletion 回调，
+     * 在事务提交/回滚完成后再释放锁；否则立即释放。
+     *
+     * <p>原因：{@code deduct}/{@code rollback} 声明了 {@code @Transactional}，
+     * 若在 finally 中直接解锁，锁的释放会早于事务提交，锁保护范围小于事务范围——
+     * 目前靠 InnoDB 行锁兜底未出事，但一旦扣减后新增其他校验，就会出现不一致。</p>
+     */
+    private void unlockAfterTransaction(String lockKey, String token) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                    redisLockUtil.unlock(lockKey, token);
+                }
+            });
+        } else {
+            redisLockUtil.unlock(lockKey, token);
+        }
     }
 
     private void validateParam(Long skuId, int qty) {

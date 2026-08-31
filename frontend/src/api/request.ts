@@ -80,6 +80,31 @@ function generateIdempotencyKey(): string {
   })
 }
 
+/**
+ * 幂等键管理：以“业务动作”为维度复用 key。
+ *
+ * 原先每次 HTTP 请求都生成新的随机 UUID，导致用户重复点击提交时两次请求的
+ * X-Idempotency-Key 不同，后端幂等切面（结果缓存 / 处理中标记）完全拦截不住，
+ * 会创建两笔订单。正确语义是：一次“业务动作”（如一次提交订单）只生成一个 key，
+ * 重试 / 重复点击复用同一个 key，动作完成或主动放弃后再重新生成。
+ */
+const idempotencyKeyMap = new Map<string, string>()
+
+/** 获取指定业务动作的幂等键：首次调用生成，后续复用（直到 reset） */
+export function getOrCreateIdempotencyKey(action: string): string {
+  let key = idempotencyKeyMap.get(action)
+  if (!key) {
+    key = generateIdempotencyKey()
+    idempotencyKeyMap.set(action, key)
+  }
+  return key
+}
+
+/** 重置指定业务动作的幂等键：提交成功或用户明确放弃后调用，下次操作生成新 key */
+export function resetIdempotencyKey(action: string): void {
+  idempotencyKeyMap.delete(action)
+}
+
 /** 从 localStorage 安全读取 */
 function safeGetItem(key: string): string | null {
   return storage.local.get(key)

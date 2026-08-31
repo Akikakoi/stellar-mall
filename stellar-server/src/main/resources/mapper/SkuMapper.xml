@@ -59,7 +59,10 @@
             <if test="price != null">price = #{price},</if>
             <if test="originalPrice != null">original_price = #{originalPrice},</if>
             <if test="costPrice != null">cost_price = #{costPrice},</if>
-            <if test="stock != null">stock = #{stock},</if>
+            <!-- 管理端改库存必须推进 version：version 反映“库存被外部变更”的语义，
+                 若只 SET stock 不推 version，会与原子扣减的 stock>=qty 兜底之外的
+                 version 语义脱节（历史版本曾存在把库存扣成负数的组合路径） -->
+            <if test="stock != null">stock = #{stock}, version = version + 1,</if>
             <if test="warnStock != null">warn_stock = #{warnStock},</if>
             <if test="weightG != null">weight_g = #{weightG},</if>
             <if test="barcode != null">barcode = #{barcode},</if>
@@ -97,6 +100,26 @@
         SET stock = stock - #{qty}
         WHERE id = #{id}
           AND stock &gt;= #{qty}
+    </update>
+
+    <!-- 原子条件扣减（推荐方案）：单条 UPDATE 完成扣减 + version 递增 + 库存兜底。
+         UPDATE 是当前读，RR/RC 下均正确，不再依赖“读-判-写+重试”循环
+         （RR 下重试循环里 getById 快照读永远拿到旧 version，导致重试必然失败）。
+         rows==0 即库存不足或 SKU 不存在。 -->
+    <update id="deductStockAtomic">
+        UPDATE stellar_sku
+        SET stock   = stock - #{qty},
+            version = version + 1
+        WHERE id = #{id}
+          AND stock &gt;= #{qty}
+    </update>
+
+    <!-- 原子回滚库存：无条件加回并递增 version，rows==0 表示 SKU 不存在 -->
+    <update id="rollbackStockAtomic">
+        UPDATE stellar_sku
+        SET stock   = stock + #{qty},
+            version = version + 1
+        WHERE id = #{id}
     </update>
 
     <!-- Redis 锁模式直接回滚库存：不依赖 version -->
