@@ -40,7 +40,6 @@ export interface Sku {
   price: number
   originalPrice?: number
   costPrice?: number
-  marketPrice?: number
   stock: number
   version?: number
   warnStock?: number
@@ -66,7 +65,6 @@ export interface Spu {
   descriptionMd?: string
   mainImage?: string
   subImages?: string
-  sliderImages?: string
   saleCount?: number
   commentCount?: number
   totalStock?: number

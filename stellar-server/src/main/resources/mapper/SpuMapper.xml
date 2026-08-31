@@ -19,7 +19,6 @@
         <result property="descriptionMd" column="description_md"/>
         <result property="mainImage"     column="main_image"/>
         <result property="subImages"     column="sub_images"/>
-        <result property="sliderImages"  column="slider_images"/>
         <result property="saleCount"     column="sale_count"/>
         <result property="commentCount"  column="comment_count"/>
         <result property="totalStock"    column="total_stock"/>
@@ -44,14 +43,14 @@
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_spu (
             name, sub_title, category_id,
-            description, description_md, main_image, sub_images, slider_images,
+            description, description_md, main_image, sub_images,
             sale_count, comment_count, total_stock, sku_count,
             min_price, max_price, is_new, is_hot, sort, status,
             on_shelf_time, off_shelf_time,
             create_time, create_user, update_time, update_user
         ) VALUES (
             #{name}, #{subTitle}, #{categoryId},
-            #{description}, #{descriptionMd}, #{mainImage}, #{subImages}, #{sliderImages},
+            #{description}, #{descriptionMd}, #{mainImage}, #{subImages},
             #{saleCount}, #{commentCount}, #{totalStock}, #{skuCount},
             #{minPrice}, #{maxPrice}, #{isNew}, #{isHot}, #{sort}, #{status},
             #{onShelfTime}, #{offShelfTime},
@@ -70,7 +69,6 @@
             <if test="descriptionMd != null">description_md = #{descriptionMd},</if>
             <if test="mainImage != null">main_image = #{mainImage},</if>
             <if test="subImages != null">sub_images = #{subImages},</if>
-            <if test="sliderImages != null">slider_images = #{sliderImages},</if>
             <if test="totalStock != null">total_stock = #{totalStock},</if>
             <if test="skuCount != null">sku_count = #{skuCount},</if>
             <if test="minPrice != null">min_price = #{minPrice},</if>

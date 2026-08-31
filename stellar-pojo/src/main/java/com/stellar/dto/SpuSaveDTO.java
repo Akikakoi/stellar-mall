@@ -48,10 +48,6 @@ public class SpuSaveDTO implements Serializable {
     @ApiModelProperty("副图 URL 列表（分号分隔）")
     private String subImages;
 
-    @Size(max = 2000)
-    @ApiModelProperty("轮播图 URL 列表（JSON 数组格式，如 [\"url1\",\"url2\"]；传分号分隔字符串亦可兼容）")
-    private String sliderImages;
-
     // ========= 描述：双版本 + 互相兼容 =========
     @Size(max = 16777215)
     @ApiModelProperty("商品详情 HTML（前端商品管理页面通常只维护这一份）")

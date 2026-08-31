@@ -63,10 +63,10 @@ A: 承诺 4 年 Android 大版本更新 + 5 年安全补丁。',
 
 SET @spu_x200 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_x200, '星耀 X200 · 钛灰 · 12+256GB', '颜色:钛灰;内存:12GB;存储:256GB', '{"颜色":"钛灰","内存":"12GB","存储":"256GB"}', 5999.00, 6499.00, 4800.00, 6299.00, 200, 10, 219, 'PH-X200-12-256-GY', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_x200, '星耀 X200 · 钛灰 · 16+512GB', '颜色:钛灰;内存:16GB;存储:512GB', '{"颜色":"钛灰","内存":"16GB","存储":"512GB"}', 6999.00, 7499.00, 5600.00, 7299.00, 150, 10, 219, 'PH-X200-16-512-GY', 20, 1, NOW(), 1, NOW(), 1),
-(@spu_x200, '星耀 X200 · 陶瓷白 · 16+1TB', '颜色:陶瓷白;内存:16GB;存储:1TB', '{"颜色":"陶瓷白","内存":"16GB","存储":"1TB"}', 7499.00, 7999.00, 6000.00, 7799.00, 100, 10, 223, 'PH-X200-16-1TB-WH', 30, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_x200, '星耀 X200 · 钛灰 · 12+256GB', '颜色:钛灰;内存:12GB;存储:256GB', '{"颜色":"钛灰","内存":"12GB","存储":"256GB"}', 5999.00, 6499.00, 4800.00, 200, 10, 219, 'PH-X200-12-256-GY', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_x200, '星耀 X200 · 钛灰 · 16+512GB', '颜色:钛灰;内存:16GB;存储:512GB', '{"颜色":"钛灰","内存":"16GB","存储":"512GB"}', 6999.00, 7499.00, 5600.00, 150, 10, 219, 'PH-X200-16-512-GY', 20, 1, NOW(), 1, NOW(), 1),
+(@spu_x200, '星耀 X200 · 陶瓷白 · 16+1TB', '颜色:陶瓷白;内存:16GB;存储:1TB', '{"颜色":"陶瓷白","内存":"16GB","存储":"1TB"}', 7499.00, 7999.00, 6000.00, 100, 10, 223, 'PH-X200-16-1TB-WH', 30, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 3, total_stock = 450 WHERE id = @spu_x200;
 
@@ -114,10 +114,10 @@ A: 内置电池健康引擎，经过 1600 次充放电循环后仍保留 80% 以
 
 SET @spu_note14 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_note14, '星耀 Note 14 Pro · 子夜黑 · 8+256GB', '颜色:子夜黑;内存:8GB;存储:256GB', '{"颜色":"子夜黑","内存":"8GB","存储":"256GB"}', 2799.00, 2999.00, 2200.00, 2899.00, 300, 15, 188, 'PH-N14-8-256-BK', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_note14, '星耀 Note 14 Pro · 冰川蓝 · 12+256GB', '颜色:冰川蓝;内存:12GB;存储:256GB', '{"颜色":"冰川蓝","内存":"12GB","存储":"256GB"}', 3099.00, 3299.00, 2450.00, 3199.00, 250, 15, 188, 'PH-N14-12-256-BL', 20, 1, NOW(), 1, NOW(), 1),
-(@spu_note14, '星耀 Note 14 Pro · 香槟金 · 12+512GB', '颜色:香槟金;内存:12GB;存储:512GB', '{"颜色":"香槟金","内存":"12GB","存储":"512GB"}', 3499.00, 3699.00, 2800.00, 3599.00, 200, 15, 188, 'PH-N14-12-512-GD', 30, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_note14, '星耀 Note 14 Pro · 子夜黑 · 8+256GB', '颜色:子夜黑;内存:8GB;存储:256GB', '{"颜色":"子夜黑","内存":"8GB","存储":"256GB"}', 2799.00, 2999.00, 2200.00, 300, 15, 188, 'PH-N14-8-256-BK', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_note14, '星耀 Note 14 Pro · 冰川蓝 · 12+256GB', '颜色:冰川蓝;内存:12GB;存储:256GB', '{"颜色":"冰川蓝","内存":"12GB","存储":"256GB"}', 3099.00, 3299.00, 2450.00, 250, 15, 188, 'PH-N14-12-256-BL', 20, 1, NOW(), 1, NOW(), 1),
+(@spu_note14, '星耀 Note 14 Pro · 香槟金 · 12+512GB', '颜色:香槟金;内存:12GB;存储:512GB', '{"颜色":"香槟金","内存":"12GB","存储":"512GB"}', 3499.00, 3699.00, 2800.00, 200, 15, 188, 'PH-N14-12-512-GD', 30, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 3, total_stock = 750 WHERE id = @spu_note14;
 
@@ -163,9 +163,9 @@ A: 王者荣耀高帧率流畅运行，原神中低画质 40fps 左右。定位�
 
 SET @spu_a60 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_a60, '星耀 A60 · 薄荷绿 · 6+128GB', '颜色:薄荷绿;内存:6GB;存储:128GB', '{"颜色":"薄荷绿","内存":"6GB","存储":"128GB"}', 1299.00, 1499.00, 1000.00, 1399.00, 500, 20, 195, 'PH-A60-6-128-GN', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_a60, '星耀 A60 · 星空黑 · 8+256GB', '颜色:星空黑;内存:8GB;存储:256GB', '{"颜色":"星空黑","内存":"8GB","存储":"256GB"}', 1699.00, 1899.00, 1300.00, 1799.00, 400, 20, 195, 'PH-A60-8-256-BK', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_a60, '星耀 A60 · 薄荷绿 · 6+128GB', '颜色:薄荷绿;内存:6GB;存储:128GB', '{"颜色":"薄荷绿","内存":"6GB","存储":"128GB"}', 1299.00, 1499.00, 1000.00, 500, 20, 195, 'PH-A60-6-128-GN', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_a60, '星耀 A60 · 星空黑 · 8+256GB', '颜色:星空黑;内存:8GB;存储:256GB', '{"颜色":"星空黑","内存":"8GB","存储":"256GB"}', 1699.00, 1899.00, 1300.00, 400, 20, 195, 'PH-A60-8-256-BK', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 900 WHERE id = @spu_a60;
 
@@ -216,9 +216,9 @@ A: 主流应用（微信、抖音、支付宝、地图等）均已适配外屏�
 
 SET @spu_flip = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_flip, '星耀 Flip · 香槟粉 · 12+256GB', '颜色:香槟粉;内存:12GB;存储:256GB', '{"颜色":"香槟粉","内存":"12GB","存储":"256GB"}', 4999.00, 5499.00, 4000.00, 5299.00, 150, 10, 188, 'PH-FLIP-12-256-PK', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_flip, '星耀 Flip · 曜石黑 · 12+512GB', '颜色:曜石黑;内存:12GB;存储:512GB', '{"颜色":"曜石黑","内存":"12GB","存储":"512GB"}', 5999.00, 6499.00, 4800.00, 6299.00, 100, 10, 188, 'PH-FLIP-12-512-BK', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_flip, '星耀 Flip · 香槟粉 · 12+256GB', '颜色:香槟粉;内存:12GB;存储:256GB', '{"颜色":"香槟粉","内存":"12GB","存储":"256GB"}', 4999.00, 5499.00, 4000.00, 150, 10, 188, 'PH-FLIP-12-256-PK', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_flip, '星耀 Flip · 曜石黑 · 12+512GB', '颜色:曜石黑;内存:12GB;存储:512GB', '{"颜色":"曜石黑","内存":"12GB","存储":"512GB"}', 5999.00, 6499.00, 4800.00, 100, 10, 188, 'PH-FLIP-12-512-BK', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 250 WHERE id = @spu_flip;
 
@@ -273,9 +273,9 @@ A: 内存为板载不可升级。硬盘有一个空闲 M.2 2280 插槽可加装�
 
 SET @spu_tb16 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_tb16, '星耀 ThinkBook 16 · 银色 · 32GB+1TB', '颜色:银色;内存:32GB;存储:1TB', '{"颜色":"银色","内存":"32GB","存储":"1TB"}', 6999.00, 7499.00, 5600.00, 7299.00, 150, 10, 1800, 'NB-TB16-32-1T-SL', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_tb16, '星耀 ThinkBook 16 · 深空灰 · 32GB+2TB', '颜色:深空灰;内存:32GB;存储:2TB', '{"颜色":"深空灰","内存":"32GB","存储":"2TB"}', 7999.00, 8499.00, 6400.00, 8299.00, 100, 10, 1800, 'NB-TB16-32-2T-GY', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_tb16, '星耀 ThinkBook 16 · 银色 · 32GB+1TB', '颜色:银色;内存:32GB;存储:1TB', '{"颜色":"银色","内存":"32GB","存储":"1TB"}', 6999.00, 7499.00, 5600.00, 150, 10, 1800, 'NB-TB16-32-1T-SL', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_tb16, '星耀 ThinkBook 16 · 深空灰 · 32GB+2TB', '颜色:深空灰;内存:32GB;存储:2TB', '{"颜色":"深空灰","内存":"32GB","存储":"2TB"}', 7999.00, 8499.00, 6400.00, 100, 10, 1800, 'NB-TB16-32-2T-GY', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 250 WHERE id = @spu_tb16;
 
@@ -324,9 +324,9 @@ A: RTX 4070 移动端可以畅玩 3A 大作。赛博朋克 2077 2.5K 中高画�
 
 SET @spu_creator = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_creator, '星耀 Creator 14 · 深空灰 · 64GB+2TB', '颜色:深空灰;内存:64GB;存储:2TB', '{"颜色":"深空灰","内存":"64GB","存储":"2TB"}', 12999.00, 13999.00, 10400.00, 13499.00, 80, 5, 1650, 'NB-CR14-64-2T-GY', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_creator, '星耀 Creator 14 · 月岩白 · 64GB+4TB', '颜色:月岩白;内存:64GB;存储:4TB', '{"颜色":"月岩白","内存":"64GB","存储":"4TB"}', 14999.00, 15999.00, 12000.00, 15499.00, 50, 5, 1650, 'NB-CR14-64-4T-WH', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_creator, '星耀 Creator 14 · 深空灰 · 64GB+2TB', '颜色:深空灰;内存:64GB;存储:2TB', '{"颜色":"深空灰","内存":"64GB","存储":"2TB"}', 12999.00, 13999.00, 10400.00, 80, 5, 1650, 'NB-CR14-64-2T-GY', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_creator, '星耀 Creator 14 · 月岩白 · 64GB+4TB', '颜色:月岩白;内存:64GB;存储:4TB', '{"颜色":"月岩白","内存":"64GB","存储":"4TB"}', 14999.00, 15999.00, 12000.00, 50, 5, 1650, 'NB-CR14-64-4T-WH', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 130 WHERE id = @spu_creator;
 
@@ -372,9 +372,9 @@ A: 内存板载不可升级，硬盘有一个空闲 M.2 插槽可加装。购买
 
 SET @spu_book14 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_book14, '星耀 Book 14 · 星空银 · 16GB+512GB', '颜色:星空银;内存:16GB;存储:512GB', '{"颜色":"星空银","内存":"16GB","存储":"512GB"}', 4299.00, 4699.00, 3400.00, 4499.00, 300, 15, 1450, 'NB-BK14-16-512-SL', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_book14, '星耀 Book 14 · 雾霾蓝 · 16GB+1TB', '颜色:雾霾蓝;内存:16GB;存储:1TB', '{"颜色":"雾霾蓝","内存":"16GB","存储":"1TB"}', 4999.00, 5299.00, 4000.00, 5199.00, 200, 15, 1450, 'NB-BK14-16-1T-BL', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_book14, '星耀 Book 14 · 星空银 · 16GB+512GB', '颜色:星空银;内存:16GB;存储:512GB', '{"颜色":"星空银","内存":"16GB","存储":"512GB"}', 4299.00, 4699.00, 3400.00, 300, 15, 1450, 'NB-BK14-16-512-SL', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_book14, '星耀 Book 14 · 雾霾蓝 · 16GB+1TB', '颜色:雾霾蓝;内存:16GB;存储:1TB', '{"颜色":"雾霾蓝","内存":"16GB","存储":"1TB"}', 4999.00, 5299.00, 4000.00, 200, 15, 1450, 'NB-BK14-16-1T-BL', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 500 WHERE id = @spu_book14;
 
@@ -426,9 +426,9 @@ A: 办公场景约 5 小时，游戏场景需插电使用。游戏本续航普�
 
 SET @spu_gamepro = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_gamepro, '星耀 GamePro 16 · 暗夜黑 · 32GB+1TB', '颜色:暗夜黑;内存:32GB;存储:1TB', '{"颜色":"暗夜黑","内存":"32GB","存储":"1TB"}', 9499.00, 9999.00, 7600.00, 9799.00, 120, 10, 2400, 'NB-GP16-32-1T-BK', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_gamepro, '星耀 GamePro 16 · 星际灰 · 32GB+2TB', '颜色:星际灰;内存:32GB;存储:2TB', '{"颜色":"星际灰","内存":"32GB","存储":"2TB"}', 10999.00, 11499.00, 8800.00, 11299.00, 60, 10, 2400, 'NB-GP16-32-2T-GY', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_gamepro, '星耀 GamePro 16 · 暗夜黑 · 32GB+1TB', '颜色:暗夜黑;内存:32GB;存储:1TB', '{"颜色":"暗夜黑","内存":"32GB","存储":"1TB"}', 9499.00, 9999.00, 7600.00, 120, 10, 2400, 'NB-GP16-32-1T-BK', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_gamepro, '星耀 GamePro 16 · 星际灰 · 32GB+2TB', '颜色:星际灰;内存:32GB;存储:2TB', '{"颜色":"星际灰","内存":"32GB","存储":"2TB"}', 10999.00, 11499.00, 8800.00, 60, 10, 2400, 'NB-GP16-32-2T-GY', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 180 WHERE id = @spu_gamepro;
 
@@ -479,8 +479,8 @@ A: 20-40 平米客厅效果最佳。支持房间校准功能，可自动优化�
 
 SET @spu_soundbar = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_soundbar, '逸彩 VividBar Ultra · 标准套装', '规格:标准套装', '{"规格":"标准套装"}', 6999.00, 7999.00, 5500.00, 7499.00, 100, 5, 15000, 'SPK-VBU-001', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_soundbar, '逸彩 VividBar Ultra · 标准套装', '规格:标准套装', '{"规格":"标准套装"}', 6999.00, 7999.00, 5500.00, 100, 5, 15000, 'SPK-VBU-001', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 100 WHERE id = @spu_soundbar;
 
@@ -529,8 +529,8 @@ A: 电视通常没有 XLR/TRS 输出。可购买 HDMI 音频分离器或使用 3
 
 SET @spu_studio = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_studio, '逸彩 VividStudio Pro · 对装', '规格:一对', '{"规格":"一对"}', 2999.00, 3499.00, 2300.00, 3299.00, 200, 10, 13000, 'SPK-VSP-001', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_studio, '逸彩 VividStudio Pro · 对装', '规格:一对', '{"规格":"一对"}', 2999.00, 3499.00, 2300.00, 200, 10, 13000, 'SPK-VSP-001', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 200 WHERE id = @spu_studio;
 
@@ -582,8 +582,8 @@ A: 支持正装、吊装、背投、吊装背投四种安装方式。底部有�
 
 SET @spu_projector = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_projector, '逸彩 VividBeam 4K · 标准版', '规格:标准版', '{"规格":"标准版"}', 5999.00, 6999.00, 4700.00, 6499.00, 150, 5, 5200, 'PJ-VBM-001', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_projector, '逸彩 VividBeam 4K · 标准版', '规格:标准版', '{"规格":"标准版"}', 5999.00, 6999.00, 4700.00, 150, 5, 5200, 'PJ-VBM-001', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 150 WHERE id = @spu_projector;
 
@@ -628,8 +628,8 @@ A: 可以蓝牙连接手机播放伴奏，也可以用 3.5mm 音频线连接。'
 
 SET @spu_mixer = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_mixer, '逸彩 VividMix · 标准版', '规格:标准版', '{"规格":"标准版"}', 899.00, 1099.00, 650.00, 999.00, 500, 20, 450, 'AUD-VMX-001', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_mixer, '逸彩 VividMix · 标准版', '规格:标准版', '{"规格":"标准版"}', 899.00, 1099.00, 650.00, 500, 20, 450, 'AUD-VMX-001', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 500 WHERE id = @spu_mixer;
 
@@ -689,8 +689,8 @@ A: 采用 22mm 快拆表带，兼容所有标准 22mm 表带。',
 
 SET @spu_watch4u = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_watch4u, '星耀 Watch 4 Ultra · 钛金灰', '颜色:钛金灰', '{"颜色":"钛金灰"}', 3299.00, 3699.00, 2600.00, 3499.00, 200, 10, 61, 'WT-W4U-GY', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_watch4u, '星耀 Watch 4 Ultra · 钛金灰', '颜色:钛金灰', '{"颜色":"钛金灰"}', 3299.00, 3699.00, 2600.00, 200, 10, 61, 'WT-W4U-GY', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 200 WHERE id = @spu_watch4u;
 
@@ -736,10 +736,10 @@ A: 支持蓝牙通话，但需要手机在附近。没有 eSIM 独立通话功�
 
 SET @spu_band9 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_band9, '星耀 Band 9 · 午夜黑', '颜色:午夜黑', '{"颜色":"午夜黑"}', 329.00, 349.00, 220.00, 339.00, 400, 20, 18, 'BD-B9-BK', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_band9, '星耀 Band 9 · 星云粉', '颜色:星云粉', '{"颜色":"星云粉"}', 349.00, 369.00, 230.00, 359.00, 300, 20, 18, 'BD-B9-PK', 20, 1, NOW(), 1, NOW(), 1),
-(@spu_band9, '星耀 Band 9 · 深海蓝', '颜色:深海蓝', '{"颜色":"深海蓝"}', 379.00, 399.00, 250.00, 389.00, 250, 20, 18, 'BD-B9-BL', 30, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_band9, '星耀 Band 9 · 午夜黑', '颜色:午夜黑', '{"颜色":"午夜黑"}', 329.00, 349.00, 220.00, 400, 20, 18, 'BD-B9-BK', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_band9, '星耀 Band 9 · 星云粉', '颜色:星云粉', '{"颜色":"星云粉"}', 349.00, 369.00, 230.00, 300, 20, 18, 'BD-B9-PK', 20, 1, NOW(), 1, NOW(), 1),
+(@spu_band9, '星耀 Band 9 · 深海蓝', '颜色:深海蓝', '{"颜色":"深海蓝"}', 379.00, 399.00, 250.00, 250, 20, 18, 'BD-B9-BL', 30, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 3, total_stock = 950 WHERE id = @spu_band9;
 
@@ -788,9 +788,9 @@ A: ANC 降噪通过产生反向声波抵消噪音，对耳朵没有伤害。长�
 
 SET @spu_buds3 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_buds3, '星耀 Buds Pro 3 · 陶瓷白', '颜色:陶瓷白', '{"颜色":"陶瓷白"}', 1299.00, 1399.00, 950.00, 1349.00, 200, 10, 52, 'BD-BP3-WH', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_buds3, '星耀 Buds Pro 3 · 石墨黑', '颜色:石墨黑', '{"颜色":"石墨黑"}', 1499.00, 1599.00, 1100.00, 1549.00, 150, 10, 52, 'BD-BP3-BK', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_buds3, '星耀 Buds Pro 3 · 陶瓷白', '颜色:陶瓷白', '{"颜色":"陶瓷白"}', 1299.00, 1399.00, 950.00, 200, 10, 52, 'BD-BP3-WH', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_buds3, '星耀 Buds Pro 3 · 石墨黑', '颜色:石墨黑', '{"颜色":"石墨黑"}', 1499.00, 1599.00, 1100.00, 150, 10, 52, 'BD-BP3-BK', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 350 WHERE id = @spu_buds3;
 
@@ -840,8 +840,8 @@ A: 120Hz 高刷新率 + 低延迟显示，大多数用户不会感到不适。�
 
 SET @spu_glass = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_glass, '星耀 AR Glasses Air · 墨镜灰', '颜色:墨镜灰', '{"颜色":"墨镜灰"}', 2799.00, 2999.00, 2100.00, 2899.00, 100, 5, 49, 'GL-AR-GY', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_glass, '星耀 AR Glasses Air · 墨镜灰', '颜色:墨镜灰', '{"颜色":"墨镜灰"}', 2799.00, 2999.00, 2100.00, 100, 5, 49, 'GL-AR-GY', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 100 WHERE id = @spu_glass;
 
@@ -890,8 +890,8 @@ A: IP68 防水，可以戴着洗手、游泳。但潜水和热水浴不建议。
 
 SET @spu_ring = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_ring, '星耀 SmartRing Nova · 钛金原色', '颜色:钛金原色', '{"颜色":"钛金原色"}', 999.00, 1199.00, 750.00, 1099.00, 300, 15, 3, 'RG-NOVA-TI', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_ring, '星耀 SmartRing Nova · 钛金原色', '颜色:钛金原色', '{"颜色":"钛金原色"}', 999.00, 1199.00, 750.00, 300, 15, 3, 'RG-NOVA-TI', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 300 WHERE id = @spu_ring;
 
@@ -950,9 +950,9 @@ A: 停电 4 小时内不要开门，食物可保持新鲜。超过 4 小时建�
 
 SET @spu_fridge500 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_fridge500, '极净 FreshBox 500 · 星云灰', '颜色:星云灰', '{"颜色":"星云灰"}', 4599.00, 4999.00, 3600.00, 4799.00, 150, 10, 88000, 'RF-FB500-GY', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_fridge500, '极净 FreshBox 500 · 珍珠白', '颜色:珍珠白', '{"颜色":"珍珠白"}', 5599.00, 5999.00, 4400.00, 5799.00, 100, 10, 88000, 'RF-FB500-WH', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_fridge500, '极净 FreshBox 500 · 星云灰', '颜色:星云灰', '{"颜色":"星云灰"}', 4599.00, 4999.00, 3600.00, 150, 10, 88000, 'RF-FB500-GY', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_fridge500, '极净 FreshBox 500 · 珍珠白', '颜色:珍珠白', '{"颜色":"珍珠白"}', 5599.00, 5999.00, 4400.00, 100, 10, 88000, 'RF-FB500-WH', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 250 WHERE id = @spu_fridge500;
 
@@ -997,9 +997,9 @@ A: 门搁架可以放 2L 可乐瓶，冷藏室层板可以放下 12 罐易拉罐
 
 SET @spu_minibar = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_minibar, '极净 MiniBar 120 · 白色', '颜色:白色', '{"颜色":"白色"}', 999.00, 1099.00, 750.00, 1049.00, 400, 20, 28000, 'RF-MB120-WH', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_minibar, '极净 MiniBar 120 · 薄荷绿', '颜色:薄荷绿', '{"颜色":"薄荷绿"}', 1299.00, 1399.00, 980.00, 1349.00, 300, 20, 28000, 'RF-MB120-GN', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_minibar, '极净 MiniBar 120 · 白色', '颜色:白色', '{"颜色":"白色"}', 999.00, 1099.00, 750.00, 400, 20, 28000, 'RF-MB120-WH', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_minibar, '极净 MiniBar 120 · 薄荷绿', '颜色:薄荷绿', '{"颜色":"薄荷绿"}', 1299.00, 1399.00, 980.00, 300, 20, 28000, 'RF-MB120-GN', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 700 WHERE id = @spu_minibar;
 
@@ -1045,8 +1045,8 @@ A: 建议每月清洗一次水箱和冰格。长时间不用时清空水箱，�
 
 SET @spu_coolpro = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_coolpro, '极净 CoolPro 650 · 星岩灰', '颜色:星岩灰', '{"颜色":"星岩灰"}', 8999.00, 9999.00, 7200.00, 9499.00, 100, 5, 115000, 'RF-CP650-GY', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_coolpro, '极净 CoolPro 650 · 星岩灰', '颜色:星岩灰', '{"颜色":"星岩灰"}', 8999.00, 9999.00, 7200.00, 100, 5, 115000, 'RF-CP650-GY', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 100 WHERE id = @spu_coolpro;
 
@@ -1090,8 +1090,8 @@ A: 香蕉、芒果等热带水果不宜冷藏（会冻伤发黑）。巧克力�
 
 SET @spu_icebar = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_icebar, '极净 IceBar 200 · 典雅黑', '颜色:典雅黑', '{"颜色":"典雅黑"}', 3299.00, 3699.00, 2500.00, 3499.00, 150, 10, 52000, 'RF-IB200-BK', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_icebar, '极净 IceBar 200 · 典雅黑', '颜色:典雅黑', '{"颜色":"典雅黑"}', 3299.00, 3699.00, 2500.00, 150, 10, 52000, 'RF-IB200-BK', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 150 WHERE id = @spu_icebar;
 
@@ -1145,9 +1145,9 @@ A: 采用喷气增焓压缩机，-20°C 环境仍可正常制热，无需电辅�
 
 SET @spu_freshair = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_freshair, '御风 FreshAir Pro · 1.5匹 · 皓月白', '匹数:1.5匹;颜色:皓月白', '{"匹数":"1.5匹","颜色":"皓月白"}', 3999.00, 4299.00, 3000.00, 4199.00, 250, 10, 32000, 'AC-FAP-15-WH', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_freshair, '御风 FreshAir Pro · 1.5匹 · 星空灰', '匹数:1.5匹;颜色:星空灰', '{"匹数":"1.5匹","颜色":"星空灰"}', 4699.00, 4999.00, 3500.00, 4899.00, 150, 10, 32000, 'AC-FAP-15-GY', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_freshair, '御风 FreshAir Pro · 1.5匹 · 皓月白', '匹数:1.5匹;颜色:皓月白', '{"匹数":"1.5匹","颜色":"皓月白"}', 3999.00, 4299.00, 3000.00, 250, 10, 32000, 'AC-FAP-15-WH', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_freshair, '御风 FreshAir Pro · 1.5匹 · 星空灰', '匹数:1.5匹;颜色:星空灰', '{"匹数":"1.5匹","颜色":"星空灰"}', 4699.00, 4999.00, 3500.00, 150, 10, 32000, 'AC-FAP-15-GY', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 400 WHERE id = @spu_freshair;
 
@@ -1195,9 +1195,9 @@ A: 不需要。移动空调整体密封，冷媒在出厂时已充好，终身�
 
 SET @spu_coolmate = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_coolmate, '御风 CoolMate · 1匹 · 白色 · 单冷', '匹数:1匹;颜色:白色;类型:单冷', '{"匹数":"1匹","颜色":"白色","类型":"单冷"}', 1599.00, 1799.00, 1200.00, 1699.00, 300, 15, 26000, 'AC-CM-10-CL-WH', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_coolmate, '御风 CoolMate · 1匹 · 白色 · 冷暖', '匹数:1匹;颜色:白色;类型:冷暖', '{"匹数":"1匹","颜色":"白色","类型":"冷暖"}', 1899.00, 2099.00, 1450.00, 1999.00, 200, 15, 26000, 'AC-CM-10-HT-WH', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_coolmate, '御风 CoolMate · 1匹 · 白色 · 单冷', '匹数:1匹;颜色:白色;类型:单冷', '{"匹数":"1匹","颜色":"白色","类型":"单冷"}', 1599.00, 1799.00, 1200.00, 300, 15, 26000, 'AC-CM-10-CL-WH', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_coolmate, '御风 CoolMate · 1匹 · 白色 · 冷暖', '匹数:1匹;颜色:白色;类型:冷暖', '{"匹数":"1匹","颜色":"白色","类型":"冷暖"}', 1899.00, 2099.00, 1450.00, 200, 15, 26000, 'AC-CM-10-HT-WH', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 500 WHERE id = @spu_coolmate;
 
@@ -1241,9 +1241,9 @@ A: 柜机风量大、送风范围广，适合客厅。挂机省空间、价格�
 
 SET @spu_eco3 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_eco3, '御风 EcoSilence · 3匹 · 珍珠白', '匹数:3匹;颜色:珍珠白', '{"匹数":"3匹","颜色":"珍珠白"}', 6999.00, 7499.00, 5200.00, 7299.00, 100, 5, 52000, 'AC-ES3-WH', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_eco3, '御风 EcoSilence · 3匹 · 香槟金', '匹数:3匹;颜色:香槟金', '{"匹数":"3匹","颜色":"香槟金"}', 7699.00, 8199.00, 5800.00, 7999.00, 60, 5, 52000, 'AC-ES3-GD', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_eco3, '御风 EcoSilence · 3匹 · 珍珠白', '匹数:3匹;颜色:珍珠白', '{"匹数":"3匹","颜色":"珍珠白"}', 6999.00, 7499.00, 5200.00, 100, 5, 52000, 'AC-ES3-WH', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_eco3, '御风 EcoSilence · 3匹 · 香槟金', '匹数:3匹;颜色:香槟金', '{"匹数":"3匹","颜色":"香槟金"}', 7699.00, 8199.00, 5800.00, 60, 5, 52000, 'AC-ES3-GD', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 160 WHERE id = @spu_eco3;
 
@@ -1286,8 +1286,8 @@ A: 如果客厅 25-30m²，2 匹挂机够用且更省空间。但柜机送风范
 
 SET @spu_smartcool = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_smartcool, '御风 SmartCool · 2匹 · 皓月白', '匹数:2匹;颜色:皓月白', '{"匹数":"2匹","颜色":"皓月白"}', 4599.00, 4899.00, 3500.00, 4799.00, 300, 15, 28000, 'AC-SC2-WH', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_smartcool, '御风 SmartCool · 2匹 · 皓月白', '匹数:2匹;颜色:皓月白', '{"匹数":"2匹","颜色":"皓月白"}', 4599.00, 4899.00, 3500.00, 300, 15, 28000, 'AC-SC2-WH', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 300 WHERE id = @spu_smartcool;
 
@@ -1347,9 +1347,9 @@ A: 85 寸重量约 42kg。建议挂墙（需承重墙+专业支架），更安�
 
 SET @spu_tv85 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_tv85, '逸彩 85 寸 QD-OLED · 标准版', '版本:标准版', '{"版本":"标准版"}', 24999.00, 26999.00, 20000.00, 25999.00, 30, 3, 42000, 'TV-85OLED-STD', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_tv85, '逸彩 85 寸 QD-OLED · 壁挂套装(含安装)', '版本:壁挂套装(含安装)', '{"版本":"壁挂套装(含安装)"}', 27999.00, 29999.00, 22400.00, 28999.00, 20, 3, 42000, 'TV-85OLED-WALL', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_tv85, '逸彩 85 寸 QD-OLED · 标准版', '版本:标准版', '{"版本":"标准版"}', 24999.00, 26999.00, 20000.00, 30, 3, 42000, 'TV-85OLED-STD', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_tv85, '逸彩 85 寸 QD-OLED · 壁挂套装(含安装)', '版本:壁挂套装(含安装)', '{"版本":"壁挂套装(含安装)"}', 27999.00, 29999.00, 22400.00, 20, 3, 42000, 'TV-85OLED-WALL', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 50 WHERE id = @spu_tv85;
 
@@ -1395,9 +1395,9 @@ A: VA 对比度高（黑色更深沉），但可视角度比 IPS 窄。如果你
 
 SET @spu_tv50 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_tv50, '逸彩 50 寸 QLED 游戏电视 · 标准版', '版本:标准版', '{"版本":"标准版"}', 3999.00, 4499.00, 3100.00, 4299.00, 200, 10, 14000, 'TV-50QLED-STD', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_tv50, '逸彩 50 寸 QLED 游戏电视 · 游戏套装(含支架)', '版本:游戏套装(含支架)', '{"版本":"游戏套装(含支架)"}', 4999.00, 5499.00, 3900.00, 5299.00, 100, 10, 14000, 'TV-50QLED-GK', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_tv50, '逸彩 50 寸 QLED 游戏电视 · 标准版', '版本:标准版', '{"版本":"标准版"}', 3999.00, 4499.00, 3100.00, 200, 10, 14000, 'TV-50QLED-STD', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_tv50, '逸彩 50 寸 QLED 游戏电视 · 游戏套装(含支架)', '版本:游戏套装(含支架)', '{"版本":"游戏套装(含支架)"}', 4999.00, 5499.00, 3900.00, 100, 10, 14000, 'TV-50QLED-GK', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 300 WHERE id = @spu_tv50;
 
@@ -1442,8 +1442,8 @@ A: 可以。内置应用商店，支持安装爱奇艺、腾讯视频、B站、K
 
 SET @spu_tv43 = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_tv43, '逸彩 43 寸 FHD · 黑色', '颜色:黑色', '{"颜色":"黑色"}', 1299.00, 1499.00, 950.00, 1399.00, 600, 30, 7000, 'TV-43FHD-BK', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_tv43, '逸彩 43 寸 FHD · 黑色', '颜色:黑色', '{"颜色":"黑色"}', 1299.00, 1499.00, 950.00, 600, 30, 7000, 'TV-43FHD-BK', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 600 WHERE id = @spu_tv43;
 
@@ -1492,8 +1492,8 @@ A: 单个模块可独立更换，无需更换整屏。模块享有 5 年质保�
 
 SET @spu_thewall = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_thewall, '逸彩 The Wall 120寸 · 标准套装（含安装）', '规格:120寸标准套装（含安装）', '{"规格":"120寸标准套装（含安装）"}', 499999.00, 599999.00, 350000.00, 549999.00, 5, 1, 250000, 'TV-TW120-STD', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_thewall, '逸彩 The Wall 120寸 · 标准套装（含安装）', '规格:120寸标准套装（含安装）', '{"规格":"120寸标准套装（含安装）"}', 499999.00, 599999.00, 350000.00, 5, 1, 250000, 'TV-TW120-STD', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 5 WHERE id = @spu_thewall;
 
@@ -1542,8 +1542,8 @@ A: 建议用纯净水或蒸馏水。自来水水垢会堵塞蒸汽孔，影响�
 
 SET @spu_steamer = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_steamer, '极净 SteamPro · 抹茶绿', '颜色:抹茶绿', '{"颜色":"抹茶绿"}', 259.00, 299.00, 180.00, 279.00, 800, 30, 850, 'HA-STM-GN', 10, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_steamer, '极净 SteamPro · 抹茶绿', '颜色:抹茶绿', '{"颜色":"抹茶绿"}', 259.00, 299.00, 180.00, 800, 30, 850, 'HA-STM-GN', 10, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 1, total_stock = 800 WHERE id = @spu_steamer;
 
@@ -1592,9 +1592,9 @@ A: 不需要。开机即用，比烤箱快 3-5 倍。',
 
 SET @spu_airfry = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_airfry, '极净 HeatChef · 象牙白', '颜色:象牙白', '{"颜色":"象牙白"}', 399.00, 449.00, 280.00, 429.00, 500, 25, 4800, 'HA-AF5-WH', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_airfry, '极净 HeatChef · 墨岩黑', '颜色:墨岩黑', '{"颜色":"墨岩黑"}', 499.00, 549.00, 350.00, 529.00, 300, 25, 4800, 'HA-AF5-BK', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_airfry, '极净 HeatChef · 象牙白', '颜色:象牙白', '{"颜色":"象牙白"}', 399.00, 449.00, 280.00, 500, 25, 4800, 'HA-AF5-WH', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_airfry, '极净 HeatChef · 墨岩黑', '颜色:墨岩黑', '{"颜色":"墨岩黑"}', 499.00, 549.00, 350.00, 300, 25, 4800, 'HA-AF5-BK', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 800 WHERE id = @spu_airfry;
 
@@ -1642,9 +1642,9 @@ A: 只要定期清洁、使用纯净水，加湿器是安全的。问题通常�
 
 SET @spu_humid = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_humid, '极净 AquaBloom · 暖白色', '颜色:暖白色', '{"颜色":"暖白色"}', 299.00, 329.00, 200.00, 319.00, 400, 20, 1800, 'HA-AQM-WH', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_humid, '极净 AquaBloom · 雾蓝色', '颜色:雾蓝色', '{"颜色":"雾蓝色"}', 359.00, 389.00, 240.00, 379.00, 200, 20, 1800, 'HA-AQM-BL', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_humid, '极净 AquaBloom · 暖白色', '颜色:暖白色', '{"颜色":"暖白色"}', 299.00, 329.00, 200.00, 400, 20, 1800, 'HA-AQM-WH', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_humid, '极净 AquaBloom · 雾蓝色', '颜色:雾蓝色', '{"颜色":"雾蓝色"}', 359.00, 389.00, 240.00, 200, 20, 1800, 'HA-AQM-BL', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 600 WHERE id = @spu_humid;
 
@@ -1693,9 +1693,9 @@ A: 机器人噪音较低，大多数猫狗会好奇但不会害怕。建议前�
 
 SET @spu_cleanbot = LAST_INSERT_ID();
 
-INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, market_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
-(@spu_cleanbot, '极净 CleanBot S1 · 标准版', '版本:标准版', '{"版本":"标准版"}', 3299.00, 3699.00, 2500.00, 3499.00, 300, 15, 4200, 'HA-CBS1-STD', 10, 1, NOW(), 1, NOW(), 1),
-(@spu_cleanbot, '极净 CleanBot S1 · 全能版（含自动集尘+上下水）', '版本:全能版（含自动集尘+上下水）', '{"版本":"全能版（含自动集尘+上下水）"}', 4299.00, 4799.00, 3300.00, 4599.00, 150, 15, 8200, 'HA-CBS1-ULT', 20, 1, NOW(), 1, NOW(), 1);
+INSERT INTO stellar_sku (spu_id, name, specs, specs_json, price, original_price, cost_price, stock, warn_stock, weight_g, barcode, sort, status, create_time, create_user, update_time, update_user) VALUES
+(@spu_cleanbot, '极净 CleanBot S1 · 标准版', '版本:标准版', '{"版本":"标准版"}', 3299.00, 3699.00, 2500.00, 300, 15, 4200, 'HA-CBS1-STD', 10, 1, NOW(), 1, NOW(), 1),
+(@spu_cleanbot, '极净 CleanBot S1 · 全能版（含自动集尘+上下水）', '版本:全能版（含自动集尘+上下水）', '{"版本":"全能版（含自动集尘+上下水）"}', 4299.00, 4799.00, 3300.00, 150, 15, 8200, 'HA-CBS1-ULT', 20, 1, NOW(), 1, NOW(), 1);
 
 UPDATE stellar_spu SET sku_count = 2, total_stock = 450 WHERE id = @spu_cleanbot;
 
