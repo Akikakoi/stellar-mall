@@ -49,6 +49,7 @@ public class PointsServiceImpl implements PointsService {
     private final PointsPaymentMapper pointsPaymentMapper;
     private final MallOrderMapper mallOrderMapper;
     private final UserMessageService userMessageService;
+    private final AddressMapper addressMapper;
 
     /** 积分默认过期天数 */
     private static final int POINTS_EXPIRE_DAYS = 365;
@@ -631,6 +632,13 @@ public class PointsServiceImpl implements PointsService {
         }
         if (product.getStock() <= 0) {
             throw new BaseException("该商品已兑完");
+        }
+        // 实物类商品必须校验收货地址归属，防止填他人地址收货
+        if (!"COUPON".equals(product.getProductType()) && dto.getAddressId() != null) {
+            com.stellar.entity.Address addr = addressMapper.getById(dto.getAddressId(), userId);
+            if (addr == null) {
+                throw new BaseException("收货地址不存在或无权限使用");
+            }
         }
 
         // 检查积分是否足够

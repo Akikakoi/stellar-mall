@@ -22,7 +22,7 @@ public interface UserMessageMapper {
 
     long countUnread(@Param("userId") Long userId);
 
-    int markAsRead(@Param("id") Long id);
+    int markAsRead(@Param("userId") Long userId, @Param("id") Long id);
 
     int markAllAsRead(@Param("userId") Long userId);
 }

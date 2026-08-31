@@ -76,12 +76,14 @@ public class UserMessageServiceImpl implements UserMessageService {
 
     /**
      * 将指定消息标记为已读。
+     * <p>按 userId + id 双条件更新，消息不属于当前用户时 rows=0 静默跳过，防止横向越权。</p>
      *
-     * @param id 消息ID
+     * @param userId 当前登录用户ID
+     * @param id     消息ID
      */
     @Override
-    public void markAsRead(Long id) {
-        userMessageMapper.markAsRead(id);
+    public void markAsRead(Long userId, Long id) {
+        userMessageMapper.markAsRead(userId, id);
     }
 
     /**

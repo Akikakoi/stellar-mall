@@ -47,7 +47,7 @@
 
     <!-- 单条标记已读 -->
     <update id="markAsRead">
-        UPDATE stellar_user_message SET is_read = 1 WHERE id = #{id}
+        UPDATE stellar_user_message SET is_read = 1 WHERE id = #{id} AND user_id = #{userId}
     </update>
 
     <!-- 全部标记已读（一键已读） -->
