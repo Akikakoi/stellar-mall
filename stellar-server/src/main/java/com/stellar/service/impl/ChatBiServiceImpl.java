@@ -58,6 +58,27 @@ public class ChatBiServiceImpl implements ChatBiService {
     private static final Pattern TABLE_REF = Pattern.compile(
             "\\b(from|join)\\s+([a-zA-Z_][a-zA-Z0-9_]*)", Pattern.CASE_INSENSITIVE);
 
+    /** 提取 SELECT 子句中的标识符（列名/函数名/表别名），用于列名黑名单校验 */
+    private static final Pattern SELECT_IDENTIFIER = Pattern.compile(
+            "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\b", Pattern.CASE_INSENSITIVE);
+
+    /** SQL 关键字 / 聚合函数 / 常用函数名（出现时跳过，不作为列名判定） */
+    private static final Set<String> SQL_KEYWORDS = new HashSet<>(Arrays.asList(
+            "select", "from", "where", "group", "order", "by", "limit", "as", "and", "or", "not",
+            "null", "is", "in", "like", "between", "distinct", "on", "join", "left", "right", "inner",
+            "outer", "count", "sum", "avg", "min", "max", "date", "year", "month", "day", "if",
+            "case", "when", "then", "else", "end", "coalesce", "round", "cast", "concat", "left_str",
+            "right_str",             "substring", "substr", "now", "current_date", "current_timestamp", "datediff",
+            "timestampdiff", "abs", "floor", "ceil", "length", "char_length", "replace", "trim",
+            "upper", "lower", "desc", "asc", "having", "true", "false"
+    ));
+
+    /** 敏感列黑名单：LLM 生成的 SQL 不得 SELECT 这些列（手机号/密码哈希/身份证等） */
+    private static final Set<String> SENSITIVE_COLUMNS = new HashSet<>(Arrays.asList(
+            "phone", "password", "password_hash", "id_number", "email", "avatar",
+            "access_token", "refresh_token", "token", "secret", "id_card", "address_detail"
+    ));
+
     private static final Pattern SELECT_HEAD = Pattern.compile("^\\s*select\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern HAS_LIMIT = Pattern.compile("\\blimit\\s+\\d+", Pattern.CASE_INSENSITIVE);
 
@@ -185,6 +206,18 @@ public class ChatBiServiceImpl implements ChatBiService {
                 throw new RuntimeException("AI 生成的 SQL 引用了未授权的表「" + table + "」，已拒绝执行");
             }
         }
+        // 列名黑名单：SELECT 子句中不得出现手机号/密码哈希/身份证等敏感列
+        String selectClause = extractSelectClause(sql);
+        if (selectClause != null) {
+            Matcher colMatcher = SELECT_IDENTIFIER.matcher(selectClause);
+            while (colMatcher.find()) {
+                String token = colMatcher.group(1).toLowerCase(Locale.ROOT);
+                if (SQL_KEYWORDS.contains(token)) continue;
+                if (SENSITIVE_COLUMNS.contains(token)) {
+                    throw new RuntimeException("AI 生成的 SQL 查询了敏感字段「" + token + "」，已拒绝执行");
+                }
+            }
+        }
         // 自动补 LIMIT（maxRows 兜底限制行数，这里保证返回语义可控）
         if (!HAS_LIMIT.matcher(sql).find()) {
             sql = sql + " LIMIT " + MAX_ROWS;
@@ -214,5 +247,14 @@ public class ChatBiServiceImpl implements ChatBiService {
         } catch (Exception e) {
             throw new RuntimeException("查询结果序列化失败", e);
         }
+    }
+
+    /** 提取 SELECT 与 FROM 之间的列表达式子串（不含表别名点前缀），无 FROM 时返回 null。 */
+    private static String extractSelectClause(String sql) {
+        int fromIdx = sql.toLowerCase(Locale.ROOT).indexOf(" from ");
+        if (fromIdx < 0) return null;
+        int selEnd = sql.toLowerCase(Locale.ROOT).indexOf("select") + 6;
+        if (selEnd >= fromIdx) return null;
+        return sql.substring(selEnd, fromIdx);
     }
 }
