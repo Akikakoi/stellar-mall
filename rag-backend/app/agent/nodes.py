@@ -9,7 +9,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, Tool
 from app.config import settings
 from app.core.logger import logger
 from app.rag.llm import get_langchain_chat
-from app.rag.llm_cache import get_cache_sync, put_cache_sync, INTENT_PROMPT_HASH, AGENT_PROMPT_HASH
+from app.rag.llm_cache import get_cache_sync, put_cache_sync, single_flight_sync, INTENT_PROMPT_HASH, AGENT_PROMPT_HASH
 from app.agent.state import AgentState
 from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT
 from app.agent.tools import (
@@ -245,54 +245,60 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
             "intent_confidence": cached.get("tokens_used", 90) / 100.0,
         }
 
-    llm = get_langchain_chat()
-    prompt = INTENT_CLASSIFICATION_PROMPT.format(
-        history=history_text,
-        query=query,
-    )
+    def _intent_produce():
+        llm = get_langchain_chat()
+        prompt = INTENT_CLASSIFICATION_PROMPT.format(
+            history=history_text,
+            query=query,
+        )
 
-    try:
-        resp = llm.invoke([SystemMessage(content="你是一个严格的JSON输出助手。"),
-                           HumanMessage(content=prompt)])
-        content = resp.content if hasattr(resp, "content") else str(resp)
-        content = content.strip()
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.endswith("```"):
-            content = content[:-3]
-        content = content.strip()
+        try:
+            resp = llm.invoke([SystemMessage(content="你是一个严格的JSON输出助手。"),
+                               HumanMessage(content=prompt)])
+            content = resp.content if hasattr(resp, "content") else str(resp)
+            content = content.strip()
+            if content.startswith("```json"):
+                content = content[7:]
+            if content.endswith("```"):
+                content = content[:-3]
+            content = content.strip()
 
-        result = json.loads(content)
-        intent = result.get("intent", "other")
-        confidence = float(result.get("confidence", 0.5))
+            result = json.loads(content)
+            intent = result.get("intent", "other")
+            confidence = float(result.get("confidence", 0.5))
 
-        logger.info(f"[Intent] query={query[:30]}... -> intent={intent} conf={confidence:.2f}")
+            logger.info(f"[Intent] query={query[:30]}... -> intent={intent} conf={confidence:.2f}")
 
-        # === 异步写入缓存（同样跳过短回答 + 有历史的场景） ===
-        if use_cache:
-            try:
-                put_cache_sync(
-                    query=query,
-                    model=settings.LLM_MODEL_NAME,
-                    temperature=settings.LLM_TEMPERATURE,
-                    system_prompt_hash=INTENT_PROMPT_HASH,
-                    context_hash=None,
-                    answer=json.dumps(result, ensure_ascii=False),
-                    sources=[],
-                    intent=intent,
-                    tokens_used=int(confidence * 100),
-                    cache_type="intent",
-                )
-            except Exception:
-                pass
+            # === 异步写入缓存（同样跳过短回答 + 有历史的场景） ===
+            if use_cache:
+                try:
+                    put_cache_sync(
+                        query=query,
+                        model=settings.LLM_MODEL_NAME,
+                        temperature=settings.LLM_TEMPERATURE,
+                        system_prompt_hash=INTENT_PROMPT_HASH,
+                        context_hash=None,
+                        answer=json.dumps(result, ensure_ascii=False),
+                        sources=[],
+                        intent=intent,
+                        tokens_used=int(confidence * 100),
+                        cache_type="intent",
+                    )
+                except Exception:
+                    pass
 
-        return {
-            "intent": intent,
-            "intent_confidence": confidence,
-        }
-    except Exception as e:
-        logger.warning(f"意图识别失败，默认 other: {e}")
-        return {"intent": "other", "intent_confidence": 0.0}
+            return {
+                "intent": intent,
+                "intent_confidence": confidence,
+            }
+        except Exception as e:
+            logger.warning(f"意图识别失败，默认 other: {e}")
+            return {"intent": "other", "intent_confidence": 0.0}
+
+    if use_cache:
+        # 缓存击穿防护：并发相同 query 的 miss 只触发一次 LLM，其余复用其结果
+        return single_flight_sync(f"llm:sf:intent|{query}", _intent_produce)
+    return _intent_produce()
 
 
 def check_params_node(state: AgentState) -> Dict[str, Any]:
@@ -326,7 +332,7 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
     )
     if should_check_spec and not kb_override:
         spec_comparison_patterns = [
-            r'(哪[一款个]|哪种|哪一[款种]|哪个).*(充电|功率|瓦|[0-9]+W|电池|续航|屏幕|拍照|��素|内存|存储|处理器|芯片|参数|配置|规格|价格|最便宜|最贵)',
+            r'(哪[一款个]|哪种|哪一[款种]|哪个).*(充电|功率|瓦|[0-9]+W|电池|续航|屏幕|拍照|像素|内存|存储|处理器|芯片|参数|配置|规格|价格|最便宜|最贵)',
             r'(充电|功率|瓦|电池|续航|屏幕|拍照|像素|内存|存储|处理器|芯片|参数|配置|规格).*(比较|对比|哪[一款个]|哪个|最好|最高|最快|最强|最大|最小|最便宜|最贵)',
             r'.*(哪[一款个]).*(哪[一款个]).*',
             r'(一共|总共|到底)?有几[款个种台].*',
@@ -1002,45 +1008,46 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
             "sources": cached.get("sources", []),
         }
 
-    llm = get_langchain_chat()
+    def _produce_answer():
+        llm = get_langchain_chat()
 
-    context = _build_tool_context(tool_result, intent)
+        context = _build_tool_context(tool_result, intent)
 
-    sys_msg = SystemMessage(content=AGENT_SYSTEM_PROMPT)
-    # 根据不同意图定制回答提示
-    extra_hints = ""
-    if intent == "product_search":
-        extra_hints = (
-            "- 如果工具结果中包含「知识库中相关商品的规格参数」，务必结合这些数据回答比较/筛选/推荐类问题\n"
-            "- 比较时用表格或列表展示各款商品的关键差异，重点突出用户关心的维度\n"
-        )
-
-    # 防幻觉：商品名称必须严格使用工具返回的真实名称
-    anti_hallucination = (
-        "【防幻觉强约束 — 违反任何一条都是严重错误】\n"
-        "- 回答中所有数字（功率、容量、价格、尺寸等）必须**严格等于**工具返回的数值，不得修改哪怕 1 个数字\n"
-        "- 如果用户问「有没有 200W 快充」但工具返回的数据里没有任何产品标注 200W，只能回答「没有，最高 XXW」\n"
-        "- 商品名称必须与工具返回 100% 一致，禁止近音字替换\n"
-        "- 不存在的数据写「暂无」，禁止编造\n"
-    )
-
-    # 硬数据校验：如果用户问的规格数值在上下文中不存在，直接注入警告
-    import re as _re
-    user_nums = set()
-    for m in _re.finditer(r'(\d+)\s*W', query):
-        user_nums.add(int(m.group(1)))
-    if user_nums:
-        # 搜索整个上下文（不是只搜 sources 的 content，也搜 product_count/product_names 等元信息）
-        context_str = context + " " + str(tool_result.get("product_names", []))
-        context_nums = set(int(n) for n in _re.findall(r'(\d+)\s*W', context_str))
-        missing_nums = user_nums - context_nums
-        if missing_nums:
-            context = (
-                f"⚠️ 注意：以下数据中**没有任何产品标注 {', '.join(f'{n}W' for n in sorted(missing_nums))} 快充**。"
-                f"如果你在数据中确实没有找到该规格，请如实告知用户，不要编造。\n\n{context}"
+        sys_msg = SystemMessage(content=AGENT_SYSTEM_PROMPT)
+        # 根据不同意图定制回答提示
+        extra_hints = ""
+        if intent == "product_search":
+            extra_hints = (
+                "- 如果工具结果中包含「知识库中相关商品的规格参数」，务必结合这些数据回答比较/筛选/推荐类问题\n"
+                "- 比较时用表格或列表展示各款商品的关键差异，重点突出用户关心的维度\n"
             )
 
-    user_msg = HumanMessage(content=f"""用户问题：{query}
+        # 防幻觉：商品名称必须严格使用工具返回的真实名称
+        anti_hallucination = (
+            "【防幻觉强约束 — 违反任何一条都是严重错误】\n"
+            "- 回答中所有数字（功率、容量、价格、尺寸等）必须**严格等于**工具返回的数值，不得修改哪怕 1 个数字\n"
+            "- 如果用户问「有没有 200W 快充」但工具返回的数据里没有任何产品标注 200W，只能回答「没有，最高 XXW」\n"
+            "- 商品名称必须与工具返回 100% 一致，禁止近音字替换\n"
+            "- 不存在的数据写「暂无」，禁止编造\n"
+        )
+
+        # 硬数据校验：如果用户问的规格数值在上下文中不存在，直接注入警告
+        import re as _re
+        user_nums = set()
+        for m in _re.finditer(r'(\d+)\s*W', query):
+            user_nums.add(int(m.group(1)))
+        if user_nums:
+            # 搜索整个上下文（不是只搜 sources 的 content，也搜 product_count/product_names 等元信息）
+            context_str = context + " " + str(tool_result.get("product_names", []))
+            context_nums = set(int(n) for n in _re.findall(r'(\d+)\s*W', context_str))
+            missing_nums = user_nums - context_nums
+            if missing_nums:
+                context = (
+                    f"⚠️ 注意：以下数据中**没有任何产品标注 {', '.join(f'{n}W' for n in sorted(missing_nums))} 快充**。"
+                    f"如果你在数据中确实没有找到该规格，请如实告知用户，不要编造。\n\n{context}"
+                )
+
+        user_msg = HumanMessage(content=f"""用户问题：{query}
 
 工具返回结果：
 {context}
@@ -1055,42 +1062,48 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
 {extra_hints}
 {anti_hallucination}""")
 
-    try:
-        answer_chunks = []
-        for chunk in llm.stream([sys_msg, user_msg]):
-            txt = chunk.content if hasattr(chunk, "content") else str(chunk)
-            if txt:
-                answer_chunks.append(str(txt))
-
-        full_answer = "".join(answer_chunks)
-
-        # === 异步写入缓存 ===
         try:
-            # 提取商品 ID
-            product_ids = _extract_product_ids(tool_result)
-            put_cache_sync(
-                query=query,
-                model=settings.LLM_MODEL_NAME,
-                temperature=settings.LLM_TEMPERATURE,
-                system_prompt_hash=AGENT_PROMPT_HASH,
-                context_hash=context_hash,
-                answer=full_answer,
-                sources=state.get("sources", []),
-                intent=intent,
-                tokens_used=len(full_answer),
-                product_ids=product_ids,
-                cache_type="answer",
-            )
-        except Exception:
-            pass
+            answer_chunks = []
+            for chunk in llm.stream([sys_msg, user_msg]):
+                txt = chunk.content if hasattr(chunk, "content") else str(chunk)
+                if txt:
+                    answer_chunks.append(str(txt))
 
-        return {
-            "final_answer": full_answer,
-            "stream_chunks": answer_chunks,
-        }
-    except Exception as e:
-        logger.error(f"生成回答失败: {e}")
-        return {"final_answer": "抱歉，系统暂时无法处理您的请求，请稍后重试。"}
+            full_answer = "".join(answer_chunks)
+
+            # === 异步写入缓存 ===
+            try:
+                # 提取商品 ID
+                product_ids = _extract_product_ids(tool_result)
+                put_cache_sync(
+                    query=query,
+                    model=settings.LLM_MODEL_NAME,
+                    temperature=settings.LLM_TEMPERATURE,
+                    system_prompt_hash=AGENT_PROMPT_HASH,
+                    context_hash=context_hash,
+                    answer=full_answer,
+                    sources=state.get("sources", []),
+                    intent=intent,
+                    tokens_used=len(full_answer),
+                    product_ids=product_ids,
+                    cache_type="answer",
+                )
+            except Exception:
+                pass
+
+            return {
+                "final_answer": full_answer,
+                "stream_chunks": answer_chunks,
+            }
+        except Exception as e:
+            logger.error(f"生成回答失败: {e}")
+            return {"final_answer": "抱歉，系统暂时无法处理您的请求，请稍后重试。"}
+
+    # 缓存击穿防护：并发相同 query+context 的 miss 只触发一次 LLM，其余复用其结果
+    return single_flight_sync(
+        f"llm:sf:answer|{query}|{context_hash}|{intent}",
+        _produce_answer,
+    )
 
 
 def _handle_small_talk(state: AgentState) -> Dict[str, Any]:

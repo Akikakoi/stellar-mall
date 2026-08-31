@@ -150,6 +150,13 @@ class Settings(BaseSettings):
     LLM_CACHE_SEMANTIC_K: int = 5                 # 召回候选数
     # 监控
     LLM_CACHE_METRICS_ENABLED: bool = True
+    # 布隆过滤（缓存穿透快速负判定）：命中 L1 前先查布隆，不存在则直接 miss
+    # 注：布隆为进程内结构，进程重启后需重新写入才恢复到全量（旧进程写入的 L1 会被跳过一次后自愈）
+    LLM_CACHE_BLOOM_ENABLED: bool = True
+    LLM_CACHE_BLOOM_NUM_BITS: int = 65536         # 位数组长度（内存约 8KB）
+    LLM_CACHE_BLOOM_NUM_HASHES: int = 7           # 哈希函数个数
+    # Single-flight（缓存击穿防护）：同一查询并发 miss 时只允许一个请求调用 LLM，其余等待复用
+    LLM_CACHE_SINGLE_FLIGHT_ENABLED: bool = True
 
     # 限流
     RATE_LIMIT_PER_MINUTE_AUTH: int = 60

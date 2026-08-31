@@ -15,8 +15,9 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import threading
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from app.config import settings
 from app.core.logger import logger
@@ -156,6 +157,195 @@ def get_cache_metrics() -> Dict[str, Any]:
 
 
 # ==============================================
+# 缓存穿透防护：进程内布隆过滤器
+# ==============================================
+class _BloomFilter:
+    """进程内布隆过滤器，用于 L1 精确缓存命中前的快速负判定。
+
+    思路：对从未写入过的 key，Redis/Chroma 查询永远是浪费。对一个忠实实现
+    布隆只存在"必然不存在"与"可能存在并需要进一步查询"两种结论，因此用它
+    拦截穿透查询（缓存穿透）可省掉大量无效的 L1 Redis 往返。
+
+    注意：
+    - 进程内结构，进程重启后为空。重启后首次命中旧进程写入的 L1 条目时会
+      因布隆<尚无>而被跳过一次，走 L2 / 真实 LLM，随后回写自愈——可接受。
+    - 位数组默认 64K bit ≈ 8KB，7 个哈希函数，对小规模精确缓存足够。
+    - 用 threading.Lock 保证 async（事件循环线程）与 sync（LangGraph 线程池）
+      两条写路径同时访问时的线程安全。
+    """
+
+    def __init__(self, num_bits: int, num_hashes: int):
+        self.num_bits = int(num_bits)
+        self.num_hashes = int(num_hashes)
+        self._bits = bytearray((self.num_bits + 7) // 8)
+
+    @staticmethod
+    def _double_hashes(key: str, num_bits: int, num_hashes: int) -> List[int]:
+        # blake2b 16 字节派生两个 64 位哈希，用加倍哈希（double hashing）展开为多个下标
+        digest = hashlib.blake2b(key.encode("utf-8"), digest_size=16).digest()
+        h1 = int.from_bytes(digest[:8], "big")
+        h2 = int.from_bytes(digest[8:], "big") | 1  # 置为奇数，避免 k*h2 恒为 0
+        return [(h1 + k * h2) % num_bits for k in range(num_hashes)]
+
+    def add(self, key: str) -> None:
+        for idx in self._double_hashes(key, self.num_bits, self.num_hashes):
+            byte_idx = idx >> 3
+            bit_idx = idx & 7
+            self._bits[byte_idx] |= 1 << bit_idx
+
+    def contains(self, key: str) -> bool:
+        for idx in self._double_hashes(key, self.num_bits, self.num_hashes):
+            byte_idx = idx >> 3
+            bit_idx = idx & 7
+            if not (self._bits[byte_idx] & (1 << bit_idx)):
+                return False
+        return True
+
+
+_bloom: Optional[_BloomFilter] = None
+_bloom_lock = threading.Lock()
+
+
+def _ensure_bloom() -> Optional[_BloomFilter]:
+    """惰性初始化布隆过滤器；关闭时返回 None。"""
+    global _bloom
+    if not settings.LLM_CACHE_BLOOM_ENABLED:
+        return None
+    if _bloom is None:
+        with _bloom_lock:
+            if _bloom is None:
+                _bloom = _BloomFilter(
+                    settings.LLM_CACHE_BLOOM_NUM_BITS,
+                    settings.LLM_CACHE_BLOOM_NUM_HASHES,
+                )
+    return _bloom
+
+
+def _bloom_may_exist(
+    query: str, model: str, temperature: float,
+    system_prompt_hash: str, context_hash: Optional[str], cache_type: str,
+) -> bool:
+    """布隆判定：返回 True 表示「可能存在」，需要继续查 L1；False 表示「必然不存在」可直接 miss。"""
+    bloom = _ensure_bloom()
+    if bloom is None:
+        return True  # 未启用 → 不拦任何查询
+    key = _redis_key(query, model, temperature, system_prompt_hash, context_hash, cache_type)
+    with _bloom_lock:
+        return bloom.contains(key)
+
+
+def _bloom_add(
+    query: str, model: str, temperature: float,
+    system_prompt_hash: str, context_hash: Optional[str], cache_type: str,
+) -> None:
+    """成功写入 L1 后回填布隆。"""
+    bloom = _ensure_bloom()
+    if bloom is None:
+        return
+    key = _redis_key(query, model, temperature, system_prompt_hash, context_hash, cache_type)
+    with _bloom_lock:
+        bloom.add(key)
+
+
+# ==============================================
+# 缓存击穿防护：Single-Flight（同一查询并发去重）
+# ==============================================
+async def _single_flight_async(key: str, producer: Callable[[], Any]):
+    """异步 single-flight：并发相同 key 只执行一次 producer，其余等待复用首次结果。
+
+    使用 asyncio.Future 传递结果；首个请求成为 leader 执行 producer，其余请求 await
+    同一个 Future 拿到同一份结果（不重复调用 LLM）。producer 抛错时错误广播给所有等待者，
+    避免各自重试造成放大。
+    """
+    if not settings.LLM_CACHE_SINGLE_FLIGHT_ENABLED:
+        return await producer()
+
+    loop = asyncio.get_running_loop()
+    with _sf_async_lock:
+        fut = _sf_async_map.get(key)
+        leader = fut is None
+        if leader:
+            fut = loop.create_future()
+            _sf_async_map[key] = fut
+
+    if not leader:
+        # 非 leader：等待并复用 leader 的结果 / 错误
+        return await asyncio.shield(fut)
+
+    try:
+        result = await producer()
+        if not fut.done():
+            fut.set_result(result)
+        return result
+    except BaseException as e:
+        if not fut.done():
+            fut.set_exception(e)
+        raise
+    finally:
+        with _sf_async_lock:
+            if _sf_async_map.get(key) is fut:
+                _sf_async_map.pop(key, None)
+
+
+class _SyncFlight:
+    __slots__ = ("done", "result", "error")
+
+    def __init__(self):
+        self.done = threading.Event()
+        self.result: Any = None
+        self.error: Optional[BaseException] = None
+
+
+def _single_flight_sync(key: str, producer: Callable[[], Any]):
+    """同步版 single-flight（供 LangGraph 线程池节点使用）。"""
+    if not settings.LLM_CACHE_SINGLE_FLIGHT_ENABLED:
+        return producer()
+
+    with _sf_sync_lock:
+        flight = _sf_sync_map.get(key)
+        leader = flight is None
+        if leader:
+            flight = _SyncFlight()
+            _sf_sync_map[key] = flight
+
+    if not leader:
+        # 非 leader：阻塞等待 leader 完成并复用结果
+        flight.done.wait()
+        if flight.error is not None:
+            raise flight.error
+        return flight.result
+
+    try:
+        result = producer()
+        flight.result = result
+        return result
+    except BaseException as e:
+        flight.error = e
+        raise
+    finally:
+        flight.done.set()
+        with _sf_sync_lock:
+            if _sf_sync_map.get(key) is flight:
+                _sf_sync_map.pop(key, None)
+
+
+_sf_async_map: Dict[str, asyncio.Future] = {}
+_sf_async_lock = threading.Lock()
+_sf_sync_map: Dict[str, _SyncFlight] = {}
+_sf_sync_lock = threading.Lock()
+
+
+def single_flight(key: str, producer: Callable[[], Any]):
+    """异步 single-flight：并发相同 key 只执行一次 producer，其余复用它（缓存击穿防护）。"""
+    return _single_flight_async(key, producer)
+
+
+def single_flight_sync(key: str, producer: Callable[[], Any]):
+    """同步 single-flight（供 LangGraph 线程池节点使用）。"""
+    return _single_flight_sync(key, producer)
+
+
+# ==============================================
 # L1: Redis 精确缓存
 # ==============================================
 def _redis_key(
@@ -178,6 +368,9 @@ async def _redis_get(
 ) -> Optional[Dict[str, Any]]:
     """从 Redis 精确缓存获取。"""
     if not _redis_available or not _redis_client:
+        return None
+    # 布隆快速负判定：从未写入过 → 直接 miss，省去 Redis 往返
+    if not _bloom_may_exist(query, model, temperature, system_prompt_hash, context_hash, cache_type):
         return None
     t0 = time.monotonic()
     try:
@@ -210,6 +403,7 @@ async def _redis_put(
         data["_cached_at"] = time.time()
         await _redis_client.setex(key, ttl, json.dumps(data, ensure_ascii=False))
         _metrics.write_oks += 1
+        _bloom_add(query, model, temperature, system_prompt_hash, context_hash, cache_type)
         return True
     except Exception as e:
         _metrics.write_fails += 1
@@ -224,6 +418,9 @@ def _redis_get_sync(
 ) -> Optional[Dict[str, Any]]:
     """从 Redis 精确缓存获取（同步，供线程池中的 LangGraph 节点使用）。"""
     if not _redis_available or not _redis_sync:
+        return None
+    # 布隆快速负判定：从未写入过 → 直接 miss，省去 Redis 往返
+    if not _bloom_may_exist(query, model, temperature, system_prompt_hash, context_hash, cache_type):
         return None
     t0 = time.monotonic()
     try:
@@ -256,6 +453,7 @@ def _redis_put_sync(
         data["_cached_at"] = time.time()
         _redis_sync.setex(key, ttl, json.dumps(data, ensure_ascii=False))
         _metrics.write_oks += 1
+        _bloom_add(query, model, temperature, system_prompt_hash, context_hash, cache_type)
         return True
     except Exception as e:
         _metrics.write_fails += 1
