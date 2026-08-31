@@ -54,6 +54,10 @@ public class ReviewServiceImpl implements ReviewService {
         review.setUpdateTime(LocalDateTime.now());
         review.setUpdateUser(userId);
         reviewMapper.insert(review);
+        // 维护 SPU 评价数（可见评价 +1）
+        if (review.getSpuId() != null) {
+            spuMapper.incrCommentCount(review.getSpuId(), 1);
+        }
         // 评价获得积分（不影响评价主流程）
         try {
             pointsService.earnByReview(userId, review.getId());
@@ -77,25 +81,35 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     /**
-     * 隐藏评价（将状态设为0）。
+     * 隐藏评价（将状态设为0），并同步扣减 SPU 评价数。
      *
      * @param id 评价ID
      */
     @Override
     @Transactional
     public void hide(Long id) {
-        reviewMapper.updateStatus(id, 0);
+        Review r = reviewMapper.getById(id);
+        if (r == null) return;
+        if (r.getStatus() != null && r.getStatus() == 1) {
+            reviewMapper.updateStatus(id, 0);
+            spuMapper.incrCommentCount(r.getSpuId(), -1);
+        }
     }
 
     /**
-     * 显示评价（将状态设为1）。
+     * 显示评价（将状态设为1），并同步累加 SPU 评价数。
      *
      * @param id 评价ID
      */
     @Override
     @Transactional
     public void show(Long id) {
-        reviewMapper.updateStatus(id, 1);
+        Review r = reviewMapper.getById(id);
+        if (r == null) return;
+        if (r.getStatus() != null && r.getStatus() == 0) {
+            reviewMapper.updateStatus(id, 1);
+            spuMapper.incrCommentCount(r.getSpuId(), 1);
+        }
     }
 
     /**

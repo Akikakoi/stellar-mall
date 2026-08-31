@@ -14,6 +14,7 @@ import java.util.List;
 @Mapper
 public interface ReviewMapper {
     int insert(Review review);
+    Review getById(@Param("id") Long id);
     int updateReply(@Param("id") Long id, @Param("reply") String reply);
     int updateStatus(@Param("id") Long id, @Param("status") Integer status);
     List<Review> pageBySpuId(@Param("spuId") Long spuId, @Param("offset") int offset, @Param("pageSize") int pageSize);
