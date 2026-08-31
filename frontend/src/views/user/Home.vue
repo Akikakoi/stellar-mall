@@ -52,7 +52,7 @@
                 <div v-for="p in mod._products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
                   <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
                   <div class="p-name">{{ p.name }}</div>
-                  <div class="p-desc">已售 {{ p.saleCount || 0 }}</div>
+                  <div class="p-desc">已售 {{ p.saleCount || 0 }} · 评论 {{ p.commentCount || 0 }}</div>
                   <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
                 </div>
                 <div class="more-card" @click="viewMoreModule(mod)" v-if="mod._total > 8">
@@ -145,7 +145,7 @@
                 </div>
                 <div v-for="p in sec.products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
                   <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
-                  <div class="p-name">{{ p.name }}</div><div class="p-desc">已售 {{ p.saleCount || 0 }}</div>
+                  <div class="p-name">{{ p.name }}</div><div class="p-desc">已售 {{ p.saleCount || 0 }} · 评论 {{ p.commentCount || 0 }}</div>
                   <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
                 </div>
                 <div class="more-card" @click="viewMore(sec)" v-if="sec.total > 8">
@@ -167,6 +167,7 @@
           </div>
           <div class="spu-info">
             <h3 class="spu-name">{{ spu.name }}</h3>
+            <div class="spu-meta">已售 {{ spu.saleCount || 0 }} · 评论 {{ spu.commentCount || 0 }}</div>
             <div class="spu-bottom">
               <div class="spu-price">¥{{ Number(spu.minPrice || 0).toFixed(2) }}</div>
               <el-button size="small" type="primary" class="add-cart-btn" @click.stop="handleAddToCart(spu)">加入购物车</el-button>
@@ -823,6 +824,7 @@ onUnmounted(() => {
 .spu-info { padding: 18px 20px 22px; }
 .spu-name { font-size: 15px; color: var(--text-primary); margin: 0 0 10px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 45px; }
 .spu-bottom { display: flex; justify-content: space-between; align-items: center; }
+.spu-meta { font-size: 12px; color: var(--text-muted); margin: -2px 0 8px; }
 .spu-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
 .add-cart-btn { border-radius: 8px; }
 

@@ -79,11 +79,14 @@
           <div class="price-block">
             <span class="label">售价</span>
             <span class="price">¥{{ displayPrice.toFixed(2) }}</span>
+            <span v-if="originalDisplayPrice > displayPrice" class="original-price">¥{{ originalDisplayPrice.toFixed(2) }}</span>
             <span v-if="serviceFee > 0" class="service-tip">（含保障服务 ¥{{ serviceFee }}）</span>
           </div>
           <div class="meta-row sale-row">
             <span class="meta-label">销量：</span>
             <span class="sale-count">已售 {{ spu.saleCount || 0 }}</span>
+            <span class="meta-label" style="margin-left: 16px;">评论：</span>
+            <span class="sale-count">{{ spu.commentCount || 0 }} 条</span>
           </div>
           <div class="meta-row">
             <span class="meta-label">分类：</span>
@@ -214,6 +217,12 @@ const selectedServicesDetail = computed(() => {
 const displayPrice = computed(() => {
   const base = Number(selectedSku.value?.price || spu.value?.minPrice || 0)
   return base + serviceFee.value
+})
+
+// 划线价：取所选 SKU 的 originalPrice（未选中或未设置时回退到 0，展示层判断不显示）
+const originalDisplayPrice = computed(() => {
+  const base = Number(selectedSku.value?.originalPrice || 0)
+  return base > 0 ? base + serviceFee.value : 0
 })
 
 // --- 轮播图 ---
@@ -759,6 +768,7 @@ onMounted(() => { loadDetail(); loadReviews() })
 }
 .price-block .label { color: var(--text-muted); font-size: 14px; }
 .price-block .price { color: var(--text-primary); font-size: 32px; font-weight: 700; }
+.price-block .original-price { color: var(--text-muted); font-size: 15px; text-decoration: line-through; }
 .price-block .service-tip { color: var(--brand-primary); font-size: 13px; margin-left: 8px; }
 .meta-row { margin-bottom: 12px; color: var(--text-secondary); }
 .sale-row .sale-count { color: var(--brand-primary); font-weight: 600; }
