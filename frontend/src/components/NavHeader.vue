@@ -17,7 +17,7 @@
           active-class="active"
         >
           <component :is="item.icon" class="nav-icon" />
-          <span class="nav-label" v-html="item.label"></span>
+          <span class="nav-label">{{ item.label }}</span>
         </router-link>
         <span class="nav-indicator" :style="indicatorStyle"></span>
       </nav>
