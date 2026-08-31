@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.annotation.RequireRole;
 import com.stellar.service.SpuImportExportService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,6 +29,7 @@ public class SpuImportExportController {
 
     private final SpuImportExportService importExportService;
 
+@RequireRole({1, 2})
     @GetMapping("/export")
     @ApiOperation("导出全部商品为 Excel")
     public ResponseEntity<byte[]> exportAll() throws UnsupportedEncodingException {
@@ -39,6 +41,7 @@ public class SpuImportExportController {
                 .body(data);
     }
 
+@RequireRole({1, 2})
     @GetMapping("/template")
     @ApiOperation("下载导入模板")
     public ResponseEntity<byte[]> downloadTemplate() throws UnsupportedEncodingException {
@@ -50,6 +53,7 @@ public class SpuImportExportController {
                 .body(data);
     }
 
+@RequireRole({1, 2})
     @PostMapping("/import")
     @ApiOperation("批量导入商品")
     public Result<Map<String, Object>> importSpu(@RequestParam("file") MultipartFile file) {

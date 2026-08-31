@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
+import com.stellar.annotation.RequireRole;
 import com.stellar.entity.Coupon;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
@@ -23,6 +24,7 @@ public class CouponAdminController {
     private final CouponService couponService;
 
     @Idempotent(keyPrefix = "admin-coupon-create", windowSeconds = 300)
+@RequireRole({1, 2})
     @PostMapping
     @ApiOperation("创建优惠券")
     public Result<Long> create(@RequestBody Coupon coupon) {
@@ -30,6 +32,7 @@ public class CouponAdminController {
     }
 
     @Idempotent(keyPrefix = "admin-coupon-update", windowSeconds = 300)
+@RequireRole({1, 2})
     @PutMapping
     @ApiOperation("更新优惠券")
     public Result<String> update(@RequestBody Coupon coupon) {
@@ -37,6 +40,7 @@ public class CouponAdminController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @DeleteMapping("/{id}")
     @ApiOperation("删除优惠券")
     public Result<String> delete(@PathVariable Long id) {
@@ -44,6 +48,7 @@ public class CouponAdminController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @GetMapping("/page")
     @ApiOperation("优惠券分页")
     public Result<PageResult> page(@RequestParam(required = false) String name,

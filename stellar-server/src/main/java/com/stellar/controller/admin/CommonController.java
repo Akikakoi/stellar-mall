@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.annotation.RequireRole;
 import com.stellar.utils.AliOssUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,6 +25,7 @@ public class CommonController {
 
     private final AliOssUtil aliOssUtil;
 
+@RequireRole({1, 2, 3, 4})
     @PostMapping("/upload")
     @ApiOperation("上传图片（支持单张/多张），返回 OSS URL 列表")
     public Result<List<String>> upload(

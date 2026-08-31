@@ -13,6 +13,7 @@ const EMPID_KEY = 'stellar_admin_empid'
 const USERNAME_KEY = 'stellar_admin_username'
 const NAME_KEY = 'stellar_admin_name'
 const REFRESH_TOKEN_KEY = 'stellar_admin_refresh_token'
+const ROLE_KEY = 'stellar_admin_role'
 
 /** 从 localStorage 读取 */
 function safeGet(key: string): string | null {
@@ -44,6 +45,8 @@ interface AdminState {
   username: string
   /** 真实姓名 */
   name: string
+  /** 角色：1 超级管理员 2 运营 3 客服 4 财务（服务端权威，仅用于前端路由/菜单展示） */
+  role: number | null
 }
 
 export const useAdminStore = defineStore('admin', {
@@ -52,12 +55,15 @@ export const useAdminStore = defineStore('admin', {
     token: safeGet(TOKEN_KEY) || '',
     refreshToken: safeGet(REFRESH_TOKEN_KEY) || '',
     username: safeGet(USERNAME_KEY) || '',
-    name: safeGet(NAME_KEY) || ''
+    name: safeGet(NAME_KEY) || '',
+    role: safeGet(ROLE_KEY) ? Number(safeGet(ROLE_KEY)) : null
   }),
 
   getters: {
     /** 是否已登录 */
-    isLoggedIn: (state) => !!state.token
+    isLoggedIn: (state) => !!state.token,
+    /** 是否超级管理员 */
+    isSuperAdmin: (state) => state.role === 1
   },
 
   actions: {
@@ -69,12 +75,15 @@ export const useAdminStore = defineStore('admin', {
       this.empId = res.empId || res.EMP_ID || res.id || null
       this.username = res.username || payload.username || ''
       this.name = res.name || res.NAME || ''
+      // role 可能来自登录响应（如 res.role），否则由 fetchProfile 拉取补全
+      this.role = res.role != null ? Number(res.role) : null
 
       safeSet(TOKEN_KEY, this.token)
       safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
       safeSet(EMPID_KEY, this.empId)
       safeSet(USERNAME_KEY, this.username)
       safeSet(NAME_KEY, this.name)
+      safeSet(ROLE_KEY, this.role)
 
       return res
     },
@@ -94,6 +103,12 @@ export const useAdminStore = defineStore('admin', {
         if (res.id || res.empId || res.EMP_ID) {
           this.empId = res.id || res.empId || res.EMP_ID
           safeSet(EMPID_KEY, this.empId)
+        }
+        // 服务端 Employee 含 role（1超管 2运营 3客服 4财务），同步到 store 供路由守卫使用
+        const serverRole = res.role != null ? Number(res.role) : null
+        if (serverRole != null) {
+          this.role = serverRole
+          safeSet(ROLE_KEY, this.role)
         }
         return res
       } catch (e) {
@@ -132,6 +147,10 @@ export const useAdminStore = defineStore('admin', {
         this.token = info.token
         safeSet(TOKEN_KEY, this.token)
       }
+      if (info.role != null) {
+        this.role = Number(info.role)
+        safeSet(ROLE_KEY, this.role)
+      }
     },
 
     /**
@@ -157,11 +176,13 @@ export const useAdminStore = defineStore('admin', {
       this.refreshToken = ''
       this.username = ''
       this.name = ''
+      this.role = null
       safeRemove(TOKEN_KEY)
       safeRemove(REFRESH_TOKEN_KEY)
       safeRemove(EMPID_KEY)
       safeRemove(USERNAME_KEY)
       safeRemove(NAME_KEY)
+      safeRemove(ROLE_KEY)
     }
   }
 })

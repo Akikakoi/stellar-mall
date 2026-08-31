@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
+import com.stellar.annotation.RequireRole;
 import com.stellar.dto.CategoryPageQueryDTO;
 import com.stellar.dto.CategorySaveDTO;
 import com.stellar.dto.CategoryUpdateDTO;
@@ -54,6 +55,7 @@ public class CategoryController {
     }
 
     @Idempotent(keyPrefix = "admin-category-save", windowSeconds = 300)
+@RequireRole({1, 2})
     @PostMapping
     @ApiOperation("新增分类")
     public Result<Map<String, Long>> save(@RequestBody @Valid CategorySaveDTO dto) {
@@ -63,6 +65,7 @@ public class CategoryController {
         return Result.success(data);
     }
 
+@RequireRole({1, 2})
     @GetMapping("/{id}")
     @ApiOperation("按 id 查询分类")
     public Result<CategoryVO> getById(@PathVariable Long id) {
@@ -70,6 +73,7 @@ public class CategoryController {
     }
 
     @Idempotent(keyPrefix = "admin-category-update", windowSeconds = 300)
+@RequireRole({1, 2})
     @PutMapping
     @ApiOperation("更新分类")
     public Result<String> update(@RequestBody @Valid CategoryUpdateDTO dto) {
@@ -77,6 +81,7 @@ public class CategoryController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @DeleteMapping("/{id}")
     @ApiOperation("删除分类")
     public Result<String> delete(@PathVariable Long id) {
@@ -84,12 +89,14 @@ public class CategoryController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @GetMapping("/{id}/deletable")
     @ApiOperation("删除分类前预校验：返回是否允许删除 + 关联商品/子分类数量 + 禁止原因。前端在弹出确认框前先调用。")
     public Result<CategoryDeletableVO> getDeletable(@PathVariable Long id) {
         return Result.success(categoryService.checkDeletable(id));
     }
 
+@RequireRole({1, 2})
     @PostMapping("/status/{status}")
     @ApiOperation("启停用分类")
     public Result<String> startOrStop(@RequestParam Long id, @PathVariable Integer status) {
@@ -97,6 +104,7 @@ public class CategoryController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @GetMapping("/page")
     @ApiOperation("分页查询分类")
     public Result<PageResult> page(CategoryPageQueryDTO dto) {
@@ -108,6 +116,7 @@ public class CategoryController {
         return Result.success(pr);
     }
 
+@RequireRole({1, 2})
     @GetMapping("/tree")
     @ApiOperation("分类嵌套树（最多 2 级）。onlyEnabled=true 只返回启用的")
     public Result<List<CategoryVO>> tree(
@@ -118,6 +127,7 @@ public class CategoryController {
                 .collect(Collectors.toList()));
     }
 
+@RequireRole({1, 2})
     @GetMapping("/list")
     @ApiOperation("分类列表（嵌套 tree，包含启用/禁用的全部）")
     public Result<List<CategoryVO>> list() {

@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.annotation.RequireRole;
 import com.stellar.service.DailyReportService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +27,7 @@ public class AdminDashboardController {
     private final JdbcTemplate jdbcTemplate;
     private final DailyReportService dailyReportService;
 
+@RequireRole({1, 2})
     @GetMapping("/stats")
     @ApiOperation("仪表盘统计：员工数 / SPU 数 / SKU 数 / 订单数 / 用户数")
     public Result<Map<String, Long>> stats() {
@@ -38,6 +40,7 @@ public class AdminDashboardController {
         return Result.success(data);
     }
 
+@RequireRole({1, 2})
     @GetMapping("/enhanced")
     @ApiOperation("增强统计：今日订单数、今日销售额、低库存数、趋势图")
     public Result<Map<String, Object>> enhanced() {
@@ -119,6 +122,7 @@ public class AdminDashboardController {
         return Result.success(data);
     }
 
+@RequireRole({1, 2})
     @GetMapping("/ai-report")
     @ApiOperation("AI 经营日报：汇总当日经营数据，调用 LLM 生成分析报告（耗时较长，前端需放宽超时）")
     public Result<Map<String, Object>> aiReport() {

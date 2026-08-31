@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
+import com.stellar.annotation.RequireRole;
 import com.stellar.dto.HomeModuleSaveDTO;
 import com.stellar.entity.HomeModule;
 import com.stellar.result.Result;
@@ -23,12 +24,14 @@ public class HomeModuleController {
     private final HomeModuleService homeModuleService;
 
     @Idempotent(keyPrefix = "admin-home-module-create", windowSeconds = 300)
+@RequireRole({1, 2})
     @PostMapping
     @ApiOperation("新增模块")
     public Result<Long> create(@Valid @RequestBody HomeModuleSaveDTO dto) {
         return Result.success(homeModuleService.create(dto));
     }
 
+@RequireRole({1, 2})
     @PutMapping("/{id}")
     @ApiOperation("更新模块")
     public Result<String> update(@PathVariable Long id, @Valid @RequestBody HomeModuleSaveDTO dto) {
@@ -37,6 +40,7 @@ public class HomeModuleController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @DeleteMapping("/{id}")
     @ApiOperation("删除模块")
     public Result<String> delete(@PathVariable Long id) {
@@ -44,12 +48,14 @@ public class HomeModuleController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @GetMapping("/list")
     @ApiOperation("获取全部模块列表")
     public Result<List<HomeModule>> list() {
         return Result.success(homeModuleService.listAll());
     }
 
+@RequireRole({1, 2})
     @PutMapping("/batch-sort")
     @ApiOperation("批量更新排序")
     public Result<String> batchSort(@RequestBody Map<String, List<HomeModuleSaveDTO>> body) {

@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.PageResult;
+import com.stellar.annotation.RequireRole;
 import com.stellar.result.Result;
 import com.stellar.service.SpuService;
 import io.swagger.annotations.Api;
@@ -21,6 +22,7 @@ public class RecycleBinController {
 
     private final JdbcTemplate jdbcTemplate;
 
+@RequireRole({1, 2})
     @GetMapping("/page")
     @ApiOperation("回收站分页（status=0的已删除SPU）")
     public Result<PageResult> page(@RequestParam(defaultValue = "1") Integer page,
@@ -41,6 +43,7 @@ public class RecycleBinController {
         return Result.success(new PageResult(total == null ? 0L : total, list == null ? new ArrayList<>() : list));
     }
 
+@RequireRole({1, 2})
     @PostMapping("/{id}/restore")
     @ApiOperation("恢复商品（status 0→1）")
     public Result<String> restore(@PathVariable Long id) {
@@ -48,6 +51,7 @@ public class RecycleBinController {
         return Result.success();
     }
 
+@RequireRole({1})
     @DeleteMapping("/{id}")
     @ApiOperation("彻底删除")
     public Result<String> forceDelete(@PathVariable Long id) {
@@ -56,6 +60,7 @@ public class RecycleBinController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @PostMapping("/batch-restore")
     @ApiOperation("批量恢复")
     public Result<String> batchRestore(@RequestBody Map<String, Object> body) {
@@ -69,6 +74,7 @@ public class RecycleBinController {
         return Result.success();
     }
 
+@RequireRole({1})
     @PostMapping("/batch-delete")
     @ApiOperation("批量彻底删除")
     public Result<String> batchDelete(@RequestBody Map<String, Object> body) {
@@ -83,6 +89,7 @@ public class RecycleBinController {
         return Result.success();
     }
 
+@RequireRole({1})
     @DeleteMapping("/clear")
     @ApiOperation("清空回收站")
     public Result<String> clear() {

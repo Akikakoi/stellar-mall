@@ -2,7 +2,7 @@ package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
 import com.stellar.annotation.RateLimit;
-import com.stellar.constant.JwtClaimsConstant;
+import com.stellar.annotation.RequireRole;
 import com.stellar.constant.MessageConstant;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.EmployeeCreateDTO;
@@ -95,6 +95,7 @@ public class EmployeeController {
         return Result.success(vo);
     }
 
+    @RequireRole({1})
     @PostMapping("/unlock")
     @ApiOperation("手动解锁被临时锁定的账号（E2 登录失败次数过多）")
     public Result<Void> unlock(@RequestBody UnlockRequest req) {
@@ -121,6 +122,7 @@ public class EmployeeController {
         private String refreshToken;
     }
 
+    @RequireRole({1})
     @GetMapping("/page")
     @ApiOperation("员工分页查询")
     public Result<PageResult> page(
@@ -133,12 +135,14 @@ public class EmployeeController {
         return Result.success(employeeService.page(name, status, role, page, pageSize));
     }
 
+    @RequireRole({1})
     @GetMapping("/{id}")
     @ApiOperation("根据 ID 查询员工")
     public Result<Employee> getById(@PathVariable Long id) {
         return Result.success(employeeService.getById(id));
     }
 
+    @RequireRole({1})
     @Idempotent(keyPrefix = "admin-employee-create", windowSeconds = 300)
     @PostMapping
     @ApiOperation("新增员工")
@@ -149,6 +153,7 @@ public class EmployeeController {
         return Result.success();
     }
 
+    @RequireRole({1})
     @PutMapping
     @ApiOperation("修改员工（含密码修改：password 传明文即可，Service 内部会 BCrypt 哈希）")
     public Result<Void> update(@RequestBody EmployeeUpdateDTO dto) {
@@ -156,18 +161,18 @@ public class EmployeeController {
         return Result.success();
     }
 
+    @RequireRole({1})
     @PostMapping("/status/{status}")
     @ApiOperation("启用/禁用员工：status=1 启用，status=0 禁用")
     public Result<Void> setStatus(@PathVariable Integer status,
                                   @RequestParam Long id) {
         log.info("[EmployeeController] setStatus id={}, status={}, operator={}",
                 id, status, BaseContext.getCurrentId());
+        // 种子超管（id=1）不允许禁用；修复原死代码 JwtClaimsConstant.EMP_ID.equals("EMP_ID") 恒真判断
         Employee emp = employeeService.getById(id);
-        if (emp != null && emp.getRole() != null && emp.getRole() == 1
-                && JwtClaimsConstant.EMP_ID.equals("EMP_ID") /* keep compiler happy */) {
-            if (emp.getId() != null && emp.getId() == 1 && status == 0) {
-                throw new BaseException("超级管理员账号不允许禁用");
-            }
+        if (emp != null && emp.getId() != null && emp.getId() == 1
+                && status != null && status == 0) {
+            throw new BaseException("超级管理员账号不允许禁用");
         }
         employeeService.setStatus(id, status);
         return Result.success();

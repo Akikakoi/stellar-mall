@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
+import com.stellar.annotation.RequireRole;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
 import com.stellar.service.OrderService;
@@ -26,6 +27,7 @@ public class AdminOrderController {
 
     private final OrderService orderService;
 
+@RequireRole({1, 2})
     @GetMapping("/page")
     @ApiOperation("分页查询所有订单（支持按状态、订单号和日期范围筛选）")
     public Result<PageResult> page(
@@ -39,6 +41,7 @@ public class AdminOrderController {
     }
 
     @Idempotent(keyPrefix = "admin-order-ship", windowSeconds = 300)
+@RequireRole({1, 2})
     @PostMapping("/{id}/ship")
     @ApiOperation("发货：PAID → SHIPPED，可传入物流信息并自动通知用户")
     public Result<String> ship(@PathVariable Long id, @RequestBody(required = false) Map<String, String> body) {
@@ -48,6 +51,7 @@ public class AdminOrderController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @DeleteMapping("/{id}")
     @ApiOperation("删除订单（仅 已完成/已取消 可删除）")
     public Result<String> delete(@PathVariable Long id) {

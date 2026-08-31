@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
+import com.stellar.annotation.RequireRole;
 import com.stellar.entity.Banner;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
@@ -23,12 +24,14 @@ public class BannerAdminController {
     private final BannerService bannerService;
 
     @Idempotent(keyPrefix = "admin-banner-create", windowSeconds = 300)
+@RequireRole({1, 2})
     @PostMapping
     @ApiOperation("新增轮播图")
     public Result<Long> create(@RequestBody Banner banner) {
         return Result.success(bannerService.create(banner));
     }
 
+@RequireRole({1, 2})
     @PutMapping
     @ApiOperation("更新轮播图")
     public Result<String> update(@RequestBody Banner banner) {
@@ -36,6 +39,7 @@ public class BannerAdminController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @DeleteMapping("/{id}")
     @ApiOperation("删除轮播图")
     public Result<String> delete(@PathVariable Long id) {
@@ -43,6 +47,7 @@ public class BannerAdminController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @GetMapping("/page")
     @ApiOperation("轮播图分页")
     public Result<PageResult> page(@RequestParam(required = false) String title,

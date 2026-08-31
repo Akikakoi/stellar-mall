@@ -183,97 +183,98 @@ const routes: RouteRecordRaw[] = [
         path: 'chatbi',
         name: 'AdminChatBI',
         component: () => import('@/views/admin/ChatBI.vue'),
-        meta: { title: '智能查数', requiresAdminAuth: true }
+        meta: { title: '智能查数', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'spu',
         name: 'AdminSpuMgmt',
         component: () => import('@/views/admin/SpuMgmt.vue'),
-        meta: { title: '商品管理', requiresAdminAuth: true }
+        meta: { title: '商品管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'category',
         name: 'AdminCategoryMgmt',
         component: () => import('@/views/admin/CategoryMgmt.vue'),
-        meta: { title: '分类管理', requiresAdminAuth: true }
+        meta: { title: '分类管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'employee',
         name: 'AdminEmployeeMgmt',
         component: () => import('@/views/admin/EmployeeMgmt.vue'),
-        meta: { title: '员工管理', requiresAdminAuth: true }
+        // 员工管理涉及创建/禁用账号，仅超级管理员可访问（与后端 @RequireRole({1}) 一致）
+        meta: { title: '员工管理', requiresAdminAuth: true, requiresRole: [1] }
       },
       {
         path: 'kb',
         name: 'AdminKb',
         component: () => import('@/views/admin/KnowledgeBase.vue'),
-        meta: { title: '知识库管理', requiresAdminAuth: true }
+        meta: { title: '知识库管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'settings',
         name: 'AdminSettings',
         component: () => import('@/views/admin/SystemSettings.vue'),
-        meta: { title: '系统设置', requiresAdminAuth: true }
+        meta: { title: '系统设置', requiresAdminAuth: true, requiresRole: [1] }
       },
       {
         path: 'orders',
         name: 'AdminOrderMgmt',
         component: () => import('@/views/admin/OrderMgmt.vue'),
-        meta: { title: '订单管理', requiresAdminAuth: true }
+        meta: { title: '订单管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'coupon',
         name: 'AdminCouponMgmt',
         component: () => import('@/views/admin/CouponMgmt.vue'),
-        meta: { title: '优惠券管理', requiresAdminAuth: true }
+        meta: { title: '优惠券管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'review',
         name: 'AdminReviewMgmt',
         component: () => import('@/views/admin/ReviewMgmt.vue'),
-        meta: { title: '评价管理', requiresAdminAuth: true }
+        meta: { title: '评价管理', requiresAdminAuth: true, requiresRole: [1, 2, 3] }
       },
       {
         path: 'inventory',
         name: 'AdminInventory',
         component: () => import('@/views/admin/Inventory.vue'),
-        meta: { title: '库存管理', requiresAdminAuth: true }
+        meta: { title: '库存管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'recycle',
         name: 'AdminRecycleBin',
         component: () => import('@/views/admin/RecycleBin.vue'),
-        meta: { title: '商品回收站', requiresAdminAuth: true }
+        meta: { title: '商品回收站', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'banner',
         name: 'AdminBannerMgmt',
         component: () => import('@/views/admin/BannerMgmt.vue'),
-        meta: { title: '轮播图管理', requiresAdminAuth: true }
+        meta: { title: '轮播图管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'aftersale',
         name: 'AdminAfterSaleMgmt',
         component: () => import('@/views/admin/AfterSaleMgmt.vue'),
-        meta: { title: '售后管理', requiresAdminAuth: true }
+        meta: { title: '售后管理', requiresAdminAuth: true, requiresRole: [1, 2, 3] }
       },
       {
         path: 'points-rules',
         name: 'AdminPointsRuleMgmt',
         component: () => import('@/views/admin/PointsRuleMgmt.vue'),
-        meta: { title: '积分规则管理', requiresAdminAuth: true }
+        meta: { title: '积分规则管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'points-products',
         name: 'AdminPointsProductMgmt',
         component: () => import('@/views/admin/PointsProductMgmt.vue'),
-        meta: { title: '积分商城管理', requiresAdminAuth: true }
+        meta: { title: '积分商城管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'home-module',
         name: 'AdminHomeModuleMgmt',
         component: () => import('@/views/admin/HomeModuleMgmt.vue'),
-        meta: { title: '首页装修', requiresAdminAuth: true }
+        meta: { title: '首页装修', requiresAdminAuth: true, requiresRole: [1, 2] }
       }
     ]
   },
@@ -296,7 +297,7 @@ const router = createRouter({
  * - requiresUserAuth:未登录用户重定向到 /login
  * - requiresAdminAuth:未登录管理员重定向到 /admin/login
  */
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const title = to.meta?.title
   if (title) {
     document.title = `${title} - 星耀商城`
@@ -317,6 +318,18 @@ router.beforeEach((to, from, next) => {
     if (!token && to.path !== '/admin/login') {
       next({ path: '/admin/login', query: { redirect: to.fullPath } })
       return
+    }
+    // 角色级鉴权（前端兜底；服务端 @RequireRole 为权威校验）
+    const requiredRoles = (to.meta?.requiresRole as number[] | undefined) || []
+    if (requiredRoles.length > 0) {
+      // role 可能尚未从服务端拉取，尝试补拉一次
+      if (adminStore.role == null && token) {
+        await adminStore.fetchProfile()
+      }
+      if (adminStore.role != null && !requiredRoles.includes(adminStore.role)) {
+        next({ path: '/admin/dashboard', query: { denied: '1' } })
+        return
+      }
     }
   }
 
