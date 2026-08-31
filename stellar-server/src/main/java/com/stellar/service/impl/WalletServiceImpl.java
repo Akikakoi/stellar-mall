@@ -88,10 +88,10 @@ public class WalletServiceImpl implements WalletService {
         BigDecimal amount = dto.getAmount();
         String channel = dto.getChannel() != null ? dto.getChannel().toUpperCase() : "WECHAT";
 
-        // 乐观锁增加余额
-        int rows = walletMapper.addBalance(userId, amount, wallet.getVersion());
+        // 原子增加余额（余额条件内置，RR 下无需先读 version 再重试）
+        int rows = walletMapper.addBalanceAtomic(userId, amount);
         if (rows == 0) {
-            throw new BaseException("充值失败，请稍后重试（并发冲突）");
+            throw new BaseException("充值失败，请稍后重试");
         }
 
         // 重新读取余额
@@ -149,10 +149,10 @@ public class WalletServiceImpl implements WalletService {
             throw new BaseException("钱包余额不足，当前余额 ¥" + wallet.getBalance().setScale(2).toPlainString());
         }
 
-        // 乐观锁扣减
-        int rows = walletMapper.deductBalance(userId, amount, wallet.getVersion());
+        // 原子扣减余额（余额条件内置，RR 下无需先读 version 再重试）
+        int rows = walletMapper.deductBalanceAtomic(userId, amount);
         if (rows == 0) {
-            throw new BaseException("支付失败，请稍后重试（并发冲突）");
+            throw new BaseException("支付失败，请稍后重试（余额不足或并发冲突）");
         }
 
         // 重新读取余额
@@ -199,19 +199,13 @@ public class WalletServiceImpl implements WalletService {
     public void refundToWallet(Long userId, Long orderId, BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return;
 
-        // 增加余额（乐观锁 + 重试，避免并发冲突导致退款失败）
-        int rows = 0;
-        int maxRetry = 3;
-        for (int i = 0; i < maxRetry; i++) {
-            Wallet wallet = ensureWallet(userId);
-            rows = walletMapper.addBalance(userId, amount, wallet.getVersion());
-            if (rows > 0) break;
-            if (i < maxRetry - 1) {
-                log.warn("[WalletService] 退款乐观锁冲突（第{}次重试），用户 {}，订单 {}", i + 1, userId, orderId);
-            }
-        }
+        // 确保钱包账户存在（原乐观锁重试循环里逐轮调用，改原子 SQL 后仍需保底）
+        ensureWallet(userId);
+
+        // 原子增加余额（余额条件内置，RR 下无需先读 version 再重试）
+        int rows = walletMapper.addBalanceAtomic(userId, amount);
         if (rows == 0) {
-            throw new BaseException("退款失败，请稍后重试（并发冲突）");
+            throw new BaseException("退款失败，请稍后重试");
         }
 
         Wallet wallet = walletMapper.getByUserId(userId);

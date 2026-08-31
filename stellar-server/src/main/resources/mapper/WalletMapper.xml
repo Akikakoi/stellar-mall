@@ -58,6 +58,23 @@
           AND version = #{oldVersion}
     </update>
 
+    <!-- 原子扣减余额（支付）：余额条件内置，RR 下无需先读 version 再重试 -->
+    <update id="deductBalanceAtomic">
+        UPDATE stellar_wallet
+        SET balance = balance - #{amount},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND balance >= #{amount}
+    </update>
+
+    <!-- 原子增加余额（充值/退款入账）：加余额无余额条件，RR 下无需先读 version 再重试 -->
+    <update id="addBalanceAtomic">
+        UPDATE stellar_wallet
+        SET balance = balance + #{amount},
+            version = version + 1
+        WHERE user_id = #{userId}
+    </update>
+
     <!-- 累计充值金额 +amount -->
     <update id="addTotalRecharge">
         UPDATE stellar_wallet
