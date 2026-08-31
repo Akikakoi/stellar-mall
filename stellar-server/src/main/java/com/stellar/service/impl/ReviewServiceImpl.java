@@ -2,6 +2,8 @@ package com.stellar.service.impl;
 
 import com.stellar.context.BaseContext;
 import com.stellar.entity.Review;
+import com.stellar.exception.BaseException;
+import com.stellar.mapper.MallOrderItemMapper;
 import com.stellar.mapper.ReviewMapper;
 import com.stellar.mapper.SpuMapper;
 import com.stellar.result.PageResult;
@@ -32,6 +34,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewMapper reviewMapper;
     private final SpuMapper spuMapper;
     private final PointsService pointsService;
+    private final MallOrderItemMapper mallOrderItemMapper;
 
     /**
      * 提交评价。
@@ -47,6 +50,14 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     public Long submit(Review review) {
         Long userId = BaseContext.getCurrentId();
+        // 仅允许购买过该商品的用户评价，防止刷评价赚积分
+        if (review.getSpuId() == null) {
+            throw new BaseException("评价缺少商品信息");
+        }
+        int bought = mallOrderItemMapper.countBoughtByUser(userId, review.getSpuId());
+        if (bought <= 0) {
+            throw new BaseException("仅购买过该商品的用户可评价");
+        }
         review.setUserId(userId);
         review.setStatus(1);
         review.setCreateTime(LocalDateTime.now());

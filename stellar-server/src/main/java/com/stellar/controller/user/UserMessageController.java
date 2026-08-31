@@ -38,7 +38,7 @@ public class UserMessageController {
     @PutMapping("/{id}/read")
     @ApiOperation("标记消息为已读")
     public Result<Void> markAsRead(@PathVariable Long id) {
-        userMessageService.markAsRead(id);
+        userMessageService.markAsRead(BaseContext.getCurrentId(), id);
         return Result.success();
     }
 

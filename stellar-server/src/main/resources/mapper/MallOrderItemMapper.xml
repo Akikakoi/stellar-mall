@@ -68,4 +68,14 @@
         ORDER BY order_id ASC, id ASC
     </select>
 
+    <!-- 统计用户是否购买过指定 SPU（关联订单主表，排除待付款/已取消的订单） -->
+    <select id="countBoughtByUser" resultType="int">
+        SELECT COUNT(*)
+        FROM stellar_mall_order_item oi
+        JOIN stellar_mall_order o ON o.id = oi.order_id
+        WHERE oi.spu_id = #{spuId}
+          AND o.user_id = #{userId}
+          AND o.status NOT IN ('PENDING', 'CANCELLED')
+    </select>
+
 </mapper>

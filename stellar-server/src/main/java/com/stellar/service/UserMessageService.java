@@ -14,8 +14,8 @@ public interface UserMessageService {
     /** 获取未读数量 */
     long getUnreadCount(Long userId);
 
-    /** 标记已读 */
-    void markAsRead(Long id);
+    /** 标记已读（按 userId + id 双条件，防止横向越权） */
+    void markAsRead(Long userId, Long id);
 
     /** 全部标记已读 */
     void markAllAsRead(Long userId);
