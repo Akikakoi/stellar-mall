@@ -213,20 +213,54 @@ class OrderServiceProxyTest {
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
             when(cartMapper.deleteByIds(anyList())).thenReturn(1);
 
-            // Mock 优惠券
+            // Mock 优惠券：满减券 type=1，面值 50，门槛 200
             UserCoupon uc = UserCoupon.builder().id(100L).userId(USER_ID).status(1)
+                    .couponType(1).discountAmount(BigDecimal.valueOf(50))
                     .conditionAmount(BigDecimal.valueOf(200)).build();
             when(couponService.getUserCoupon(100L)).thenReturn(uc);
 
             OrderSubmitDTO dto = submitDto("地址", 1);
             dto.setUserCouponId(100L);
-            dto.setDiscountAmount(BigDecimal.valueOf(50));
+            // 前端即使传更大的抵扣金额，服务端也只按券面值 50 抵扣
+            dto.setDiscountAmount(BigDecimal.valueOf(999));
 
             MallOrder result = orderService.submit(USER_ID, dto);
 
-            // 原价300 - 优惠50 = 实付250
+            // 原价300 - 券面值50 = 实付250（忽略前端传入的 999）
             assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(300)));
             assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(250)));
+            verify(couponService).useCoupon(100L, ORDER_ID);
+        }
+
+        @Test @DisplayName("使用折扣券（type=2, 0.85）下单 → 按折扣率计算抵扣")
+        void withDiscountCoupon_calculatedByRate() {
+            Cart c = cart(1L, 10L, 1L, 1);
+            when(cartMapper.listCheckedByUserId(USER_ID)).thenReturn(Collections.singletonList(c));
+
+            Sku s = sku(10L, 1L, "S1", "默认", BigDecimal.valueOf(300));
+            when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(s));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "P1")));
+
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            stubOrderInsert();
+            when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
+            when(cartMapper.deleteByIds(anyList())).thenReturn(1);
+
+            // 折扣券 type=2：discountAmount=0.85 表示 85 折
+            UserCoupon uc = UserCoupon.builder().id(100L).userId(USER_ID).status(1)
+                    .couponType(2).discountAmount(BigDecimal.valueOf(0.85))
+                    .conditionAmount(BigDecimal.ZERO).build();
+            when(couponService.getUserCoupon(100L)).thenReturn(uc);
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setUserCouponId(100L);
+            dto.setDiscountAmount(BigDecimal.ZERO); // 前端传 0，服务端应忽略并自行计算
+
+            MallOrder result = orderService.submit(USER_ID, dto);
+
+            // 300 × (1-0.85) = 45 抵扣 → 实付 255
+            assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(300)));
+            assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(255)));
             verify(couponService).useCoupon(100L, ORDER_ID);
         }
 
@@ -339,6 +373,97 @@ class OrderServiceProxyTest {
             MallOrder result = orderService.submitDirect(USER_ID, dto);
             assertNotNull(result);
             verify(cartMapper).deleteByIds(argThat(ids -> ids.contains(99L)));
+        }
+
+        @Test @DisplayName("直购数量为负 → 抛 BaseException，不扣库存不写订单")
+        void negativeQuantity_throwsBaseException() {
+            OrderSubmitDTO.OrderItemDTO item = new OrderSubmitDTO.OrderItemDTO();
+            item.setSkuId(10L); item.setQuantity(-3);
+            item.setPrice(BigDecimal.valueOf(100));
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setItems(Collections.singletonList(item));
+
+            when(skuMapper.listByIds(anyList())).thenReturn(
+                    Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
+
+            assertThrows(BaseException.class, () -> orderService.submitDirect(USER_ID, dto));
+            verify(skuStockService, never()).deduct(anyLong(), anyInt());
+            verify(mallOrderMapper, never()).insert(any());
+        }
+
+        @Test @DisplayName("直购额外费用为负 → 抛 BaseException，不扣库存不写订单")
+        void negativeExtraAmount_throwsBaseException() {
+            OrderSubmitDTO.OrderItemDTO item = new OrderSubmitDTO.OrderItemDTO();
+            item.setSkuId(10L); item.setQuantity(1);
+            item.setPrice(BigDecimal.valueOf(100));
+            item.setExtraAmount(BigDecimal.valueOf(-50));
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setItems(Collections.singletonList(item));
+
+            when(skuMapper.listByIds(anyList())).thenReturn(
+                    Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
+
+            assertThrows(BaseException.class, () -> orderService.submitDirect(USER_ID, dto));
+            verify(skuStockService, never()).deduct(anyLong(), anyInt());
+            verify(mallOrderMapper, never()).insert(any());
+        }
+
+        @Test @DisplayName("直购正常附加保障服务费 → 订单总额含服务费")
+        void directWithExtraAmount_totalIncludesFee() {
+            OrderSubmitDTO.OrderItemDTO item = new OrderSubmitDTO.OrderItemDTO();
+            item.setSkuId(10L); item.setQuantity(2);
+            item.setPrice(BigDecimal.valueOf(100));
+            item.setExtraAmount(BigDecimal.valueOf(10));
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setItems(Collections.singletonList(item));
+            dto.setClearCart(false);
+
+            when(skuMapper.listByIds(anyList())).thenReturn(
+                    Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
+
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            stubOrderInsert();
+            when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
+
+            MallOrder result = orderService.submitDirect(USER_ID, dto);
+
+            // 100×2 + 10 = 210
+            assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(210)));
+            assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(210)));
+        }
+
+        @Test @DisplayName("直购前端篡改价格（URL 传 1 元，库表价 100）→ 按库表价计价，防 0 元下单")
+        void directWithTamperedPrice_usesServerPrice() {
+            // 模拟攻击：前端从 URL query 解析出的 price=1（0 元单攻击路径）
+            OrderSubmitDTO.OrderItemDTO item = new OrderSubmitDTO.OrderItemDTO();
+            item.setSkuId(10L); item.setQuantity(2);
+            item.setPrice(BigDecimal.ONE);
+            item.setExtraAmount(BigDecimal.ZERO);
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setItems(Collections.singletonList(item));
+            dto.setClearCart(false);
+
+            // 库表价 100，与前端传入的 1 元不同
+            when(skuMapper.listByIds(anyList())).thenReturn(
+                    Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
+
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            stubOrderInsert();
+            when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
+
+            MallOrder result = orderService.submitDirect(USER_ID, dto);
+
+            // 必须按库表价 100×2=200 计价，忽略前端传入的 1 元
+            assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(200)));
+            assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(200)));
         }
     }
 

@@ -88,7 +88,7 @@ public class OrderServiceImpl implements OrderService {
         return createOrder(uid, dto.getAddress(), dto.getConsignee(), dto.getPhone(),
                 dto.getPayMethod(), dto.getRemark(),
                 calculateTotal(lines), lines, cartIdsToDelete,
-                dto.getUserCouponId(), dto.getDiscountAmount(),
+                dto.getUserCouponId(),
                 dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount());
     }
 
@@ -129,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
         return createOrder(uid, dto.getAddress(), dto.getConsignee(), dto.getPhone(),
                 dto.getPayMethod(), dto.getRemark(),
                 calculateTotal(lines), lines, cartIdsToDelete,
-                dto.getUserCouponId(), dto.getDiscountAmount(),
+                dto.getUserCouponId(),
                 dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount());
     }
 
@@ -157,6 +157,9 @@ public class OrderServiceImpl implements OrderService {
                 throw new BaseException("SKU（id=" + sku.getId() + "）已停售，无法下单");
             }
             int qty = c.getQty() == null ? 1 : c.getQty();
+            if (qty < 1) {
+                throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（购买数量必须大于 0）");
+            }
             checkStock(sku, qty);
             Spu spu = c.getSpuId() == null ? null : spuMap.get(c.getSpuId());
             lines.add(buildLine(c, sku, spu, qty));
@@ -184,8 +187,15 @@ public class OrderServiceImpl implements OrderService {
                 throw new BaseException("SKU（id=" + sku.getId() + "）已停售，无法下单");
             }
             int qty = item.getQuantity() == null ? 1 : item.getQuantity();
+            if (qty < 1) {
+                throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（购买数量必须大于 0）");
+            }
             checkStock(sku, qty);
+            // 额外费用（保障服务等）必须非负，否则前端可传负值压低订单总价
             BigDecimal extraAmount = item.getExtraAmount() == null ? BigDecimal.ZERO : item.getExtraAmount();
+            if (extraAmount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（额外费用不能为负数）");
+            }
             Spu spu = sku.getSpuId() == null ? null : spuMap.get(sku.getSpuId());
             lines.add(buildLine(null, sku, spu, qty, extraAmount));
         }
@@ -220,6 +230,34 @@ public class OrderServiceImpl implements OrderService {
         return buildLine(cart, sku, spu, qty, BigDecimal.ZERO);
     }
 
+    /**
+     * 按优惠券类型权威计算抵扣金额（服务端计算，不信任前端传入的 discountAmount）。
+     * <p>满减券（type=1）：抵扣 = min(券面值, 订单总额)；折扣券（type=2）：
+     * discountAmount 存折扣率（0.85=85折），抵扣 = 总额 × (1 - 折扣率)，四舍五入到分。</p>
+     */
+    private BigDecimal calculateCouponDiscount(UserCoupon uc, BigDecimal total) {
+        if (uc == null || total == null) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal base = total.max(BigDecimal.ZERO);
+        Integer type = uc.getCouponType();
+        BigDecimal face = uc.getDiscountAmount();
+        if (type != null && type == 2) {
+            // 折扣券：面值即折扣率，正常范围 (0,1)，越界按无效券处理（不抵扣）
+            if (face == null || face.compareTo(BigDecimal.ZERO) <= 0 || face.compareTo(BigDecimal.ONE) >= 0) {
+                return BigDecimal.ZERO;
+            }
+            BigDecimal discount = base.multiply(BigDecimal.ONE.subtract(face))
+                    .setScale(2, java.math.RoundingMode.HALF_UP);
+            return discount.max(BigDecimal.ZERO).min(base);
+        }
+        // 满减券（type=1 或未知类型）：抵扣 = min(面值, 总额)
+        if (face == null) {
+            return BigDecimal.ZERO;
+        }
+        return face.max(BigDecimal.ZERO).min(base);
+    }
+
     private OrderLine buildLine(Cart cart, Sku sku, Spu spu, int qty, BigDecimal extraAmount) {
         BigDecimal price = sku.getPrice() == null ? BigDecimal.ZERO : sku.getPrice();
         BigDecimal subtotal = price.multiply(BigDecimal.valueOf(qty));
@@ -241,9 +279,9 @@ public class OrderServiceImpl implements OrderService {
     private MallOrder createOrder(Long uid, String address, String consignee, String phone,
                                    Integer payMethod, String remark,
                                    BigDecimal total, List<OrderLine> lines, List<Long> cartIdsToDelete,
-                                   Long userCouponId, BigDecimal discountAmount,
+                                   Long userCouponId,
                                    boolean usePoints, BigDecimal requestedPointsAmount) {
-        // 校验并使用优惠券
+        // 校验并使用优惠券。抵扣金额由服务端按优惠券面值/折扣率计算，不信任前端传入的 discountAmount
         BigDecimal discount = BigDecimal.ZERO;
         if (userCouponId != null) {
             UserCoupon userCoupon = couponService.getUserCoupon(userCouponId);
@@ -264,19 +302,12 @@ public class OrderServiceImpl implements OrderService {
             if (total.compareTo(userCoupon.getConditionAmount() == null ? BigDecimal.ZERO : userCoupon.getConditionAmount()) < 0) {
                 throw new BaseException("订单金额未达到优惠券使用门槛");
             }
-            discount = discountAmount == null ? BigDecimal.ZERO : discountAmount;
-            if (discount.compareTo(total) > 0) {
-                discount = total;
-            }
+            // 服务端权威计算：满减券按面值、折扣券按折扣率（0.85=85折），两者均不超订单总额
+            discount = calculateCouponDiscount(userCoupon, total);
         }
 
-        BigDecimal         payAmountBeforePoints = total.subtract(discount).max(BigDecimal.ZERO);
-
-        // 对浮点数精度做归一化，防止前端 JS 浮点漂移（如 599.8999999999999）
-        if (discountAmount != null) {
-            discount = discountAmount.setScale(2, java.math.RoundingMode.HALF_UP);
-            payAmountBeforePoints = total.subtract(discount).max(BigDecimal.ZERO);
-        }
+        // 对浮点数精度做归一化，防止 JS 浮点漂移（如 599.8999999999999）
+        BigDecimal payAmountBeforePoints = total.subtract(discount).max(BigDecimal.ZERO);
 
         // 构造订单（先用原始 payAmount，积分抵扣后再更新）
         MallOrder order = MallOrder.builder()
