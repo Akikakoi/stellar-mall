@@ -107,7 +107,8 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("token", "authentication", "Content-Disposition")
-                .allowCredentials(true)
+                // 鉴权走自定义 header（token / Authorization），不使用 Cookie，
+                // 因此不开 allowCredentials——避免 "*" 通配 + 凭证组合（反射任意来源带凭证）的安全风险
                 .maxAge(3600);
     }
 
