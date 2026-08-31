@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.annotation.RequireRole;
 import com.stellar.service.OrderService;
 import com.stellar.service.SpuService;
 import io.swagger.annotations.Api;
@@ -20,6 +21,7 @@ public class BatchOperationController {
     private final SpuService spuService;
     private final OrderService orderService;
 
+@RequireRole({1, 2})
     @PostMapping("/spu/shelf")
     @ApiOperation("批量上架")
     public Result<String> batchShelf(@RequestBody Map<String, Object> body) {
@@ -33,6 +35,7 @@ public class BatchOperationController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @PostMapping("/spu/unshelf")
     @ApiOperation("批量下架")
     public Result<String> batchUnshelf(@RequestBody Map<String, Object> body) {
@@ -46,6 +49,7 @@ public class BatchOperationController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @PostMapping("/order/ship")
     @ApiOperation("批量发货")
     public Result<String> batchShip(@RequestBody Map<String, Object> body) {

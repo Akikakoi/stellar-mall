@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.entity.RagSyncOutbox;
+import com.stellar.annotation.RequireRole;
 import com.stellar.ragsync.service.RagSyncService;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
@@ -40,6 +41,7 @@ public class RagSyncAdminController {
 
     private final RagSyncService ragSyncService;
 
+@RequireRole({1, 2})
     @GetMapping("/pending")
     @ApiOperation("分页查询未同步的 outbox（synced=0 AND failed=0）")
     public Result<PageResult> listPending(
@@ -49,6 +51,7 @@ public class RagSyncAdminController {
         return Result.success(mapPage(raw));
     }
 
+@RequireRole({1, 2})
     @GetMapping("/list")
     @ApiOperation("分页查询所有 outbox，支持 status/eventType/bizId 过滤")
     public Result<PageResult> list(
@@ -61,6 +64,7 @@ public class RagSyncAdminController {
         return Result.success(mapPage(raw));
     }
 
+@RequireRole({1, 2})
     @GetMapping("/stats")
     @ApiOperation("outbox 统计：total / synced / pending / failed")
     public Result<Map<String, Long>> stats() {
@@ -70,6 +74,7 @@ public class RagSyncAdminController {
         return Result.success(s);
     }
 
+@RequireRole({1, 2})
     @PostMapping("/retry/{id}")
     @ApiOperation("单条重试：先清空失败标记与重试计数，再立即同步一次")
     public Result<Void> retryOne(@PathVariable Long id) {
@@ -77,6 +82,7 @@ public class RagSyncAdminController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @PostMapping("/process-all")
     @ApiOperation("清队列：循环 processPendingBatch(50) 直到返回 0，返回处理统计")
     public Result<Map<String, Integer>> processAll() {

@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.elasticsearch.sync.SpuEsSyncService;
+import com.stellar.annotation.RequireRole;
 import com.stellar.result.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,6 +21,7 @@ public class EsAdminController {
 
     private final SpuEsSyncService spuEsSyncService;
 
+@RequireRole({1, 2})
     @PostMapping("/rebuild")
     @ApiOperation("全量重建 SPU 搜索索引（将 MySQL 所有商品同步到 ES）")
     public Result<Long> rebuild() {

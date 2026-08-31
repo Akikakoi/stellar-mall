@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
+import com.stellar.annotation.RequireRole;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.dto.SpuSaveDTO;
 import com.stellar.elasticsearch.service.SpuSearchService;
@@ -28,6 +29,7 @@ public class SpuController {
     private final SpuSearchService spuSearchService;
 
     @Idempotent(keyPrefix = "admin-spu-save", windowSeconds = 300)
+@RequireRole({1, 2})
     @PostMapping
     @ApiOperation("新增 SPU（含嵌套 SKU）")
     public Result<Map<String, Long>> save(@RequestBody @Valid SpuSaveDTO dto) {
@@ -37,6 +39,7 @@ public class SpuController {
         return Result.success(data);
     }
 
+@RequireRole({1, 2})
     @GetMapping("/{id}")
     @ApiOperation("根据 id 查询 SPU 详情（含 SKU 列表）")
     public Result<Spu> getById(@PathVariable Long id) {
@@ -44,6 +47,7 @@ public class SpuController {
     }
 
     @Idempotent(keyPrefix = "admin-spu-update", windowSeconds = 300)
+@RequireRole({1, 2})
     @PutMapping
     @ApiOperation("更新 SPU（传 SKU 则覆盖原 SKU，不传则保留）")
     public Result<String> update(@RequestBody @Valid SpuSaveDTO dto) {
@@ -51,6 +55,7 @@ public class SpuController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @DeleteMapping("/{id}")
     @ApiOperation("删除 SPU（同步删除关联 SKU）")
     public Result<String> delete(@PathVariable Long id) {
@@ -58,6 +63,7 @@ public class SpuController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @PostMapping("/status/{status}")
     @ApiOperation("上下架：status=1 上架 / 0 下架")
     public Result<String> onOffShelf(@RequestParam Long id, @PathVariable Integer status) {
@@ -65,6 +71,7 @@ public class SpuController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @PostMapping("/batch-status/{status}")
     @ApiOperation("批量上下架：status=1 上架 / 0 下架")
     public Result<String> batchOnOffShelf(@RequestBody List<Long> ids, @PathVariable Integer status) {
@@ -72,6 +79,7 @@ public class SpuController {
         return Result.success();
     }
 
+@RequireRole({1, 2})
     @GetMapping("/page")
     @ApiOperation("分页查询 SPU（优先 ES 中文分词搜索，支持名称模糊/分类/状态/价格区间）")
     public Result<PageResult> page(SpuPageQueryDTO dto) {

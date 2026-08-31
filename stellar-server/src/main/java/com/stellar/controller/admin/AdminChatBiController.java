@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.annotation.RequireRole;
 import com.stellar.service.ChatBiService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +27,7 @@ public class AdminChatBiController {
 
     private final ChatBiService chatBiService;
 
+@RequireRole({1, 2})
     @PostMapping("/query")
     @ApiOperation("自然语言查数（LLM 生成 SQL 并执行，耗时较长，前端需放宽超时）")
     public Result<Map<String, Object>> query(@RequestBody Map<String, String> body) {

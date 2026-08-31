@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.annotation.RequireRole;
 import com.stellar.service.DataExportService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +23,7 @@ public class DataExportController {
 
     private final DataExportService dataExportService;
 
+@RequireRole({1, 2})
     @GetMapping("/orders")
     @ApiOperation("导出订单数据 Excel")
     public ResponseEntity<byte[]> exportOrders(
@@ -32,6 +34,7 @@ public class DataExportController {
         return buildResponse(data, "订单数据导出.xlsx");
     }
 
+@RequireRole({1, 2})
     @GetMapping("/users")
     @ApiOperation("导出用户数据 Excel")
     public ResponseEntity<byte[]> exportUsers() throws UnsupportedEncodingException {
@@ -39,6 +42,7 @@ public class DataExportController {
         return buildResponse(data, "用户数据导出.xlsx");
     }
 
+@RequireRole({1, 4})
     @GetMapping("/finance")
     @ApiOperation("导出财务报表 Excel")
     public ResponseEntity<byte[]> exportFinance(

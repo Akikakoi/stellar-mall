@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.annotation.Idempotent;
+import com.stellar.annotation.RequireRole;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.AfterSaleAuditDTO;
 import com.stellar.result.PageResult;
@@ -25,6 +26,7 @@ public class AfterSaleAdminController {
 
     private final AfterSaleService afterSaleService;
 
+@RequireRole({1, 2, 3})
     @GetMapping("/page")
     @ApiOperation("售后列表（分页）")
     public Result<PageResult> page(@RequestParam(defaultValue = "1") Integer page,
@@ -34,6 +36,7 @@ public class AfterSaleAdminController {
         return Result.success(afterSaleService.pageAll(page, pageSize, status, type));
     }
 
+@RequireRole({1, 2, 3})
     @GetMapping("/{id}")
     @ApiOperation("售后详情")
     public Result<AfterSaleVO> detail(@PathVariable Long id) {
@@ -41,6 +44,7 @@ public class AfterSaleAdminController {
     }
 
     @Idempotent(keyPrefix = "admin-aftersale-audit", windowSeconds = 300)
+@RequireRole({1, 2, 3})
     @PostMapping("/audit")
     @ApiOperation("审核售后单")
     public Result<Void> audit(@RequestBody AfterSaleAuditDTO dto) {
@@ -50,6 +54,7 @@ public class AfterSaleAdminController {
     }
 
     @Idempotent(keyPrefix = "admin-aftersale-refund", windowSeconds = 300)
+@RequireRole({1, 2, 4})
     @PostMapping("/{id}/confirm-refund")
     @ApiOperation("确认退款完成")
     public Result<Void> confirmRefund(@PathVariable Long id) {
