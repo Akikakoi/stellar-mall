@@ -4,11 +4,14 @@ import com.stellar.entity.Sku;
 import com.stellar.exception.BaseException;
 import com.stellar.service.SkuStockService;
 import com.stellar.service.SkuService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,6 +30,25 @@ class SkuStockServiceTest {
     @Autowired(required = false)
     private SkuService skuService;
 
+    /**
+     * 本测试写入真实 H2，spu_id 是硬编码的虚拟值 1L。
+     * H2 是测试间共享的（DB_CLOSE_DELAY=-1），若不清理会污染后续按 spu_id 聚合的用例
+     * （例如 SpuSkuServiceTest 新建的 SPU 恰好也拿到 id=1，会把这里的孤儿 SKU 一起聚合）。
+     */
+    private final List<Long> createdSkuIds = new ArrayList<>();
+
+    @AfterEach
+    void cleanUpSkus() {
+        for (Long id : createdSkuIds) {
+            try {
+                skuService.deleteById(id);
+            } catch (Exception ignored) {
+                // 清理失败不影响用例本身
+            }
+        }
+        createdSkuIds.clear();
+    }
+
     private Sku createSkuWithStock(int stock) {
         Sku s = new Sku();
         s.setSpuId(1L);
@@ -37,6 +59,7 @@ class SkuStockServiceTest {
         s.setSort(1);
         s.setStatus(1);
         skuService.save(s);
+        createdSkuIds.add(s.getId());
         return s;
     }
 
