@@ -29,6 +29,13 @@ public class SpuImportExportController {
 
     private final SpuImportExportService importExportService;
 
+    /** 允许的 Excel 扩展名 */
+    private static final java.util.Set<String> ALLOWED_EXCEL_EXT = java.util.Collections.unmodifiableSet(
+            new java.util.HashSet<>(java.util.Arrays.asList(".xlsx", ".xls")));
+
+    /** 导入文件大小上限：10MB */
+    private static final long MAX_IMPORT_SIZE = 10L * 1024 * 1024;
+
 @RequireRole({1, 2})
     @GetMapping("/export")
     @ApiOperation("导出全部商品为 Excel")
@@ -59,6 +66,16 @@ public class SpuImportExportController {
     public Result<Map<String, Object>> importSpu(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return Result.error("上传文件为空");
+        }
+        String name = file.getOriginalFilename();
+        String lower = name == null ? "" : name.toLowerCase(java.util.Locale.ROOT);
+        int dot = lower.lastIndexOf('.');
+        String ext = dot >= 0 ? lower.substring(dot) : "";
+        if (!ALLOWED_EXCEL_EXT.contains(ext)) {
+            return Result.error("仅支持 Excel 文件（.xlsx / .xls）");
+        }
+        if (file.getSize() > MAX_IMPORT_SIZE) {
+            return Result.error("导入文件不能超过 10MB");
         }
         try {
             Map<String, Object> summary = importExportService.importFromExcel(file);
