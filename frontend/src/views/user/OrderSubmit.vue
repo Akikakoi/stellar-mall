@@ -190,7 +190,7 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { submitOrder, payOrder, getWallet, listAddresses, saveAddress, getUserPoints } from '@/api/mall'
-import { userRequest } from '@/api/request'
+import { userRequest, getOrCreateIdempotencyKey, resetIdempotencyKey } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const __PH = window.__PH
@@ -510,6 +510,10 @@ function calcAmount() {
 // ==================== 提交订单 ====================
 /** 提交订单：校验收货信息、组装订单数据，提交成功后发起支付并跳转订单列表 */
 async function handleSubmit() {
+  // 业务动作维度的幂等键：一次点击 = 一次动作，重试 / 重复点击复用同一 key，
+  // 防止后端幂等切面因 key 每次不同而拦截不住（会创建两笔订单）
+  const SUBMIT_ACTION = 'order:submit'
+  const idempotencyKey = getOrCreateIdempotencyKey(SUBMIT_ACTION)
   if (orderItems.value.length === 0) {
     ElMessage.warning('请先选择商品')
     return
@@ -560,10 +564,14 @@ async function handleSubmit() {
       // 立即购买不清空购物车，购物车下单才清空
       clearCart: !isDirect.value
     }
-    const res = await submitOrder(payload)
+    const res = await submitOrder(payload, idempotencyKey)
     const orderId = res?.id || res?.orderId
     const payAmount = Number(res?.payAmount ?? finalAmount.value)
     submitting.value = false
+
+    // 下单成功 → 本次业务动作完成，重置幂等键（下一次点击是新动作，用新 key）。
+    // 注意：仅在成功后重置；失败时保留 key，用户重试仍复用同一 key，不会重复下单
+    resetIdempotencyKey(SUBMIT_ACTION)
 
     // 购物车下单：提交成功后立即清空本地已勾选项，不论用户是否付款
     if (!isDirect.value) {

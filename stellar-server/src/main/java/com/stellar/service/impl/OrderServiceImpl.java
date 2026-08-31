@@ -7,6 +7,7 @@ import com.stellar.enumeration.OrderStatus;
 import com.stellar.exception.BaseException;
 import com.stellar.mapper.*;
 import com.stellar.service.CouponService;
+import com.stellar.service.OrderCancelService;
 import com.stellar.service.OrderService;
 import com.stellar.service.NotificationService;
 import com.stellar.service.PointsService;
@@ -56,6 +57,8 @@ public class OrderServiceImpl implements OrderService {
     private final com.stellar.service.WalletService walletService;
     private final NotificationService notificationService;
     private final PointsService pointsService;
+    /** 过期订单逐笔取消（独立 REQUIRES_NEW 事务），避免批量取消中一笔失败影响其他笔。 */
+    private final OrderCancelService orderCancelService;
 
     // -------- 提交订单 --------
 
@@ -810,36 +813,69 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 标记订单为退款中状态。
      * 供售后模块调用，将订单状态更新为退款中。
+     * <p>仅已支付/已发货/已完成状态的订单可进入退款中，防止 PENDING 等
+     * 未付款订单被误改；已是退款中时幂等返回；状态流转用 CAS 防并发竞态。</p>
      *
      * @param orderId 订单ID
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void markRefunding(Long orderId) {
-        mallOrderMapper.updateStatus(orderId, OrderStatus.REFUNDING.getBackendValue());
+        MallOrder order = mallOrderMapper.getById(orderId);
+        if (order == null) {
+            throw new BaseException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        String status = order.getStatus();
+        // 已是退款中 → 幂等返回（同一订单存在多个售后单时会重复触发）
+        if (OrderStatus.REFUNDING.getBackendValue().equals(status)) {
+            log.info("[OrderService] 订单 {} 已是退款中，跳过重复标记", orderId);
+            return;
+        }
+        // 仅已支付/已发货/已完成可退款
+        if (!OrderStatus.PAID.getBackendValue().equals(status)
+                && !OrderStatus.SHIPPED.getBackendValue().equals(status)
+                && !OrderStatus.COMPLETED.getBackendValue().equals(status)) {
+            throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
+                    + "（当前状态=" + status + "，仅已支付/已发货/已完成订单可申请退款）");
+        }
+        // CAS 占位：并发下订单状态可能刚被变更（如已取消），rows==0 即中止
+        int rows = mallOrderMapper.casUpdateStatus(orderId, status, OrderStatus.REFUNDING.getBackendValue());
+        if (rows == 0) {
+            throw new BaseException(MessageConstant.ORDER_STATUS_ERROR + "（订单状态已变更，请刷新后重试）");
+        }
         log.info("[OrderService] 订单 {} 售后申请已提交，状态标记为退款中", orderId);
     }
 
     /**
      * 完成退款处理。
      * 回滚订单项库存，将订单标记为已退款。已取消的订单不可退款。
+     * <p>幂等保护：先用带 {@code is_refunded = 0} 条件的 {@code markRefunded} 原子占位，
+     * rows==0 说明已退款或状态不允许——已退款则直接返回（不重复回滚库存），
+     * 已取消则抛业务异常，从根上杜绝重复退款导致库存被回滚两次。</p>
      *
      * @param orderId 订单ID
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void completeRefund(Long orderId) {
-        MallOrder order = mallOrderMapper.getById(orderId);
-        if (order == null) {
-            throw new BaseException(MessageConstant.ORDER_NOT_FOUND);
-        }
-        // 允许 COMPLETED/PAID/SHIPPED 状态的订单完成退款
-        if (OrderStatus.CANCELLED.getBackendValue().equals(order.getStatus())) {
-            throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
-                    + "（当前状态=" + order.getStatus() + "，已取消的订单不可退款）");
+        // 幂等占位：仅未退款且非已取消/已退款的订单会被标记，rows==0 时不再回滚库存
+        int rows = mallOrderMapper.markRefunded(orderId);
+        if (rows == 0) {
+            MallOrder order = mallOrderMapper.getById(orderId);
+            if (order == null) {
+                throw new BaseException(MessageConstant.ORDER_NOT_FOUND);
+            }
+            if (OrderStatus.CANCELLED.getBackendValue().equals(order.getStatus())) {
+                throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
+                        + "（当前状态=" + order.getStatus() + "，已取消的订单不可退款）");
+            }
+            // 已退款（is_refunded=1）或状态不允许 → 幂等跳过，避免重复回滚库存导致库存虚增
+            log.warn("[OrderService] 订单 {} 退款被跳过（status={}, isRefunded={}），可能已处理过",
+                    orderId, order.getStatus(), order.getIsRefunded());
+            return;
         }
 
-        // 回滚库存
+        // 占位成功 → 回滚库存
         List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(orderId);
         if (items != null) {
             for (MallOrderItem it : items) {
@@ -848,7 +884,6 @@ public class OrderServiceImpl implements OrderService {
             }
         }
 
-        mallOrderMapper.markRefunded(orderId);
         log.info("[OrderService] 订单 {} 退款完成，库存已回滚，已标记退款", orderId);
     }
 
@@ -878,6 +913,11 @@ public class OrderServiceImpl implements OrderService {
      * 扫描超出 {@value #ORDER_EXPIRE_MINUTES} 分钟未支付的待付款订单并逐个取消，
      * 包括回滚库存、解冻积分、退还优惠券。
      *
+     * <p>每一笔通过 {@link OrderCancelService#cancelExpiredOrder} 在独立 REQUIRES_NEW
+     * 事务中执行：CAS 改状态 + 回滚库存等要么全部提交、要么全部回滚——回滚库存一旦抛异常，
+     * 事务整体回滚（订单保持 PENDING），库存不会因“订单已取消但库存未归还”而丢失；
+     * 单笔失败也不影响批次中的其他订单。</p>
+     *
      * @param limit 最大取消数量
      * @return 实际取消的订单数
      */
@@ -891,48 +931,15 @@ public class OrderServiceImpl implements OrderService {
         for (MallOrder order : expiredList) {
             if (cancelled >= limit) break;
             try {
-                if (cancelOrderInternal(order)) {
+                if (orderCancelService.cancelExpiredOrder(order)) {
                     cancelled++;
                 }
             } catch (Exception e) {
+                // 单笔失败仅回滚该笔的 REQUIRES_NEW 事务，不影响其他订单
                 log.error("[OrderService] 自动取消过期订单失败: orderId={}, orderNo={}", order.getId(), order.getOrderNo(), e);
             }
         }
         log.info("[OrderService] 自动取消了 {} 笔过期订单（共扫描到 {} 笔）", cancelled, expiredList.size());
         return cancelled;
-    }
-
-    /**
-     * 内部取消订单：不校验用户归属，仅对被 CancelExpired 调用使用。
-     * 逻辑与 cancel 一致：CAS 占状态 → 回滚库存 + 解冻积分 + 退优惠券。
-     *
-     * @return true = 实际取消成功；false = 状态已变更（如刚被支付）跳过，不计入取消数
-     */
-    private boolean cancelOrderInternal(MallOrder order) {
-        if (!OrderStatus.PENDING.getBackendValue().equals(order.getStatus())) {
-            log.info("[OrderService] 订单 {} 已非待付款状态（当前={}），跳过自动取消", order.getId(), order.getStatus());
-            return false;
-        }
-
-        // 先 CAS 占住 PENDING → CANCELLED，竞争失败说明订单刚被支付，跳过（不动库存）
-        int rows = mallOrderMapper.casUpdateStatus(order.getId(),
-                OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
-        if (rows == 0) {
-            log.info("[OrderService] 订单 {} CAS 竞争失败（可能刚被支付），跳过自动取消", order.getId());
-            return false;
-        }
-
-        List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(order.getId());
-        if (items != null) {
-            for (MallOrderItem it : items) {
-                skuStockService.rollback(it.getSkuId(), it.getQty() == null ? 0 : it.getQty());
-            }
-        }
-
-        unfreezeOrderPointsQuietly(order.getUserId(), order.getId());
-        couponService.returnCouponByOrderId(order.getId());
-
-        log.info("[OrderService] 订单 {} 已自动过期取消（超 {} 分钟未支付）", order.getId(), ORDER_EXPIRE_MINUTES);
-        return true;
     }
 }

@@ -178,11 +178,17 @@
         DELETE FROM stellar_mall_order WHERE id = #{id}
     </delete>
 
-    <!-- 标记整单退款完成 -->
+    <!-- 标记整单退款完成（幂等：仅未退款且非已取消/已退款的订单可被标记）。
+         is_refunded = 0 是数据层幂等防线：重复调用第二次 rows=0，调用方据此跳过库存回滚，
+         杜绝重复退款导致库存被回滚两次（库存虚增 → 后续超卖）。
+         status != 'CANCELLED' 保持“已取消订单不可退款”的业务约束。 -->
     <update id="markRefunded">
         UPDATE stellar_mall_order
         SET status = 'REFUNDED', is_refunded = 1
         WHERE id = #{id}
+          AND is_refunded = 0
+          AND status != 'CANCELLED'
+          AND status != 'REFUNDED'
     </update>
 
     <!-- 导出：查询全部订单（关联用户手机号） -->

@@ -152,12 +152,18 @@ export function clearCart(): Promise<any> {
 
 // =========================== 订单 ===========================
 
-/** 提交订单 */
-export function submitOrder(data: any): Promise<any> {
+/**
+ * 提交订单。
+ * @param data 订单数据
+ * @param idempotencyKey 业务动作维度的幂等键：同一动作（如一次点击提交）复用同一 key，
+ *                       重试 / 重复点击不会创建多笔订单；不传时由 request.ts 自动生成
+ */
+export function submitOrder(data: any, idempotencyKey?: string): Promise<any> {
   return userRequest({
     url: '/user/order/submit',
     method: 'post',
-    data
+    data,
+    headers: idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : undefined
   })
 }
 

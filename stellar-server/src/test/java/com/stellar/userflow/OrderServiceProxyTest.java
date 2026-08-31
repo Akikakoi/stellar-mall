@@ -69,6 +69,7 @@ class OrderServiceProxyTest {
     @Mock private WalletService walletService;
     @Mock private NotificationService notificationService;
     @Mock private PointsService pointsService;
+    @Mock private OrderCancelService orderCancelService;
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -604,13 +605,47 @@ class OrderServiceProxyTest {
     @Nested @DisplayName("10. markRefunding — 标记退款中")
     class MarkRefundingTests {
 
-        @Test @DisplayName("标记退款中 → 状态变更为 REFUNDING")
+        @Test @DisplayName("已支付订单 → CAS 变更为 REFUNDING")
         void markRefunding_success() {
-            when(mallOrderMapper.updateStatus(ORDER_ID, OrderStatus.REFUNDING.getBackendValue())).thenReturn(1);
+            MallOrder o = order(ORDER_ID, OrderStatus.PAID.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
+            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+            when(mallOrderMapper.casUpdateStatus(ORDER_ID,
+                    OrderStatus.PAID.getBackendValue(), OrderStatus.REFUNDING.getBackendValue())).thenReturn(1);
 
             orderService.markRefunding(ORDER_ID);
 
-            verify(mallOrderMapper).updateStatus(ORDER_ID, OrderStatus.REFUNDING.getBackendValue());
+            verify(mallOrderMapper).casUpdateStatus(ORDER_ID,
+                    OrderStatus.PAID.getBackendValue(), OrderStatus.REFUNDING.getBackendValue());
+            // 不再走无条件 updateStatus
+            verify(mallOrderMapper, never()).updateStatus(anyLong(), anyString());
+        }
+
+        @Test @DisplayName("待付款订单 → 不可标记退款，抛 BaseException")
+        void markRefundingPending_throws() {
+            MallOrder o = order(ORDER_ID, OrderStatus.PENDING.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
+            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+
+            assertThrows(BaseException.class, () -> orderService.markRefunding(ORDER_ID));
+            verify(mallOrderMapper, never()).casUpdateStatus(anyLong(), anyString(), anyString());
+        }
+
+        @Test @DisplayName("已是退款中 → 幂等返回，不重复更新")
+        void markRefundingAlreadyRefunding_idempotent() {
+            MallOrder o = order(ORDER_ID, OrderStatus.REFUNDING.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
+            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+
+            orderService.markRefunding(ORDER_ID);
+
+            verify(mallOrderMapper, never()).casUpdateStatus(anyLong(), anyString(), anyString());
+        }
+
+        @Test @DisplayName("订单不存在 → BaseException")
+        void markRefundingNonExistent_throws() {
+            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(null);
+            assertThrows(BaseException.class, () -> orderService.markRefunding(ORDER_ID));
         }
     }
 
@@ -620,10 +655,8 @@ class OrderServiceProxyTest {
 
         @Test @DisplayName("已完成订单退款 → 回滚库存+标记已退款")
         void refundCompleted_success() {
-            MallOrder o = order(ORDER_ID, OrderStatus.COMPLETED.getBackendValue(), USER_ID,
-                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
-            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
-
+            // 新实现：markRefunded 幂等占位成功（返回1）后直接回滚库存，
+            // 无需预先 getById（getById 仅在占位失败时用于区分已退款/已取消）
             MallOrderItem it = orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 3, BigDecimal.valueOf(100));
             when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Collections.singletonList(it));
             when(mallOrderMapper.markRefunded(ORDER_ID)).thenReturn(1);
@@ -632,6 +665,7 @@ class OrderServiceProxyTest {
 
             verify(skuStockService).rollback(10L, 3);
             verify(mallOrderMapper).markRefunded(ORDER_ID);
+            verify(mallOrderMapper, never()).getById(anyLong());
         }
 
         @Test @DisplayName("已取消订单 → 不可退款")
@@ -651,13 +685,28 @@ class OrderServiceProxyTest {
             assertThrows(BaseException.class,
                     () -> orderService.completeRefund(ORDER_ID));
         }
+
+        @Test @DisplayName("已退款订单再次退款 → 幂等跳过，不重复回滚库存")
+        void refundAlreadyRefunded_idempotent() {
+            MallOrder o = order(ORDER_ID, OrderStatus.REFUNDED.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
+            o.setIsRefunded(1);
+            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+            // markRefunded 未 stub → 默认返回 0（SQL 幂等条件 is_refunded=0 不满足）
+
+            orderService.completeRefund(ORDER_ID);
+
+            // 幂等返回，不回滚库存，避免双倍回滚导致库存虚增
+            verify(skuStockService, never()).rollback(anyLong(), anyInt());
+            verify(mallOrderItemMapper, never()).listByOrderId(anyLong());
+        }
     }
 
     // ================================================================
     @Nested @DisplayName("12. cancelExpiredOrders — 自动取消过期订单")
     class CancelExpiredOrdersTests {
 
-        @Test @DisplayName("有2笔过期订单，limit=1 → 只取消第1笔")
+        @Test @DisplayName("有2笔过期订单，limit=1 → 只处理第1笔")
         void twoExpired_limitOne_cancelsOne() {
             MallOrder o1 = order(1L, OrderStatus.PENDING.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(100), BigDecimal.valueOf(100));
@@ -665,22 +714,17 @@ class OrderServiceProxyTest {
                     BigDecimal.valueOf(200), BigDecimal.valueOf(200));
 
             when(mallOrderMapper.listExpiredPending(any())).thenReturn(Arrays.asList(o1, o2));
-
-            MallOrderItem it1 = orderItem(1L, 1L, 10L, 1L, "P1", 1, BigDecimal.valueOf(100));
-            when(mallOrderItemMapper.listByOrderId(1L)).thenReturn(Collections.singletonList(it1));
-            when(mallOrderMapper.casUpdateStatus(1L,
-                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
+            when(orderCancelService.cancelExpiredOrder(o1)).thenReturn(true);
 
             int cancelled = orderService.cancelExpiredOrders(1);
 
             assertEquals(1, cancelled);
-            verify(mallOrderMapper).casUpdateStatus(1L,
-                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
-            verify(mallOrderMapper, never()).casUpdateStatus(eq(2L), anyString(), anyString());
-            verify(skuStockService).rollback(10L, 1);
+            // 逐笔取消已委托给 OrderCancelService（独立 REQUIRES_NEW 事务），只处理第 1 笔
+            verify(orderCancelService).cancelExpiredOrder(o1);
+            verify(orderCancelService, never()).cancelExpiredOrder(o2);
         }
 
-        @Test @DisplayName("过期列表中某笔已是PAID → CAS竞争失败被跳过，cancelled计数不虚高")
+        @Test @DisplayName("过期列表中某笔取消被跳过 → cancelled计数不虚高")
         void expiredButPaid_skipped() {
             MallOrder o1 = order(1L, OrderStatus.PENDING.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(100), BigDecimal.valueOf(100));
@@ -689,19 +733,34 @@ class OrderServiceProxyTest {
                     BigDecimal.valueOf(200), BigDecimal.valueOf(200));
 
             when(mallOrderMapper.listExpiredPending(any())).thenReturn(Arrays.asList(o1, o2));
-
-            MallOrderItem it = orderItem(1L, 1L, 10L, 1L, "P1", 1, BigDecimal.valueOf(100));
-            when(mallOrderItemMapper.listByOrderId(1L)).thenReturn(Collections.singletonList(it));
-            when(mallOrderMapper.casUpdateStatus(1L,
-                    OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
-            // 第2笔 casUpdateStatus 默认返回 0（CAS 失败），应被跳过且不计入取消数
+            when(orderCancelService.cancelExpiredOrder(o1)).thenReturn(true);
+            // 第2笔返回 false（CAS 竞争失败被跳过），不计入取消数
+            when(orderCancelService.cancelExpiredOrder(o2)).thenReturn(false);
 
             int cancelled = orderService.cancelExpiredOrders(10);
 
-            // 第2笔被跳过 → 返回 1（cancelOrderInternal 返回 boolean，计数不再虚高）
             assertEquals(1, cancelled);
-            // 第2笔确实没有被 CAS 更新
-            verify(mallOrderMapper, never()).casUpdateStatus(eq(2L), anyString(), anyString());
+            verify(orderCancelService).cancelExpiredOrder(o1);
+            verify(orderCancelService).cancelExpiredOrder(o2);
+        }
+
+        @Test @DisplayName("某笔取消抛异常 → 被捕获不影响其他笔，cancelled不虚高")
+        void oneThrows_othersStillProcessed() {
+            MallOrder o1 = order(1L, OrderStatus.PENDING.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(100), BigDecimal.valueOf(100));
+            MallOrder o2 = order(2L, OrderStatus.PENDING.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(200), BigDecimal.valueOf(200));
+
+            when(mallOrderMapper.listExpiredPending(any())).thenReturn(Arrays.asList(o1, o2));
+            // 第1笔事务内抛异常（如回滚库存失败）→ REQUIRES_NEW 事务回滚，异常传播到此处被捕获
+            when(orderCancelService.cancelExpiredOrder(o1)).thenThrow(new RuntimeException("库存回滚失败"));
+            when(orderCancelService.cancelExpiredOrder(o2)).thenReturn(true);
+
+            int cancelled = orderService.cancelExpiredOrders(10);
+
+            assertEquals(1, cancelled);
+            verify(orderCancelService).cancelExpiredOrder(o1);
+            verify(orderCancelService).cancelExpiredOrder(o2);
         }
     }
 

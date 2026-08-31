@@ -58,6 +58,23 @@ public interface SkuMapper {
     int deductStock(@Param("id") Long id, @Param("qty") Integer qty);
 
     /**
+     * 原子条件扣减（推荐方案，替代“读-判-写+重试”的乐观锁循环）：
+     *   UPDATE stellar_sku SET stock = stock - #{qty}, version = version + 1
+     *   WHERE id = #{id} AND stock >= #{qty}
+     * UPDATE 是当前读，在 RR / RC 下都正确；rows==0 表示库存不足或 SKU 不存在，
+     * 无需依赖 version 快照读，规避 REPEATABLE READ 下重试永远读旧 version 的问题。
+     */
+    int deductStockAtomic(@Param("id") Long id, @Param("qty") Integer qty);
+
+    /**
+     * 原子回滚库存（替代乐观锁回滚循环）：
+     *   UPDATE stellar_sku SET stock = stock + #{qty}, version = version + 1
+     *   WHERE id = #{id}
+     * rows==0 表示 SKU 不存在。
+     */
+    int rollbackStockAtomic(@Param("id") Long id, @Param("qty") Integer qty);
+
+    /**
      * Redis 分布式锁模式下直接回滚库存（不依赖 version）：
      *   UPDATE stellar_sku SET stock = stock + #{qty}
      *   WHERE id = #{id}
