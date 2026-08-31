@@ -34,6 +34,17 @@ public interface WalletMapper {
                    @Param("amount") BigDecimal amount,
                    @Param("oldVersion") Integer oldVersion);
 
+    /**
+     * 原子余额扣减（RR 下规避"读 version → UPDATE WHERE version 重试"的快照读陷阱）。
+     * 余额条件内置，rows==0 表示余额不足或账户不存在，无需先读后写。
+     */
+    int deductBalanceAtomic(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
+
+    /**
+     * 原子余额增加（RR 下规避快照读陷阱）。加余额无余额条件，rows==0 表示账户不存在。
+     */
+    int addBalanceAtomic(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
+
     /** 增加累计充值 */
     int addTotalRecharge(@Param("userId") Long userId, @Param("amount") BigDecimal amount);
 

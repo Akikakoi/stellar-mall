@@ -343,15 +343,18 @@ public class PointsServiceImpl implements PointsService {
                     .divide(BigDecimal.valueOf(POINTS_EXCHANGE_RATE), 2, java.math.RoundingMode.HALF_UP);
         }
 
-        // 6) 冻结积分
-        int result = userPointsMapper.freezePoints(userId, pointsToFreeze, up.getVersion());
+        // 6) 冻结积分（原子 SQL：可用余额条件内置，RR 下无需读 version 重试）
+        int result = userPointsMapper.freezePointsAtomic(userId, pointsToFreeze);
         if (result == 0) {
-            up = userPointsMapper.getByUserId(userId);
-            if (up.getAvailablePoints() < pointsToFreeze) {
-                pointsToFreeze = up.getAvailablePoints();
+            // 可用积分不足（或并发下被消耗）→ 按最新可用值用尽后重试一次
+            UserPoints latest = userPointsMapper.getByUserId(userId);
+            if (latest != null && latest.getAvailablePoints() < pointsToFreeze) {
+                pointsToFreeze = latest.getAvailablePoints();
                 if (pointsToFreeze <= 0) return 0;
+                actualDeductAmount = BigDecimal.valueOf(pointsToFreeze)
+                        .divide(BigDecimal.valueOf(POINTS_EXCHANGE_RATE), 2, java.math.RoundingMode.HALF_UP);
             }
-            result = userPointsMapper.freezePoints(userId, pointsToFreeze, up.getVersion());
+            result = userPointsMapper.freezePointsAtomic(userId, pointsToFreeze);
             if (result == 0) {
                 throw new BaseException("积分冻结失败，请稍后重试");
             }
@@ -406,17 +409,10 @@ public class PointsServiceImpl implements PointsService {
             return;
         }
 
-        int result = userPointsMapper.consumeFrozenPoints(userId, frozenPoints, up.getVersion());
+        int result = userPointsMapper.consumeFrozenPointsAtomic(userId, frozenPoints);
         if (result == 0) {
-            up = userPointsMapper.getByUserId(userId);
-            if (up.getFrozenPoints() < frozenPoints) {
-                log.warn("[PointsService] consumeFrozenPoints 重试仍失败: userId={}, orderId={}", userId, orderId);
-                return;
-            }
-            result = userPointsMapper.consumeFrozenPoints(userId, frozenPoints, up.getVersion());
-            if (result == 0) {
-                throw new BaseException("积分扣减失败，请稍后重试");
-            }
+            log.warn("[PointsService] 消费冻结积分失败（冻结余额不足或已消费），跳过: userId={}, orderId={}", userId, orderId);
+            return;
         }
 
         // 记录积分消费流水（PointsRecord）
@@ -477,14 +473,10 @@ public class PointsServiceImpl implements PointsService {
             return;
         }
 
-        int result = userPointsMapper.unfreezePoints(userId, frozenPoints, up.getVersion());
+        int result = userPointsMapper.unfreezePointsAtomic(userId, frozenPoints);
         if (result == 0) {
-            up = userPointsMapper.getByUserId(userId);
-            result = userPointsMapper.unfreezePoints(userId, frozenPoints, up.getVersion());
-            if (result == 0) {
-                log.warn("[PointsService] 解冻积分重试仍失败: userId={}, orderId={}", userId, orderId);
-                return;
-            }
+            log.warn("[PointsService] 解冻积分失败（冻结余额不足或已解冻），跳过: userId={}, orderId={}", userId, orderId);
+            return;
         }
 
         PointsPayment unfreeze = PointsPayment.builder()
@@ -869,7 +861,7 @@ public class PointsServiceImpl implements PointsService {
             int expireAmount = Math.min(record.getPoints(), up.getAvailablePoints());
             if (expireAmount <= 0) continue;
 
-            int result = userPointsMapper.expirePoints(record.getUserId(), expireAmount, up.getVersion());
+            int result = userPointsMapper.expirePointsAtomic(record.getUserId(), expireAmount);
             if (result > 0) {
                 // 记录过期流水
                 UserPoints updated = userPointsMapper.getByUserId(record.getUserId());
@@ -930,14 +922,9 @@ public class PointsServiceImpl implements PointsService {
     /** 发放积分 */
     private void addUserPoints(Long userId, int points, String bizType, String bizId, String description) {
         UserPoints up = ensureUserPoints(userId);
-        int result = userPointsMapper.addPoints(userId, points, up.getVersion());
+        int result = userPointsMapper.addPointsAtomic(userId, points);
         if (result == 0) {
-            // 并发冲突，重试一次
-            up = userPointsMapper.getByUserId(userId);
-            result = userPointsMapper.addPoints(userId, points, up.getVersion());
-            if (result == 0) {
-                throw new BaseException("积分变动失败，请稍后重试");
-            }
+            throw new BaseException("积分变动失败，请稍后重试");
         }
 
         userPointsMapper.addTotalEarned(userId, points);
@@ -966,13 +953,9 @@ public class PointsServiceImpl implements PointsService {
             throw new BaseException("积分不足");
         }
 
-        int result = userPointsMapper.deductPoints(userId, points, up.getVersion());
+        int result = userPointsMapper.deductPointsAtomic(userId, points);
         if (result == 0) {
-            up = userPointsMapper.getByUserId(userId);
-            result = userPointsMapper.deductPoints(userId, points, up.getVersion());
-            if (result == 0) {
-                throw new BaseException("积分扣减失败，请稍后重试");
-            }
+            throw new BaseException("积分扣减失败，请稍后重试");
         }
 
         userPointsMapper.addTotalSpent(userId, points);

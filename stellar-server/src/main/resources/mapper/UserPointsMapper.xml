@@ -46,6 +46,15 @@
         WHERE user_id = #{userId} AND version = #{oldVersion}
     </update>
 
+    <!-- 原子积分入账：无 version 条件（加积分无余额限制），RR 下规避快照读陷阱 -->
+    <update id="addPointsAtomic">
+        UPDATE stellar_user_points
+        SET total_points = total_points + #{points},
+            available_points = available_points + #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+    </update>
+
     <!-- 积分扣减（管理端调整扣减）：乐观锁 + 可用余额充足校验 -->
     <update id="deductPoints">
         UPDATE stellar_user_points
@@ -54,6 +63,16 @@
             version = version + 1
         WHERE user_id = #{userId}
           AND version = #{oldVersion}
+          AND available_points >= #{points}
+    </update>
+
+    <!-- 原子积分扣减：余额条件内置，RR 下无需先读 version 再重试 -->
+    <update id="deductPointsAtomic">
+        UPDATE stellar_user_points
+        SET total_points = total_points - #{points},
+            available_points = available_points - #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
           AND available_points >= #{points}
     </update>
 
@@ -68,6 +87,16 @@
           AND available_points >= #{points}
     </update>
 
+    <!-- 原子冻结积分：可用余额条件内置，RR 下无需先读 version 再重试 -->
+    <update id="freezePointsAtomic">
+        UPDATE stellar_user_points
+        SET available_points = available_points - #{points},
+            frozen_points = frozen_points + #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND available_points >= #{points}
+    </update>
+
     <!-- 解冻积分（订单取消）：冻结 → 可用 -->
     <update id="unfreezePoints">
         UPDATE stellar_user_points
@@ -76,6 +105,16 @@
             version = version + 1
         WHERE user_id = #{userId}
           AND version = #{oldVersion}
+          AND frozen_points >= #{points}
+    </update>
+
+    <!-- 原子解冻积分：冻结余额条件内置，RR 下无需先读 version 再重试 -->
+    <update id="unfreezePointsAtomic">
+        UPDATE stellar_user_points
+        SET available_points = available_points + #{points},
+            frozen_points = frozen_points - #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
           AND frozen_points >= #{points}
     </update>
 
@@ -104,6 +143,16 @@
           AND available_points >= #{points}
     </update>
 
+    <!-- 原子过期扣减：余额条件内置，RR 下无需先读 version 再重试 -->
+    <update id="expirePointsAtomic">
+        UPDATE stellar_user_points
+        SET total_points = total_points - #{points},
+            available_points = available_points - #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
+          AND available_points >= #{points}
+    </update>
+
     <!-- 消费冻结积分：frozen- → total_points- → total_spent+，一次原子操作 -->
     <update id="consumeFrozenPoints">
         UPDATE stellar_user_points
@@ -113,6 +162,17 @@
             version = version + 1
         WHERE user_id = #{userId}
           AND version = #{oldVersion}
+          AND frozen_points >= #{points}
+    </update>
+
+    <!-- 原子消费冻结积分：冻结余额条件内置，RR 下无需先读 version 再重试 -->
+    <update id="consumeFrozenPointsAtomic">
+        UPDATE stellar_user_points
+        SET frozen_points = frozen_points - #{points},
+            total_points = total_points - #{points},
+            total_spent = total_spent + #{points},
+            version = version + 1
+        WHERE user_id = #{userId}
           AND frozen_points >= #{points}
     </update>
 
