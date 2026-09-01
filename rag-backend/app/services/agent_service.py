@@ -11,6 +11,21 @@ from app.core.logger import logger
 from app.models import User, MessageRole
 
 
+def _pseudo_stream_chunks(text: str, chunk_size: int = 24, interval: float = 0.005):
+    """伪流式分块：按标点/空白优先、固定长度兜底切成小块逐块 yield。
+    相较逐字 sleep(0.01)，更新次数更少、间隔更短，显著降低纯表现层延迟。
+    """
+    punct = "。！？，、；,.!?;:：\n\t "
+    buf = ""
+    for ch in text:
+        buf += ch
+        if ch in punct or len(buf) >= chunk_size:
+            yield buf
+            buf = ""
+    if buf:
+        yield buf
+
+
 class AgentChatService:
     def __init__(self, db: Session, user: User):
         self.db = db
@@ -51,6 +66,25 @@ class AgentChatService:
             intent_confidence = result.get("intent_confidence", 0)
             yield {"type": "intent", "intent": intent, "confidence": intent_confidence}
 
+            # other 场景：图内仅打标记，走 ReAct 真流式
+            if result.get("uses_react"):
+                try:
+                    from app.agent.react_agent import astream_react
+
+                    async for ev in astream_react(
+                        query=query,
+                        user_id=self.user.id,
+                        mall_token=mall_token,
+                        conversation_history=conversation_history or [],
+                    ):
+                        yield ev
+                except Exception as e:  # noqa: BLE001
+                    logger.exception(f"ReAct 流式失败: {e}")
+                    fallback = "（智能体服务暂时不可用，请稍后重试。）"
+                    yield {"type": "token", "content": fallback}
+                    yield {"type": "done", "tokens": len(fallback), "error": str(e)}
+                return
+
             current_tool = result.get("current_tool")
             tool_results = result.get("tool_results", {})
             if current_tool and tool_results:
@@ -63,9 +97,9 @@ class AgentChatService:
 
             answer = result.get("answer", "")
             if answer:
-                for ch in answer:
-                    yield {"type": "token", "content": ch}
-                    await asyncio.sleep(0.01)
+                for chunk in _pseudo_stream_chunks(answer):
+                    yield {"type": "token", "content": chunk}
+                    await asyncio.sleep(0.005)
 
             missing_params = result.get("missing_params", [])
             if missing_params:
@@ -103,6 +137,28 @@ class AgentChatService:
             conversation_history=conversation_history or [],
         )
         latency = int((time.time() - t0) * 1000)
+
+        # other 场景：图内仅打标记，交给 ReAct agent 同步执行
+        if result.get("uses_react"):
+            from app.agent.react_agent import run_react_agent
+
+            rr = run_react_agent(
+                query=query,
+                user_id=self.user.id,
+                mall_token=mall_token,
+                conversation_history=conversation_history or [],
+            )
+            return {
+                "answer": rr.get("answer", ""),
+                "sources": rr.get("sources", []),
+                "intent": result.get("intent", "other"),
+                "tool_used": None,
+                "tool_results": {},
+                "missing_params": [],
+                "tokens_used": len(rr.get("answer", "")),
+                "latency_ms": latency,
+                "react_tool_trace": rr.get("tool_trace", []),
+            }
 
         return {
             "answer": result.get("answer", ""),
