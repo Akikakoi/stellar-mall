@@ -16,6 +16,13 @@
     <div class="bubble-wrap">
       <!-- 气泡主体 -->
       <div class="bubble" :class="{ streaming: msg.streaming, 'has-sources': msg.sources?.length }">
+        <!-- ReAct 思考过程 -->
+        <div v-if="msg.role === 'assistant' && msg.thinking" class="react-thinking">
+          <span class="rt-spin">
+            <el-icon><Loading /></el-icon>
+          </span>
+          <span class="rt-text">{{ msg.thinking }}</span>
+        </div>
         <div v-if="msg.role === 'assistant'" class="markdown-body" v-html="renderedMd"></div>
         <div v-else class="user-text">{{ msg.content }}</div>
 
@@ -109,7 +116,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { Star, StarFilled, CopyDocument, Document, Cpu, Setting, CircleCheck, CircleClose, ChatDotRound, ArrowDown } from '@element-plus/icons-vue'
+import { Star, StarFilled, CopyDocument, Document, Cpu, Loading, Setting, CircleCheck, CircleClose, ChatDotRound, ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
@@ -428,6 +435,30 @@ function toolName(tool: any) {
 .sources-expand-leave-to {
   max-height: 0;
   opacity: 0;
+}
+
+/* ===== ReAct 思考过程 ===== */
+.react-thinking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  border-radius: var(--radius-sm);
+
+  .rt-spin .el-icon {
+    animation: rtSpinning 1s linear infinite;
+  }
+  .rt-text {
+    line-height: 1.5;
+  }
+}
+
+@keyframes rtSpinning {
+  to { transform: rotate(360deg); }
 }
 
 /* ===== 工具调用 ===== */
