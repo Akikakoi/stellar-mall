@@ -15,7 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.stellar.TestRedisConfig;
@@ -29,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * 分类 Category 全链路测试（平级模型，无层级）。
  * ⚠️ 类级别 @Transactional：每个 @Test 方法结束后自动回滚，保证测试幂等。
  */
-@SpringBootTest
+@SpringBootTest(properties = "stellar.elasticsearch.enabled=false")
 @Transactional
 @Import(TestRedisConfig.class)
 class CategoryServiceTest {
@@ -131,6 +133,11 @@ class CategoryServiceTest {
 
     @Autowired(required = false)
     private SpuService spuService;
+
+    /** ES 关闭后 ElasticsearchConfig 不再创建 ElasticsearchOperations，
+     *  用 Mock 满足 SpuEsSyncService 等的构造注入，确保测试不触碰真实 ES。 */
+    @MockBean
+    private ElasticsearchOperations elasticsearchOperations;
 
     private Long createSpuForTest(Long catId) {
         assertNotNull(spuService, "需要 SpuService 来创建关联商品");
