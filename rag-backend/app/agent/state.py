@@ -6,6 +6,8 @@ class AgentState(TypedDict, total=False):
     messages: Annotated[list, add_messages]
     intent: Optional[str]
     intent_confidence: Optional[float]
+    uses_react: Optional[bool]        # 是否走 ReAct 真流式（other 场景）
+    agent_thought: Optional[str]      # ReAct/智能体思考过程
     required_params: dict
     missing_params: List[str]
     current_tool: Optional[str]

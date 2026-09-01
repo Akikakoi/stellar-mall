@@ -985,7 +985,10 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
         return _handle_small_talk(state)
 
     if intent == "other":
-        return _handle_other(state)
+        # fallback 路由：无法用确定性流程识别的复杂/组合问题，标记交给 ReAct agent 处理。
+        # 此处不执行 ReAct，仅打标记，由服务层(agent_service)对 other 走 astream_react 真流式；
+        # 同步路径(answer_sync)则由服务层调用 run_react_agent。
+        return {"uses_react": True}
 
     # === LLM 缓存：答案生成 ===
     context_hash = hashlib.sha256(
@@ -1162,6 +1165,35 @@ def _sanitize_error_message(raw_msg: str) -> str:
     return msg if msg else "系统暂时无法处理您的请求"
 
 
+# 方案B：传给答案 LLM 的 KB 上下文精简预算（降低上下文体积→加快生成、省 token）
+_KB_CTX_MAX_SOURCES = 10   # 最多进入 prompt 的 source 条数
+_KB_CTX_MAX_PER_DOC = 2    # 每个商品最多保留的 chunk 条数
+_KB_CTX_MAX_CHARS = 500    # 每条 content 最多保留的字符数
+
+
+def _trim_kb_sources(sources: list) -> list:
+    """精简知识库来源：相关度降序、每商品限量、单条截断，控制答案 LLM 的上下文体积。"""
+    seen: dict = {}
+    picked = []
+    for src in sorted(sources, key=lambda x: x.get("score", 0), reverse=True):
+        doc = src.get("doc_name", "") or "未知"
+        if seen.get(doc, 0) >= _KB_CTX_MAX_PER_DOC:
+            continue
+        seen[doc] = seen.get(doc, 0) + 1
+        picked.append(src)
+        if len(picked) >= _KB_CTX_MAX_SOURCES:
+            break
+    trimmed = []
+    for src in picked:
+        content = src.get("content", "")
+        if len(content) > _KB_CTX_MAX_CHARS:
+            content = content[:_KB_CTX_MAX_CHARS] + "……"
+        item = dict(src)
+        item["content"] = content
+        trimmed.append(item)
+    return trimmed
+
+
 def _build_tool_context(tool_result: Any, intent: str) -> str:
     """把工具结果格式化为上下文文本。"""
     if not tool_result:
@@ -1185,7 +1217,7 @@ def _build_tool_context(tool_result: Any, intent: str) -> str:
                 pn = tool_result.get("product_names", [])
                 lines.append(f"**知识库中该品类共有 {pc} 款产品：** {', '.join(pn[:20])}")
                 lines.append("")
-            for src in sources:
+            for src in _trim_kb_sources(sources):
                 lines.append(f"--- 来源: {src.get('doc_name', '未知')}  相关度: {src.get('score', 0):.3f} ---")
                 lines.append(src.get("content", ""))
             return "\n\n".join(lines)
