@@ -12,7 +12,9 @@
 | 缓存 | Redis 7.2 |
 | 搜索引擎 | Elasticsearch 7.17（IK 分词器，MySQL 降级兜底） |
 | 对象存储 | Aliyun OSS |
-| AI/RAG | FastAPI + LangChain + LangGraph + ChromaDB + BM25 + BGE Reranker |
+| AI/RAG | FastAPI + LangChain + LangGraph（5 节点状态机 + ReAct Agent）+ ChromaDB + BM25 + BGE Reranker |
+| AI 缓存 | Redis 三层 LLM 缓存（L1 精确 + L2 语义 + L3 模型），布隆过滤 + Single-flight + 异步写 + 本地余弦精排 |
+| BI 智能分析 | ChatBI 自然语言查数 + AI 经营日报 |
 | 支付 | 微信支付 V3 |
 | 鉴权 | JWT（用户端 + 管理端双密钥） |
 | 基础设施 | Docker Compose（ES + MySQL + Redis） |
@@ -24,8 +26,8 @@ stellar-mall/
 ├── stellar-common/          # 公共模块（工具类、常量、异常定义）
 ├── stellar-pojo/            # 数据对象（Entity、DTO、VO、Mapper）
 ├── stellar-server/          # 主服务（Controller、Service、配置）
-├── frontend/                # Vue 3 前端（商城 + 管理后台）
-├── rag-backend/             # RAG 智能问答服务（FastAPI）
+├── frontend/                # Vue 3 前端（商城 + 管理后台）→ [README](frontend/README.md)
+├── rag-backend/             # RAG 智能问答服务（FastAPI）→ [README](rag-backend/README.md)
 ├── docker/                  # Docker 构建文件
 ├── docker-compose.yml       # 基础设施编排
 └── start-mall.ps1           # Windows 一键启动脚本
@@ -46,12 +48,18 @@ stellar-mall/
 - 积分消费：订单抵扣（100 积分 = 1 元）、商城兑换
 - 积分管理：365 天过期策略，乐观锁并发控制，完整流水追溯
 
-### AI 智能问答（RAG）
-- 基于 LangGraph 的 5 节点 Agent 状态机，支持 16 类意图分类
+### AI 智能问答（RAG + Agent）
+- 基于 LangGraph 的 5 节点确定性状态机（意图识别 → 参数检查/追问 → 工具执行 → 回答生成），16 类意图分类
+- 复合/多意图问题自动降级到 ReAct Agent（Thought → Action → Observation），暴露 10 个安全子集工具（知识库检索、订单/购物车/收藏夹/钱包/评价查询、商品搜索、SKU 解析、改数量、加购物车），写操作带参数来源白名单 + 幂等守卫
+- 规格对比/筛选类问题自动路由到知识库，叠加品类 tags 过滤 + 关键词改写，多商品补全规格参数
 - ChromaDB 向量库 + BM25 关键词混合检索 + BGE Reranker 精排
-- 三层 LLM 缓存：Redis 精确匹配 → ChromaDB 语义匹配 → 模型调用
-- 商品智能搜索、购物推荐、规格解析等 Agent Tools
-- 知识库管理（管理端 CRUD + JWT 鉴权）
+- 三层 LLM 缓存：L1 Redis 精确匹配 → L2 Chroma 语义匹配（本地余弦精排）→ L3 模型调用；布隆过滤快速布隆判负、Single-flight 防缓存击穿、缓存写入走后台线程池异步落库
+- 知识库管理（管理端 CRUD + JWT 鉴权 + 图片/多媒体解析）
+- 防幻觉强约束：答案数字/商品名必须严格对齐工具返回值，缺失数据如实告知
+
+### BI 智能分析
+- ChatBI：管理端自然语言查数，SQL 生成前做列名/敏感字段黑名单校验
+- AI 经营日报：自动汇总关键经营指标生成运营日报
 
 ### 管理后台
 - 商品管理：SPU/SKU 增删改查，Excel 导入导出，多图上传
