@@ -15,12 +15,21 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import os
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from app.config import settings
 from app.core.logger import logger
+
+# 方案C：缓存写入专用后台线程池。写入（embedding + Chroma 落库）较重且与当前请求无关，
+# 放后台线程执行，避免阻塞 LLM 回答链路的返回。容量按 CPU 数限定。
+_CACHE_WRITE_EXECUTOR: ThreadPoolExecutor = ThreadPoolExecutor(
+    max_workers=min(4, max(1, os.cpu_count() or 2)),
+    thread_name_prefix="llm-cache-write",
+)
 
 # ==============================================
 # Redis 对象（模块级，启动时由 lifespan 注入）
@@ -527,10 +536,11 @@ async def _semantic_search(
         if k == 0:
             return None
         results = col.query(query_embeddings=[q_emb], n_results=k,
-                            include=["documents", "metadatas", "distances"])
+                            include=["documents", "metadatas", "distances", "embeddings"])
 
         ids_list = results.get("ids", [[]])[0]
         metas_list = results.get("metadatas", [[]])[0]
+        embeddings = results.get("embeddings", [[]])[0]
         distances = results.get("distances", [[]])[0]
 
         if not ids_list:
@@ -561,39 +571,32 @@ async def _semantic_search(
         if not candidates:
             return None
 
-        # Reranker 精排（比对 embedding 相似度最高的候选，避免相似但不相关的返回）
-        from app.rag.retriever import rerank
-        from langchain_core.documents import Document
-
-        candidate_docs = []
-        for idx, _ in candidates:
-            doc_content = results["documents"][0][idx] if results.get("documents") else ""
-            candidate_docs.append(Document(page_content=str(doc_content)))
-
-        if not candidate_docs:
-            return None
-
-        reranked = rerank(query, candidate_docs, top_k=1)
-        if not reranked:
-            return None
-
-        best_doc, score = reranked[0]
-        threshold = settings.LLM_CACHE_SEMANTIC_RERANK_THRESHOLD
-        if score < threshold:
-            logger.debug(f"[LLMCache] L2 miss: best_rerank={score:.4f} < threshold={threshold}")
-            return None
-
-        # 找到最佳匹配对应的 metadata
-        # rerank 返回的是原始顺序，需要映射回 candidate
+        # 方案B：直接用 query embedding + Chroma 已存向量做余弦精排，
+        # 复用本已算出的 q_emb，不再走 rag.retriever.rerank（会再次触发云端 embedding，单次约 1.3s）。
+        # 语义缓存排序只要求"候选间相似度倒序取 top1"，本地余弦即可，无需 CrossEncoder。
+        import numpy as np
+        q_np = np.asarray(q_emb, dtype=np.float32).reshape(1, -1)
         best_idx = None
-        for i, doc in enumerate(candidate_docs):
-            if doc is best_doc:
-                best_idx = i
-                break
+        best_score = 0.0
+        for pos, (idx, _meta) in enumerate(candidates):
+            if idx >= len(embeddings):
+                continue
+            d_np = np.asarray(embeddings[idx], dtype=np.float32).reshape(1, -1)
+            score = float((d_np @ q_np.T).ravel()[0] / (
+                np.linalg.norm(d_np) * np.linalg.norm(q_np) + 1e-9))
+            if score > best_score:
+                best_score = score
+                best_idx = pos
+
         if best_idx is None:
             return None
 
         best_meta = candidates[best_idx][1]
+        threshold = settings.LLM_CACHE_SEMANTIC_RERANK_THRESHOLD
+        if best_score < threshold:
+            logger.debug(f"[LLMCache] L2 miss: best_score={best_score:.4f} < threshold={threshold}")
+            return None
+
         # 更新命中计数
         try:
             hit_count = int(best_meta.get("hit_count", 0)) + 1
@@ -610,7 +613,7 @@ async def _semantic_search(
         if len(_metrics.l2_latency_ms) > 100:
             _metrics.l2_latency_ms.pop(0)
         logger.info(f"[LLMCache] L2 HIT  query={query[:30]}...  "
-                     f"rerank={score:.3f}  latency={elapsed:.1f}ms")
+                     f"best_score={best_score:.3f}  latency={elapsed:.1f}ms")
 
         return {
             "answer": best_meta.get("answer", ""),
@@ -705,10 +708,56 @@ async def _semantic_put(
 
 
 # ==============================================
+# 方案C：后台异步缓存写入执行体
+# ==============================================
+def _do_put_sync(
+    query: str,
+    model: str,
+    temperature: float,
+    system_prompt_hash: str,
+    context_hash: Optional[str],
+    answer: str,
+    sources: List[dict],
+    intent: str,
+    tokens_used: int,
+    product_ids: Optional[List[int]] = None,
+    cache_type: str = "answer",
+) -> None:
+    """在后台线程池中真正执行 L1 + L2 写入。与 async put() 等价，只做写、不做读。"""
+    try:
+        if not settings.LLM_CACHE_ENABLED or not answer or not answer.strip():
+            return
+        # L1: 同步写 Redis
+        ttl = settings.LLM_CACHE_REDIS_TTL_ANSWER if cache_type == "answer" else settings.LLM_CACHE_REDIS_TTL_INTENT
+        data = {
+            "v": 1,
+            "answer": answer,
+            "sources": sources,
+            "intent": intent,
+            "tokens_used": tokens_used,
+            "ts": int(time.time()),
+        }
+        _redis_put_sync(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type)
+        # L2: Chroma 语义写入（内部是同步 client，但方法为 async，用 asyncio.run 驱动）
+        try:
+            asyncio.run(_semantic_put(
+                query=query, model=model, temperature=temperature,
+                system_prompt_hash=system_prompt_hash, context_hash=context_hash,
+                answer=answer, sources=sources, intent=intent,
+                tokens_used=tokens_used, product_ids=product_ids,
+                cache_type=cache_type,
+            ))
+        except RuntimeError:
+            pass
+    except Exception as e:
+        logger.warning(f"[LLMCache] 异步写入失败(后台): {e}")
+
+
+# ==============================================
 # 公开 API
 # ==============================================
 class LLMCache:
-    """LLM 三层缓存统一接口。"""
+    """LLM 三层缓存统一接口"""
 
     async def get(
         self,
@@ -833,32 +882,16 @@ class LLMCache:
         product_ids: Optional[List[int]] = None,
         cache_type: str = "answer",
     ) -> None:
-        """同步写入 L1 + L2（供线程池中的 LangGraph 节点使用）。"""
-        if not settings.LLM_CACHE_ENABLED:
-            return
-        if not answer or not answer.strip():
-            return
+        """异步化写入 L1 + L2：提交到后台线程池，不阻塞主回答链路。
 
-        ttl = settings.LLM_CACHE_REDIS_TTL_ANSWER if cache_type == "answer" else settings.LLM_CACHE_REDIS_TTL_INTENT
-        data = {
-            "v": 1,
-            "answer": answer,
-            "sources": sources,
-            "intent": intent,
-            "tokens_used": tokens_used,
-            "ts": int(time.time()),
-        }
-        _redis_put_sync(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type)
-        try:
-            asyncio.run(_semantic_put(
-                query=query, model=model, temperature=temperature,
-                system_prompt_hash=system_prompt_hash, context_hash=context_hash,
-                answer=answer, sources=sources, intent=intent,
-                tokens_used=tokens_used, product_ids=product_ids,
-                cache_type=cache_type,
-            ))
-        except (RuntimeError, Exception):
-            pass
+        方案C：本地 embedding + Chroma 落库较重（秒级），放后台线程执行；
+        写入对当前请求无感知，成功后对后续请求仍可命中。
+        """
+        _CACHE_WRITE_EXECUTOR.submit(
+            _do_put_sync,
+            query, model, temperature, system_prompt_hash, context_hash,
+            answer, sources, intent, tokens_used, product_ids, cache_type,
+        )
 
     async def invalidate_by_product_ids(self, product_ids: List[int]) -> int:
         """按商品 ID 精准失效语义缓存。返回清除条数。"""
