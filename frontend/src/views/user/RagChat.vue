@@ -525,6 +525,8 @@ async function send(text: any) {
     let tokensUsed = 0
     let latencyMs = 0
     let mode = 'smart'
+    const toolCalls: any[] = []    // ReAct 工具调用链: [{type:'call'|'result', tool, params, success}]
+    let reactThinking = ''         // 当前思考(agent_thought),可选展示
 
     while (true) {
       const { done, value } = await reader.read()
@@ -549,6 +551,23 @@ async function send(text: any) {
           scrollToBottom()
         } else if (ev.event === 'sources') {
           sourcesData = Array.isArray(ev.data) ? ev.data : []
+        } else if (ev.event === 'agent_thought') {
+          reactThinking = typeof ev.data === 'string' ? ev.data : (ev.data?.content || '')
+          chatStore.updateAssistant(asstId, { thinking: reactThinking, streaming: true })
+          scrollToBottom()
+        } else if (ev.event === 'tool_call') {
+          toolCalls.push({
+            type: 'call',
+            tool: ev.data?.tool || '',
+            params: ev.data?.params || {},
+            success: false,
+          })
+          chatStore.updateAssistant(asstId, { tool_calls: toolCalls, streaming: true })
+          scrollToBottom()
+        } else if (ev.event === 'tool_result') {
+          toolCalls.push({ type: 'result', tool: ev.data?.tool || '', success: !!ev.data?.success })
+          chatStore.updateAssistant(asstId, { tool_calls: toolCalls, streaming: true })
+          scrollToBottom()
         } else if (ev.event === 'done') {
           if (ev.data && typeof ev.data === 'object') {
             tokensUsed = ev.data.tokens || 0
@@ -561,6 +580,8 @@ async function send(text: any) {
     chatStore.updateAssistant(asstId, {
       content: fullContent,
       sources: sourcesData,
+      tool_calls: toolCalls,
+      thinking: '',
       streaming: false,
       tokens_used: tokensUsed,
       latency_ms: latencyMs,
