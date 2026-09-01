@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
  * ⚠️ 每个测试先造真实 SPU（动态 ID），保证 spuService.getById(bizId) 非空，
  *    processPendingOne 才能进入 ragSyncClient.syncSpu(mock) 分支。
  */
-@SpringBootTest
+@SpringBootTest(properties = "stellar.elasticsearch.enabled=false")
 @Transactional
 class RagSyncServiceTest {
 
@@ -46,6 +46,11 @@ class RagSyncServiceTest {
 
     @MockBean
     private RagSyncClient ragSyncClient;
+
+    /** ES 关闭后 ElasticsearchConfig 不再创建 ElasticsearchOperations，
+     *  用 Mock 满足 SpuEsSyncService 等的构造注入，确保测试不触碰真实 ES。 */
+    @MockBean
+    private org.springframework.data.elasticsearch.core.ElasticsearchOperations elasticsearchOperations;
 
     @BeforeEach
     void resetMocks() {

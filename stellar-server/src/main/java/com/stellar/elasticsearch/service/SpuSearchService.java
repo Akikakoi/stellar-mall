@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -67,6 +68,9 @@ public class SpuSearchService {
     private String ragBaseUrl;
 
     private volatile boolean esAvailable = true;
+
+    /** 查询向量本地缓存：相同文本的 embedding 只请求一次。 */
+    private final Map<String, double[]> embedCache = new ConcurrentHashMap<>();
 
     public SpuSearchService(ElasticsearchOperations esOps, SpuMapper spuMapper,
                             SynonymEngine synonymEngine) {
@@ -284,8 +288,13 @@ public class SpuSearchService {
         return vo;
     }
 
-    /** 调 rag-backend 获取查询向量。 */
+    /** 调 rag-backend 获取查询向量（带本地缓存）。 */
     private double[] fetchQueryEmbedding(String text) {
+        double[] cached = embedCache.get(text);
+        if (cached != null) {
+            log.debug("embedCache HIT  text={}", text);
+            return cached;
+        }
         try {
             String body = MAPPER.writeValueAsString(Map.of("texts", List.of(text)));
             java.net.URL url = new java.net.URL(ragBaseUrl + "/api/embed");
@@ -303,6 +312,7 @@ public class SpuSearchService {
             JsonNode vec = MAPPER.readTree(conn.getInputStream()).get("embeddings").get(0);
             double[] arr = new double[vec.size()];
             for (int i = 0; i < vec.size(); i++) arr[i] = vec.get(i).asDouble();
+            embedCache.put(text, arr);
             return arr;
         } catch (Exception e) { log.warn("Embedding query failed: {}", e.getMessage()); return null; }
     }

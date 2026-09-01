@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.test.annotation.DirtiesContext;
 
 import java.math.BigDecimal;
@@ -24,10 +26,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * P1-M1 RED阶段：SPU + SKU CRUD + SKU 嵌套保存 + 6 SPU 精简样例数据。
- * ⚠️ 类级别 @Transactional：每个 @Test 方法结束后自动回滚，避免残留。
+ * ⚠️ H2 内存库随 JVM 销毁，测试数据不残留；但 SPU 保存会发 SpuChangedEvent，
+ *    必须用内联属性强制关闭 ES 同步——dev profile 的 enabled=true 优先级高于
+ *    test application.properties，曾导致测试数据（香蕉-UT 等）覆盖真实 ES 索引。
  * ⚠️ 每个 @Test 会先造唯一分类（用返回 ID 当外键），不依赖库里预置数据。
  */
-@SpringBootTest
+@SpringBootTest(properties = "stellar.elasticsearch.enabled=false")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SpuSkuServiceTest {
 
@@ -37,6 +41,11 @@ class SpuSkuServiceTest {
     private SkuService skuService;
     @Autowired(required = false)
     private CategoryService categoryService;
+
+    /** ES 关闭后 ElasticsearchConfig 不再创建 ElasticsearchOperations，
+     *  用 Mock 满足 SpuEsSyncService 等的构造注入，确保测试不触碰真实 ES。 */
+    @MockBean
+    private ElasticsearchOperations elasticsearchOperations;
 
     private static String uid(String prefix) {
         return prefix + "-UT-" + Integer.toHexString(
