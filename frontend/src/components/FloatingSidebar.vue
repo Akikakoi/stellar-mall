@@ -102,12 +102,13 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 6px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
 }
 
 .sidebar-item {
@@ -124,7 +125,7 @@ onUnmounted(() => {
   min-width: 60px;
 }
 .sidebar-item:hover {
-  background: var(--brand-primary-soft);
+  background: var(--glass-hover);
   color: var(--brand-primary);
 }
 
@@ -136,7 +137,7 @@ onUnmounted(() => {
 
 .sidebar-divider {
   height: 1px;
-  background: var(--border-subtle);
+  background: var(--glass-border);
   margin: 4px 8px;
 }
 </style>

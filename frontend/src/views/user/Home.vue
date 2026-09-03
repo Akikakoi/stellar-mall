@@ -153,7 +153,7 @@
                 </div>
               </div>
             </section>
-            <el-empty v-if="!sectionsLoading && sections.every((s: any) => s.products.length === 0)" description="暂无商品" />
+            <el-empty v-if="!sectionsLoading && sections.every((s: any) => s.products.length === 0)" class="glass-empty" description="暂无商品" />
           </main>
         </template>
       </template>
@@ -174,14 +174,14 @@
             </div>
           </div>
         </div>
-        <el-empty v-if="!loading && spus.length === 0" description="暂无商品" />
+        <el-empty v-if="!loading && spus.length === 0" class="glass-empty" description="暂无商品" />
         <div v-if="loadingMore" class="load-more-tip"><el-icon class="is-loading"><Loading /></el-icon><span>加载更多商品中...</span></div>
         <div v-else-if="!hasMore && spus.length > 0" class="load-more-tip no-more">已经到底啦</div>
       </div>
     </div>
 
     <!-- SKU 选择弹窗：选型号界面统一复用详情页 SkuSpecSelector（规格分组按钮 + 数量控件） -->
-    <el-dialog v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close>
       <SkuSpecSelector
         v-if="currentSkus.length"
         :spu="currentSpu"
@@ -205,6 +205,7 @@ import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
 import { userRequest } from '@/api/request'
+import { track } from '@/utils/tracker'
 import { ElMessage } from 'element-plus'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 
@@ -460,6 +461,11 @@ async function loadAllModuleProducts() {
       if (Array.isArray(res)) res.forEach((id: any) => favSet.add(id))
     } catch (e: any) {}
   }
+  // 埋点：首页曝光（去重后上报，extra 带 spuIds 供后续商品热度分析）
+  const uniqueIds = Array.from(new Set(allIds))
+  if (uniqueIds.length) {
+    track('view_item_list', { scene: 'home', extra: { spuIds: uniqueIds.slice(0, 50) } })
+  }
 }
 
 // ========== 回退：分类分区 ==========
@@ -587,8 +593,8 @@ function goDetail(id: any) {
 async function toggleFav(spu: any) {
   if (!userStore.token) { ElMessage.warning('请先登录'); router.push('/login'); return }
   try {
-    if (favSet.has(spu.id)) { await removeFavorite(spu.id); favSet.delete(spu.id); ElMessage.success('已取消收藏') }
-    else { await addFavorite(spu.id); favSet.add(spu.id); ElMessage.success('已添加收藏') }
+    if (favSet.has(spu.id)) { await removeFavorite(spu.id); favSet.delete(spu.id); track('favorite', { spuId: spu.id, scene: 'home', extra: { fav: 0 } }); ElMessage.success('已取消收藏') }
+    else { await addFavorite(spu.id); favSet.add(spu.id); track('favorite', { spuId: spu.id, scene: 'home', extra: { fav: 1 } }); ElMessage.success('已添加收藏') }
   } catch (e: any) { ElMessage.error('操作失败') }
 }
 
@@ -611,7 +617,11 @@ async function handleAddToCart(spu: any) {
     const res = await getSpu(spu.id)
     const skuList = res?.skuList || (res as any)?.skuListVo || []
     if (!skuList.length) { ElMessage.warning('该商品暂无规格可选'); return }
-    if (skuList.length === 1) { await doAddCart(skuList[0].id); return }
+    if (skuList.length === 1) {
+      track('add_to_cart', { spuId: spu.id, skuId: skuList[0].id, scene: 'home' })
+      await doAddCart(skuList[0].id)
+      return
+    }
     currentSpu.value = res
     currentSkus.value = skuList.filter((s: any) => s.status !== 0)
     cartQty.value = 1
@@ -635,7 +645,10 @@ async function doAddCart(skuId: any, qty = 1) {
   } catch (e: any) { ElMessage.error(e?.response?.data?.msg || e?.message || '加入购物车失败') } finally { addingCart.value = false }
 }
 
-function confirmAddToCart() { doAddCart(selectedSku.value?.id, cartQty.value) }
+function confirmAddToCart() {
+  track('add_to_cart', { spuId: currentSpu.value?.id, skuId: selectedSku.value?.id, scene: 'home' })
+  doAddCart(selectedSku.value?.id, cartQty.value)
+}
 
 // ========== 生命周期 ==========
 onMounted(async () => {

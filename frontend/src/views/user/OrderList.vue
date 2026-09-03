@@ -73,7 +73,7 @@
     </main>
 
     <!-- 支付方式选择对话框 -->
-    <el-dialog v-model="payDialogVisible" title="选择支付方式" width="420px" :close-on-click-modal="false">
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="payDialogVisible" title="选择支付方式" width="420px" :close-on-click-modal="false">
       <div class="pay-dialog-body">
         <p class="pay-dialog-tip">订单 {{ pendingOrder?.orderNo || pendingOrder?.id }}，应付 ¥{{ Number(pendingOrder?.payAmount || pendingOrder?.amount || 0).toFixed(2) }}</p>
         <el-radio-group v-model="selectedPayMethod" class="pay-method-group">
@@ -89,7 +89,7 @@
     </el-dialog>
 
     <!-- 退货物流弹窗 -->
-    <el-dialog v-model="returnVisible" title="填写退货物流" width="420px" destroy-on-close>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="returnVisible" title="填写退货物流" width="420px" destroy-on-close>
       <el-form label-width="100px">
         <el-form-item label="快递单号" required>
           <el-input v-model="returnTracking" placeholder="请输入退货快递单号" />
@@ -382,23 +382,34 @@ onUnmounted(stopCountdown)
   padding: 0 20px;
   margin-bottom: 20px;
 }
-.empty { background: var(--bg-card); border-radius: var(--radius-lg); padding: 80px 0; border: 1px solid var(--border-base); }
+.empty {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 80px 0;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  overflow: hidden;
+}
 
 .order-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   margin-bottom: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
 }
 .order-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  background: var(--bg-hover);
-  border-bottom: 1px solid var(--border-subtle);
+  background: var(--glass-hover);
+  border-bottom: 1px solid var(--glass-border);
 }
 .order-head .info { color: var(--text-secondary); font-size: 14px; }
 .order-head .label { color: var(--text-muted); }
@@ -440,7 +451,7 @@ onUnmounted(stopCountdown)
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
 }
 .order-foot .total { color: var(--text-secondary); }
 .order-foot .amount { color: var(--text-primary); font-size: 20px; font-weight: 700; margin-left: 4px; }

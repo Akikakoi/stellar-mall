@@ -20,7 +20,7 @@
           </div>
         </Transition>
         <div class="addr-switch" v-if="addresses.length > 0">
-          <el-select v-model="selectedAddressId" placeholder="选择收货地址" class="addr-select" @change="handleAddressChange">
+          <el-select v-model="selectedAddressId" placeholder="选择收货地址" popper-class="glass-select-popper" class="addr-select" @change="handleAddressChange">
             <el-option v-for="addr in addresses" :key="addr.id" :label="addressLabel(addr)" :value="addr.id">
               <div class="addr-option">
                 <span class="addr-option-main">{{ addr.consignee }} {{ addr.phone }}</span>
@@ -42,7 +42,7 @@
       <div class="card coupon-card">
         <div class="card-title">优惠券</div>
         <div v-if="availableCoupons.length > 0" class="coupon-select">
-          <el-select v-model="selectedCouponId" placeholder="选择优惠券" clearable style="width: 300px" @change="calcAmount">
+          <el-select v-model="selectedCouponId" placeholder="选择优惠券" clearable style="width: 300px" popper-class="glass-select-popper" @change="calcAmount">
             <el-option v-for="c in availableCoupons" :key="c.id" :label="couponLabel(c)" :value="c.id" />
           </el-select>
           <span v-if="couponDiscount > 0" class="coupon-discount">-¥{{ couponDiscount.toFixed(2) }}</span>
@@ -69,7 +69,7 @@
       </div>
 
       <!-- 新增地址弹窗 -->
-      <el-dialog v-model="showAddressDialog" title="新增收货地址" width="550px" class="addr-dialog" :lock-scroll="false" @closed="resetAddForm">
+      <el-dialog class="glass-dialog addr-dialog" modal-class="glass-overlay" v-model="showAddressDialog" title="新增收货地址" width="550px"  :lock-scroll="false" @closed="resetAddForm">
         <el-form ref="addFormRef" :model="addForm" :rules="addRules" label-width="80px">
           <el-form-item label="收货人" prop="consignee">
             <el-input v-model="addForm.consignee" placeholder="请输入收货人姓名" />
@@ -192,6 +192,7 @@ import { useCartStore } from '@/stores/cart'
 import { submitOrder, payOrder, getWallet, listAddresses, saveAddress, getUserPoints } from '@/api/mall'
 import { userRequest, getOrCreateIdempotencyKey, resetIdempotencyKey } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { track } from '@/utils/tracker'
 
 const __PH = window.__PH
 const DRAFT_KEY = 'stellar_mall_draft_address'
@@ -582,6 +583,15 @@ async function handleSubmit() {
     if (!addr) {
       saveDraftAddress()
     }
+
+    // 埋点：下单转化（order_placed），金额与商品件数供漏斗分析
+    try {
+      track('order_placed', {
+        scene: 'order',
+        amount: payAmount || null,
+        extra: { orderId: orderId ?? null, items: Array.isArray(items) ? items.length : 0, direct: !!isDirect.value }
+      })
+    } catch { /* ignore */ }
 
     if (orderId) {
       try {

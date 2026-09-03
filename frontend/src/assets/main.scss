@@ -47,6 +47,9 @@ html.theme-transitioning *::after {
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   --backdrop-blur: blur(20px);
   --hover-lift: translateY(-6px);
+  /* 磨砂玻璃浮层通用材质（下拉/弹层用）：顶部内高光 + 玻璃面上的半透明 hover 层 */
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+  --glass-hover: rgba(0, 0, 0, 0.05);
 }
 
 html.theme-dark {
@@ -100,6 +103,8 @@ html.theme-dark {
   --glass-bg: rgba(29, 29, 31, 0.72);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-highlight: rgba(255, 255, 255, 0.1);
+  --glass-hover: rgba(255, 255, 255, 0.08);
 }
 
 html.theme-light {
@@ -153,6 +158,8 @@ html.theme-light {
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+  --glass-hover: rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -558,5 +565,219 @@ body .dialog-fade-leave-active .el-overlay-dialog {
     outline: none;
     box-shadow: none;
     border-color: var(--border-base);
+  }
+}
+
+/* ===== C 端空状态统一玻璃材质（.glass-empty）=====
+ * 用于页面级空状态卡片（购物车/订单/收藏/地址/优惠券/消息等独立空态）。
+ * 若 el-empty 内嵌于已有 .panel 卡片内则不加此类，避免卡片套卡片。
+ * 需配合 el-empty 的默认结构使用，直接 class 挂 el-empty 根即可。 */
+.el-empty.glass-empty {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 80px 0;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  overflow: hidden;
+  width: 100%;
+  /* 若空态是 grid 容器的直接子项（商品网格等），横跨整行避免挤在一格 */
+  grid-column: 1 / -1;
+}
+
+/* ===== C 端弹窗统一磨砂玻璃（.glass-dialog + .glass-overlay） =====
+ * 用法：el-dialog 挂 class="glass-dialog" modal-class="glass-overlay"。
+ * 注意：本项目 Element Plus 版本不支持 custom-class 透传（会渲染成裸属性、样式不生效），
+ * 必须用透传 class 挂玻璃类。
+ * 模态遮罩默认 rgba(0,0,0,.5) 太实会吃掉背景 → 玻璃感出不来看不见背后内容，
+ * 因此玻璃化弹窗必须同步换浅遮罩（亮 ~.35 / 暗 ~.5，暗色页本身深、玻璃透出对比弱）。
+ * 表单控件（el-input 等）保持实底，玻璃面板 + 实底控件是标准搭配。 */
+body .el-dialog.glass-dialog {
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 var(--glass-highlight);
+  overflow: hidden;
+}
+body .el-overlay.glass-overlay {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+html.theme-dark body .el-overlay.glass-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ===== C 端 MessageBox 玻璃化（body.area-user 区域标记） =====
+ * ElMessageBox 确认/提示/输入框由 JS 服务创建并 teleport 到 body，C 端与后台
+ * 共用同一组件实例，无法用 DOM 后代选择器区分 → App.vue 按路由给 body 挂
+ * area-user / area-admin 标记：仅 C 端(area-user)玻璃化，后台(area-admin)
+ * 保持 EP 默认实底。
+ * 遮罩沿用 .glass-overlay 逻辑调浅（默认 .5 太实会吃掉背景）。 */
+body.area-user .el-overlay {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+html.theme-dark body.area-user .el-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+body.area-user .el-message-box {
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow:
+    var(--glass-shadow),
+    inset 0 1px 0 var(--glass-highlight);
+  overflow: hidden;
+}
+body.area-user .el-message-box .el-message-box__headerbtn .el-message-box__close {
+  color: var(--text-muted);
+}
+body.area-user .el-message-box .el-message-box__headerbtn:hover .el-message-box__close {
+  color: var(--brand-primary);
+}
+
+/* ===== el-select 下拉统一磨砂玻璃（.glass-select-popper） =====
+ * 用法：C 端 el-select 挂 popper-class="glass-select-popper"（弹层 teleport 到 body）。
+ * EP 选择器弹层结构：外层 .el-popper(透明壳) + 内层 .el-select-dropdown(实底视觉容器)
+ * → 玻璃落在内层，选中态保持品牌色、disabled 用弱化文字色。 */
+.glass-select-popper {
+  &.el-popper.is-light {
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  .el-select-dropdown {
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur) saturate(160%);
+    -webkit-backdrop-filter: var(--backdrop-blur) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow:
+      var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight);
+    overflow: hidden;
+  }
+  .el-select-dropdown__item {
+    color: var(--text-primary);
+
+    &.hover,
+    &:hover {
+      background: var(--glass-hover);
+    }
+    &.is-selected {
+      color: var(--brand-primary);
+      font-weight: 500;
+    }
+    &.is-disabled {
+      color: var(--text-muted);
+    }
+  }
+  .el-select-dropdown__empty {
+    color: var(--text-muted);
+  }
+}
+
+/* ===== el-popconfirm 迷你确认浮层统一磨砂玻璃（.glass-popconfirm） =====
+ * 用法：C 端 el-popconfirm 挂 popper-class="glass-popconfirm"。
+ * 弹层 root(.el-popper.is-light) 即视觉容器，方案同 .user-menu-popper；
+ * 操作按钮保持 EP 实底（玻璃面板+实底按钮是标准搭配），箭头隐藏防实色残块。 */
+.glass-popconfirm {
+  margin-top: 6px !important;
+
+  &.el-popper.is-light {
+    padding: 0;
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur) saturate(160%);
+    -webkit-backdrop-filter: var(--backdrop-blur) saturate(160%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow:
+      var(--glass-shadow),
+      inset 0 1px 0 var(--glass-highlight);
+    overflow: hidden;
+  }
+  .el-popper__arrow {
+    display: none;
+  }
+  .el-popconfirm {
+    padding: 12px 14px;
+
+    .el-popconfirm__main {
+      color: var(--text-primary);
+      font-size: 13px;
+      line-height: 20px;
+    }
+    .el-popconfirm__action {
+      margin-top: 8px;
+    }
+  }
+}
+
+/* ===== 资产页柔和光斑衬底 =====
+ * 磨砂玻璃需要透出"有层次"的背景才成立。
+ * 注意：这几页根容器在 App.vue 的 .page-bg 内，底下已有全站固定背景图
+ * (background-light.webp, 经 ::after 压暗 45%)——背景必须保持透明让它透出，
+ * 所以这里只叠两团半透明品牌柔光做玻璃层次，**不要再铺不透明 linear-gradient**，
+ * 否则会把 .page-bg 的背景图整个盖死，表现为"页面看不到背景"。 */
+.wallet-page,
+.points-page,
+.coupons-page,
+.spu-detail-page {
+  background:
+    radial-gradient(900px 480px at 10% -4%, rgba(0, 113, 227, 0.07), transparent 62%),
+    radial-gradient(760px 560px at 96% 12%, rgba(255, 103, 0, 0.05), transparent 58%);
+}
+html.theme-dark .wallet-page,
+html.theme-dark .points-page,
+html.theme-dark .coupons-page,
+html.theme-dark .spu-detail-page {
+  background:
+    radial-gradient(900px 480px at 10% -4%, rgba(0, 113, 227, 0.10), transparent 62%),
+    radial-gradient(760px 560px at 96% 12%, rgba(255, 103, 0, 0.06), transparent 58%);
+}
+
+/* ===== 用户下拉菜单统一磨砂玻璃（.user-menu-popper）=====
+ * NavHeader "我的"下拉与 RagChat 顶栏用户下拉共用：弹层 teleport 到 body，
+ * 用 popper-class 挂此全局类；行 hover/focus 用半透明 --glass-hover 保持玻璃通透。 */
+.user-menu-popper {
+  margin-top: 6px !important;
+
+  &.el-popper.is-light {
+    padding: 0;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.72));
+    backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+    -webkit-backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+    border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.08));
+    border-radius: var(--radius-md);
+    box-shadow:
+      var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
+      inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
+    overflow: hidden;
+  }
+
+  .el-dropdown-menu {
+    background: transparent;
+    padding: 4px 0;
+  }
+
+  .el-dropdown-menu__item {
+    color: var(--text-primary);
+    font-size: 13px;
+
+    &:hover,
+    &:focus {
+      background: var(--glass-hover, rgba(0, 0, 0, 0.05));
+      color: var(--brand-primary);
+    }
+  }
+
+  .el-dropdown-menu__item--divided {
+    border-top: 1px solid var(--glass-border, rgba(0, 0, 0, 0.06));
+    margin-top: 4px;
   }
 }

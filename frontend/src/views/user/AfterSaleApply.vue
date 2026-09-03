@@ -6,7 +6,7 @@
         <div class="panel-head"><span class="panel-title">选择售后商品</span></div>
         <div class="section-desc">请选择需要售后的订单商品（仅已支付/已发货/已完成的订单可申请）</div>
         
-        <el-select v-model="selectedOrderId" placeholder="请先选择订单" class="order-select" @change="onOrderChange" filterable>
+        <el-select v-model="selectedOrderId" placeholder="请先选择订单" class="order-select" popper-class="glass-select-popper" @change="onOrderChange" filterable>
           <el-option v-for="o in availableOrders" :key="o.id" :label="`${o.orderNo} (¥${Number(o.payAmount || 0).toFixed(2)})`" :value="o.id" />
         </el-select>
 
@@ -52,7 +52,7 @@
           </el-form-item>
 
           <el-form-item label="申请原因" required>
-            <el-select v-model="form.reason" placeholder="请选择原因" class="reason-select">
+            <el-select v-model="form.reason" placeholder="请选择原因" class="reason-select" popper-class="glass-select-popper">
               <el-option label="商品质量问题" value="商品质量问题" />
               <el-option label="商品与描述不符" value="商品与描述不符" />
               <el-option label="发错货/漏发" value="发错货/漏发" />

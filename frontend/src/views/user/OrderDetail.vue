@@ -119,7 +119,7 @@
     </div>
 
     <!-- 评价弹窗 -->
-    <el-dialog v-model="reviewVisible" title="发表评价" width="520px" destroy-on-close>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="reviewVisible" title="发表评价" width="520px" destroy-on-close>
       <div class="review-target">
         <img :src="reviewItem?.pic || reviewItem?.image || __PH" class="review-thumb" />
         <div>
@@ -149,7 +149,7 @@
     </el-dialog>
 
     <!-- 退货物流弹窗 -->
-    <el-dialog v-model="returnVisible" title="填写退货物流" width="420px" destroy-on-close>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="returnVisible" title="填写退货物流" width="420px" destroy-on-close>
       <el-form label-width="100px">
         <el-form-item label="快递单号" required>
           <el-input v-model="returnTracking" placeholder="请输入退货快递单号" />

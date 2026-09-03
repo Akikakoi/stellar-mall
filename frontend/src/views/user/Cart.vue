@@ -138,7 +138,16 @@ onMounted(async () => {
 .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
 .main-content { padding: 24px 20px 40px; }
-.empty { background: var(--bg-card); border-radius: var(--radius-lg); padding: 80px 0; border: 1px solid var(--border-base); }
+.empty {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 80px 0;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  overflow: hidden;
+}
 
 .cart-table { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-base); overflow: hidden; }
 .row {

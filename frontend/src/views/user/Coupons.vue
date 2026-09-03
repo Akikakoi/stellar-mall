@@ -32,7 +32,7 @@
             <el-button type="primary" size="small" :loading="c.claiming" :disabled="c.claiming" @click="handleClaim(c)">立即领取</el-button>
           </div>
         </div>
-        <el-empty v-if="!loading && availableCoupons.length === 0" description="暂无可领取的优惠券" />
+        <el-empty v-if="!loading && availableCoupons.length === 0" class="glass-empty" description="暂无可领取的优惠券" />
       </template>
 
       <!-- 我的优惠券（不含已过期） -->
@@ -56,7 +56,7 @@
             <el-tag v-else type="success" size="small">可使用</el-tag>
           </div>
         </div>
-        <el-empty v-if="!loading && activeCoupons.length === 0" description="暂无优惠券" />
+        <el-empty v-if="!loading && activeCoupons.length === 0" class="glass-empty" description="暂无优惠券" />
       </template>
 
       <!-- 已过期 -->
@@ -79,7 +79,7 @@
             <el-tag type="info" size="small">已过期</el-tag>
           </div>
         </div>
-        <el-empty v-if="!loading && expiredCoupons.length === 0" description="暂无已过期的优惠券" />
+        <el-empty v-if="!loading && expiredCoupons.length === 0" class="glass-empty" description="暂无已过期的优惠券" />
       </template>
     </div>
   </div>
@@ -165,19 +165,24 @@ onMounted(() => { loadAvailable(); loadMy() })
 .coupon-list { max-width: 900px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
 .coupon-card {
   display: flex;
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
-.coupon-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+.coupon-card:hover {
+  transform: var(--hover-lift);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
 .coupon-card.used, .coupon-card.expired { opacity: 0.5; }
 .coupon-left {
   width: 140px;
-  background: var(--bg-hover);
-  border-right: 1px solid var(--border-base);
+  background: var(--glass-hover);
+  border-right: 1px solid var(--glass-border);
   color: var(--text-primary);
   display: flex;
   flex-direction: column;

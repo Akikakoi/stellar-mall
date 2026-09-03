@@ -9,7 +9,7 @@
     </div>
 
     <div class="address-grid" v-loading="loading">
-      <el-empty v-if="!loading && addresses.length === 0" description="暂无收货地址">
+      <el-empty v-if="!loading && addresses.length === 0" class="glass-empty" description="暂无收货地址">
         <el-button type="primary" @click="openAdd">新增收货地址</el-button>
       </el-empty>
 
@@ -64,7 +64,7 @@
     </div>
 
     <!-- 弹窗表单 -->
-    <el-dialog
+    <el-dialog class="glass-dialog" modal-class="glass-overlay"
       v-model="dialogVisible"
       :title="isEdit ? '编辑收货地址' : '新增收货地址'"
       width="540px"
@@ -263,7 +263,7 @@ onMounted(loadAddresses)
 .address-page {
   min-height: 100vh;
   padding: 0 20px 60px;
-  background: var(--bg-page, #f5f7fa);
+  /* 不写 background：让父 .page-bg 的 webp 背景透出，与详情页/资产页一致 */
 }
 
 .page-header {

@@ -173,7 +173,7 @@
                 </div>
               </div>
             </div>
-            <el-empty v-if="!loading && spus.length === 0" description="暂无商品，试试其他关键词吧" />
+            <el-empty v-if="!loading && spus.length === 0" class="glass-empty" description="暂无商品，试试其他关键词吧" />
             <div v-if="loadingMore" class="load-more-tip">
               <el-icon class="is-loading"><Loading /></el-icon>
               <span>加载更多商品中...</span>
@@ -186,7 +186,7 @@
 
     <!-- 规格选择弹窗（append-to-body：遮罩脱离 .shop-page 的 transform 层，保持视口定位）。
          选型号界面统一复用详情页的 SkuSpecSelector：规格分组按钮 + 数量控件。 -->
-    <el-dialog v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close append-to-body>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="skuDialogVisible" :title="`选择规格 - ${currentSpu?.name || ''}`" width="520px" destroy-on-close append-to-body>
       <SkuSpecSelector
         v-if="currentSkus.length"
         :spu="currentSpu"
@@ -211,6 +211,7 @@ import { useCartStore } from '@/stores/cart'
 import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 import { useSearchHistory } from '@/composables/useSearchHistory'
+import { track } from '@/utils/tracker'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 import DOMPurify from 'dompurify'
 
@@ -361,6 +362,7 @@ function doShopSearch() {
   aggCategories.value = []
   page.value = 1; spus.value = []
   loadSpu()
+  track('search', { keyword: kw, scene: 'search' })
 }
 
 /**
@@ -542,6 +544,16 @@ async function loadSpu(append = false) {
           }
         }
         await batchCheckFavs()
+        // 埋点：列表曝光（非追加加载）。scene 区分 搜索 / 分类浏览
+        if (records.length) {
+          const scene = keyword.value ? 'search' : 'category'
+          track('view_item_list', {
+            keyword: keyword.value || null,
+            categoryId: Number(categoryId.value || activeCategoryId.value) || null,
+            scene,
+            extra: { sortBy: params.sortBy || 'default', page: 1 }
+          })
+        }
       }
     }
   } catch (e: any) {
@@ -585,10 +597,12 @@ async function toggleFav(spu: any) {
     if (favSet.has(spu.id)) {
       await removeFavorite(spu.id)
       favSet.delete(spu.id)
+      track('favorite', { spuId: spu.id, scene: 'list', extra: { fav: 0 } })
       ElMessage.success('已取消收藏')
     } else {
       await addFavorite(spu.id)
       favSet.add(spu.id)
+      track('favorite', { spuId: spu.id, scene: 'list', extra: { fav: 1 } })
       ElMessage.success('已添加收藏')
     }
   } catch (e: any) { ElMessage.error('操作失败') }
@@ -610,7 +624,11 @@ async function handleAddToCart(spu: any) {
     const detail: any = res || {}
     const skuList = detail.skuList || detail.skuListVo || []
     if (!skuList.length) { ElMessage.warning('该商品暂无规格可选'); return }
-    if (skuList.length === 1) { await doAddCart(skuList[0].id); return }
+    if (skuList.length === 1) {
+      track('add_to_cart', { spuId: spu.id, skuId: skuList[0].id, scene: 'list' })
+      await doAddCart(skuList[0].id)
+      return
+    }
     currentSpu.value = detail
     currentSkus.value = skuList.filter((s: any) => s.status !== 0)
     cartQty.value = 1
@@ -638,7 +656,10 @@ async function doAddCart(skuId: any, qty = 1) {
   } finally { addingCart.value = false }
 }
 
-function confirmAddToCart() { doAddCart(selectedSku.value?.id, cartQty.value) }
+function confirmAddToCart() {
+  track('add_to_cart', { spuId: currentSpu.value?.id, skuId: selectedSku.value?.id, scene: 'list' })
+  doAddCart(selectedSku.value?.id, cartQty.value)
+}
 
 // --- 初始化 ---
 onMounted(async () => {
@@ -691,17 +712,22 @@ onMounted(async () => {
   width: 100%;
   max-width: 560px;
 }
-/* 搜索历史下拉 */
+/* 搜索历史下拉 —— 磨砂玻璃质感（半透明底 + 背景模糊 + 细描边 + 顶部内高光） */
 .history-panel {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-base, #e4e7ed);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.72));
+  backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+  -webkit-backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+  border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.08));
   border-radius: 12px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+  box-shadow:
+    var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
+    inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
   padding: 6px 0 8px;
+  overflow: hidden;
   z-index: 20;
 }
 .history-panel-head {
@@ -727,7 +753,7 @@ onMounted(async () => {
   transition: background 0.15s;
 }
 .history-item:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover, rgba(0, 0, 0, 0.05));
 }
 .history-clock {
   flex-shrink: 0;
@@ -756,7 +782,7 @@ onMounted(async () => {
   opacity: 1;
 }
 .history-del:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover, rgba(0, 0, 0, 0.05));
   color: var(--status-danger, #F56C6C);
 }
 .shop-search-pill {
