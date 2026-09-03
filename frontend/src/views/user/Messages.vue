@@ -26,7 +26,7 @@
         </div>
       </div>
     </div>
-    <el-empty v-else description="暂无消息" />
+    <el-empty v-else class="glass-empty" description="暂无消息" />
 
     <div class="pagination-wrap" v-if="total > pageSize">
       <el-pagination

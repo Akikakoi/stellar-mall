@@ -50,7 +50,7 @@
     </main>
 
     <!-- 退货物流弹窗 -->
-    <el-dialog v-model="returnVisible" title="填写退货物流" width="420px" destroy-on-close>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="returnVisible" title="填写退货物流" width="420px" destroy-on-close>
       <el-form label-width="100px">
         <el-form-item label="快递单号" required>
           <el-input v-model="returnTracking" placeholder="请输入退货快递单号" />
@@ -177,7 +177,16 @@ onMounted(loadList)
 .main-content { padding: 32px 20px 60px; }
 .page-header { margin-bottom: 20px; }
 .page-header h2 { font-size: 22px; color: var(--text-primary); font-weight: 600; }
-.empty { background: var(--bg-card); border-radius: var(--radius-lg); padding: 80px 0; border: 1px solid var(--border-base); }
+.empty {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 80px 0;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  overflow: hidden;
+}
 
 .card {
   background: var(--bg-card);

@@ -57,7 +57,7 @@
     </main>
 
     <!-- 兑换确认弹窗 -->
-    <el-dialog v-model="redeemVisible" title="确认兑换" width="400px" destroy-on-close>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="redeemVisible" title="确认兑换" width="400px" destroy-on-close>
       <div class="redeem-confirm" v-if="redeemTarget">
         <div class="redeem-name">{{ redeemTarget.name }}</div>
         <div class="redeem-detail">
@@ -212,7 +212,15 @@ onMounted(() => loadData())
   box-shadow: var(--shadow-sm);
 }
 
-.points-panel { padding: 24px 28px; }
+.points-panel {
+  padding: 24px 28px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  overflow: hidden;
+}
 .points-overview {
   display: flex;
   justify-content: space-between;

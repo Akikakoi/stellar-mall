@@ -30,14 +30,14 @@
           </div>
           <span class="ci-title" :title="c.title">{{ c.title }}</span>
           <div class="ci-ops" @click.stop>
-            <el-popconfirm title="确定重命名该会话？" @confirm="onRename(c)">
+            <el-popconfirm popper-class="glass-popconfirm" title="确定重命名该会话？" @confirm="onRename(c)">
               <template #reference>
                 <button class="op-btn rename-btn">
                   <el-icon :size="13"><Edit /></el-icon>
                 </button>
               </template>
             </el-popconfirm>
-            <el-popconfirm title="删除后将无法恢复，确定？" @confirm="onDelete(c.id)">
+            <el-popconfirm popper-class="glass-popconfirm" title="删除后将无法恢复，确定？" @confirm="onDelete(c.id)">
               <template #reference>
                 <button class="op-btn delete-btn">
                   <el-icon :size="13"><Delete /></el-icon>
@@ -90,7 +90,7 @@
           <el-tag :type="userStore.isAdmin ? 'danger' : 'success'" effect="dark" size="small" class="role-tag">
             {{ userStore.roleLabel }}
           </el-tag>
-          <el-dropdown trigger="click" @command="onUserCmd">
+          <el-dropdown popper-class="user-menu-popper" trigger="click" @command="onUserCmd">
             <span class="user-info">
               <el-avatar :size="32" class="user-avatar">
                 {{ userStore.userInfo?.nickname?.[0] || userStore.userInfo?.username?.[0] || 'A' }}
@@ -634,15 +634,17 @@ function parseEvent(block: any) {
   display: grid;
   grid-template-columns: 280px 1fr;
   grid-template-rows: 1fr;
-  background: var(--bg-surface);
+  background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-surface) 100%);
   overflow: hidden;
 }
 
 /* ===== 侧边栏 ===== */
 .sidebar {
   grid-row: 1 / -1;
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-strong);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -651,7 +653,7 @@ function parseEvent(block: any) {
 
 .sb-head {
   padding: 18px 16px 14px;
-  border-bottom: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .brand {
@@ -736,7 +738,7 @@ function parseEvent(block: any) {
   transition: all 0.15s ease;
 
   &:hover {
-    background: var(--bg-hover);
+    background: var(--glass-hover);
     color: var(--text-primary);
 
     .ci-ops {
@@ -831,7 +833,7 @@ function parseEvent(block: any) {
 /* 侧边栏底部导航 */
 .sb-foot {
   padding: 10px 12px;
-  border-top: 1px solid var(--border-strong);
+  border-top: 1px solid var(--glass-border);
 }
 
 .nav-item {
@@ -1078,9 +1080,11 @@ function parseEvent(block: any) {
 
 .prompt {
   padding: 14px 16px;
-  border: 1px solid var(--border-base);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-card);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
   color: var(--text-primary);
   cursor: pointer;
   display: flex;
@@ -1091,11 +1095,11 @@ function parseEvent(block: any) {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
   animation: promptSlideIn 0.4s ease-out both;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
 
   &:hover {
-    background: var(--brand-primary-soft);
-    border-color: var(--brand-primary-border);
+    background: var(--glass-hover);
+    border-color: var(--brand-primary);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 113, 227, 0.12);
 
@@ -1154,8 +1158,10 @@ function parseEvent(block: any) {
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   border-bottom-left-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
@@ -1197,8 +1203,8 @@ function parseEvent(block: any) {
 /* ===== 输入区域 ===== */
 .input-area {
   padding: 12px 24px 16px;
-  border-top: 1px solid var(--divider);
-  background: var(--bg-surface);
+  border-top: 1px solid var(--glass-border);
+  background: transparent;
   flex-shrink: 0;
 }
 

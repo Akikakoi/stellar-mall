@@ -29,7 +29,7 @@
             </div>
           </div>
         </div>
-        <el-empty v-if="!loading && favorites.length === 0" description="暂无收藏商品">
+        <el-empty v-if="!loading && favorites.length === 0" class="glass-empty" description="暂无收藏商品">
           <el-button type="primary" @click="router.push('/')">去逛逛</el-button>
         </el-empty>
       </div>
@@ -44,6 +44,7 @@ import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { listFavorites, removeFavorite } from '@/api/mall'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { track } from '@/utils/tracker'
 
 const __PH = window.__PH
 
@@ -68,6 +69,11 @@ async function loadFavorites() {
   try {
     const res = await listFavorites()
     favorites.value = Array.isArray(res) ? res : []
+    // 埋点：收藏列表曝光（曝光/收藏页 属于强正反馈信号）
+    const ids = favorites.value.map((f: any) => f.spuId).filter(Boolean)
+    if (ids.length) {
+      track('view_item_list', { scene: 'favorites', extra: { spuIds: ids.slice(0, 50) } })
+    }
   } catch (e: any) {
     favorites.value = []
   } finally {
@@ -100,6 +106,7 @@ async function handleRemove(item: any) {
   }
   try {
     await removeFavorite(item.spuId)
+    track('favorite', { spuId: item.spuId, scene: 'favorites', extra: { fav: 0 } })
     ElMessage.success('已取消收藏')
     favorites.value = favorites.value.filter((f: any) => f.id !== item.id)
   } catch (e: any) {

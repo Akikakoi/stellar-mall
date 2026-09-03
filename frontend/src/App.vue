@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import NavHeader from '@/components/NavHeader.vue'
 import FloatingSidebar from '@/components/FloatingSidebar.vue'
@@ -26,6 +26,14 @@ const showHeader = computed(() => !isAdmin.value && !isSpuDetail.value && !hideH
 const showFloatingSidebar = computed(() =>
   showHeader.value && !isRag.value
 )
+// 弹层作用域标记：ElMessageBox/Drawer 等 JS 服务弹层 teleport 到 body，
+// 无法用 DOM 后代选择器区分 C 端与后台 → 按路由给 body 挂 area-user/area-admin
+// 标记，供 main.scss 里 MessageBox 等 C 端玻璃化样式限定作用域（后台保持实底）。
+watchEffect(() => {
+  const admin = route.path.startsWith('/admin')
+  document.body.classList.toggle('area-admin', admin)
+  document.body.classList.toggle('area-user', !admin)
+})
 </script>
 
 <style>

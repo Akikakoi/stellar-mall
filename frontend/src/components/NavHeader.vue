@@ -70,7 +70,7 @@
           </el-button>
         </el-badge>
         <span class="nickname">{{ userStore.nickname || '用户' }}</span>
-        <el-dropdown @command="handleCommand">
+        <el-dropdown popper-class="user-menu-popper" @command="handleCommand">
           <el-button class="user-menu-btn">我的 ▾</el-button>
           <template #dropdown>
             <el-dropdown-menu class="user-menu-dropdown">
@@ -109,6 +109,7 @@ import { useUserStore } from '@/stores/user'
 import { getUnreadCount, suggestSpu } from '@/api/mall'
 import { useUnreadBadge } from '@/composables/useUnreadBadge'
 import { useSearchHistory } from '@/composables/useSearchHistory'
+import { track } from '@/utils/tracker'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const props = defineProps({
@@ -280,6 +281,7 @@ function doSearch() {
   const kw = searchKeyword.value.trim()
   if (!kw) return
   addToHistory(kw)
+  track('search', { keyword: kw, scene: 'header' })
   const query: Record<string, any> = { keyword: kw }
   if (route.path === '/shop/search') {
     router.replace({ query })
@@ -484,6 +486,27 @@ function handleLogoClick() {
 .nav-search-popper {
   margin-top: 6px !important;
 
+  /* ===== 磨砂玻璃质感：弹层根节点即视觉容器 ===== */
+  &.el-popper.is-light {
+    padding: 0;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.72));
+    backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+    -webkit-backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+    border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.08));
+    border-radius: var(--radius-md);
+    box-shadow:
+      var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
+      inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
+    overflow: hidden;
+  }
+
+  /* element-plus 默认以不透明 --el-fill-color-light 填充行 hover/键盘高亮，
+     在玻璃面上改用半透明层，保持整块通透质感 */
+  .el-autocomplete-suggestion li:hover,
+  .el-autocomplete-suggestion li.highlighted {
+    background: var(--glass-hover, rgba(0, 0, 0, 0.05));
+  }
+
   .el-autocomplete-suggestion__wrap {
     padding: 4px 0;
     max-height: 320px;
@@ -499,7 +522,7 @@ function handleLogoClick() {
     color: var(--text-primary);
 
     &:hover {
-      background: var(--bg-hover);
+      background: transparent; /* 高亮已由外层 li 的半透明层提供，避免双层叠加 */
     }
 
     &.is-history {
@@ -539,7 +562,7 @@ function handleLogoClick() {
     opacity: 0;
 
     &:hover {
-      background: var(--bg-hover);
+      background: var(--glass-hover, rgba(0, 0, 0, 0.05));
       color: var(--status-danger, #F56C6C);
       opacity: 1;
     }
@@ -549,4 +572,5 @@ function handleLogoClick() {
     opacity: 1;
   }
 }
+
 </style>

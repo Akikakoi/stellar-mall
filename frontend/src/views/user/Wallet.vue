@@ -53,7 +53,7 @@
     </main>
 
     <!-- 充值弹窗 -->
-    <el-dialog v-model="rechargeVisible" title="钱包充值" width="420px" destroy-on-close>
+    <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="rechargeVisible" title="钱包充值" width="420px" destroy-on-close>
       <el-form :model="rechargeForm" label-width="100px">
         <el-form-item label="充值金额" required>
           <el-input-number v-model="rechargeForm.amount" :min="0.01" :max="99999.99" :precision="2" style="width: 200px" />
@@ -188,6 +188,12 @@ onMounted(() => {
 
 .balance-panel {
   padding: 24px 28px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border-color: var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  overflow: hidden;
 }
 .balance-row {
   display: flex;

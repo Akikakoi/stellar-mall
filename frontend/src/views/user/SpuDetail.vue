@@ -162,7 +162,7 @@
           </div>
         </div>
       </div>
-      <el-empty v-else-if="reviewTotal === 0" description="暂无评价" />
+      <el-empty v-else-if="reviewTotal === 0" class="glass-empty" description="暂无评价" />
     </div>
   </div>
 </template>
@@ -175,6 +175,7 @@ import { userRequest } from '@/api/request'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
+import { track } from '@/utils/tracker'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 
 const __PH = window.__PH
@@ -387,6 +388,15 @@ async function loadDetail() {
     skus.value = res?.skus || res?.skuList || []
     selectedServices.value = []
     await checkFav()
+    // 埋点：详情浏览（spuId/分类/最低价，供漏斗归因）
+    if (spu.value) {
+      track('view_item', {
+        spuId: Number(spu.value.id),
+        categoryId: Number(spu.value.categoryId) || null,
+        scene: 'detail',
+        amount: Number(spu.value.minPrice) || null
+      })
+    }
   } catch (e: any) {
     const msg = (e?.response?.data?.msg) || e?.message || ''
     if (msg.includes('已下架')) {
@@ -426,10 +436,12 @@ async function toggleFav() {
     if (isFav.value) {
       await removeFavorite(spuId)
       isFav.value = false
+      track('favorite', { spuId, scene: 'detail', extra: { fav: 0 } })
       ElMessage.success('已取消收藏')
     } else {
       await addFavorite(spuId)
       isFav.value = true
+      track('favorite', { spuId, scene: 'detail', extra: { fav: 1 } })
       ElMessage.success('已添加收藏')
     }
   } catch (e: any) {
@@ -457,6 +469,13 @@ async function handleAddCart() {
       quantity: Number(qty.value) || 1,
       services: selectedServicesDetail.value,
       serviceFee: serviceFee.value
+    })
+    track('add_to_cart', {
+      spuId: Number(spu.value?.id),
+      skuId: Number(sku.id),
+      scene: 'detail',
+      amount: Number(sku.price) || null,
+      extra: { qty: Number(qty.value) || 1 }
     })
     ElMessage.success('已加入购物车')
   } catch (e: any) {
@@ -509,14 +528,16 @@ onMounted(() => { loadDetail(); loadReviews() })
 
 .main-content { padding: 28px 20px 60px; }
 .detail-wrap {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   padding: 32px;
   display: grid;
   grid-template-columns: 500px 1fr;
   gap: 48px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
 }
 
 /* ===== 图片轮播 ===== */
