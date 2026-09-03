@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.UserBehaviorMapper">
+
+    <!-- 批量插入埋点（只追加）。字段已由 Service 层兜底去空，避免长度/非法值导致整批失败 -->
+    <insert id="batchInsert">
+        INSERT INTO stellar_user_behavior
+            (user_id, device_id, event_type, spu_id, sku_id, category_id,
+             keyword, scene, position, amount, duration_ms, extra,
+             client_ip, user_agent, event_time)
+        VALUES
+        <foreach collection="list" item="b" separator=",">
+            (#{b.userId}, #{b.deviceId}, #{b.eventType}, #{b.spuId}, #{b.skuId}, #{b.categoryId},
+             #{b.keyword}, #{b.scene}, #{b.position}, #{b.amount}, #{b.durationMs}, #{b.extra},
+             #{b.clientIp}, #{b.userAgent}, NOW())
+        </foreach>
+    </insert>
+
+</mapper>
