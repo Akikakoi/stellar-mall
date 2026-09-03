@@ -39,6 +39,12 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
     @Value("${stellar.elasticsearch.index-prefix:stellar}")
     private String indexPrefix = DEFAULT_INDEX_PREFIX;
 
+    /** 语义向量维度：必须与 rag-backend /api/embed 实际返回的维度一致。
+     *  默认 1536 = DashScope text-embedding-v2（云端优先）；本地 bge-large-zh-v1.5 为 1024。
+     *  ⚠️ dense_vector 创建后 dims 不可修改，切换模型需删索引重建（见 rebuildAll）。 */
+    @Value("${stellar.elasticsearch.vector-dim:1536}")
+    private int vectorDim = 1536;
+
     private final ElasticsearchOperations elasticsearchOperations;
 
     public ElasticsearchConfig(@Lazy ElasticsearchOperations elasticsearchOperations) {
@@ -78,34 +84,72 @@ public class ElasticsearchConfig extends AbstractElasticsearchConfiguration {
         try {
             IndexOperations idxOps = elasticsearchOperations.indexOps(SpuDocument.class);
             if (!idxOps.exists()) {
-                idxOps.create();
+                // ⚠️ 不能用 idxOps.create()+putMapping：Spring Data 会自动把无 @Field 的
+                // nameVec(double[]) 也写进 mapping，此时它没有 index 参数；而 dense_vector
+                // 的 index/similarity 一旦建立就不可改，之后再 PUT 补参数会被 ES 忽略（仅 299
+                // 告警），语义向量在 doc values 中缺失 → script_score 的 cos 恒为 0（2026-09-03
+                // 实测定案）。因此索引创建必须一次到位：注入 index:true 后手动 PUT。
                 Document mapping = idxOps.createMapping(SpuDocument.class);
-                idxOps.putMapping(mapping);
-                log.info("ES index {} created with keyword mapping", spuIndexName());
+                createIndexWithDenseOptions(mapping);
+                log.info("ES index {} created with nameVec(dims={}, index=hnsw, cosine)",
+                        spuIndexName(), vectorDim);
             } else {
                 log.info("ES index {} already exists", spuIndexName());
             }
 
-            // 追加/更新 dense_vector 映射（幂等）
+            // 兜底：当 nameVec 字段在已存在索引中缺失时补充；字段已存在时 ES 忽略并 299 告警
+            // （日志会提示删除索引后重启重建，确保 nameVec 带 index:true）
             putDenseVectorMapping();
         } catch (Exception e) {
             log.error("Failed to ensure ES index {}: {}", spuIndexName(), e.getMessage(), e);
         }
     }
 
-    /** 为 nameVec 字段添加 dense_vector 映射（1536 维，cosine 相似度）。 */
+    /** 手动创建索引：把 Spring Data 生成的 mapping 中 nameVec 替换为带 index:true 的
+     *  dense_vector 定义后，用 low-level client 一次 PUT 建索引。
+     *  <p>为什么必须这样：dense_vector 的 dims/index/similarity 建后不可变，Spring Data
+     *  的 create()+putMapping 流程会让 nameVec 以「无 index」形态落库，后续无法补救。</p>
+     */
+    private void createIndexWithDenseOptions(Document mapping) throws Exception {
+        Object propsObj = mapping.get("properties");
+        if (propsObj instanceof java.util.Map) {
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> props = (java.util.Map<String, Object>) propsObj;
+            java.util.Map<String, Object> nameVec = new java.util.LinkedHashMap<>();
+            nameVec.put("type", "dense_vector");
+            nameVec.put("dims", vectorDim);
+            nameVec.put("index", true);
+            nameVec.put("similarity", "cosine");
+            props.put("nameVec", nameVec);
+        }
+        // Spring Data 的 mapping Document 顶层即 properties（供 PUT /_mapping 用）；
+        // 建索引 PUT /{index} 的 body 需要 {"mappings": {...}} 包裹一层
+        com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
+        com.fasterxml.jackson.databind.node.ObjectNode body = om.createObjectNode();
+        body.set("mappings", om.readTree(mapping.toJson()));
+        org.elasticsearch.client.Request request = new org.elasticsearch.client.Request("PUT", "/" + spuIndexName());
+        request.setJsonEntity(om.writeValueAsString(body));
+        elasticsearchClient().getLowLevelClient().performRequest(request);
+    }
+
+    /** 为 nameVec 字段添加 dense_vector 映射（仅当字段缺失时生效；字段已存在时被 ES 忽略）。 */
     private void putDenseVectorMapping() {
         try {
             org.elasticsearch.client.Request request = new org.elasticsearch.client.Request("PUT",
                     "/" + spuIndexName() + "/_mapping");
             request.setJsonEntity("{"
                     + "\"properties\":{"
-                    + "\"nameVec\":{\"type\":\"dense_vector\",\"dims\":1536}"
+                    + "\"nameVec\":{\"type\":\"dense_vector\",\"dims\":" + vectorDim
+                    + ",\"index\":true,\"similarity\":\"cosine\"}"
                     + "}}");
             elasticsearchClient().getLowLevelClient().performRequest(request);
-            log.info("dense_vector mapping added to {}", spuIndexName());
+            log.info("dense_vector mapping added to {} (dims={}, index=hnsw)", spuIndexName(), vectorDim);
         } catch (Exception e) {
-            log.warn("Failed to add dense_vector mapping: {}", e.getMessage());
+            // 索引已存在且参数与配置不一致时 ES 会拒绝修改（dense_vector 参数不可变）。
+            // 属预期告警：需删索引后重启重建，或调整配置与现有索引一致。
+            log.warn("Failed to add dense_vector mapping to {}: {} (dims={}；若为参数冲突，"
+                    + "请删除索引 {} 后重启，确保 nameVec 带 index:true 重建)",
+                    spuIndexName(), e.getMessage(), vectorDim, spuIndexName());
         }
     }
 

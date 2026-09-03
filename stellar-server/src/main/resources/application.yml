@@ -118,6 +118,10 @@ stellar:
     connect-timeout: 5000
     socket-timeout: 60000
     index-prefix: stellar
+    # 语义向量维度：必须与 rag-backend /api/embed 实际返回一致。
+    # 1536 = DashScope text-embedding-v2（云端优先）；本地 bge-large-zh-v1.5 为 1024。
+    # 注意 dense_vector 建好后 dims 不可改，切换模型需删索引后重建（管理端 /admin/es/rebuild 前先删索引）。
+    vector-dim: 1536
   # 4 个隔离线程池参数（对齐 sky）
   thread-pool:
     core-size: 10

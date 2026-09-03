@@ -36,6 +36,15 @@ public class SpuEsSyncService {
     @Value("${stellar.rag.base-url:http://127.0.0.1:8000}")
     private String ragBaseUrl;
 
+    /** 语义向量维度（必须与 ES dense_vector mapping 一致，见 ElasticsearchConfig）。
+     *  默认 1536 = DashScope text-embedding-v2；本地 bge-large-zh-v1.5 为 1024。
+     *  维度不符时丢弃向量（宁缺毋滥），避免整批写入 ES 报 400。 */
+    @Value("${stellar.elasticsearch.vector-dim:1536}")
+    private int vectorDim = 1536;
+
+    /** rag-backend /api/embed 单次最大条数（服务端 Field max_length=100），保守取 50。 */
+    private static final int EMBED_BATCH_SIZE = 50;
+
     public SpuEsSyncService(ElasticsearchOperations esOps, SpuMapper spuMapper) {
         this.esOps = esOps;
         this.spuMapper = spuMapper;
@@ -85,11 +94,11 @@ public class SpuEsSyncService {
                 .collect(Collectors.toList());
         List<double[]> vectors = fetchEmbeddings(texts);
 
-        // 构建文档
+        // 构建文档（vectors 与 allSpus 等长，null 槽位表示该商品未取到向量）
         List<SpuDocument> docs = new ArrayList<>();
         for (int i = 0; i < allSpus.size(); i++) {
             SpuDocument doc = toDocument(allSpus.get(i));
-            if (i < vectors.size()) doc.setNameVec(vectors.get(i));
+            if (vectors.get(i) != null) doc.setNameVec(vectors.get(i));
             docs.add(doc);
         }
 
@@ -107,46 +116,82 @@ public class SpuEsSyncService {
         return sb.toString();
     }
 
-    /** 调 rag-backend /api/embed 批量获取向量。 */
+    /** 调 rag-backend /api/embed 批量获取向量。
+     *  <p>分批调用（单次最多 {@link #EMBED_BATCH_SIZE} 条），任一批失败只影响该批并记日志，
+     *  不阻断全量同步；返回结果与 texts 严格对齐，失败/维度不符的槽位为 null。</p>
+     */
     private List<double[]> fetchEmbeddings(List<String> texts) {
-        try {
-            String body = MAPPER.writeValueAsString(new EmbedRequest(texts));
-            java.net.URL url = new java.net.URL(ragBaseUrl + "/api/embed");
-            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            conn.setDoOutput(true);
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(60000);
-            byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-            conn.getOutputStream().write(bytes);
-            conn.getOutputStream().flush();
+        List<double[]> result = new ArrayList<>(texts.size());
+        for (int i = 0; i < texts.size(); i++) result.add(null);
+        if (texts.isEmpty()) return result;
 
-            if (conn.getResponseCode() != 200) {
-                log.error("Embedding API returned {}", conn.getResponseCode());
-                return List.of();
+        int ok = 0;
+        for (int start = 0; start < texts.size(); start += EMBED_BATCH_SIZE) {
+            int end = Math.min(start + EMBED_BATCH_SIZE, texts.size());
+            List<String> batch = texts.subList(start, end);
+            try {
+                List<double[]> batchVecs = doEmbedBatch(batch);
+                for (int j = 0; j < batchVecs.size(); j++) {
+                    double[] v = batchVecs.get(j);
+                    if (v != null && v.length != vectorDim) {
+                        log.warn("Embedding dim mismatch: got {}, expect {} (text index {}). "
+                                + "Vector discarded, doc will be keyword-searchable only. "
+                                + "Check stellar.elasticsearch.vector-dim vs rag-backend embedding model.",
+                                v.length, vectorDim, start + j);
+                        continue; // 槽位保持 null
+                    }
+                    result.set(start + j, v);
+                    ok++;
+                }
+            } catch (Exception e) {
+                log.error("Embedding batch [{}, {}) failed: {}", start, end, e.getMessage());
             }
-            JsonNode node = MAPPER.readTree(conn.getInputStream());
-            List<double[]> result = new ArrayList<>();
-            for (JsonNode vec : node.get("embeddings")) {
-                double[] arr = new double[vec.size()];
-                for (int i = 0; i < vec.size(); i++) arr[i] = vec.get(i).asDouble();
-                result.add(arr);
-            }
-            log.debug("Fetched {} embeddings, dim={}", result.size(),
-                    result.isEmpty() ? 0 : result.get(0).length);
-            return result;
-        } catch (Exception e) {
-            log.error("Failed to fetch embeddings: {}", e.getMessage());
-            return List.of();
         }
+        log.info("Embedding fetched: {}/{} (dim={})", ok, texts.size(), vectorDim);
+        return result;
+    }
+
+    /** 单批 POST /api/embed。受检异常上抛给调用方（fetchEmbeddings 已 catch 记日志）。 */
+    private List<double[]> doEmbedBatch(List<String> texts) throws Exception {
+        String body = MAPPER.writeValueAsString(new EmbedRequest(new ArrayList<>(texts)));
+        java.net.URL url = new java.net.URL(ragBaseUrl + "/api/embed");
+        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        conn.setDoOutput(true);
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(60000);
+        byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        conn.getOutputStream().write(bytes);
+        conn.getOutputStream().flush();
+
+        if (conn.getResponseCode() != 200) {
+            throw new RuntimeException("Embedding API returned " + conn.getResponseCode());
+        }
+        JsonNode node = MAPPER.readTree(conn.getInputStream());
+        List<double[]> result = new ArrayList<>(texts.size());
+        for (JsonNode vec : node.get("embeddings")) {
+            double[] arr = new double[vec.size()];
+            for (int i = 0; i < vec.size(); i++) arr[i] = vec.get(i).asDouble();
+            result.add(arr);
+        }
+        log.debug("Fetched {} embeddings, dim={}", result.size(),
+                result.isEmpty() ? 0 : result.get(0).length);
+        return result;
+    }
+
+    /** 单条向量化（商品同步时），维度不符或失败时返回 null。 */
+    private double[] fetchOneEmbedding(String text) {
+        List<double[]> vecs = fetchEmbeddings(List.of(text));
+        return vecs.isEmpty() ? null : vecs.get(0);
     }
 
     /** 单条向量化（商品同步时）。 */
     private SpuDocument toDocumentWithEmbedding(Spu spu) {
         SpuDocument doc = toDocument(spu);
-        List<double[]> vecs = fetchEmbeddings(List.of(buildEmbedText(spu)));
-        if (!vecs.isEmpty()) doc.setNameVec(vecs.get(0));
+        double[] vec = fetchOneEmbedding(buildEmbedText(spu));
+        if (vec != null) doc.setNameVec(vec);
+        else log.warn("SPU {} embedding unavailable, skip nameVec (keyword-only)", spu.getId());
         return doc;
     }
 
