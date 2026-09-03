@@ -148,6 +148,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                         "/user/category/list",
                         "/user/home-module/list",
                         "/user/shop/status",
+                        "/user/behavior/**",
                         "/health",
                         "/doc.html",
                         "/v3/api-docs/**",
