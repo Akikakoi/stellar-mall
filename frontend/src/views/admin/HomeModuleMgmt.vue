@@ -5,6 +5,7 @@
       <div class="panel-head">
         <span class="panel-title">首页装修</span>
         <div class="panel-actions">
+          <el-button @click="openBgSettings">背景图设置</el-button>
           <el-button type="primary" @click="openAdd">新增模块</el-button>
         </div>
       </div>
@@ -65,6 +66,44 @@
         </div>
       </div>
     </div>
+
+    <!-- 商城主页背景图设置弹窗 -->
+    <el-dialog
+      v-model="bgVisible"
+      title="商城主页背景图"
+      width="620px"
+      destroy-on-close
+      @closed="bgDraft = bgCur"
+    >
+      <div class="bg-setting">
+        <!-- 预览面板：模拟前台 .page-bg 观感（cover 铺图 + 压暗层） -->
+        <div
+          class="bg-preview"
+          :style="{ backgroundImage: `url('${bgDraft || DEFAULT_BG_IMG}')` }"
+        >
+          <div class="bg-preview-dim"></div>
+          <span class="bg-preview-badge">{{ bgDraft ? '自定义背景' : '默认背景' }}</span>
+        </div>
+        <p class="bg-tip">
+          建议上传 1920×1080 及以上横向图（webp / jpg / png，≤5MB）。前台会自动压暗 45%
+          以保证文字与卡片可读，预览已模拟该效果。保存后前台即时生效；后台与 AI 助手页不受影响。
+        </p>
+        <div class="bg-actions">
+          <el-upload
+            :show-file-list="false"
+            :http-request="bgUpload"
+            accept=".webp,.jpg,.jpeg,.png"
+            :disabled="bgUploading"
+          >
+            <el-button type="primary" :loading="bgUploading">上传新背景</el-button>
+          </el-upload>
+          <el-button :disabled="!bgDraft" @click="bgDraft = ''">恢复默认</el-button>
+          <span class="bg-actions-spacer"></span>
+          <el-button @click="bgVisible = false">取消</el-button>
+          <el-button type="primary" :loading="bgSaving" @click="bgSave">保存</el-button>
+        </div>
+      </div>
+    </el-dialog>
 
     <!-- 新增/编辑弹窗 -->
     <el-dialog
@@ -192,6 +231,66 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest, userRequest } from '@/api/request'
+import { getSiteBgConfig, saveSiteBgConfig, uploadImages } from '@/api/admin'
+
+// ========== 商城主页背景图设置 ==========
+// bgCur：已保存值（打开弹窗时从后端拉取）；bgDraft：本次编辑草稿（'' = 默认背景）。
+// 交互语义：上传/恢复默认只改草稿并即时刷新预览，点"保存"才落库生效（防误触）。
+const DEFAULT_BG_IMG = '/images/background-light.webp'
+const bgVisible = ref(false)
+const bgCur = ref('')
+const bgDraft = ref('')
+const bgUploading = ref(false)
+const bgSaving = ref(false)
+
+async function openBgSettings() {
+  bgVisible.value = true
+  bgDraft.value = bgCur.value
+  try {
+    const cfg = await getSiteBgConfig()
+    bgCur.value = cfg?.bgImage || ''
+    bgDraft.value = bgCur.value
+  } catch {
+    // 读取失败按默认展示，仍可上传/保存（保存前会覆盖当前值）
+  }
+}
+
+/** el-upload http-request：前端预校验格式/大小后走公共上传通道（module=home-bg） */
+async function bgUpload(options: any) {
+  const file: File = options.file
+  if (!/\.(webp|jpe?g|png)$/i.test(file.name)) {
+    ElMessage.error('仅支持 webp / jpg / png 格式')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    ElMessage.error('图片大小不能超过 5MB')
+    return
+  }
+  bgUploading.value = true
+  try {
+    const urls = await uploadImages(file, 'home-bg')
+    bgDraft.value = urls[0] || ''
+    ElMessage.success('上传成功，点击"保存"后前台即时生效')
+  } catch {
+    ElMessage.error('上传失败，请重试或更换图片')
+  } finally {
+    bgUploading.value = false
+  }
+}
+
+async function bgSave() {
+  bgSaving.value = true
+  try {
+    await saveSiteBgConfig(bgDraft.value || null)
+    bgCur.value = bgDraft.value
+    ElMessage.success(bgDraft.value ? '已保存，前台即时生效' : '已恢复默认背景，前台即时生效')
+    bgVisible.value = false
+  } catch {
+    ElMessage.error('保存失败，请重试')
+  } finally {
+    bgSaving.value = false
+  }
+}
 
 // ========== 模块类型定义 ==========
 const MODULE_TYPES = [
@@ -629,5 +728,48 @@ onMounted(async () => {
 }
 .preview-label {
   color: var(--text-muted);
+}
+
+/* 商城主页背景图设置弹窗 */
+.bg-preview {
+  position: relative;
+  height: 240px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border-base);
+}
+.bg-preview-dim {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-base);
+  opacity: 0.45; /* 模拟前台 .page-bg::after 压暗层 */
+}
+.bg-preview-badge {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 1;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+}
+.bg-tip {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 10px 0 0;
+}
+.bg-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.bg-actions-spacer {
+  flex: 1;
 }
 </style>

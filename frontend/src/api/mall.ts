@@ -37,6 +37,19 @@ export function getCaptcha(): Promise<{ captchaId: string, imageBase64: string }
   })
 }
 
+// =========================== 站点配置（商城主页背景图） ===========================
+/**
+ * 获取商城主页背景图配置（bgImage 空串 = 使用默认背景图）。
+ * 匿名放行接口；__silent 静默失败——后端未部署/网络异常时保持默认背景，绝不影响页面。
+ */
+export function getSiteBg(): Promise<{ bgImage: string }> {
+  return userRequest({
+    url: '/user/site-config/bg',
+    method: 'get',
+    __silent: true
+  } as any)
+}
+
 /** 获取当前登录用户信息 */
 export function getCurrentUser(): Promise<UserInfo> {
   return userRequest({

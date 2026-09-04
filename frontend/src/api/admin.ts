@@ -378,6 +378,24 @@ export function uploadImages(files: File | File[], module = 'spu'): Promise<stri
   })
 }
 
+// =========================== 站点配置：商城主页背景图 ===========================
+/** 获取商城主页背景配置（bgImage 空串 = 使用默认背景） */
+export function getSiteBgConfig(): Promise<{ bgImage: string }> {
+  return adminRequest({
+    url: '/admin/site-config/bg',
+    method: 'get'
+  })
+}
+
+/** 保存商城主页背景（bgImage null/空 = 恢复默认） */
+export function saveSiteBgConfig(bgImage: string | null): Promise<any> {
+  return adminRequest({
+    url: '/admin/site-config/bg',
+    method: 'put',
+    data: { bgImage }
+  })
+}
+
 // =========================== AI 经营日报 ===========================
 
 /**
