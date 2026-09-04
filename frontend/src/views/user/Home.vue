@@ -767,7 +767,11 @@ onUnmounted(() => {
 }
 .cat-banner {
   grid-row: 1 / 3; border-radius: 10px; overflow: hidden;
-  position: relative; cursor: pointer; background: var(--bg-hover);
+  position: relative; cursor: pointer;
+  /* 磨砂玻璃：图片加载/透明区透出 webp 背景，与全站玻璃体系一致 */
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
 }
 .cat-banner img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
 .cat-banner:hover img { transform: scale(1.04); }
@@ -781,26 +785,35 @@ onUnmounted(() => {
 .cat-banner .banner-text p { font-size: 13px; opacity: .92; margin: 0; }
 
 .p-card {
-  background: var(--bg-card); border-radius: 10px;
-  border: 1px solid var(--border-base); box-shadow: var(--shadow-sm);
+  /* 磨砂玻璃卡（替代实底 var(--bg-card)）：背景/描边/投影/顶部高光全量玻璃化 */
+  background: var(--glass-bg);
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
   display: flex; flex-direction: column; align-items: center;
   padding: 22px 16px 18px; cursor: pointer;
   transition: transform .25s, box-shadow .25s; overflow: hidden;
 }
-.p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.p-card img { width: 140px; height: 140px; object-fit: cover; margin-bottom: 14px; border-radius: 10px; }
+.p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); }
+.p-card img { width: 140px; height: 140px; object-fit: cover; margin-bottom: 14px; border-radius: 10px; background: #fff; }
 .p-name { font-size: 14px; font-weight: 500; text-align: center; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .p-desc { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .p-price { margin-top: auto; padding-top: 12px; font-size: 14px; }
 .p-price .cur { color: var(--brand-primary); font-weight: 600; }
 
 .more-card {
-  background: var(--bg-card); border-radius: 10px;
-  border: 1px solid var(--border-base); box-shadow: var(--shadow-sm);
+  background: var(--glass-bg);
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all .25s;
 }
-.more-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--brand-primary); }
+.more-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary); }
 .more-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .more-txt { font-size: 16px; font-weight: 600; color: var(--text-secondary); transition: color .2s; }
 .more-sub { font-size: 12px; color: var(--text-muted); }
@@ -816,11 +829,16 @@ onUnmounted(() => {
   gap: 24px;
 }
 .spu-card {
-  background: var(--bg-card); border-radius: 22px; overflow: hidden;
-  cursor: pointer; border: 1px solid var(--border-base);
+  /* 磨砂玻璃卡：白底 → 玻璃。商品图 cover 不透明内容自然呈现；信息区/描边透出玻璃 */
+  background: var(--glass-bg);
+  border-radius: 22px; overflow: hidden;
+  cursor: pointer; border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
-.spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); border-color: var(--brand-primary-border); }
+.spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary-border); }
 .spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
 .spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
 .spu-card:hover .spu-image img { transform: scale(1.05); }
