@@ -78,23 +78,14 @@
             <el-input v-model="addForm.phone" placeholder="请输入联系电话" />
           </el-form-item>
           <el-form-item label="所在地区" required>
-            <el-row :gutter="8">
-              <el-col :span="8">
-                <el-form-item prop="province" label-width="0" style="margin-bottom:0">
-                  <el-input v-model="addForm.province" placeholder="省" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="8">
-                <el-form-item prop="city" label-width="0" style="margin-bottom:0">
-                  <el-input v-model="addForm.city" placeholder="市" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="8">
-                <el-form-item prop="district" label-width="0" style="margin-bottom:0">
-                  <el-input v-model="addForm.district" placeholder="区" />
-                </el-form-item>
-              </el-col>
-            </el-row>
+            <el-cascader
+              v-model="selectedArea"
+              :options="areaOptions"
+              placeholder="请选择省/市/区"
+              clearable
+              style="width: 100%"
+              popper-class="glass-select-popper"
+            />
           </el-form-item>
           <el-form-item label="详细地址" prop="detail">
             <el-input v-model="addForm.detail" type="textarea" :rows="2" placeholder="街道、门牌号等" />
@@ -193,6 +184,37 @@ import { submitOrder, payOrder, getWallet, listAddresses, saveAddress, getUserPo
 import { userRequest, getOrCreateIdempotencyKey, resetIdempotencyKey } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { track } from '@/utils/tracker'
+import areaData from 'china-area-data'
+
+// 将 china-area-data 转换为 Cascader 需要的 options 格式
+function convertAreaDataToOptions(data: any, parentCode: string): any[] {
+  const options: any[] = []
+  const areas = data[parentCode]
+  if (!areas) return options
+  for (const code in areas) {
+    const name = areas[code]
+    // 跳过"市辖区"、"市辖县"等冗余中间节点
+    if (name === '市辖区' || name === '市辖县') {
+      // 把它的子节点直接提升到当前层级
+      const children = convertAreaDataToOptions(data, code)
+      options.push(...children)
+      continue
+    }
+    const option: Record<string, any> = {
+      value: name,
+      label: name,
+      code: code
+    }
+    const children = convertAreaDataToOptions(data, code)
+    if (children.length > 0) {
+      option.children = children
+    }
+    options.push(option)
+  }
+  return options
+}
+
+const areaOptions = convertAreaDataToOptions(areaData, '86')
 
 const __PH = window.__PH
 const DRAFT_KEY = 'stellar_mall_draft_address'
@@ -272,12 +294,11 @@ const addForm = reactive<any>({
   isDefault: 0
 })
 
+const selectedArea = ref<string[]>([])
+
 const addRules: Record<string, any> = {
   consignee: [{ required: true, message: '请输入收货人', trigger: 'blur' }],
   phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
-  province: [{ required: true, message: '请输入省', trigger: 'blur' }],
-  city: [{ required: true, message: '请输入市', trigger: 'blur' }],
-  district: [{ required: true, message: '请输入区', trigger: 'blur' }],
   detail: [{ required: true, message: '请输入详细地址', trigger: 'blur' }]
 }
 
@@ -425,12 +446,23 @@ function resetAddForm() {
   addForm.district = ''
   addForm.detail = ''
   addForm.isDefault = 0
+  selectedArea.value = []
 }
 
 /** 保存新地址并刷新地址列表，自动选中新增的地址 */
 async function handleAddAddress() {
   const valid = await addFormRef.value?.validate().catch(() => false)
   if (!valid) return
+  // 检查是否选择了省市区
+  if (!selectedArea.value || selectedArea.value.length < 3) {
+    ElMessage.warning('请选择省市区')
+    return
+  }
+  // 从 cascader 中提取省市区名称并赋值到 addForm
+  addForm.province = selectedArea.value[0] || ''
+  addForm.city = selectedArea.value[1] || ''
+  addForm.district = selectedArea.value[2] || ''
+
   addingAddress.value = true
   try {
     const res = await saveAddress({ ...addForm })
@@ -644,12 +676,14 @@ onMounted(async () => {
 .main-content { padding: 24px 20px 40px; }
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 20px 24px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--glass-shadow);
 }
 .card-title {
   font-size: 16px;
@@ -686,16 +720,18 @@ onMounted(async () => {
   grid-template-columns: 1fr 120px 120px 140px;
   align-items: center;
   padding: 14px 0;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--glass-border);
 }
 .row.header {
-  background: var(--bg-hover);
+  background: var(--glass-bg);
   color: var(--text-secondary);
   font-weight: 600;
   padding: 12px 0;
   border-radius: var(--radius-sm);
   margin: -8px 0 0;
   border-bottom: none;
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
 }
 .row.item:last-child { border-bottom: none; }
 .product-card { display: flex; align-items: center; gap: 12px; }
@@ -739,8 +775,42 @@ onMounted(async () => {
 </style>
 
 <style>
-/* 新增地址弹窗：圆角与页面卡片保持一致 */
+/* 新增地址弹窗：磨砂玻璃 */
 .el-dialog.addr-dialog {
   border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.el-dialog.addr-dialog .el-dialog__header {
+  color: var(--text-primary);
+}
+.el-dialog.addr-dialog .el-dialog__body {
+  color: var(--text-secondary);
+}
+/* 弹窗蒙版 */
+.glass-overlay {
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+}
+/* 下拉选择器磨砂 */
+.glass-select-popper {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+html.theme-dark .glass-select-popper {
+  background: rgba(29, 29, 31, 0.95) !important;
+}
+.glass-select-popper .el-select-dropdown__item {
+  color: var(--text-primary) !important;
+}
+.glass-select-popper .el-select-dropdown__item.hover,
+.glass-select-popper .el-select-dropdown__item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 </style>

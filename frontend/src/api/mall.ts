@@ -341,6 +341,14 @@ export function markAllMessagesRead(): Promise<any> {
   })
 }
 
+/** 清空所有已读消息 */
+export function clearReadMessages(): Promise<any> {
+  return userRequest({
+    url: '/user/message/read',
+    method: 'delete'
+  })
+}
+
 // =========================== 售后 ===========================
 
 /** 提交售后申请 */

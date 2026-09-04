@@ -2,7 +2,10 @@
   <div class="messages-page container">
     <div class="page-header">
       <h2>我的消息</h2>
-      <el-button v-if="hasUnread" type="primary" link @click="readAll">全部已读</el-button>
+      <div class="header-actions">
+        <el-button v-if="hasRead" type="danger" link @click="clearRead" style="margin-right: 12px;">清空已读</el-button>
+        <el-button v-if="hasUnread" type="primary" link @click="readAll">全部已读</el-button>
+      </div>
     </div>
 
     <div class="msg-list" v-if="list.length > 0">
@@ -43,7 +46,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { listMessages, markMessageRead, markAllMessagesRead } from '@/api/mall'
+import { listMessages, markMessageRead, markAllMessagesRead, clearReadMessages } from '@/api/mall'
 import { useUnreadBadge } from '@/composables/useUnreadBadge'
 import { ElMessage } from 'element-plus'
 
@@ -55,6 +58,7 @@ const pageNum = ref(1)
 const pageSize = ref(20)
 
 const hasUnread = computed(() => list.value.some((m: any) => m.isRead === 0))
+const hasRead = computed(() => list.value.some((m: any) => m.isRead === 1))
 
 /**
  * 根据消息类型返回对应的 Element Plus Tag 样式
@@ -133,9 +137,25 @@ async function readAll() {
     const msg = e?.response?.data?.msg || e?.message || '操作失败'
     ElMessage.error(msg)
   }
-}
+	}
 
-onMounted(load)
+	/**
+	 * 清空所有已读消息
+	 */
+	async function clearRead() {
+	  try {
+	    await clearReadMessages()
+	    // 从列表中移除已读消息
+	    list.value = list.value.filter((m: any) => m.isRead !== 1)
+	    total.value = list.value.length
+	    ElMessage.success('已清空已读消息')
+	  } catch (e: any) {
+	    const msg = e?.response?.data?.msg || e?.message || '操作失败'
+	    ElMessage.error(msg)
+	  }
+	}
+
+	onMounted(load)
 </script>
 
 <style scoped>
@@ -146,15 +166,20 @@ onMounted(load)
 .msg-list { display: flex; flex-direction: column; gap: 10px; }
 
 .msg-item {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 16px 20px;
   transition: background var(--transition-base);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--glass-shadow);
 }
 .msg-item.unread {
   border-left: 3px solid var(--brand-primary);
-  background: var(--brand-primary-soft);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
 }
 
 .msg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }

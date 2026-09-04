@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "axios": "^1.6.2",
+    "china-area-data": "^5.0.1",
     "dompurify": "^3.4.12",
     "echarts": "^6.1.0",
     "element-plus": "^2.4.4",

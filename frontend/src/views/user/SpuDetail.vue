@@ -24,7 +24,6 @@
               :interval="5000"
               height="420px"
               arrow="hover"
-              indicator-position="outside"
               trigger="click"
               :autoplay="galleryImages.length > 1"
             >
@@ -546,6 +545,7 @@ onMounted(() => { loadDetail(); loadReviews() })
   background: #ffffff;
   border-radius: var(--radius-xl);
   overflow: hidden;
+  align-self: start;
 }
 
 /* 单图 */
@@ -597,9 +597,9 @@ onMounted(() => { loadDetail(); loadReviews() })
   font-size: 22px;
   font-weight: 600;
 }
-/* 指示器：短横线 */
+/* 指示器：短横线，浮在图片底部 */
 .carousel-wrap :deep(.el-carousel__indicators) {
-  margin-top: 14px;
+  bottom: 12px;
 }
 .carousel-wrap :deep(.el-carousel__indicator) {
   padding: 6px 3px;
@@ -608,14 +608,14 @@ onMounted(() => { loadDetail(); loadReviews() })
   width: 20px;
   height: 2px;
   border-radius: 0;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.5);
   opacity: 1;
   transition: all 0.25s ease;
 }
 .carousel-wrap :deep(.el-carousel__indicator.is-active .el-carousel__button) {
   width: 36px;
   height: 2px;
-  background: rgba(0, 0, 0, 0.7);
+  background: #fff;
 }
 /* 暗色主题适配 */
 :global(html.theme-dark) .carousel-wrap,
@@ -630,11 +630,11 @@ onMounted(() => { loadDetail(); loadReviews() })
   color: rgba(255, 255, 255, 0.9);
 }
 :global(html.theme-dark) .carousel-wrap :deep(.el-carousel__indicator .el-carousel__button) {
-  background: rgba(255, 255, 255, 0.2);
-}
-:global(html.theme-dark) .carousel-wrap :deep(.el-carousel__indicator.is-active .el-carousel__button) {
-  background: rgba(255, 255, 255, 0.75);
-}
+	  background: rgba(255, 255, 255, 0.3);
+	}
+	:global(html.theme-dark) .carousel-wrap :deep(.el-carousel__indicator.is-active .el-carousel__button) {
+	  background: rgba(255, 255, 255, 0.9);
+	}
 
 .carousel-img {
   width: 100%;

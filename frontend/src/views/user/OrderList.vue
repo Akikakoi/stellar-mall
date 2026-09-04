@@ -22,11 +22,11 @@
             <span class="label" style="margin-left: 24px;">下单时间：</span>
             <span>{{ order.createTime || order.orderTime || '-' }}</span>
           </div>
-          <el-tag :type="statusTag(order.statusCode)" class="status-tag">{{ statusText(order.statusCode) }}</el-tag>
           <span v-if="order.statusCode === ORDER_STATUS.PENDING" class="order-countdown" :class="{ 'cd-expired': isCountdownExpired(order.id) }">
             <el-icon :size="13"><Timer /></el-icon>
             <span>{{ countdownText(order.id) }}</span>
           </span>
+          <el-tag :type="statusTag(order.statusCode)" class="status-tag">{{ statusText(order.statusCode) }}</el-tag>
         </div>
 
         <div class="order-body" v-if="order.items && order.items.length">
