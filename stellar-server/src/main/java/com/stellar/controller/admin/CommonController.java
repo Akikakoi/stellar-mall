@@ -31,7 +31,7 @@ public class CommonController {
 
     /** 允许的业务模块（防 module 路径注入：module 会拼进 OSS key） */
     private static final Set<String> ALLOWED_MODULES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "spu", "category", "banner", "employee", "user", "kb", "review", "after-sale")));
+            "spu", "category", "banner", "employee", "user", "kb", "review", "after-sale", "home-bg")));
 
     /** 单张图片大小上限：5MB */
     private static final long MAX_FILE_SIZE = 5L * 1024 * 1024;

@@ -147,6 +147,7 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                         "/user/banner/list",
                         "/user/category/list",
                         "/user/home-module/list",
+                        "/user/site-config/**",
                         "/user/shop/status",
                         "/user/behavior/**",
                         "/health",

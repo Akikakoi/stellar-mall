@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     站点级配置 Mapper（stellar_site_config）
+     通用 key-value 配置：config_key 唯一，config_value 存 JSON 串。
+     无记录 = 使用默认值（恢复默认即删除行）。
+     ============================================================ -->
+<mapper namespace="com.stellar.mapper.SiteConfigMapper">
+
+    <!-- 数据库字段 → 实体属性映射 -->
+    <resultMap id="SiteConfigMap" type="com.stellar.entity.SiteConfig">
+        <id property="id" column="id"/>
+        <result property="configKey" column="config_key"/>
+        <result property="configValue" column="config_value"/>
+        <result property="remark" column="remark"/>
+        <result property="updateUser" column="update_user"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 按配置键查询 -->
+    <select id="getByKey" resultMap="SiteConfigMap">
+        SELECT id, config_key, config_value, remark, update_user, update_time
+        FROM stellar_site_config
+        WHERE config_key = #{configKey}
+        LIMIT 1
+    </select>
+
+    <!-- 新增配置 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stellar_site_config (config_key, config_value, remark, update_user)
+        VALUES (#{configKey}, #{configValue}, #{remark}, #{updateUser})
+    </insert>
+
+    <!-- 更新配置值与操作人（update_time 由 DB 自动维护） -->
+    <update id="updateValue">
+        UPDATE stellar_site_config
+        SET config_value = #{configValue},
+            update_user  = #{updateUser}
+        WHERE config_key = #{configKey}
+    </update>
+
+    <!-- 删除配置行（恢复默认） -->
+    <delete id="deleteByKey">
+        DELETE FROM stellar_site_config
+        WHERE config_key = #{configKey}
+    </delete>
+</mapper>

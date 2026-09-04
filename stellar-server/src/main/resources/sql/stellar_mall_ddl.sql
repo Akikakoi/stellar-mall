@@ -764,3 +764,21 @@ CREATE TABLE stellar_user_behavior (
     KEY idx_behavior_type_time (event_type, event_time),
     KEY idx_behavior_spu (spu_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户行为埋点日志（只追加）';
+
+-- ------------------------------------------------------------
+-- 站点级配置（V19 引入，migration: V19__site_config.sql）
+-- 通用 key-value：config_key 唯一，config_value 存 JSON 串。
+-- 当前键：home_bg = {"bgImage":"<OSS url>"}（无记录 = 默认背景，
+-- 恢复默认即删除行）。后续站点 logo/主题色等外观配置复用本表。
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS stellar_site_config;
+CREATE TABLE stellar_site_config (
+    id           BIGINT       NOT NULL AUTO_INCREMENT COMMENT '配置ID',
+    config_key   VARCHAR(64)  NOT NULL COMMENT '配置键（home_bg）',
+    config_value TEXT         COMMENT '配置值 JSON，如 {"bgImage":"https://..."}',
+    remark       VARCHAR(255) NOT NULL DEFAULT '' COMMENT '配置说明',
+    update_user  BIGINT       COMMENT '最后操作人',
+    update_time  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_config_key (config_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='站点级配置';
