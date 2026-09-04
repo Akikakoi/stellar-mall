@@ -45,10 +45,10 @@ export function applyThemeToDOM(value: Theme) {
     root.style.colorScheme = isDark ? 'dark' : 'light'
     document.body?.setAttribute('data-theme', value)
 
-    // 3) 等 CSS 变量全部挂载后再解锁,恢复过渡
+    // 3) 等 CSS 变量全部挂载后再解锁,恢复统一过渡
     transitionLockTimer = setTimeout(() => {
       root.classList.remove('theme-transitioning')
-    }, 200)
+    }, 0)
   })
 }
 

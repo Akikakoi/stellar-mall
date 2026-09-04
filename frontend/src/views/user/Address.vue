@@ -80,11 +80,14 @@
           <el-input v-model="form.phone" placeholder="请输入联系电话" maxlength="20" />
         </el-form-item>
         <el-form-item label="所在地区" required>
-          <el-row :gutter="8">
-            <el-col :span="8"><el-input v-model="form.province" placeholder="省 / 直辖市" /></el-col>
-            <el-col :span="8"><el-input v-model="form.city" placeholder="市" /></el-col>
-            <el-col :span="8"><el-input v-model="form.district" placeholder="区 / 县" /></el-col>
-          </el-row>
+          <el-cascader
+            v-model="selectedArea"
+            :options="areaOptions"
+            placeholder="请选择省/市/区"
+            clearable
+            style="width: 100%"
+            popper-class="glass-select-popper"
+          />
         </el-form-item>
         <el-form-item label="详细地址" prop="detail">
           <el-input v-model="form.detail" type="textarea" :rows="2" placeholder="街道、门牌号、楼栋等" maxlength="255" show-word-limit />
@@ -112,6 +115,38 @@ import {
   deleteAddress,
   setDefaultAddress
 } from '@/api/mall'
+import areaData from 'china-area-data'
+
+// 将 china-area-data 转换为 Cascader 需要的 options 格式
+function convertAreaDataToOptions(data: any, parentCode: string): any[] {
+  const options: any[] = []
+  const areas = data[parentCode]
+  if (!areas) return options
+  for (const code in areas) {
+    const name = areas[code]
+    // 跳过"市辖区"、"市辖县"等冗余中间节点
+    if (name === '市辖区' || name === '市辖县') {
+      // 把它的子节点直接提升到当前层级
+      const children = convertAreaDataToOptions(data, code)
+      options.push(...children)
+      continue
+    }
+    const option: Record<string, any> = {
+      value: name,
+      label: name,
+      code: code
+    }
+    const children = convertAreaDataToOptions(data, code)
+    if (children.length > 0) {
+      option.children = children
+    }
+    options.push(option)
+  }
+  return options
+}
+
+const areaOptions = convertAreaDataToOptions(areaData, '86')
+const selectedArea = ref<string[]>([])
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -161,6 +196,7 @@ function resetForm() {
   form.district = ''
   form.detail = ''
   form.isDefault = 0
+  selectedArea.value = []
 }
 
 /** 加载用户所有收货地址 */
@@ -197,6 +233,10 @@ function openEdit(addr: any) {
   form.district = addr.district || ''
   form.detail = addr.detail || ''
   form.isDefault = addr.isDefault || 0
+  // 回填 cascader（如果省市区都有值）
+  if (form.province && form.city && form.district) {
+    selectedArea.value = [form.province, form.city, form.district]
+  }
   dialogVisible.value = true
   setTimeout(() => formRef.value?.clearValidate?.(), 0)
 }
@@ -205,6 +245,16 @@ function openEdit(addr: any) {
 async function handleSave() {
   const valid = await formRef.value?.validate().catch(() => false)
   if (!valid) return
+  // 检查是否选择了省市区
+  if (!selectedArea.value || selectedArea.value.length < 3) {
+    ElMessage.warning('请选择省市区')
+    return
+  }
+  // 从 cascader 中提取省市区名称并赋值
+  form.province = selectedArea.value[0] || ''
+  form.city = selectedArea.value[1] || ''
+  form.district = selectedArea.value[2] || ''
+
   if (submitting.value) return
   submitting.value = true
   try {
@@ -278,12 +328,12 @@ onMounted(loadAddresses)
 .header-title h2 {
   margin: 0;
   font-size: 22px;
-  color: var(--text-primary, #1f2329);
+  color: var(--text-primary);
 }
 
 .header-title .subtitle {
   font-size: 13px;
-  color: var(--text-muted, #8f959e);
+  color: var(--text-secondary);
   margin-left: 8px;
 }
 
@@ -297,14 +347,16 @@ onMounted(loadAddresses)
 }
 
 .address-card {
-  background: #fff;
-  border: 1px solid var(--border-base, #e4e6eb);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--glass-shadow);
 }
 
 .address-card:hover {
@@ -314,7 +366,7 @@ onMounted(loadAddresses)
 
 .address-card.default {
   border-color: var(--el-color-primary);
-  background: linear-gradient(180deg, rgba(64, 158, 255, 0.04) 0%, #fff 100%);
+  background: linear-gradient(180deg, rgba(64, 158, 255, 0.08) 0%, var(--glass-bg) 100%);
 }
 
 .add-card {
@@ -373,12 +425,12 @@ onMounted(loadAddresses)
 .consignee {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #1f2329);
+  color: var(--text-primary);
 }
 
 .phone {
   font-size: 13px;
-  color: var(--text-muted, #8f959e);
+  color: var(--text-muted);
 }
 
 .address-tags {
@@ -391,7 +443,7 @@ onMounted(loadAddresses)
 .detail {
   margin: 0;
   font-size: 14px;
-  color: var(--text-secondary, #4e5969);
+  color: var(--text-secondary);
   line-height: 1.6;
   word-break: break-all;
 }
@@ -401,7 +453,7 @@ onMounted(loadAddresses)
   justify-content: space-between;
   align-items: center;
   padding-top: 12px;
-  border-top: 1px solid var(--border-subtle, #f2f3f5);
+  border-top: 1px solid var(--glass-border);
 }
 
 .default-label {

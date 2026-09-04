@@ -7,7 +7,7 @@
       </div>
 
       <div class="filter-bar">
-        <el-input v-model="keyword" placeholder="搜索商品或SKU" style="width: 300px" clearable @keyup.enter="load" />
+        <el-input v-model="keyword" placeholder="搜索商品名称" style="width: 300px" clearable @keyup.enter="load" />
         <el-select v-model="filterLowStock" placeholder="库存状态" clearable style="width: 150px;" @change="load">
           <el-option label="低库存预警" value="1" />
           <el-option label="全部" value="" />
@@ -15,8 +15,6 @@
       </div>
 
       <el-table :data="list" v-loading="loading" stripe>
-      <el-table-column prop="id" label="SKU ID" width="70" />
-      <el-table-column prop="spuId" label="SPU ID" width="70" />
       <el-table-column prop="name" label="SKU名称" min-width="180" />
       <el-table-column prop="specs" label="规格" width="120" />
       <el-table-column label="价格" width="100">

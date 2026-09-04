@@ -95,4 +95,14 @@ public class UserMessageServiceImpl implements UserMessageService {
     public void markAllAsRead(Long userId) {
         userMessageMapper.markAllAsRead(userId);
     }
+
+    /**
+     * 清空所有已读消息。
+     *
+     * @param userId 用户ID
+     */
+    @Override
+    public void deleteRead(Long userId) {
+        userMessageMapper.deleteRead(userId);
+    }
 }

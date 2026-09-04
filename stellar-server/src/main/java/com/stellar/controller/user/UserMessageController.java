@@ -49,4 +49,12 @@ public class UserMessageController {
         userMessageService.markAllAsRead(userId);
         return Result.success();
     }
+
+    @DeleteMapping("/read")
+    @ApiOperation("清空所有已读消息")
+    public Result<Void> deleteRead() {
+        Long userId = BaseContext.getCurrentId();
+        userMessageService.deleteRead(userId);
+        return Result.success();
+    }
 }

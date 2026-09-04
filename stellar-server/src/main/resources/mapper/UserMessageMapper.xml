@@ -55,4 +55,9 @@
         UPDATE stellar_user_message SET is_read = 1 WHERE user_id = #{userId} AND is_read = 0
     </update>
 
+    <!-- 清空已读消息 -->
+    <delete id="deleteRead">
+        DELETE FROM stellar_user_message WHERE user_id = #{userId} AND is_read = 1
+    </delete>
+
 </mapper>

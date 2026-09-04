@@ -19,4 +19,7 @@ public interface UserMessageService {
 
     /** 全部标记已读 */
     void markAllAsRead(Long userId);
+
+    /** 清空所有已读消息 */
+    void deleteRead(Long userId);
 }

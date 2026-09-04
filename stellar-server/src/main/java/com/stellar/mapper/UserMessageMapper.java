@@ -25,4 +25,7 @@ public interface UserMessageMapper {
     int markAsRead(@Param("userId") Long userId, @Param("id") Long id);
 
     int markAllAsRead(@Param("userId") Long userId);
+
+    /** 清空所有已读消息（删除当前用户 is_read = 1 的消息） */
+    int deleteRead(@Param("userId") Long userId);
 }
