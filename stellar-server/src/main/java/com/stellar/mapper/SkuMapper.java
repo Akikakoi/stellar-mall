@@ -80,4 +80,29 @@ public interface SkuMapper {
      *   WHERE id = #{id}
      */
     int rollbackStock(@Param("id") Long id, @Param("qty") Integer qty);
+
+    // ==================== 管理端库存管理 ====================
+
+    /** 管理端库存分页查询（支持按名称模糊搜索和低库存过滤）。 */
+    List<Sku> pageForInventory(@Param("name") String name,
+                               @Param("lowStock") Integer lowStock,
+                               @Param("offset") int offset,
+                               @Param("limit") int limit);
+
+    /** 管理端库存分页计数。 */
+    long countForInventory(@Param("name") String name,
+                           @Param("lowStock") Integer lowStock);
+
+    /**
+     * 管理端调整库存（不触发 @AutoFill）。
+     * UPDATE stellar_sku SET stock = GREATEST(0, stock + #{delta}), version = version + 1, update_time = NOW()
+     * WHERE id = #{id}
+     */
+    int adjustStock(@Param("id") Long id, @Param("delta") Integer delta);
+
+    /**
+     * 管理端更新 SKU 元数据（预警库存等，不触发 @AutoFill）。
+     * 仅更新 warnStock、update_time、update_user。
+     */
+    int updateStockMeta(Sku sku);
 }

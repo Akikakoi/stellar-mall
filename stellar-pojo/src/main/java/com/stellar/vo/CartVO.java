@@ -49,4 +49,10 @@ public class CartVO implements Serializable {
 
     @ApiModelProperty("SKU 图片")
     private String skuImage;
+
+    @ApiModelProperty("保障服务费（单个商品口径，未乘数量）")
+    private BigDecimal extraAmount;
+
+    @ApiModelProperty("保障服务信息（JSON 数组）")
+    private String serviceInfo;
 }

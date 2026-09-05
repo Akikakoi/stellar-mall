@@ -1,8 +1,14 @@
 <template>
   <div class="messages-page container">
     <div class="page-header">
+      <div class="header-left">
+        <el-button text @click="goHome" class="back-btn">
+          <el-icon><ArrowLeft /></el-icon>
+          返回主页
+        </el-button>
+      </div>
       <h2>我的消息</h2>
-      <div class="header-actions">
+      <div class="header-right">
         <el-button v-if="hasRead" type="danger" link @click="clearRead" style="margin-right: 12px;">清空已读</el-button>
         <el-button v-if="hasUnread" type="primary" link @click="readAll">全部已读</el-button>
       </div>
@@ -46,11 +52,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { listMessages, markMessageRead, markAllMessagesRead, clearReadMessages } from '@/api/mall'
 import { useUnreadBadge } from '@/composables/useUnreadBadge'
 import { ElMessage } from 'element-plus'
 
 const { dec: decBadge } = useUnreadBadge()
+const router = useRouter()
 
 const list = ref<any[]>([])
 const total = ref(0)
@@ -100,6 +109,13 @@ async function load() {
     list.value = d.records || d.list || []
     total.value = d.total || 0
   } catch (e: any) { /* */ }
+}
+
+/**
+ * 返回主页
+ */
+function goHome() {
+  router.push('/')
 }
 
 /**
@@ -160,8 +176,12 @@ async function readAll() {
 
 <style scoped>
 .messages-page { max-width: 720px; margin: 0 auto; padding: 24px 0; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.page-header h2 { font-size: 22px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.page-header { display: flex; align-items: center; margin-bottom: 20px; position: relative; }
+.page-header .header-left { flex: 1; display: flex; }
+.page-header h2 { font-size: 22px; font-weight: 600; color: var(--text-primary); margin: 0; flex-shrink: 0; }
+.page-header .header-right { flex: 1; display: flex; justify-content: flex-end; }
+.back-btn { color: var(--text-secondary); font-size: 14px; }
+.back-btn:hover { color: var(--brand-primary); }
 
 .msg-list { display: flex; flex-direction: column; gap: 10px; }
 

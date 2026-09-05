@@ -37,9 +37,9 @@
           <el-icon><Document /></el-icon>
           <template #title>知识库管理</template>
         </el-menu-item>
-        <el-menu-item index="/admin/inventory">
-          <el-icon><Box /></el-icon>
-          <template #title>库存管理</template>
+        <el-menu-item index="/admin/inventory-flow">
+          <el-icon><Switch /></el-icon>
+          <template #title>出入库管理</template>
         </el-menu-item>
         <el-menu-item index="/admin/orders">
           <el-icon><Tickets /></el-icon>
@@ -53,13 +53,9 @@
           <el-icon><Discount /></el-icon>
           <template #title>优惠券管理</template>
         </el-menu-item>
-        <el-menu-item index="/admin/points-rules">
+        <el-menu-item index="/admin/points">
           <el-icon><Star /></el-icon>
-          <template #title>积分规则管理</template>
-        </el-menu-item>
-        <el-menu-item index="/admin/points-products">
-          <el-icon><Goods /></el-icon>
-          <template #title>积分商城管理</template>
+          <template #title>积分管理</template>
         </el-menu-item>
         <el-menu-item index="/admin/review">
           <el-icon><ChatLineSquare /></el-icon>
@@ -78,10 +74,6 @@
           <template #title>首页装修</template>
         </el-menu-item>
         <!-- ===== 工具类 ===== -->
-        <el-menu-item index="/admin/recycle">
-          <el-icon><Delete /></el-icon>
-          <template #title>商品回收站</template>
-        </el-menu-item>
         <el-menu-item index="/admin/settings">
           <el-icon><Setting /></el-icon>
           <template #title>系统设置</template>
@@ -143,7 +135,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   DataBoard, Goods, Menu, User,
   Fold, Expand, ArrowDown, Document, Setting, Tickets,
-  Discount, ChatLineSquare, Box, Delete, Picture, Warning, Sunny, Moon, Stamp, Star, TrendCharts
+  Discount, ChatLineSquare, Picture, Warning, Sunny, Moon, Stamp, Star, TrendCharts,
+  Switch
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -160,17 +153,15 @@ const TITLE_MAP: Record<string, string> = {
   '/admin/spu': '商品管理',
   '/admin/category': '分类管理',
   '/admin/kb': '知识库管理',
-  '/admin/inventory': '库存管理',
+  '/admin/inventory-flow': '出入库管理',
   '/admin/orders': '订单管理',
   '/admin/aftersale': '售后管理',
   '/admin/coupon': '优惠券管理',
-  '/admin/points-rules': '积分规则管理',
-  '/admin/points-products': '积分商城管理',
+  '/admin/points': '积分管理',
   '/admin/review': '评价管理',
   '/admin/employee': '员工管理',
   '/admin/banner': '轮播图管理',
   '/admin/home-module': '首页装修',
-  '/admin/recycle': '商品回收站',
   '/admin/settings': '系统设置'
 }
 const currentPageTitle = computed(() => TITLE_MAP[route.path] || '')

@@ -695,23 +695,36 @@ public class PointsServiceImpl implements PointsService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     /**
-     * 管理端积分调整。支持正向加积分和负向扣减积分。
+     * 管理端积分调整。将用户积分设为指定目标值。
      *
-     * @param dto 积分调整参数（用户ID、调整积分数、说明）
+     * @param dto 积分调整参数（用户ID、目标积分、说明）
      */
     public void adjustPoints(PointsAdjustDTO dto) {
-        if (dto.getPoints() == 0) {
-            throw new BaseException("调整积分不能为0");
+        if (dto.getPoints() == null || dto.getPoints() < 0) {
+            throw new BaseException("目标积分不能为负数");
         }
-        int pts = dto.getPoints();
+        int targetPoints = dto.getPoints();
         String desc = dto.getDescription() != null ? dto.getDescription() : "管理员调整";
 
-        if (pts > 0) {
-            addUserPoints(dto.getUserId(), pts, "ADMIN", null, desc + " +" + pts);
-        } else {
-            deductUserPoints(dto.getUserId(), Math.abs(pts), "ADMIN", null, desc + " " + pts);
+        // 查询当前可用积分
+        UserPoints up = userPointsMapper.getByUserId(dto.getUserId());
+        if (up == null) {
+            throw new BaseException("用户积分账户不存在");
         }
-        log.info("[PointsService] 管理员调整用户 {} 积分 {}", dto.getUserId(), pts);
+        int currentBalance = up.getAvailablePoints();
+        int delta = targetPoints - currentBalance;
+
+        if (delta == 0) {
+            log.info("[PointsService] 管理员调整用户 {} 积分，目标值与当前值一致，无需调整", dto.getUserId());
+            return;
+        }
+
+        if (delta > 0) {
+            addUserPoints(dto.getUserId(), delta, "ADMIN", null, desc + " 设置为 " + targetPoints + "（+" + delta + "）");
+        } else {
+            deductUserPoints(dto.getUserId(), Math.abs(delta), "ADMIN", null, desc + " 设置为 " + targetPoints + "（" + delta + "）");
+        }
+        log.info("[PointsService] 管理员调整用户 {} 积分：{} → {}（{}）", dto.getUserId(), currentBalance, targetPoints, delta);
     }
 
     @Override

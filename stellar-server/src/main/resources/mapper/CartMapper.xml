@@ -16,6 +16,8 @@
         <result property="spuId"      column="spu_id"/>
         <result property="qty"        column="qty"/>
         <result property="checked"    column="checked"/>
+        <result property="extraAmount" column="extra_amount"/>
+        <result property="serviceInfo" column="service_info"/>
         <result property="createTime" column="create_time"/>
         <result property="createUser" column="create_user"/>
         <result property="updateTime" column="update_time"/>
@@ -26,20 +28,22 @@
     <insert id="insert" parameterType="com.stellar.entity.Cart"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_cart (
-            user_id, sku_id, spu_id, qty, checked,
+            user_id, sku_id, spu_id, qty, checked, extra_amount, service_info,
             create_time, create_user, update_time, update_user
         ) VALUES (
-            #{userId}, #{skuId}, #{spuId}, #{qty}, #{checked},
+            #{userId}, #{skuId}, #{spuId}, #{qty}, #{checked}, #{extraAmount}, #{serviceInfo},
             #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
         )
     </insert>
 
-    <!-- 更新购物车项：可改数量、勾选状态（动态 SQL） -->
+    <!-- 更新购物车项：可改数量、勾选状态、保障服务（动态 SQL） -->
     <update id="update" parameterType="com.stellar.entity.Cart">
         UPDATE stellar_cart
         <set>
             <if test="qty != null">qty = #{qty},</if>
             <if test="checked != null">checked = #{checked},</if>
+            <if test="extraAmount != null">extra_amount = #{extraAmount},</if>
+            <if test="serviceInfo != null">service_info = #{serviceInfo},</if>
             update_time = #{updateTime},
             update_user = #{updateUser}
         </set>

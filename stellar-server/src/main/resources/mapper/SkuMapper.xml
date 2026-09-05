@@ -159,4 +159,49 @@
         ORDER BY sort ASC, id ASC
     </select>
 
+    <!-- ==================== 管理端库存管理 ==================== -->
+    <select id="pageForInventory" resultMap="SkuMap">
+        SELECT * FROM stellar_sku
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="lowStock != null and lowStock == 1">
+                AND stock &lt;= warn_stock AND status = 1
+            </if>
+        </where>
+        ORDER BY stock ASC, id ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countForInventory" resultType="long">
+        SELECT COUNT(*) FROM stellar_sku
+        <where>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="lowStock != null and lowStock == 1">
+                AND stock &lt;= warn_stock AND status = 1
+            </if>
+        </where>
+    </select>
+
+    <!-- 管理端调整库存：GREATEST 防负，推进 version，更新 update_time -->
+    <update id="adjustStock">
+        UPDATE stellar_sku
+        SET stock = GREATEST(0, stock + #{delta}),
+            version = version + 1,
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 管理端更新 SKU 元数据（预警库存），不触发 @AutoFill，手动维护 update 字段 -->
+    <update id="updateStockMeta" parameterType="com.stellar.entity.Sku">
+        UPDATE stellar_sku
+        SET warn_stock = #{warnStock},
+            update_time = NOW(),
+            update_user = #{updateUser}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

@@ -54,9 +54,25 @@ function normalizeCartRow(it: CartRowVO): CartItem {
     price: Number(it.price || it.skuPrice || 0),
     quantity: Number(it.qty || it.quantity || it.number || 1),
     checked,
-    services: it.services || [],
-    serviceFee: Number(it.serviceFee || it.extraAmount || 0)
+    services: parseServices(it),
+    serviceFee: Number(it.serviceFee ?? it.extraAmount ?? 0)
   }
+}
+
+/**
+ * 解析保障服务列表：优先取已是数组的 services，
+ * 否则尝试解析后端 CartVO 返回的 serviceInfo JSON 字符串。
+ */
+function parseServices(it: any): any[] {
+  if (Array.isArray(it.services)) return it.services
+  if (Array.isArray(it.serviceInfo)) return it.serviceInfo
+  if (typeof it.serviceInfo === 'string' && it.serviceInfo) {
+    try {
+      const parsed = JSON.parse(it.serviceInfo)
+      return Array.isArray(parsed) ? parsed : []
+    } catch { return [] }
+  }
+  return []
 }
 
 export const useCartStore = defineStore('cart', {

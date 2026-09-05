@@ -61,6 +61,16 @@
                 <div class="item-info">
                   <div class="item-name">{{ it.spuName }}</div>
                   <div class="item-spec">{{ it.skuSpecs || '默认规格' }}</div>
+                  <!-- 保障服务 -->
+                  <div v-if="it.extraAmount > 0" class="item-service">
+                    <div class="service-label">保障服务</div>
+                    <div class="service-list-detail">
+                      <div v-for="svc in parseServiceInfo(it.serviceInfo)" :key="svc.id" class="service-item">
+                        <span class="service-name">{{ svc.title }}</span>
+                        <span class="service-price">¥{{ Number(svc.price || 0).toFixed(2) }}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
                 <div class="item-meta">
                   <span class="item-price">¥{{ Number(it.price || 0).toFixed(2) }}</span>
@@ -93,6 +103,9 @@
           <el-descriptions-item label="买家备注">{{ order?.remark || '（无）' }}</el-descriptions-item>
           <el-descriptions-item label="商品合计">
             <span class="price-muted">¥{{ Number(order?.totalAmount || 0).toFixed(2) }}</span>
+          </el-descriptions-item>
+          <el-descriptions-item v-if="totalServiceFee > 0" label="保障服务">
+            <span class="price-muted">+¥{{ totalServiceFee.toFixed(2) }}</span>
           </el-descriptions-item>
           <el-descriptions-item label="实付金额">
             <span class="price-pay">¥{{ Number(order?.payAmount || 0).toFixed(2) }}</span>
@@ -363,6 +376,24 @@ const totalQty = computed(() =>
 )
 
 /**
+ * 计算订单中保障服务总费用
+ */
+const totalServiceFee = computed(() =>
+  (order.value?.items || []).reduce((s: any, i: any) => s + Number(i.extraAmount || 0), 0)
+)
+
+/**
+ * 解析保障服务信息的 JSON 字符串
+ */
+function parseServiceInfo(info: any): any[] {
+  if (!info) return []
+  try {
+    const parsed = typeof info === 'string' ? JSON.parse(info) : info
+    return Array.isArray(parsed) ? parsed : []
+  } catch { return [] }
+}
+
+/**
  * 支付订单，弹出确认框后调用支付接口
  */
 async function onPay() {
@@ -478,30 +509,34 @@ watch(() => route.params.id, load)
 .main-content { padding: 32px 20px 60px; }
 
 .status-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 24px 28px;
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 18px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow);
 }
 .status-sub { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
 .cd-time { color: var(--brand-warning, #e6a23c); font-family: 'Courier New', monospace; }
 .status-actions { display: flex; gap: 12px; }
 
 .panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 20px 24px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow);
 }
 .panel-head {
   display: flex; justify-content: space-between; align-items: center;
   padding-bottom: 12px; margin-bottom: 12px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--glass-border);
 }
 .panel-title {
   font-size: 16px; font-weight: 600; color: var(--text-primary);
@@ -517,7 +552,7 @@ watch(() => route.params.id, load)
 
 .item-row {
   padding: 14px 0;
-  border-bottom: 1px dashed var(--border-subtle);
+  border-bottom: 1px dashed var(--glass-border);
   transition: background .2s;
 }
 .item-row:last-child { border-bottom: none; }
@@ -550,6 +585,12 @@ watch(() => route.params.id, load)
 .item-price { color: var(--text-primary); text-align: right; width: 90px; flex-shrink: 0; }
 .item-qty   { color: var(--text-muted); text-align: right; width: 60px; flex-shrink: 0; }
 .item-subtotal { color: var(--text-primary); text-align: right; font-weight: 600; width: 100px; flex-shrink: 0; }
+.item-service { margin-top: 8px; padding: 8px 12px; background: var(--glass-bg); backdrop-filter: var(--backdrop-blur); -webkit-backdrop-filter: var(--backdrop-blur); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+.item-service .service-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+.item-service .service-list-detail { display: flex; flex-direction: column; gap: 3px; }
+.item-service .service-item { display: flex; align-items: center; gap: 8px; }
+.item-service .service-name { font-size: 13px; color: var(--text-primary); }
+.item-service .service-price { font-size: 13px; color: var(--brand-warning, #e6a23c); font-weight: 500; font-variant-numeric: tabular-nums; }
 
 /* 评价弹窗 */
 .review-target {

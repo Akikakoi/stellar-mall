@@ -88,6 +88,7 @@
               @click="handleShelfOn(row)"
             >上架</el-button>
             <el-button type="primary" link size="small" @click="openDialog('edit', row)">编辑</el-button>
+            <el-button type="primary" link size="small" @click="openStockDialog(row)">库存管理</el-button>
             <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
@@ -352,6 +353,65 @@
       </template>
     </el-dialog>
 
+    <!-- 库存管理弹窗 -->
+    <el-dialog v-model="stockDialogVisible" title="库存管理" width="700px" destroy-on-close>
+      <template #header>
+        <span>库存管理<template v-if="stockSpuName"> — {{ stockSpuName }}</template></span>
+      </template>
+      <el-table :data="stockSkuList" v-loading="stockLoading" stripe size="small">
+        <el-table-column label="SKU" min-width="180">
+          <template #default="{ row }">{{ row.name }}</template>
+        </el-table-column>
+        <el-table-column label="规格" width="140" prop="specs" />
+        <el-table-column label="当前库存" width="100">
+          <template #default="{ row }">
+            <span :class="{ 'low-stock': (row.stock || 0) <= (row.warnStock || 10) }">
+              {{ row.stock || 0 }}
+            </span>
+            <el-tag v-if="(row.stock || 0) <= (row.warnStock || 10)" type="danger" size="small" style="margin-left: 4px;">低</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="warnStock" label="预警值" width="80" />
+        <el-table-column prop="price" label="售价" width="80">
+          <template #default="{ row }">¥{{ Number(row.price || 0).toFixed(2) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="140" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="openStockAdjust(row)">调库存</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div v-if="!stockSkuList.length && !stockLoading" style="text-align: center; padding: 24px; color: var(--text-muted);">
+        该商品暂无 SKU 数据
+      </div>
+    </el-dialog>
+
+    <!-- 调整库存弹窗 -->
+    <el-dialog v-model="adjustDialogVisible" title="调整库存" width="420px" destroy-on-close>
+      <el-form :model="adjustForm" label-width="100px">
+        <el-form-item label="SKU 名称">
+          <span>{{ adjustForm.skuName }}</span>
+        </el-form-item>
+        <el-form-item label="当前库存">
+          <span>{{ adjustForm.currentStock }}</span>
+        </el-form-item>
+        <el-form-item label="调整数量">
+          <el-input-number v-model="adjustForm.delta" :min="-9999" :max="9999" />
+          <span style="margin-left: 8px; color: var(--text-muted); font-size: 13px;">正数入库，负数出库</span>
+        </el-form-item>
+        <el-form-item label="预警库存">
+          <el-input-number v-model="adjustForm.warnStock" :min="0" />
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="adjustForm.remark" placeholder="调整原因（选填）" maxlength="255" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="adjustDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="adjustSubmitting" @click="handleStockAdjust">确认调整</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 导入对话框 -->
     <el-dialog v-model="importVisible" title="批量导入商品" width="600px" destroy-on-close>
       <div style="margin-bottom: 16px;">
@@ -397,9 +457,10 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batchSetSpuStatus, listAdminCategory, uploadImages } from '@/api/admin'
+import { adminRequest } from '@/api/request'
 import { apiKbUploadWithChunks, apiKbPreview, apiKbGet } from '@/api/rag'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, Search, Document } from '@element-plus/icons-vue'
+import { Upload, Search, Document, Box } from '@element-plus/icons-vue'
 import { storage } from '@/utils/storage'
 
 const SORT_STORAGE_KEY = 'stellar:admin:spu-mgmt:sort:v1'
@@ -951,6 +1012,79 @@ function kbDocStatusText(s: any) { return ({ uploading: '上传中', parsing: '�
 function kbDocStatusTag(s: any) { return ({ ready: 'success', error: 'danger', parsing: 'warning', indexing: 'primary', uploading: 'info' } as Record<string, string>)[s] || 'info' }
 function humanFileSize(n: any) { if (!n) return '0 B'; const u = ['B', 'KB', 'MB', 'GB']; let i = 0; n = Number(n); while (n >= 1024 && i < u.length - 1) { n /= 1024; i++ }; return n.toFixed(i > 0 ? 1 : 0) + ' ' + u[i] }
 function fmtTime(v: any) { return v ? new Date(v).toLocaleString('zh-CN', { hour12: false }) : '' }
+
+// ==================== 库存管理 ====================
+const stockDialogVisible = ref(false)
+const stockLoading = ref(false)
+const stockSpuName = ref('')
+const stockSkuList = ref<any[]>([])
+
+const adjustDialogVisible = ref(false)
+const adjustSubmitting = ref(false)
+const adjustForm = reactive<any>({ skuId: null, skuName: '', currentStock: 0, delta: 0, warnStock: 10, remark: '' })
+
+/** 打开库存管理弹窗，加载该商品的所有 SKU 库存信息 */
+async function openStockDialog(row: any) {
+  stockSpuName.value = row.name
+  stockDialogVisible.value = true
+  stockLoading.value = true
+  stockSkuList.value = []
+  try {
+    const detail: any = await getAdminSpu(row.id)
+    const skus = detail.skuList || detail.skus || []
+    stockSkuList.value = skus.map((s: any) => ({
+      id: s.id,
+      name: s.name || '',
+      specs: s.specs || '',
+      stock: Number(s.stock ?? 0),
+      warnStock: Number(s.warnStock ?? 10),
+      price: Number(s.price ?? 0)
+    }))
+  } catch (e: any) {
+    ElMessage.error('加载库存信息失败')
+  } finally {
+    stockLoading.value = false
+  }
+}
+
+/** 打开调整库存弹窗 */
+function openStockAdjust(sku: any) {
+  adjustForm.skuId = sku.id
+  adjustForm.skuName = sku.name
+  adjustForm.currentStock = sku.stock || 0
+  adjustForm.delta = 0
+  adjustForm.warnStock = sku.warnStock || 10
+  adjustForm.remark = ''
+  adjustDialogVisible.value = true
+}
+
+/** 执行库存调整 */
+async function handleStockAdjust() {
+  adjustSubmitting.value = true
+  try {
+    await adminRequest({ url: '/admin/inventory/stock', method: 'put', data: { ...adjustForm } })
+    ElMessage.success('库存已更新')
+    adjustDialogVisible.value = false
+    // 刷新 SKU 列表
+    stockLoading.value = true
+    try {
+      const detail: any = await getAdminSpu(stockSkuList.value[0]?.spuId)
+      const skus = detail.skuList || detail.skus || []
+      stockSkuList.value = skus.map((s: any) => ({
+        id: s.id,
+        name: s.name || '',
+        specs: s.specs || '',
+        stock: Number(s.stock ?? 0),
+        warnStock: Number(s.warnStock ?? 10),
+        price: Number(s.price ?? 0)
+      }))
+    } catch (e: any) { /* ignore */ } finally { stockLoading.value = false }
+  } catch (e: any) {
+    ElMessage.error('调整失败')
+  } finally {
+    adjustSubmitting.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -968,6 +1102,7 @@ function fmtTime(v: any) { return v ? new Date(v).toLocaleString('zh-CN', { hour
 .sort-arrow { display: inline-block; color: var(--brand-primary); font-size: 10px; line-height: 1; padding: 2px 4px; border-radius: var(--radius-sm); background: var(--brand-primary-soft); transform: translateY(-1px); }
 .sort-arrow.asc { color: var(--status-success); }
 .sort-arrow.desc { color: var(--status-danger); }
+.low-stock { color: var(--status-danger); font-weight: 600; }
 .sku-list { margin-top: 8px; }
 .sku-item { border: 1px solid var(--border-base); border-radius: var(--radius-md); padding: 12px; margin-bottom: 12px; }
 .sku-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }

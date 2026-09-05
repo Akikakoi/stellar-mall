@@ -581,7 +581,8 @@ async function handleSubmit() {
       if (isNaN(quantity) || quantity <= 0) throw new Error(`无效的数量: ${it.quantity}`)
       if (isNaN(price) || price < 0) throw new Error(`无效的价格: ${it.price}`)
       const extraAmount = Number(it.serviceFee || 0) * quantity
-      return { skuId, quantity, price, extraAmount: extraAmount > 0 ? extraAmount : undefined }
+      const serviceInfo = it.services && it.services.length > 0 ? JSON.stringify(it.services) : undefined
+      return { skuId, quantity, price, extraAmount: extraAmount > 0 ? extraAmount : undefined, serviceInfo }
     })
     const payload: Record<string, any> = {
       address: addr ? `${addr.province || ''}${addr.city || ''}${addr.district || ''} ${addr.detail || ''}` : form.address,

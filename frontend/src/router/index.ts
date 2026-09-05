@@ -241,10 +241,10 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '库存管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
-        path: 'recycle',
-        name: 'AdminRecycleBin',
-        component: () => import('@/views/admin/RecycleBin.vue'),
-        meta: { title: '商品回收站', requiresAdminAuth: true, requiresRole: [1, 2] }
+        path: 'inventory-flow',
+        name: 'AdminInventoryFlow',
+        component: () => import('@/views/admin/InventoryFlow.vue'),
+        meta: { title: '出入库管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'banner',
@@ -259,16 +259,10 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '售后管理', requiresAdminAuth: true, requiresRole: [1, 2, 3] }
       },
       {
-        path: 'points-rules',
-        name: 'AdminPointsRuleMgmt',
-        component: () => import('@/views/admin/PointsRuleMgmt.vue'),
-        meta: { title: '积分规则管理', requiresAdminAuth: true, requiresRole: [1, 2] }
-      },
-      {
-        path: 'points-products',
-        name: 'AdminPointsProductMgmt',
-        component: () => import('@/views/admin/PointsProductMgmt.vue'),
-        meta: { title: '积分商城管理', requiresAdminAuth: true, requiresRole: [1, 2] }
+        path: 'points',
+        name: 'AdminPointsMgmt',
+        component: () => import('@/views/admin/PointsMgmt.vue'),
+        meta: { title: '积分管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'home-module',
@@ -278,11 +272,11 @@ const routes: RouteRecordRaw[] = [
       }
     ]
   },
-  // ==================== 兜底路由(未匹配路径) ====================
+  // ==================== 兜底路由(未匹配路径 → 重定向到登录页) ====================
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: () => import('@/views/Login.vue')
+    redirect: '/login'
   }
 ]
 

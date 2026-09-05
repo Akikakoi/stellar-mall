@@ -467,7 +467,10 @@ async function handleAddCart() {
       qty: Number(qty.value) || 1,
       quantity: Number(qty.value) || 1,
       services: selectedServicesDetail.value,
-      serviceFee: serviceFee.value
+      serviceFee: serviceFee.value,
+      // 后端 CartAddDTO 字段：保障服务费（单个商品）+ 服务信息 JSON 快照
+      extraAmount: serviceFee.value,
+      serviceInfo: JSON.stringify(selectedServicesDetail.value)
     })
     track('add_to_cart', {
       spuId: Number(spu.value?.id),

@@ -4,13 +4,12 @@ import com.stellar.annotation.Idempotent;
 import com.stellar.annotation.RequireRole;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
+import com.stellar.service.InventoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,50 +19,48 @@ import java.util.Map;
 @Api(tags = "管理端：库存管理")
 public class InventoryController {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final InventoryService inventoryService;
 
-@RequireRole({1, 2})
+    @RequireRole({1, 2})
     @GetMapping("/page")
-    @ApiOperation("SKU 库存分页（支持 lowStock 参数过滤低库存）")
+    @ApiOperation("SKU 库存分页（支持 name 模糊搜索和 lowStock 低库存过滤）")
     public Result<PageResult> page(@RequestParam(defaultValue = "1") Integer page,
                                    @RequestParam(defaultValue = "20") Integer pageSize,
                                    @RequestParam(required = false) String name,
                                    @RequestParam(required = false) Integer lowStock) {
-        int offset = (page - 1) * pageSize;
-        StringBuilder sql = new StringBuilder("SELECT * FROM stellar_sku WHERE 1=1");
-        StringBuilder countSql = new StringBuilder("SELECT COUNT(*) FROM stellar_sku WHERE 1=1");
-        List<Object> params = new ArrayList<>();
-        if (name != null && !name.isEmpty()) {
-            sql.append(" AND name LIKE ?");
-            countSql.append(" AND name LIKE ?");
-            params.add("%" + name + "%");
-        }
-        if (lowStock != null && lowStock == 1) {
-            sql.append(" AND stock <= warn_stock AND status = 1");
-            countSql.append(" AND stock <= warn_stock AND status = 1");
-        }
-        sql.append(" ORDER BY stock ASC, id ASC LIMIT ? OFFSET ?");
-        params.add(pageSize);
-        params.add(offset);
-        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql.toString(), params.toArray());
-        Long total = jdbcTemplate.queryForObject(countSql.toString(), Long.class, params.subList(0, params.size() - 2).toArray());
-        return Result.success(new PageResult(total == null ? 0L : total, list == null ? new ArrayList<>() : list));
+        return Result.success(inventoryService.pageInventory(page, pageSize, name, lowStock));
     }
 
     @Idempotent(keyPrefix = "admin-inventory-update", windowSeconds = 300)
-@RequireRole({1, 2})
+    @RequireRole({1, 2})
     @PutMapping("/stock")
-    @ApiOperation("调整库存")
+    @ApiOperation("调整单个 SKU 库存（自动记录流水）")
     public Result<String> updateStock(@RequestBody Map<String, Object> body) {
         Long skuId = Long.valueOf(body.get("skuId").toString());
-        Integer delta = Integer.valueOf(body.get("delta").toString());
+        Integer delta = body.get("delta") != null ? Integer.valueOf(body.get("delta").toString()) : null;
         Integer warnStock = body.get("warnStock") != null ? Integer.valueOf(body.get("warnStock").toString()) : null;
-        if (delta != 0) {
-            jdbcTemplate.update("UPDATE stellar_sku SET stock = GREATEST(0, stock + ?), update_time = NOW() WHERE id = ?", delta, skuId);
-        }
-        if (warnStock != null) {
-            jdbcTemplate.update("UPDATE stellar_sku SET warn_stock = ?, update_time = NOW() WHERE id = ?", warnStock, skuId);
-        }
+        String remark = body.get("remark") != null ? body.get("remark").toString() : null;
+        inventoryService.updateStock(skuId, delta, warnStock, remark);
         return Result.success();
+    }
+
+    @RequireRole({1, 2})
+    @PostMapping("/batch-stock")
+    @ApiOperation("批量调整库存（自动记录流水）")
+    public Result<String> batchUpdateStock(@RequestBody List<Map<String, Object>> items) {
+        inventoryService.batchUpdateStock(items);
+        return Result.success();
+    }
+
+    @RequireRole({1, 2})
+    @GetMapping("/log")
+    @ApiOperation("查询库存变动流水（可按 SKU ID 筛选）")
+    public Result<PageResult> stockLog(@RequestParam(required = false) Long skuId,
+                                       @RequestParam(defaultValue = "1") Integer page,
+                                       @RequestParam(defaultValue = "20") Integer pageSize) {
+        if (skuId != null) {
+            return Result.success(inventoryService.pageStockLog(skuId, page, pageSize));
+        }
+        return Result.success(inventoryService.pageAllStockLog(page, pageSize));
     }
 }

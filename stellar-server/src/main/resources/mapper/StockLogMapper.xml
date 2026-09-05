@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.StockLogMapper">
+
+    <resultMap id="StockLogMap" type="com.stellar.entity.StockLog">
+        <id property="id" column="id"/>
+        <result property="skuId" column="sku_id"/>
+        <result property="type" column="type"/>
+        <result property="quantity" column="quantity"/>
+        <result property="stockBefore" column="stock_before"/>
+        <result property="stockAfter" column="stock_after"/>
+        <result property="remark" column="remark"/>
+        <result property="businessType" column="business_type"/>
+        <result property="businessNo" column="business_no"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createUser" column="create_user"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.stellar.entity.StockLog"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO stellar_stock_log (
+            sku_id, type, quantity, stock_before, stock_after,
+            remark, business_type, business_no,
+            create_time, create_user
+        ) VALUES (
+            #{skuId}, #{type}, #{quantity}, #{stockBefore}, #{stockAfter},
+            #{remark}, #{businessType}, #{businessNo},
+            #{createTime}, #{createUser}
+        )
+    </insert>
+
+    <select id="pageBySkuId" resultMap="StockLogMap">
+        SELECT * FROM stellar_stock_log
+        WHERE sku_id = #{skuId}
+        ORDER BY create_time DESC, id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countBySkuId" resultType="long">
+        SELECT COUNT(*) FROM stellar_stock_log
+        WHERE sku_id = #{skuId}
+    </select>
+
+    <select id="pageAll" resultMap="StockLogMap">
+        SELECT * FROM stellar_stock_log
+        ORDER BY create_time DESC, id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAll" resultType="long">
+        SELECT COUNT(*) FROM stellar_stock_log
+    </select>
+
+</mapper>
