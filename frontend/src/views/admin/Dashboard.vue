@@ -70,9 +70,6 @@
           <div class="action-item action-green" @click="router.push('/admin/coupon')">
             <el-icon :size="28"><Discount /></el-icon><span>优惠券</span>
           </div>
-          <div class="action-item action-gray" @click="router.push('/admin/recycle')">
-            <el-icon :size="28"><Delete /></el-icon><span>回收站</span>
-          </div>
         </div>
       </div>
 
@@ -132,7 +129,7 @@ import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getDashboardStats, generateDailyReport } from '@/api/admin'
 import { adminRequest } from '@/api/request'
-import { Goods, Menu, Refresh, User, Tickets, Box, Discount, Delete, Loading } from '@element-plus/icons-vue'
+import { Goods, Menu, Refresh, User, Tickets, Box, Discount, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts/core'
 import { LineChart, BarChart } from 'echarts/charts'

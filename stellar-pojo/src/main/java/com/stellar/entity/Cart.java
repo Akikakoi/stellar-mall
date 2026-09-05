@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -31,6 +32,12 @@ public class Cart implements Serializable {
 
     /** 1 勾选 / 0 不勾选（下单时只读 checked=1 的项） */
     private Integer checked;
+
+    /** 保障服务费（单个商品口径，未乘数量） */
+    private BigDecimal extraAmount;
+
+    /** 保障服务信息（JSON 数组），如 [{"id":"screen_insurance","title":"碎屏险 · 1年","price":99}] */
+    private String serviceInfo;
 
     private LocalDateTime createTime;
     private Long          createUser;

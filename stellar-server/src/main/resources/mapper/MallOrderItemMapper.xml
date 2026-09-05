@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!-- ============================================================
      订单明细 Mapper（stellar_mall_order_item）
-     记录订单内每个商品的快照（名称/规格/单价/数量/小计/附加费）。
+     记录订单内每个商品的快照（名称/规格/单价/数量/小计/附加费/保障服务）。
      支持单条与批量插入、按订单查询（单个/多个订单）。
      ============================================================ -->
 <mapper namespace="com.stellar.mapper.MallOrderItemMapper">
@@ -20,6 +20,7 @@
         <result property="qty"       column="qty"/>
         <result property="subtotal"  column="subtotal"/>
         <result property="extraAmount" column="extra_amount"/>
+        <result property="serviceInfo" column="service_info"/>
     </resultMap>
 
     <!-- 新增单条订单明细 -->
@@ -27,10 +28,10 @@
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_mall_order_item (
             order_id, spu_id, sku_id, spu_name, sku_specs,
-            price, qty, subtotal, extra_amount
+            price, qty, subtotal, extra_amount, service_info
         ) VALUES (
             #{orderId}, #{spuId}, #{skuId}, #{spuName}, #{skuSpecs},
-            #{price}, #{qty}, #{subtotal}, #{extraAmount}
+            #{price}, #{qty}, #{subtotal}, #{extraAmount}, #{serviceInfo}
         )
     </insert>
 
@@ -38,11 +39,11 @@
     <insert id="insertBatch" parameterType="java.util.List">
         INSERT INTO stellar_mall_order_item (
             order_id, spu_id, sku_id, spu_name, sku_specs,
-            price, qty, subtotal, extra_amount
+            price, qty, subtotal, extra_amount, service_info
         ) VALUES
         <foreach collection="list" item="it" separator=",">
             (#{it.orderId}, #{it.spuId}, #{it.skuId}, #{it.spuName}, #{it.skuSpecs},
-             #{it.price}, #{it.qty}, #{it.subtotal}, #{it.extraAmount})
+             #{it.price}, #{it.qty}, #{it.subtotal}, #{it.extraAmount}, #{it.serviceInfo})
         </foreach>
     </insert>
 

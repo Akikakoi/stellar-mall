@@ -17,6 +17,7 @@ import com.stellar.vo.MallOrderItemVO;
 import com.stellar.vo.MallOrderVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,6 +73,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "spu:detail", allEntries = true)
     public MallOrder submit(Long userId, OrderSubmitDTO dto) {
         Long uid = userId != null ? userId : 0L;
         validateSubmitDto(dto);
@@ -103,6 +105,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "spu:detail", allEntries = true)
     public MallOrder submitDirect(Long userId, OrderSubmitDTO dto) {
         Long uid = userId != null ? userId : 0L;
         log.info("[OrderServiceImpl] submitDirect, userId={}, dto={}, items={}",
@@ -162,7 +165,13 @@ public class OrderServiceImpl implements OrderService {
             }
             checkStock(sku, qty);
             Spu spu = c.getSpuId() == null ? null : spuMap.get(c.getSpuId());
-            lines.add(buildLine(c, sku, spu, qty));
+            // 保障服务费（购物车存的是单个商品口径，订单行需要乘数量）；服务信息 JSON 原样快照
+            BigDecimal extraAmount = c.getExtraAmount() == null ? BigDecimal.ZERO : c.getExtraAmount();
+            if (extraAmount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（额外费用不能为负数）");
+            }
+            BigDecimal lineExtra = extraAmount.multiply(BigDecimal.valueOf(qty));
+            lines.add(buildLine(c, sku, spu, qty, lineExtra, c.getServiceInfo()));
         }
         return lines;
     }
@@ -197,7 +206,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（额外费用不能为负数）");
             }
             Spu spu = sku.getSpuId() == null ? null : spuMap.get(sku.getSpuId());
-            lines.add(buildLine(null, sku, spu, qty, extraAmount));
+            lines.add(buildLine(null, sku, spu, qty, extraAmount, item.getServiceInfo()));
         }
         return lines;
     }
@@ -224,10 +233,6 @@ public class OrderServiceImpl implements OrderService {
             throw new BaseException(MessageConstant.STOCK_NOT_ENOUGH
                     + " (skuId=" + sku.getId() + ", stock=" + stock + ", need=" + qty + ")");
         }
-    }
-
-    private OrderLine buildLine(Cart cart, Sku sku, Spu spu, int qty) {
-        return buildLine(cart, sku, spu, qty, BigDecimal.ZERO);
     }
 
     /**
@@ -258,10 +263,10 @@ public class OrderServiceImpl implements OrderService {
         return face.max(BigDecimal.ZERO).min(base);
     }
 
-    private OrderLine buildLine(Cart cart, Sku sku, Spu spu, int qty, BigDecimal extraAmount) {
+    private OrderLine buildLine(Cart cart, Sku sku, Spu spu, int qty, BigDecimal extraAmount, String serviceInfo) {
         BigDecimal price = sku.getPrice() == null ? BigDecimal.ZERO : sku.getPrice();
         BigDecimal subtotal = price.multiply(BigDecimal.valueOf(qty));
-        return new OrderLine(cart, sku, spu, qty, price, subtotal, extraAmount);
+        return new OrderLine(cart, sku, spu, qty, price, subtotal, extraAmount, serviceInfo);
     }
 
     private void deductStock(List<OrderLine> lines) {
@@ -373,6 +378,7 @@ public class OrderServiceImpl implements OrderService {
                     .qty(line.qty)
                     .subtotal(line.subtotal)
                     .extraAmount(line.extraAmount.compareTo(BigDecimal.ZERO) > 0 ? line.extraAmount : null)
+                    .serviceInfo(line.serviceInfo)
                     .build());
         }
         if (!items.isEmpty()) {
@@ -494,6 +500,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(cacheNames = "spu:detail", allEntries = true)
     public void cancel(Long orderId, Long userId) {
         MallOrder order = requireOrder(orderId, userId);
         if (!OrderStatus.PENDING.getBackendValue().equals(order.getStatus())) {
@@ -803,6 +810,7 @@ public class OrderServiceImpl implements OrderService {
                             .qty(it.getQty())
                             .subtotal(it.getSubtotal())
                             .extraAmount(it.getExtraAmount())
+                            .serviceInfo(it.getServiceInfo())
                             .pic(pic)
                             .build();
                 }).collect(Collectors.toList());
@@ -927,10 +935,15 @@ public class OrderServiceImpl implements OrderService {
         final BigDecimal price;
         final BigDecimal subtotal;
         final BigDecimal extraAmount;
+        final String serviceInfo;
         OrderLine(Cart cart, Sku sku, Spu spu, int qty, BigDecimal price, BigDecimal subtotal, BigDecimal extraAmount) {
+            this(cart, sku, spu, qty, price, subtotal, extraAmount, null);
+        }
+        OrderLine(Cart cart, Sku sku, Spu spu, int qty, BigDecimal price, BigDecimal subtotal, BigDecimal extraAmount, String serviceInfo) {
             this.cart = cart; this.sku = sku; this.spu = spu;
             this.qty = qty; this.price = price; this.subtotal = subtotal;
             this.extraAmount = extraAmount == null ? BigDecimal.ZERO : extraAmount;
+            this.serviceInfo = serviceInfo;
         }
     }
 

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 /**
@@ -50,17 +51,31 @@ public class CartServiceImpl implements CartService {
         Long uid = userId != null ? userId : 0L;
         int qty = dto.getQty() == null || dto.getQty() < 1 ? 1 : dto.getQty();
 
+        // 保障服务费必须非负，防止前端传负值压低订单总价
+        BigDecimal extraAmount = dto.getExtraAmount() == null ? BigDecimal.ZERO : dto.getExtraAmount();
+        if (extraAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（保障服务费不能为负数）");
+        }
+
         Sku sku = skuMapper.getById(dto.getSkuId());
         if (sku == null) throw new BaseException(MessageConstant.SKU_NOT_FOUND);
         if (sku.getStatus() == null || sku.getStatus() != 1) {
             throw new BaseException("该 SKU 已停售");
         }
 
+        // 是否携带保障服务选择：serviceInfo 非 null 表示本次有明确的服务选择（含空数组=清空）
+        boolean hasServiceSelection = dto.getServiceInfo() != null;
+
         Cart existing = cartMapper.getByUserIdAndSkuId(uid, dto.getSkuId());
         if (existing != null) {
             Cart upd = new Cart();
             upd.setId(existing.getId());
             upd.setQty((existing.getQty() == null ? 0 : existing.getQty()) + qty);
+            // 重复加购同一 SKU 时，以最近一次的保障服务选择为准（serviceInfo=null 表示未选，保留原值）
+            if (hasServiceSelection) {
+                upd.setExtraAmount(extraAmount);
+                upd.setServiceInfo(dto.getServiceInfo());
+            }
             cartMapper.update(upd);
         } else {
             Cart c = new Cart();
@@ -69,6 +84,10 @@ public class CartServiceImpl implements CartService {
             c.setSpuId(sku.getSpuId());
             c.setQty(qty);
             c.setChecked(1);
+            if (hasServiceSelection && extraAmount.compareTo(BigDecimal.ZERO) > 0) {
+                c.setExtraAmount(extraAmount);
+                c.setServiceInfo(dto.getServiceInfo());
+            }
             cartMapper.insert(c);
         }
     }
@@ -117,6 +136,8 @@ public class CartServiceImpl implements CartService {
                     .skuSpecs(s == null ? null : s.getSpecs())
                     .skuPrice(s == null ? null : s.getPrice())
                     .skuImage(s == null ? null : s.getImage())
+                    .extraAmount(c.getExtraAmount())
+                    .serviceInfo(c.getServiceInfo())
                     .build();
             res.add(vo);
         }

@@ -43,4 +43,7 @@ public class MallOrderItem implements Serializable {
 
     /** 额外费用（保障服务等），单位元 */
     private BigDecimal extraAmount;
+
+    /** 保障服务信息（JSON 数组），如 [{"id":"screen_insurance","title":"碎屏险 · 1年","price":99}] */
+    private String serviceInfo;
 }

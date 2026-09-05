@@ -32,4 +32,6 @@ public class MallOrderItemVO implements Serializable {
     private BigDecimal extraAmount;
     @ApiModelProperty("商品主图（SPU 主图，前端列表/详情页缩略图用）")
     private String pic;
+    @ApiModelProperty("保障服务信息（JSON），已购服务详情")
+    private String serviceInfo;
 }

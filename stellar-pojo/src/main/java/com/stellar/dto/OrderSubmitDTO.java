@@ -67,5 +67,8 @@ public class OrderSubmitDTO implements Serializable {
 
         @ApiModelProperty("额外费用（保障服务等），单位元")
         private java.math.BigDecimal extraAmount;
+
+        @ApiModelProperty("保障服务信息（JSON 数组），如 [{\"id\":\"screen_insurance\",\"title\":\"碎屏险 · 1年\",\"price\":99}]")
+        private String serviceInfo;
     }
 }
