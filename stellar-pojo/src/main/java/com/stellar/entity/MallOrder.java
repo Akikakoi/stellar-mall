@@ -71,7 +71,4 @@ public class MallOrder implements Serializable {
     private Long          createUser;
     private LocalDateTime updateTime;
     private Long          updateUser;
-
-    /** 非 DB 字段：用户手机号（导出时关联查询） */
-    private String userPhone;
 }
