@@ -16,6 +16,10 @@ html.theme-transitioning *::after {
   /* Element Plus 弹窗圆角与站点统一的卡片圆角保持一致 */
   --el-dialog-border-radius: var(--radius-lg);
 
+  /* Element Plus loading 遮罩默认 rgba(255,255,255,.9)，大块区域加载时会泛白闪烁；
+     改为透明：只保留 spinner，内容不闪白，浅/深主题通用 */
+  --el-mask-color: transparent;
+
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 12px;
@@ -50,10 +54,16 @@ html.theme-transitioning *::after {
   /* 磨砂玻璃浮层通用材质（下拉/弹层用）：顶部内高光 + 玻璃面上的半透明 hover 层 */
   --glass-highlight: rgba(255, 255, 255, 0.6);
   --glass-hover: rgba(0, 0, 0, 0.05);
+  /* 浮层玻璃再加强一档：透明度更低 + 模糊更重，让背后内容真正透出「磨砂」质感 */
+  --glass-popover-bg: rgba(255, 255, 255, 0.6);
+  --glass-popover-blur: blur(28px) saturate(180%);
 }
 
 html.theme-dark {
   color-scheme: dark;
+
+  /* 深色下 EP dark css-vars 会重定义遮罩色，此处同样置透明防闪烁 */
+  --el-mask-color: transparent;
 
   --bg-base: #000000;
   --bg-surface: #000000;
@@ -105,6 +115,8 @@ html.theme-dark {
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   --glass-highlight: rgba(255, 255, 255, 0.1);
   --glass-hover: rgba(255, 255, 255, 0.08);
+  --glass-popover-bg: rgba(29, 29, 31, 0.6);
+  --glass-popover-blur: blur(28px) saturate(180%);
 }
 
 html.theme-light {
@@ -160,6 +172,8 @@ html.theme-light {
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   --glass-highlight: rgba(255, 255, 255, 0.6);
   --glass-hover: rgba(0, 0, 0, 0.05);
+  --glass-popover-bg: rgba(255, 255, 255, 0.6);
+  --glass-popover-blur: blur(28px) saturate(180%);
 }
 
 * {
@@ -500,6 +514,31 @@ body .dialog-fade-enter-active .el-overlay-dialog {
 body .dialog-fade-leave-active .el-overlay-dialog {
   animation: dialog-pure-fade-out 0.2s ease-in both;
 }
+
+/* ===== 玻璃弹窗（.glass-dialog）：开启动画不透明度保持稳定，返回轻微缩放淡入。
+ * backdrop-filter 在元素自身透明度渐变的前几帧无法对背后内容取样，会产生“未磨砂/背景透明”
+ * 的闪帧（尤其配合 destroy-on-close 每次重建 DOM）。因此玻璃面板不随遮罩一起做透明度动画，
+ * 只保留视觉缩放入场感，磨砂由一开始即稳定生效。 */
+body .dialog-fade-enter-active .el-overlay.glass-overlay .el-overlay-dialog {
+  animation: glass-dialog-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+body .dialog-fade-enter-active .el-overlay.glass-overlay {
+  animation: dialog-pure-fade-in 0.25s ease-out both;
+}
+body .dialog-fade-leave-active .el-overlay.glass-overlay .el-overlay-dialog {
+  animation: glass-dialog-out 0.2s ease-in both;
+}
+body .dialog-fade-leave-active .el-overlay.glass-overlay {
+  animation: dialog-pure-fade-out 0.2s ease-in both;
+}
+@keyframes glass-dialog-in {
+  from { opacity: 1; transform: scale(0.98) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+@keyframes glass-dialog-out {
+  from { opacity: 1; transform: scale(1)   translateY(0); }
+  to   { opacity: 1; transform: scale(0.98) translateY(4px); }
+}
 @keyframes dialog-pure-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -586,6 +625,9 @@ body .dialog-fade-leave-active .el-overlay-dialog {
  * 因此玻璃化弹窗必须同步换浅遮罩（亮 ~.35 / 暗 ~.5，暗色页本身深、玻璃透出对比弱）。
  * 表单控件（el-input 等）保持实底，玻璃面板 + 实底控件是标准搭配。 */
 body .el-dialog.glass-dialog {
+  /* 磨砂淡入期间 backdrop-filter 无法对正在透明度渐变的面板取模糊样（Chrome 已知行为），
+     开启动画首帧会先露出纯透明白底 →“背景透明/未磨砂”闪一下（尤其 destroy-on-close 每次重建）。
+     玻璃面板本身保持 opacity：1（不改其透明度），渐现交给遮罩承担，backdrop 因此可稳定取样。 */
   background: var(--glass-bg);
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
@@ -593,6 +635,8 @@ body .el-dialog.glass-dialog {
   box-shadow:
     var(--glass-shadow),
     inset 0 1px 0 var(--glass-highlight);
+  /* 让磨砂在原位稳定渲染，减少 layering / 动画期间的重排闪烁 */
+  will-change: backdrop-filter;
   overflow: hidden;
 }
 body .el-overlay.glass-overlay {
@@ -600,6 +644,47 @@ body .el-overlay.glass-overlay {
 }
 html.theme-dark body .el-overlay.glass-overlay {
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* ===== 玻璃弹窗入场"透明闪烁"修复 =====
+ * 根因：Chromium 限制 —— 元素自身或祖先 opacity != 1（及 transform 动画）期间，
+ * backdrop-filter 被 backdrop root 截断而失效。EP 弹窗入场时 overlay 跑
+ * modal-fade-in（opacity 0→1）、.el-overlay-dialog 跑 dialog-fade-in
+ * （opacity+translateY），这 ~0.3s 内玻璃只剩半透明底色没有模糊，
+ * 动画结束才"啪"地补上。处理：入场阶段禁掉这两层动画让玻璃第一帧即生效；
+ * 弹窗内容(header/body/footer)改为自身淡入补偿观感 —— 内容是弹窗的
+ * 子孙节点，不会截断弹窗自身的 backdrop-filter。离场动画保留（淡出中
+ * 模糊短暂丢失肉眼不可见）。 */
+body .el-overlay.glass-overlay.dialog-fade-enter-active,
+body .el-overlay.glass-overlay.dialog-fade-enter-active .el-overlay-dialog,
+body .el-dialog.glass-dialog.dialog-fade-enter-active,
+body .el-dialog.glass-dialog.dialog-fade-enter-active .el-overlay-dialog {
+  animation: none !important;
+  transition: none !important;
+}
+body .el-dialog.glass-dialog .el-dialog__header,
+body .el-dialog.glass-dialog .el-dialog__body,
+body .el-dialog.glass-dialog .el-dialog__footer {
+  animation: glass-content-fade 0.25s ease-out both;
+}
+/* MessageBox（body.area-user 区域标记）同理：overlay 淡入 transition +
+ * .el-overlay-message-box 的 msgbox-fade-in 动画都会截断 backdrop-filter */
+body.area-user .el-overlay.fade-in-linear-enter-active,
+body.area-user .el-overlay.fade-in-linear-enter-active .el-overlay-message-box {
+  animation: none !important;
+  transition: none !important;
+}
+body.area-user .el-message-box.fade-in-linear-enter-active {
+  animation: none !important;
+  transition: none !important;
+}
+body.area-user .el-message-box .el-message-box__content,
+body.area-user .el-message-box .el-message-box__title {
+  animation: glass-content-fade 0.25s ease-out both;
+}
+@keyframes glass-content-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ===== C 端 MessageBox 玻璃化（body.area-user 区域标记） =====

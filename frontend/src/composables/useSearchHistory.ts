@@ -39,6 +39,7 @@ export interface SearchHistoryComposable {
   searchHistory: Ref<string[]>
   addToHistory: (kw: string) => void
   removeHistory: (kw: string) => Promise<boolean>
+  clearHistory: () => Promise<boolean>
 }
 
 /**
@@ -93,5 +94,25 @@ export function useSearchHistory(): SearchHistoryComposable {
     return true
   }
 
-  return { searchHistory, addToHistory, removeHistory }
+  /**
+   * 清空全部搜索历史(带确认弹窗)
+   * 历史为空时直接返回 false;用户取消返回 false,清空成功返回 true
+   */
+  async function clearHistory(): Promise<boolean> {
+    if (searchHistory.value.length === 0) return false
+    try {
+      await ElMessageBox.confirm('确定要清空全部搜索历史吗？', '提示', {
+        confirmButtonText: '清空',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+    } catch {
+      return false
+    }
+    searchHistory.value = []
+    localStorage.setItem(historyKey(loadedFor), '[]')
+    return true
+  }
+
+  return { searchHistory, addToHistory, removeHistory, clearHistory }
 }

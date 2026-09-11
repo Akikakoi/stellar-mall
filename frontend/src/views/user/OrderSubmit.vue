@@ -114,7 +114,7 @@
         <div v-for="item in orderItems" :key="item.id || item.skuId" class="row item">
           <div class="col col-product">
             <div class="product-card">
-              <img :src="item.image || item.pic || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
+              <img :src="item.image || item.pic || __PH" class="thumb" v-placeholder />
               <div class="name">{{ item.name }}</div>
             </div>
           </div>
@@ -181,38 +181,11 @@ import { ref, reactive, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { submitOrder, payOrder, getWallet, listAddresses, saveAddress, getUserPoints } from '@/api/mall'
-import { userRequest, getOrCreateIdempotencyKey, resetIdempotencyKey } from '@/api/request'
+import { userRequest } from '@/api/request'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { track } from '@/utils/tracker'
 import areaData from 'china-area-data'
-
-// 将 china-area-data 转换为 Cascader 需要的 options 格式
-function convertAreaDataToOptions(data: any, parentCode: string): any[] {
-  const options: any[] = []
-  const areas = data[parentCode]
-  if (!areas) return options
-  for (const code in areas) {
-    const name = areas[code]
-    // 跳过"市辖区"、"市辖县"等冗余中间节点
-    if (name === '市辖区' || name === '市辖县') {
-      // 把它的子节点直接提升到当前层级
-      const children = convertAreaDataToOptions(data, code)
-      options.push(...children)
-      continue
-    }
-    const option: Record<string, any> = {
-      value: name,
-      label: name,
-      code: code
-    }
-    const children = convertAreaDataToOptions(data, code)
-    if (children.length > 0) {
-      option.children = children
-    }
-    options.push(option)
-  }
-  return options
-}
+import { convertAreaDataToOptions } from '@/utils/area'
 
 const areaOptions = convertAreaDataToOptions(areaData, '86')
 
@@ -543,10 +516,6 @@ function calcAmount() {
 // ==================== 提交订单 ====================
 /** 提交订单：校验收货信息、组装订单数据，提交成功后发起支付并跳转订单列表 */
 async function handleSubmit() {
-  // 业务动作维度的幂等键：一次点击 = 一次动作，重试 / 重复点击复用同一 key，
-  // 防止后端幂等切面因 key 每次不同而拦截不住（会创建两笔订单）
-  const SUBMIT_ACTION = 'order:submit'
-  const idempotencyKey = getOrCreateIdempotencyKey(SUBMIT_ACTION)
   if (orderItems.value.length === 0) {
     ElMessage.warning('请先选择商品')
     return
@@ -598,14 +567,12 @@ async function handleSubmit() {
       // 立即购买不清空购物车，购物车下单才清空
       clearCart: !isDirect.value
     }
-    const res = await submitOrder(payload, idempotencyKey)
+    // 幂等键由 request.ts 拦截器按业务动作 'order:submit' 统一管理：
+    // 重复点击/失败重试复用同一 key，成功后拦截器自动重置（见 mall.ts submitOrder）
+    const res = await submitOrder(payload)
     const orderId = res?.id || res?.orderId
     const payAmount = Number(res?.payAmount ?? finalAmount.value)
     submitting.value = false
-
-    // 下单成功 → 本次业务动作完成，重置幂等键（下一次点击是新动作，用新 key）。
-    // 注意：仅在成功后重置；失败时保留 key，用户重试仍复用同一 key，不会重复下单
-    resetIdempotencyKey(SUBMIT_ACTION)
 
     // 购物车下单：提交成功后立即清空本地已勾选项，不论用户是否付款
     if (!isDirect.value) {

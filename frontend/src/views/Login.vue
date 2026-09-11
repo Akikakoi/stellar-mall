@@ -92,7 +92,7 @@ const loading = ref(false)
 const loginMode = ref('password')
 const sendingCode = ref(false)
 const codeCountdown = ref(0)
-let timer: number | null = null
+let timer: ReturnType<typeof setInterval> | null = null
 
 // E3: 图形验证码状态
 const captchaId = ref('')

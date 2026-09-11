@@ -43,14 +43,14 @@
               </div>
               <div class="cat-grid" v-loading="mod._loading">
                 <div v-if="mod._products[0]" class="cat-banner" :style="{ gridRow: mod._products.length > 5 ? '1 / 3' : '1 / 2' }" @click="goDetail(mod._products[0].id)">
-                  <img :src="mod._products[0].mainImage || __PH" :alt="mod._products[0].name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <img :src="mod._products[0].mainImage || __PH" :alt="mod._products[0].name" loading="lazy" v-placeholder />
                   <div class="banner-text">
                     <h3>{{ mod._products[0].name }}</h3>
                     <p>¥{{ Number(mod._products[0].minPrice || 0).toFixed(2) }} 起</p>
                   </div>
                 </div>
                 <div v-for="p in mod._products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
-                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" v-placeholder />
                   <div class="p-name">{{ p.name }}</div>
                   <div class="p-desc">已售 {{ p.saleCount || 0 }} · 评论 {{ p.commentCount || 0 }}</div>
                   <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
@@ -76,7 +76,7 @@
               <div class="spu-grid" v-loading="mod._loading">
                 <div v-for="spu in mod._products" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
                   <div class="spu-image">
-                    <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                    <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" v-placeholder />
                     <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)">{{ favSet.has(spu.id) ? '♥' : '♡' }}</button>
                   </div>
                   <div class="spu-info">
@@ -140,11 +140,11 @@
               </div>
               <div class="cat-grid" v-loading="sec.loading">
                 <div v-if="sec.products[0]" class="cat-banner" :style="{ gridRow: sec.products.length > 5 ? '1 / 3' : '1 / 2' }" @click="goDetail(sec.products[0].id)">
-                  <img :src="sec.products[0].mainImage || __PH" :alt="sec.products[0].name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <img :src="sec.products[0].mainImage || __PH" :alt="sec.products[0].name" loading="lazy" v-placeholder />
                   <div class="banner-text"><h3>{{ sec.products[0].name }}</h3><p>¥{{ Number(sec.products[0].minPrice || 0).toFixed(2) }} 起</p></div>
                 </div>
                 <div v-for="p in sec.products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
-                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" v-placeholder />
                   <div class="p-name">{{ p.name }}</div><div class="p-desc">已售 {{ p.saleCount || 0 }} · 评论 {{ p.commentCount || 0 }}</div>
                   <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
                 </div>
@@ -162,7 +162,7 @@
       <div v-if="filterMode" class="spu-grid container main-content" v-loading="loading" v-infinite-scroll="loadMore" :infinite-scroll-disabled="!hasMore || loading || loadingMore" :infinite-scroll-distance="120" :infinite-scroll-immediate="false">
         <div v-for="spu in spus" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
           <div class="spu-image">
-            <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" onerror="this.src=window.__PH;this.onerror=null" />
+            <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" v-placeholder />
             <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)">{{ favSet.has(spu.id) ? '♥' : '♡' }}</button>
           </div>
           <div class="spu-info">

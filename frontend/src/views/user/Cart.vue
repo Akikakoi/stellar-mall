@@ -2,7 +2,7 @@
   <div class="cart-page">
 
     <main class="container main-content" v-loading="loading">
-      <div v-if="cartStore.items.length === 0" class="empty">
+      <div v-if="!loading && cartStore.items.length === 0" class="empty">
         <el-empty description="购物车是空的，快去选购吧">
           <el-button type="primary" @click="router.push('/')">去逛逛</el-button>
         </el-empty>
@@ -27,7 +27,7 @@
             </div>
             <div class="col col-product">
               <div class="product-card" @click="goDetail(item.spuId || item.skuId)">
-                <img :src="item.image || item.pic || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
+                <img :src="item.image || item.pic || __PH" class="thumb" v-placeholder />
                 <div class="product-info">
                   <div class="name">{{ item.name }}</div>
                   <div class="sku-specs" v-if="item.skuName || item.skuSpecs">
@@ -149,21 +149,30 @@ onMounted(async () => {
   overflow: hidden;
 }
 
-.cart-table { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-base); overflow: hidden; }
+.cart-table {
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
 .row {
   display: grid;
   grid-template-columns: 60px 1fr 120px 160px 140px 80px;
   align-items: center;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--glass-border);
 }
 .row.header {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-secondary);
   font-size: 14px;
   font-weight: 600;
 }
-.row.item:hover { background: var(--bg-hover); }
+.row.item:hover { background: var(--glass-hover); }
+.row:last-child { border-bottom: none; }
 .col-check { text-align: center; }
 .product-card { display: flex; align-items: center; gap: 14px; cursor: pointer; }
 .thumb { width: 80px; height: 80px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; }

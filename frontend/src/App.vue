@@ -16,8 +16,8 @@ import FloatingSidebar from '@/components/FloatingSidebar.vue'
 import { getSiteBg } from '@/api/mall'
 
 const route = useRoute()
-const hideHeaderPaths = ['/login', '/register', '/shop/search', '/me', '/me/messages', '/wallet', '/points']
-const hideSidebarPaths = ['/login', '/register', '/shop/search', '/me', '/me/messages', '/wallet', '/points']
+const hideHeaderPaths = ['/login', '/register', '/shop/search', '/me', '/me/messages', '/wallet']
+const hideSidebarPaths = ['/login', '/register', '/shop/search', '/me', '/me/messages', '/wallet']
 const isAdmin = computed(() => route.path.startsWith('/admin'))
 // 商品详情页隐藏顶部导航，沉浸式浏览
 const isSpuDetail = computed(() => route.path.startsWith('/spu/'))

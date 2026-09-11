@@ -50,7 +50,7 @@ function normalizeCartRow(it: CartRowVO): CartItem {
     skuId: it.skuId || it.id!,
     spuId: it.spuId,
     name: it.name || it.skuName || it.spuName || '',
-    image: it.image || it.skuImage || it.pic || '',
+    image: it.image || it.skuImage || it.spuImage || it.pic || '',
     price: Number(it.price || it.skuPrice || 0),
     quantity: Number(it.qty || it.quantity || it.number || 1),
     checked,
