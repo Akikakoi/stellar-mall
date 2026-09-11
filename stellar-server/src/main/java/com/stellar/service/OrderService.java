@@ -11,7 +11,7 @@ public interface OrderService {
      * 提交订单（从购物车查询）：
      *   1) 读购物车 checked 项 → 空抛 SHOPPING_CART_IS_NULL
      *   2) 循环校验 SKU 在售、库存够不够
-     *   3) 逐条 skuStockService.deduct(skuId, qty) — 乐观锁版本，失败抛 StockInsufficientException
+     *   3) 逐条 skuStockService.deduct(skuId, qty, orderNo) — 乐观锁版本，失败抛 StockInsufficientException
      *   4) 写 Order + 逐条 OrderItem（快照：SPU 名/SKU 规格/单价）
      *   5) 删除对应购物车项
      *
@@ -35,7 +35,7 @@ public interface OrderService {
     /**
      * 取消订单：
      *   1) 归属校验 + 只有 PENDING 能取消
-     *   2) 逐条读明细 → 调 skuStockService.rollback(skuId, qty)
+     *   2) 逐条读明细 → 调 skuStockService.rollback(skuId, qty, orderNo)
      *   3) 订单状态 → CANCELLED
      */
     void cancel(Long orderId, Long userId);

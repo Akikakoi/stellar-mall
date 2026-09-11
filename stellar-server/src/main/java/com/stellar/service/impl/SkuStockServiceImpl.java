@@ -57,16 +57,11 @@ public class SkuStockServiceImpl implements SkuStockService {
      * <p>根据 {@code stellar.stock.lock-mode} 配置选择锁模式：
      * Redis 分布式锁模式或本地乐观锁模式。</p>
      *
-     * @param skuId SKU ID
-     * @param qty   扣减数量
+     * @param skuId      SKU ID
+     * @param qty        扣减数量
+     * @param businessNo 关联业务单号（如订单号），写入出入库日志，可传 null
      * @throws StockInsufficientException 库存不足或并发冲突时抛出
      */
-    @Override
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
-    public void deduct(Long skuId, int qty) {
-        deduct(skuId, qty, null);
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     public void deduct(Long skuId, int qty, String businessNo) {
@@ -87,16 +82,11 @@ public class SkuStockServiceImpl implements SkuStockService {
      * <p>根据 {@code stellar.stock.lock-mode} 配置选择锁模式：
      * Redis 分布式锁模式或本地乐观锁模式。</p>
      *
-     * @param skuId SKU ID
-     * @param qty   回滚数量
+     * @param skuId      SKU ID
+     * @param qty        回滚数量
+     * @param businessNo 关联业务单号（如订单号），写入出入库日志，可传 null
      * @throws BaseException 回滚失败时抛出
      */
-    @Override
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
-    public void rollback(Long skuId, int qty) {
-        rollback(skuId, qty, null);
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     public void rollback(Long skuId, int qty, String businessNo) {
