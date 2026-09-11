@@ -27,6 +27,13 @@ declare module 'axios' {
     __isRefresh?: boolean
     /** RAG 请求已重试过一次标记:避免无限 401→refresh→retry 循环 */
     __ragRetried?: boolean
+    /**
+     * 一次性业务动作的幂等标识(如提交订单传 'order:submit'):
+     * 同一动作的重复点击/失败重试复用同一个 X-Idempotency-Key,
+     * 请求成功(业务 code 通过)后由响应拦截器自动重置,下次动作生成新 key。
+     * 不传的写请求走默认行为:每个请求独立 key(加购/收藏等重复调用是合法新操作)。
+     */
+    __idempotencyAction?: string
   }
 }
 
@@ -208,11 +215,16 @@ function createInstance(baseURL: string, type: 'user' | 'admin' | 'rag'): AxiosI
       }
     }
 
-    // 写操作自动注入幂等键(业务方可在调用时手动覆盖 config.headers['X-Idempotency-Key'])
-    // 用途:网络重试时同一逻辑请求复用同一 key;用户主动重发视为新请求
+    // 写操作自动注入幂等键:
+    // - 传了 __idempotencyAction 的一次性业务动作(如提交订单):以动作维度复用 key,
+    //   重复点击 / 失败重试 / 401 刷新重试都复用同一 key,响应拦截器在成功后自动重置
+    // - 未传动作的普通写接口(加购/收藏/地址等):每个请求独立 key,重复调用是合法新操作
+    // - 业务方传 config.headers['X-Idempotency-Key'] 时优先级最高,拦截器不覆盖
     const method = String(config.method || 'get').toLowerCase()
     if (WRITE_METHODS.has(method) && headers['X-Idempotency-Key'] === undefined) {
-      headers['X-Idempotency-Key'] = generateIdempotencyKey()
+      headers['X-Idempotency-Key'] = config.__idempotencyAction
+        ? getOrCreateIdempotencyKey(config.__idempotencyAction)
+        : generateIdempotencyKey()
     }
 
     config.headers = headers
@@ -226,6 +238,9 @@ function createInstance(baseURL: string, type: 'user' | 'admin' | 'rag'): AxiosI
     if (data && typeof data === 'object' && 'code' in data) {
       if (type === 'rag') {
         if (data.code === 0) {
+          if (response.config?.__idempotencyAction) {
+            resetIdempotencyKey(response.config.__idempotencyAction)
+          }
           return data
         }
         if (data.code === 401) {
@@ -241,6 +256,10 @@ function createInstance(baseURL: string, type: 'user' | 'admin' | 'rag'): AxiosI
         return Promise.reject(new Error(data.message || 'Request failed'))
       } else {
         if (data.code === 1 || data.code === 200) {
+          // 业务动作型请求成功 → 幂等键使命完成,自动重置(失败时保留 key,重试仍复用同一 key)
+          if (response.config?.__idempotencyAction) {
+            resetIdempotencyKey(response.config.__idempotencyAction)
+          }
           return data.data
         }
         if (data.code === 401) {
@@ -264,6 +283,11 @@ function createInstance(baseURL: string, type: 'user' | 'admin' | 'rag'): AxiosI
     }
     return data
   }, async (error) => {
+    // 主动取消（AbortController / signal）静默放行：路由切换、连续输入等场景
+    // 取消过期请求是预期行为，不应弹"请求失败"打扰用户
+    if (axios.isCancel(error) || error?.code === 'ERR_CANCELED' || error?.name === 'CanceledError') {
+      return Promise.reject(error)
+    }
     if (error.config?.__silent) {
       return Promise.reject(error)
     }

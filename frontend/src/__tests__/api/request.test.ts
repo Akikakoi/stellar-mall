@@ -63,6 +63,8 @@ vi.mock('axios', () => {
 
   return {
     default: {
+      // error interceptor 里会调用 axios.isCancel(error) 判断主动取消
+      isCancel: vi.fn((v: any) => !!v && (v.__cancelled === true || v?.code === 'ERR_CANCELED')),
       create: vi.fn(() => {
         const type = types[createCount++] || 'unknown'
         const reqFns: any[] = []

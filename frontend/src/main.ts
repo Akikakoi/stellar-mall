@@ -28,6 +28,7 @@ import 'element-plus/es/components/message-box/style/css'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import App from './App.vue'
 import router from './router'
+import { placeholder } from './utils/imgPlaceholder'
 import './assets/main.scss'
 
 const SVG_NO_IMAGE =
@@ -41,6 +42,8 @@ const SVG_NO_IMAGE =
 window.__PH = SVG_NO_IMAGE
 
 const app = createApp(App)
+// 全局指令：图片加载失败替换为占位图（替代散落各页面的内联 onerror 写法）
+app.directive('placeholder', placeholder)
 app.config.errorHandler = (err: unknown, instance: unknown, info: string) => {
   console.error('[Vue error]', info, err)
 }

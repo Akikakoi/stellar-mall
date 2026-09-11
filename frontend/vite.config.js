@@ -78,7 +78,7 @@ export default defineConfig({
           'element-plus': ['element-plus'],
           'echarts': ['echarts'],
           'vue-vendor': ['vue', 'vue-router', 'pinia'],
-          'markdown': ['markdown-it', 'highlight.js'],
+          'markdown': ['markdown-it'],
           'axios': ['axios'],
         }
       }
