@@ -19,9 +19,6 @@ public class MallUser implements Serializable {
 
     private Long id;
 
-    /** 手机号（可选，通知用） */
-    private String phone;
-
     /** 邮箱（登录账号，唯一） */
     private String email;
 

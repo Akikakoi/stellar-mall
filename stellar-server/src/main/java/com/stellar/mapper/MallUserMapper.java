@@ -22,8 +22,6 @@ public interface MallUserMapper {
 
     MallUser getById(@Param("id") Long id);
 
-    MallUser getByPhone(@Param("phone") String phone);
-
     MallUser getByEmail(@Param("email") String email);
 
     /** 导出：查询全部用户。 */

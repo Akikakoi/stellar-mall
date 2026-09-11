@@ -117,13 +117,11 @@ describe('useUserStore', () => {
       store.setUserInfo({
         userId: 42,
         nickname: '李四',
-        phone: '13800001111',
         token: 'info-token',
         role: 'admin'
       })
       expect(store.userId).toBe(42)
       expect(store.nickname).toBe('李四')
-      expect(store.phone).toBe('13800001111')
       expect(store.token).toBe('info-token')
       expect(store.role).toBe('admin')
     })
@@ -167,7 +165,6 @@ describe('useUserStore', () => {
         token: 'login-token',
         userId: 1,
         nickname: '测试用户',
-        phone: '13900000000',
         role: 'user'
       })
 
@@ -201,7 +198,6 @@ describe('useUserStore', () => {
       store.token = 'active-token'
       store.userId = 5
       store.nickname = '用户'
-      store.phone = '138'
       store.role = 'admin'
 
       await store.logout()
@@ -209,7 +205,6 @@ describe('useUserStore', () => {
       expect(store.token).toBe('')
       expect(store.userId).toBeNull()
       expect(store.nickname).toBe('')
-      expect(store.phone).toBe('')
       expect(store.role).toBe('')
       expect(store.isLoggedIn).toBe(false)
     })
@@ -219,7 +214,6 @@ describe('useUserStore', () => {
       store.setToken('will-be-cleared')
       store.userId = 10
       store.nickname = 'n'
-      store.phone = 'p'
       store.role = 'r'
 
       await store.logout()
@@ -227,7 +221,6 @@ describe('useUserStore', () => {
       expect(localStorage.getItem('stellar_user_token')).toBeNull()
       expect(localStorage.getItem('stellar_user_id')).toBeNull()
       expect(localStorage.getItem('stellar_user_nickname')).toBeNull()
-      expect(localStorage.getItem('stellar_user_phone')).toBeNull()
       expect(localStorage.getItem('stellar_user_role')).toBeNull()
       // 同时清除购物车缓存
       expect(localStorage.getItem('stellar_cart_items')).toBeNull()

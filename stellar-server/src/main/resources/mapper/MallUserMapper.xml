@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!-- ============================================================
      商城用户 Mapper（stellar_mall_user）
-     提供用户注册（插入）、资料更新、按 id/手机号/邮箱查询，
+     提供用户注册（插入）、资料更新、按 id/邮箱查询，
      以及用户数据导出。
      ============================================================ -->
 <mapper namespace="com.stellar.mapper.MallUserMapper">
@@ -11,7 +11,6 @@
     <!-- 数据库字段 → 实体属性映射 -->
     <resultMap id="MallUserMap" type="com.stellar.entity.MallUser">
         <id     property="id"         column="id"/>
-        <result property="phone"      column="phone"/>
         <result property="email"      column="email"/>
         <result property="nickname"   column="nickname"/>
         <result property="password"   column="password"/>
@@ -26,19 +25,18 @@
     <insert id="insert" parameterType="com.stellar.entity.MallUser"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
         INSERT INTO stellar_mall_user (
-            phone, email, nickname, password, status,
+            email, nickname, password, status,
             create_time, create_user, update_time, update_user
         ) VALUES (
-            #{phone}, #{email}, #{nickname}, #{password}, #{status},
+            #{email}, #{nickname}, #{password}, #{status},
             #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
         )
     </insert>
 
-    <!-- 更新用户资料：手机号/邮箱/昵称/密码/状态按需更新（动态 SQL） -->
+    <!-- 更新用户资料：邮箱/昵称/密码/状态按需更新（动态 SQL） -->
     <update id="update" parameterType="com.stellar.entity.MallUser">
         UPDATE stellar_mall_user
         <set>
-            <if test="phone != null and phone != ''">phone = #{phone},</if>
             <if test="email != null and email != ''">email = #{email},</if>
             <if test="nickname != null">nickname = #{nickname},</if>
             <if test="password != null and password != ''">password = #{password},</if>
@@ -52,11 +50,6 @@
     <!-- 按 id 查询用户 -->
     <select id="getById" resultMap="MallUserMap">
         SELECT * FROM stellar_mall_user WHERE id = #{id} LIMIT 1
-    </select>
-
-    <!-- 按手机号查询（登录/注册查重用） -->
-    <select id="getByPhone" resultMap="MallUserMap">
-        SELECT * FROM stellar_mall_user WHERE phone = #{phone} LIMIT 1
     </select>
 
     <!-- 按邮箱查询（邮箱登录/查重用） -->

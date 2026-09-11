@@ -83,6 +83,44 @@ export function deactivateAccount(): Promise<any> {
   })
 }
 
+/** 发送修改密码验证码到当前登录邮箱（需登录，用于从未设置过密码的账号自助设置密码） */
+export function sendPasswordChangeCode(): Promise<any> {
+  return userRequest({
+    url: '/user/user/password/code',
+    method: 'post'
+  })
+}
+
+/**
+ * 修改登录密码。
+ * oldPassword 与 code 二选一：常规改密传原密码，从未设置过密码的账号传邮箱验证码。
+ */
+export function updatePassword(data: { oldPassword?: string, code?: string, newPassword: string }): Promise<any> {
+  return userRequest({
+    url: '/user/user/password',
+    method: 'post',
+    data
+  })
+}
+
+/** 发送换绑邮箱验证码到新邮箱（需登录，后端校验新邮箱未被注册） */
+export function sendEmailChangeCode(email: string): Promise<any> {
+  return userRequest({
+    url: '/user/user/email/change-code',
+    method: 'post',
+    data: { email }
+  })
+}
+
+/** 校验验证码并更换登录邮箱（后端最终校验新邮箱未被占用） */
+export function changeEmail(email: string, code: string): Promise<any> {
+  return userRequest({
+    url: '/user/user/email/change',
+    method: 'post',
+    data: { email, code }
+  })
+}
+
 // =========================== 商品 (SPU) ===========================
 
 /** 分页查询商品列表,支持按名称/分类/状态/价格区间筛选 */
@@ -176,7 +214,10 @@ export function submitOrder(data: any, idempotencyKey?: string): Promise<any> {
     url: '/user/order/submit',
     method: 'post',
     data,
-    headers: idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : undefined
+    // 显式传入 key 时优先生效;未传时由拦截器按业务动作 'order:submit' 复用 key
+    // (重复点击/失败重试同一 key,成功后自动重置),防止重复下单
+    headers: idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : undefined,
+    __idempotencyAction: idempotencyKey ? undefined : 'order:submit',
   })
 }
 
