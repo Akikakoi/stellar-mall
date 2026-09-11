@@ -34,4 +34,8 @@ public class MallOrderItemVO implements Serializable {
     private String pic;
     @ApiModelProperty("保障服务信息（JSON），已购服务详情")
     private String serviceInfo;
+    @ApiModelProperty("该商品是否已完成退款")
+    private Boolean refunded;
+    @ApiModelProperty("该商品已退款金额（元）")
+    private BigDecimal refundedAmount;
 }

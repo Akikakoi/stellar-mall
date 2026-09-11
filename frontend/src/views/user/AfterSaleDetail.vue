@@ -38,11 +38,12 @@
       <div class="panel">
         <div class="panel-head"><span class="panel-title">售后商品</span></div>
         <div class="item-row">
-          <img :src="afterSale?.spuImage || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
+          <img v-if="afterSale?.skuId" :src="afterSale?.spuImage || __PH" class="thumb" v-placeholder />
+          <div v-else class="thumb whole-thumb"><el-icon :size="24"><Box /></el-icon></div>
           <div class="item-info">
             <div class="item-name">{{ afterSale?.spuName || '商品' }}</div>
-            <div class="item-spec">{{ afterSale?.skuSpecs || '默认规格' }}</div>
-            <div class="item-qty">x{{ afterSale?.qty || 1 }}</div>
+            <div class="item-spec">{{ afterSale?.skuId ? (afterSale?.skuSpecs || '默认规格') : '退还订单全部商品' }}</div>
+            <div class="item-qty">{{ afterSale?.skuId ? ('x' + (afterSale?.qty || 1)) : ('共 ' + (afterSale?.qty || 0) + ' 件') }}</div>
           </div>
         </div>
       </div>
@@ -101,6 +102,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getAfterSale, cancelAfterSale, submitReturnTracking } from '@/api/mall'
 import { AFTER_SALE_STATUS } from '@/constants/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Box } from '@element-plus/icons-vue'
 
 const __PH = window.__PH
 const route = useRoute()
@@ -246,6 +248,11 @@ onMounted(load)
   display: flex; align-items: center; padding: 8px 0;
 }
 .thumb { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; margin-right: 14px; }
+.whole-thumb {
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--brand-primary, #409eff) 8%, transparent);
+  color: var(--brand-primary, #409eff);
+}
 .item-name { color: var(--text-primary); font-size: 14px; font-weight: 500; margin-bottom: 4px; }
 .item-spec { color: var(--text-muted); font-size: 12px; }
 .item-qty { color: var(--text-muted); font-size: 13px; }

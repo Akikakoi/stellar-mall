@@ -32,7 +32,6 @@
         <result property="createUser"  column="create_user"/>
         <result property="updateTime"  column="update_time"/>
         <result property="updateUser"  column="update_user"/>
-        <result property="userPhone"  column="user_phone"/>
     </resultMap>
 
     <!-- 创建订单（含积分抵扣字段） -->
@@ -191,11 +190,18 @@
           AND status != 'REFUNDED'
     </update>
 
-    <!-- 导出：查询全部订单（关联用户手机号） -->
+    <!-- 标记部分退款完成（幂等：仅退款中/部分退款中的订单可转为 PARTIAL_REFUNDED，
+         已取消/已退款订单不可被覆盖）。 -->
+    <update id="markPartialRefunded">
+        UPDATE stellar_mall_order
+        SET status = 'PARTIAL_REFUNDED'
+        WHERE id = #{id}
+          AND status IN ('REFUNDING', 'PARTIAL_REFUNDED')
+    </update>
+
+    <!-- 导出：查询全部订单 -->
     <select id="listAllForExport" resultMap="MallOrderMap">
-        SELECT o.*, u.phone AS user_phone
-        FROM stellar_mall_order o
-        LEFT JOIN stellar_mall_user u ON u.id = o.user_id
+        SELECT * FROM stellar_mall_order o
         <where>
             <if test="status != null and status != ''">AND o.status = #{status}</if>
             <if test="startTime != null and startTime != ''">AND o.create_time &gt;= #{startTime}</if>

@@ -19,6 +19,7 @@
             <template v-else-if="order?.statusCode === ORDER_STATUS.CANCELLED">订单已取消</template>
             <template v-else-if="order?.statusCode === ORDER_STATUS.REFUNDING">商家正在处理退款，请耐心等待</template>
             <template v-else-if="order?.statusCode === ORDER_STATUS.REFUNDED">订单已退款</template>
+            <template v-else-if="order?.statusCode === ORDER_STATUS.PARTIAL_REFUNDED">部分商品已退款，可继续对剩余商品申请售后</template>
             <template v-else>—</template>
           </div>
         </div>
@@ -56,11 +57,14 @@
           <div class="item-row" v-for="it in order?.items || []" :key="it.id || it.skuId">
             <div class="item-main" @click="goSpu(it.spuId)">
               <img :src="it.pic || it.image || __PH" class="thumb"
-                   onerror="this.src=window.__PH;this.onerror=null" />
+                   v-placeholder />
               <div class="item-detail">
                 <div class="item-info">
                   <div class="item-name">{{ it.spuName }}</div>
                   <div class="item-spec">{{ it.skuSpecs || '默认规格' }}</div>
+                  <el-tag v-if="it.refunded" type="danger" size="small" class="refunded-tag">
+                    已退款 ¥{{ Number(it.refundedAmount || 0).toFixed(2) }}
+                  </el-tag>
                   <!-- 保障服务 -->
                   <div v-if="it.extraAmount > 0" class="item-service">
                     <div class="service-label">保障服务</div>
@@ -343,7 +347,8 @@ const STATUS_MAP: Record<string, any> = {
   [ORDER_STATUS.REVIEWABLE]: ['待评价', 'success'],
   [ORDER_STATUS.COMPLETED]: ['已完成', 'success'],
   [ORDER_STATUS.REFUNDING]: ['退款中', 'warning'],
-  [ORDER_STATUS.REFUNDED]: ['已退款', 'danger']
+  [ORDER_STATUS.REFUNDED]: ['已退款', 'danger'],
+  [ORDER_STATUS.PARTIAL_REFUNDED]: ['部分退款', 'warning']
 }
 function statusText(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
 function statusTag(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
@@ -355,18 +360,24 @@ function payMethodText(m: any) {
 }
 
 /**
- * 是否显示底部操作栏（待付款/待收货时显示）
+ * 是否显示底部操作栏（待付款/待收货/可售后/需填物流时显示）
  */
 const showActions = computed(() =>
-  order.value && (order.value.statusCode === ORDER_STATUS.PENDING || order.value.statusCode === ORDER_STATUS.SHIPPED)
+  !!order.value && (
+    order.value.statusCode === ORDER_STATUS.PENDING ||
+    order.value.statusCode === ORDER_STATUS.SHIPPED ||
+    showAfterSaleBtn.value ||
+    (afterSale.value && afterSale.value.status === AFTER_SALE_STATUS.RETURNING)
+  )
 )
 
 /**
- * 是否显示"申请售后"按钮（已支付/已发货/已完成时显示）
+ * 是否显示"申请售后"按钮（已支付/已发货/已完成/部分退款时显示）
  */
 const showAfterSaleBtn = computed(() => {
   const s = order.value?.statusCode
   return s === ORDER_STATUS.PAID || s === ORDER_STATUS.SHIPPED || s === ORDER_STATUS.COMPLETED
+    || s === ORDER_STATUS.PARTIAL_REFUNDED
 })
 /**
  * 计算订单中所有商品的总数量
@@ -585,6 +596,7 @@ watch(() => route.params.id, load)
 .item-price { color: var(--text-primary); text-align: right; width: 90px; flex-shrink: 0; }
 .item-qty   { color: var(--text-muted); text-align: right; width: 60px; flex-shrink: 0; }
 .item-subtotal { color: var(--text-primary); text-align: right; font-weight: 600; width: 100px; flex-shrink: 0; }
+.refunded-tag { margin-top: 6px; align-self: flex-start; flex-shrink: 0; }
 .item-service { margin-top: 8px; padding: 8px 12px; background: var(--glass-bg); backdrop-filter: var(--backdrop-blur); -webkit-backdrop-filter: var(--backdrop-blur); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
 .item-service .service-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
 .item-service .service-list-detail { display: flex; flex-direction: column; gap: 3px; }

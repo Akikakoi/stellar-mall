@@ -1,26 +1,22 @@
 <template>
-  <div class="admin-aftersale-page">
-    <el-card class="search-card">
-      <el-form :inline="true" :model="searchForm">
-        <el-form-item label="售后状态">
-          <el-select v-model="searchForm.status" placeholder="全部" clearable class="sel">
-            <el-option v-for="(v, k) in AFTER_SALE_STATUS_TEXT" :key="k" :label="v" :value="Number(k)" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="售后类型">
-          <el-select v-model="searchForm.type" placeholder="全部" clearable class="sel">
-            <el-option v-for="(v, k) in AFTER_SALE_TYPE_TEXT" :key="k" :label="v" :value="Number(k)" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="search">查询</el-button>
-          <el-button @click="reset">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+  <div class="mgmt-page">
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">售后管理</span>
+      </div>
 
-    <el-card class="table-card">
-      <el-table :data="tableData" v-loading="loading" stripe>
+      <div class="filter-bar">
+        <el-select v-model="searchForm.status" placeholder="售后状态" clearable style="width: 140px;" :disabled="loading">
+          <el-option v-for="(v, k) in AFTER_SALE_STATUS_TEXT" :key="k" :label="v" :value="Number(k)" />
+        </el-select>
+        <el-select v-model="searchForm.type" placeholder="售后类型" clearable style="width: 140px;" :disabled="loading">
+          <el-option v-for="(v, k) in AFTER_SALE_TYPE_TEXT" :key="k" :label="v" :value="Number(k)" />
+        </el-select>
+        <el-button type="primary" :disabled="loading" @click="search">查询</el-button>
+        <el-button :disabled="loading" @click="reset">重置</el-button>
+      </div>
+
+      <el-table :data="tableData" v-loading="loading" stripe empty-text="暂无数据" style="width: 100%;">
         <el-table-column prop="id" label="售后单号" width="120">
           <template #default="{ row }">AS{{ row.id }}</template>
         </el-table-column>
@@ -48,16 +44,19 @@
         </el-table-column>
       </el-table>
 
-      <div class="pagination-wrapper">
+      <div class="pagination-wrap">
         <el-pagination
           v-model:current-page="page"
-          :page-size="pageSize"
+          v-model:page-size="pageSize"
           :total="total"
-          layout="total, prev, pager, next"
+          layout="total, prev, pager, next, sizes"
+          :page-sizes="[10, 20, 50, 100]"
+          background
           @current-change="loadData"
+          @size-change="loadData"
         />
       </div>
-    </el-card>
+    </div>
 
     <!-- 审核弹窗 -->
     <el-dialog v-model="auditVisible" title="审核售后" width="500px" destroy-on-close>
@@ -88,7 +87,7 @@
         <el-descriptions-item label="售后单号">AS{{ detailRow.id }}</el-descriptions-item>
         <el-descriptions-item label="关联订单">{{ detailRow.orderNo || '-' }}</el-descriptions-item>
         <el-descriptions-item label="商品">{{ detailRow.spuName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="规格">{{ detailRow.skuSpecs || '默认规格' }}</el-descriptions-item>
+        <el-descriptions-item label="规格">{{ detailRow.skuId ? (detailRow.skuSpecs || '默认规格') : '全部商品' }}</el-descriptions-item>
         <el-descriptions-item label="售后类型">
           <el-tag size="small">{{ detailRow.typeText }}</el-tag>
         </el-descriptions-item>
@@ -261,9 +260,30 @@ onMounted(loadData)
 </script>
 
 <style scoped>
-.admin-aftersale-page { padding: 20px; }
-.search-card { margin-bottom: 16px; }
-.sel { width: 160px; }
-.table-card { min-height: 400px; }
-.pagination-wrapper { display: flex; justify-content: flex-end; margin-top: 16px; }
+.mgmt-page { display: flex; flex-direction: column; gap: 16px; }
+.panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+}
+.panel-head {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+}
+.panel-title {
+  font-size: 18px; font-weight: 600; color: var(--text-primary);
+}
+.filter-bar {
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+.pagination-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
 </style>
