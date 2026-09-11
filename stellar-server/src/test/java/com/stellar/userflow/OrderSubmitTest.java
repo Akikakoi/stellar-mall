@@ -6,6 +6,7 @@ import com.stellar.enumeration.OrderStatus;
 import com.stellar.exception.BaseException;
 import com.stellar.exception.StockInsufficientException;
 import com.stellar.mapper.*;
+import com.stellar.service.PointsFacade;
 import com.stellar.service.SkuStockService;
 import com.stellar.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,8 @@ class OrderSubmitTest {
     private MallOrderMapper mallOrderMapper;
     @Mock
     private MallOrderItemMapper mallOrderItemMapper;
+    @Mock
+    private PointsFacade pointsFacade;
 
     @InjectMocks
     private OrderServiceImpl orderService;

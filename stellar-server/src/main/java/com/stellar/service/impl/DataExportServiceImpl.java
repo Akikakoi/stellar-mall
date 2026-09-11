@@ -8,6 +8,8 @@ import com.stellar.service.DataExportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
@@ -62,8 +64,12 @@ public class DataExportServiceImpl implements DataExportService {
     public byte[] exportOrders(String status, String startTime, String endTime) {
         List<MallOrder> orders = orderMapper.listAllForExport(status, startTime, endTime);
 
-        try (Workbook wb = new XSSFWorkbook()) {
+        // SXSSF 流式写：行数据刷到磁盘临时文件，内存只保留 500 行窗口，
+        // 大数据量导出不再整本工作簿驻留内存（close() 自动清理临时文件）
+        try (Workbook wb = new SXSSFWorkbook(500)) {
             Sheet sheet = wb.createSheet("订单数据");
+            // SXSSF 下 autoSizeColumn 需要显式开启列宽跟踪，且必须在写数据行之前
+            ((SXSSFSheet) sheet).trackAllColumnsForAutoSizing();
             createHeaderRow(sheet, ORDER_HEADERS, wb);
 
             CellStyle style = createDataStyle(wb);
@@ -71,16 +77,15 @@ public class DataExportServiceImpl implements DataExportService {
             for (MallOrder o : orders) {
                 Row row = sheet.createRow(rowIdx++);
                 setCell(row, 0, o.getOrderNo(), style);
-                setCell(row, 1, o.getUserPhone(), style);
-                setCell(row, 2, o.getTotalAmount(), style);
-                setCell(row, 3, o.getPayAmount(), style);
-                setCell(row, 4, STATUS_CN.getOrDefault(o.getStatus(), o.getStatus()), style);
-                setCell(row, 5, o.getConsignee(), style);
-                setCell(row, 6, o.getPhone(), style);
-                setCell(row, 7, o.getAddress(), style);
-                setCell(row, 8, o.getTrackingNo(), style);
-                setCell(row, 9, o.getDeliveryCompany(), style);
-                setCell(row, 10, o.getCreateTime(), style);
+                setCell(row, 1, o.getTotalAmount(), style);
+                setCell(row, 2, o.getPayAmount(), style);
+                setCell(row, 3, STATUS_CN.getOrDefault(o.getStatus(), o.getStatus()), style);
+                setCell(row, 4, o.getConsignee(), style);
+                setCell(row, 5, o.getPhone(), style);
+                setCell(row, 6, o.getAddress(), style);
+                setCell(row, 7, o.getTrackingNo(), style);
+                setCell(row, 8, o.getDeliveryCompany(), style);
+                setCell(row, 9, o.getCreateTime(), style);
             }
 
             autoSize(sheet, ORDER_HEADERS.length);
@@ -100,8 +105,10 @@ public class DataExportServiceImpl implements DataExportService {
     public byte[] exportUsers() {
         List<MallUser> users = userMapper.listAllForExport();
 
-        try (Workbook wb = new XSSFWorkbook()) {
+        // SXSSF 流式写，同 exportOrders
+        try (Workbook wb = new SXSSFWorkbook(500)) {
             Sheet sheet = wb.createSheet("用户数据");
+            ((SXSSFSheet) sheet).trackAllColumnsForAutoSizing();
             createHeaderRow(sheet, USER_HEADERS, wb);
 
             CellStyle style = createDataStyle(wb);
@@ -109,11 +116,10 @@ public class DataExportServiceImpl implements DataExportService {
             for (MallUser u : users) {
                 Row row = sheet.createRow(rowIdx++);
                 setCell(row, 0, u.getId(), style);
-                setCell(row, 1, u.getPhone(), style);
-                setCell(row, 2, u.getNickname(), style);
-                setCell(row, 3, u.getEmail(), style);
-                setCell(row, 4, (u.getStatus() != null && u.getStatus() == 1) ? "正常" : "禁用", style);
-                setCell(row, 5, u.getCreateTime(), style);
+                setCell(row, 1, u.getNickname(), style);
+                setCell(row, 2, u.getEmail(), style);
+                setCell(row, 3, (u.getStatus() != null && u.getStatus() == 1) ? "正常" : "禁用", style);
+                setCell(row, 4, u.getCreateTime(), style);
             }
 
             autoSize(sheet, USER_HEADERS.length);

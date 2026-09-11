@@ -98,6 +98,19 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 批量上下架：单条 SQL 覆盖 id 列表，按 status 决定写 on/off shelf 时间（用于 batchOnOffShelf） -->
+    <update id="updateStatusBatch">
+        UPDATE stellar_spu
+        SET status = #{status},
+        <choose>
+            <when test="status == 1">on_shelf_time = NOW(),</when>
+            <otherwise>off_shelf_time = NOW(),</otherwise>
+        </choose>
+            update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
     <!-- 聚合 SKU 反写（每次 SKU 列表变化后调用一次）。不依赖 @AutoFill 以避免参数缺失：这里直接 NOW() 且不改动 update_user。 -->
     <update id="refreshAggregatesFromSku">
         UPDATE stellar_spu

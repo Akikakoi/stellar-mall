@@ -33,6 +33,9 @@ public interface SpuMapper {
     @AutoFill(OperationType.UPDATE)
     int updateStatusAndTime(Spu spu);
 
+    /** 批量上下架：单条 SQL 更新状态与上下架时间（update_time 取 NOW()，不改 update_user）。 */
+    int updateStatusBatch(@Param("ids") List<Long> ids, @Param("status") Integer status);
+
     /** 聚合 SKU 反写 SPU：min/max 价、总库存、sku_count。一般在 save/updateWithSkus 后调一次。*/
     int refreshAggregatesFromSku(@Param("id") Long spuId,
                                  @Param("minPrice") BigDecimal minPrice,

@@ -269,7 +269,13 @@ public class SpuServiceImpl implements SpuService {
     }
 
     /**
-     * 批量上架/下架操作，遍历调用 {@link #onOffShelf(Long, Integer)}。
+     * 批量上架/下架操作。
+     * <p>
+     * 与逐条调用 {@link #onOffShelf(Long, Integer)} 的区别：一次查出全部目标 SPU、
+     * 过滤出状态确实需要变化的 id，再走单条批量 UPDATE（避免 N 次 getById + N 次 update 的 N+1）；
+     * RAG Outbox 与 ES 同步事件只对实际发生变化的 SPU 逐条触发（保持与单条路径一致的同步语义）。
+     * 已不存在的 id 静默跳过（单条路径会抛 SPU_NOT_FOUND，批量场景跳过更合理）。
+     * </p>
      *
      * @param ids    SPU ID 列表
      * @param status 目标状态：1-上架，0-下架
@@ -280,8 +286,22 @@ public class SpuServiceImpl implements SpuService {
         if (ids == null || ids.isEmpty() || status == null || (status != 0 && status != 1)) {
             throw new BaseException(MessageConstant.ILLEGAL_PARAMETER);
         }
-        for (Long id : ids) {
-            onOffShelf(id, status);
+        List<Spu> existing = spuMapper.listByIds(ids);
+        List<Long> toChange = new ArrayList<>(existing.size());
+        for (Spu s : existing) {
+            if ((s.getStatus() == null ? 0 : s.getStatus()) != status) {
+                toChange.add(s.getId());
+            }
+        }
+        if (toChange.isEmpty()) return;
+
+        spuMapper.updateStatusBatch(toChange, status);
+        String syncType = status == 1 ? "ONSHELF" : "OFFSHELF";
+        for (Long id : toChange) {
+            // ===== [RAG] 变更入 Outbox（同事务） =====
+            ragSyncService.enqueueSpuSync(id, syncType);
+            // ===== [ES] 发布同步事件 =====
+            eventPublisher.publishEvent(SpuChangedEvent.saved(id));
         }
     }
 

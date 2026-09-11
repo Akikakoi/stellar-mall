@@ -99,8 +99,11 @@ public class RagSyncServiceImpl implements RagSyncService {
 
     // ===================== 处理 =====================
 
+    // 注意：本方法【故意不加 @Transactional】。中间的 ragSyncClient.syncSpu/syncDoc 是
+    // 秒级远程向量化调用，事务会把 DB 连接占满整个调用时长（连接池耗尽 / 锁等待风险）。
+    // 方法内所有写操作（markFailedOnce / markSynced）都是单行原子 UPDATE，各自独立提交，
+    // 这正是 outbox 模式想要的增量提交语义：远程成功后即使本地标记失败，下次重试也可幂等覆盖。
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void processPendingOne(Long outboxId) {
         if (outboxId == null) return;
         RagSyncOutbox box = outboxMapper.getById(outboxId);
@@ -207,8 +210,9 @@ public class RagSyncServiceImpl implements RagSyncService {
         return new PageResult(total, records == null ? new java.util.ArrayList<>() : records);
     }
 
+    // 同样不加事务：resetForRetry 是单行 UPDATE，先独立提交（用户点了重试就是明确意图），
+    // 后续 processPendingOne 的远程调用与状态标记各自原子提交，避免事务包住远程调用。
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void retryOne(Long outboxId) {
         if (outboxId == null) return;
         RagSyncOutbox box = outboxMapper.getById(outboxId);

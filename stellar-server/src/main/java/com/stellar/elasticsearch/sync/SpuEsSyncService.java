@@ -107,13 +107,43 @@ public class SpuEsSyncService {
         return docs.size();
     }
 
-    /** 拼接商品名+副标题作为向量化文本。 */
+    /** 描述参与向量化的最大长度。DashScope text-embedding-v2 单条上限 2048 token，
+     *  name+subTitle+分类已占几十字，描述截 400 字：既留足余量，也避免超长描述稀释语义。 */
+    private static final int DESC_MAX_LEN = 400;
+
+    /**
+     * 拼接商品多字段作为向量化文本：name + subTitle + 分类名 + 描述摘要。
+     * <p>只靠 name+subTitle 时，口语化 query（如"给老人用的手机"）与短商品名的语义距离较远；
+     * 分类名与描述里的卖点文字（"大字体""长续航"等）能显著拉近语义匹配。
+     * 描述优先用 descriptionMd（markdown 清洗去图片/链接/符号），为空时兜底纯文本 description。</p>
+     */
     private static String buildEmbedText(Spu spu) {
         StringBuilder sb = new StringBuilder(spu.getName());
-        if (spu.getSubTitle() != null && !spu.getSubTitle().isEmpty()) {
-            sb.append(" ").append(spu.getSubTitle());
+        if (hasText(spu.getSubTitle())) sb.append(" ").append(spu.getSubTitle());
+        // 分类名：getById/listAll 均联查 category_name，正常有值
+        if (hasText(spu.getCategoryName())) sb.append(" 分类:").append(spu.getCategoryName());
+        String desc = cleanMarkdown(spu.getDescriptionMd());
+        if (!hasText(desc)) desc = spu.getDescription() == null ? "" : spu.getDescription().trim();
+        if (hasText(desc)) {
+            if (desc.length() > DESC_MAX_LEN) desc = desc.substring(0, DESC_MAX_LEN);
+            sb.append(" ").append(desc);
         }
         return sb.toString();
+    }
+
+    /** markdown 转纯文本：去图片/链接/裸 URL/标记符号并压缩空白，避免 URL 等噪音污染向量。 */
+    private static String cleanMarkdown(String md) {
+        if (md == null || md.isBlank()) return "";
+        String s = md;
+        s = s.replaceAll("!\\[[^\\]]*\\]\\([^)]*\\)", " ");    // 图片 ![alt](url) 整体去掉
+        s = s.replaceAll("\\[([^\\]]*)\\]\\([^)]*\\)", "$1"); // 链接 [text](url) 保留 text
+        s = s.replaceAll("https?://\\S+", " ");                // 裸 URL
+        s = s.replaceAll("[#*_`>|~]", " ");                    // markdown 标记符号
+        return s.replaceAll("\\s+", " ").trim();               // 压缩空白
+    }
+
+    private static boolean hasText(String s) {
+        return s != null && !s.isEmpty();
     }
 
     /** 调 rag-backend /api/embed 批量获取向量。

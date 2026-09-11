@@ -9,6 +9,7 @@ import com.stellar.service.SkuStockService;
 import com.stellar.service.UserMessageService;
 import com.stellar.service.WalletService;
 import com.stellar.service.NotificationService;
+import com.stellar.service.PointsFacade;
 import com.stellar.service.PointsService;
 import com.stellar.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,8 @@ class OrderCancelRollbackTest {
     private NotificationService notificationService;
     @Mock
     private PointsService pointsService;
+    @Mock
+    private PointsFacade pointsFacade;
 
     @InjectMocks
     private OrderServiceImpl orderService;

@@ -495,9 +495,14 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     /**
      * 退款退还积分。按退款比例返还已扣除的积分，写入支付追溯记录。
+     * <p>
+     * REQUIRES_NEW：售后确认退款在外层事务中 catch 本方法异常并静默降级
+     * （见 {@link AfterSaleServiceImpl#confirmRefund} 的 refundPointsQuietly），
+     * 若加入外层事务（REQUIRED），异常时内层会标记 rollback-only，外层提交时抛
+     * UnexpectedRollbackException。独立事务保证积分退还失败不影响退款主流程。
      *
      * @param userId      用户ID
      * @param orderId     订单ID
@@ -535,7 +540,7 @@ public class PointsServiceImpl implements PointsService {
         String orderNo = getOrderNo(orderId);
 
         addUserPoints(userId, refundPoints, "ORDER_REFUND", orderId.toString(),
-                "订单 " + orderNo + " 退款退还积分 +" + refundPoints + "（抵扣 ¥" + consumedAmount.setScale(2).toPlainString() + "，退款比例 " + refundRatio.multiply(BigDecimal.valueOf(100)).setScale(0).toPlainString() + "%）");
+                "订单 " + orderNo + " 退款退还积分 +" + refundPoints + "（抵扣 ¥" + consumedAmount.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString() + "，退款比例 " + refundRatio.multiply(BigDecimal.valueOf(100)).setScale(0, java.math.RoundingMode.HALF_UP).toPlainString() + "%）");
 
         // 记录支付追溯
         BigDecimal refundAmount = BigDecimal.valueOf(refundPoints)
@@ -546,7 +551,7 @@ public class PointsServiceImpl implements PointsService {
                 .points(refundPoints)
                 .amount(refundAmount)
                 .type(3) // 退还
-                .bizDesc("订单 " + orderNo + " 退款退还积分 " + refundPoints + "积分（抵扣 ¥" + consumedAmount.setScale(2).toPlainString() + "，退款比例 " + refundRatio.multiply(BigDecimal.valueOf(100)).setScale(0).toPlainString() + "%）")
+                .bizDesc("订单 " + orderNo + " 退款退还积分 " + refundPoints + "积分（抵扣 ¥" + consumedAmount.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString() + "，退款比例 " + refundRatio.multiply(BigDecimal.valueOf(100)).setScale(0, java.math.RoundingMode.HALF_UP).toPlainString() + "%）")
                 .createTime(LocalDateTime.now())
                 .build();
         pointsPaymentMapper.insert(refund);
@@ -557,9 +562,12 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     /**
      * 退款收回赠送积分。订单全额退款时收回该订单赠送的全部积分，并发送通知。
+     * <p>
+     * REQUIRES_NEW：同 {@link #refundPointsForOrder}，售后退款在外层事务中 catch
+     * 本方法异常并静默降级，独立事务避免 rollback-only 标记污染外层退款事务。
      *
      * @param userId  用户ID
      * @param orderId 订单ID
@@ -911,12 +919,14 @@ public class PointsServiceImpl implements PointsService {
     // 内部工具方法
     // ================================================================
 
-    /** 安全获取订单号，失败返回 "订单#id" */
+    /** 安全获取订单号，失败返回 "订单#id"（仅影响展示文案，非资损点，debug 级即可）。 */
     private String getOrderNo(Long orderId) {
         try {
             MallOrder order = mallOrderMapper.getById(orderId);
             if (order != null && order.getOrderNo() != null) return order.getOrderNo();
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            log.debug("[PointsService] 查询订单号失败，使用兜底展示名: orderId={}, err={}", orderId, e.getMessage());
+        }
         return "订单#" + orderId;
     }
 
