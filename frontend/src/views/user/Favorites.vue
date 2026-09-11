@@ -18,7 +18,7 @@
       <div class="fav-grid" :style="{ gridTemplateColumns: `repeat(${colsPerRow}, 1fr)` }" v-loading="loading">
         <div v-for="item in favorites" :key="item.id" class="fav-card">
           <div class="fav-image" @click="goDetail(item.spuId)">
-            <img :src="item.spuImage || __PH" :alt="item.spuName" onerror="this.src=window.__PH;this.onerror=null" />
+            <img :src="item.spuImage || __PH" :alt="item.spuName" v-placeholder />
           </div>
           <div class="fav-info">
             <h3 class="fav-name" @click="goDetail(item.spuId)">{{ item.spuName }}</h3>

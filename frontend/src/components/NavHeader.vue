@@ -21,7 +21,7 @@
         </router-link>
         <span class="nav-indicator" :style="indicatorStyle"></span>
       </nav>
-      <div class="search-box">
+      <div class="search-box" ref="searchBoxRef">
         <el-autocomplete
           v-model="searchKeyword"
           :fetch-suggestions="querySearch"
@@ -29,24 +29,12 @@
           placeholder="搜索商品..."
           clearable
           class="nav-search"
-          popper-class="nav-search-popper"
+          popper-class="nav-search-popper is-panel-hidden"
           @keyup.enter="doSearch"
-          @select="onSelectSuggestion"
+          @focus="navPanelOpen = true"
+          @blur="navPanelOpen = false"
           :debounce="300"
         >
-          <template #default="{ item }">
-            <div class="suggestion-item" :class="{ 'is-history': item.isHistory }">
-              <el-icon v-if="item.isHistory" class="history-clock"><Clock /></el-icon>
-              <el-icon v-else class="sug-icon"><Search /></el-icon>
-              <span class="suggestion-text">{{ item.value }}</span>
-              <span
-                v-if="item.isHistory"
-                class="history-del"
-                title="删除"
-                @click.stop="removeHistory(item.value)"
-              ><Close /></span>
-            </div>
-          </template>
           <template #prefix>
             <el-icon :size="15"><Search /></el-icon>
           </template>
@@ -61,6 +49,32 @@
             />
           </template>
         </el-autocomplete>
+        <!-- 搜索面板标签云：空输入展示搜索历史，有输入展示搜索建议（与商城搜索页同一套样式）
+             Teleport 到 body：.top-bar 自带 backdrop-filter + transform，会成为 backdrop root，
+             面板留在里面就取样不到页面内容、磨砂失效，必须挪出顶栏才能真的糊到背后内容 -->
+        <Teleport to="body">
+          <div class="nav-history-panel" v-if="navPanelVisible" :style="panelStyle">
+            <div class="nav-history-head">
+              <span class="nav-history-title">{{ isSuggestMode ? '搜索建议' : '搜索历史' }}</span>
+              <button
+                v-if="!isSuggestMode"
+                type="button"
+                class="nav-history-clear"
+                @mousedown.stop.prevent="clearHistoryAll"
+              >清空搜索历史</button>
+            </div>
+            <div class="nav-history-tags">
+              <button
+                v-for="t in panelTags"
+                :key="t"
+                type="button"
+                class="nav-history-tag"
+                :title="t"
+                @mousedown.prevent="pickTag(t)"
+              >{{ t }}</button>
+            </div>
+          </div>
+        </Teleport>
       </div>
       <div class="user-area">
         <ThemeToggle />
@@ -75,6 +89,7 @@
           <template #dropdown>
             <el-dropdown-menu class="user-menu-dropdown">
               <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+              <el-dropdown-item command="browse">浏览记录</el-dropdown-item>
               <el-dropdown-item command="messages">我的消息</el-dropdown-item>
               <el-dropdown-item command="aftersale">我的售后</el-dropdown-item>
               <el-dropdown-item command="wallet">我的钱包</el-dropdown-item>
@@ -100,9 +115,7 @@ import {
   ChatDotRound,
   Bell,
   List as ListIcon,
-  Search,
-  Clock,
-  Close
+  Search
 } from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
@@ -225,50 +238,108 @@ const userStore = useUserStore()
 const { count: unreadCount } = useUnreadBadge()
 const searchKeyword = ref('')
 
-// ===== 搜索历史（与商城搜索页共享同一份历史数据，按用户隔离） =====
-const { searchHistory, addToHistory, removeHistory } = useSearchHistory()
+// ===== 搜索历史 / 搜索建议（历史与商城搜索页共享同一份数据，按用户隔离） =====
+const { searchHistory, addToHistory, clearHistory } = useSearchHistory()
+
+// 搜索框是否聚焦
+const navPanelOpen = ref(false)
+// 远程搜索建议（输入非空时展示），由 querySearch 填充
+const suggestions = ref<string[]>([])
+// 是否处于「搜索建议」态（输入框有内容）
+const isSuggestMode = computed(() => !!searchKeyword.value.trim())
+// 当前面板要展示的标签（空输入→历史，有输入→建议）
+const panelTags = computed(() => (isSuggestMode.value ? suggestions.value : searchHistory.value))
+// 有标签可展示时才浮出面板
+const navPanelVisible = computed(() => navPanelOpen.value && panelTags.value.length > 0)
+
+// 面板被 Teleport 到 body（脱离顶栏的 backdrop root），改为 fixed 定位，
+// 需要按搜索框实际位置实时校准
+const SEARCH_PANEL_WIDTH = 440
+const searchBoxRef = ref<HTMLElement | null>(null)
+const panelStyle = ref<Record<string, string>>({})
+
+/**
+ * 按搜索框的位置计算面板的 fixed 坐标（右对齐搜索框、向下 10px，并限制在视口内）
+ */
+function syncPanelPosition() {
+  const el = searchBoxRef.value
+  if (!el || !navPanelVisible.value) return
+  const rect = el.getBoundingClientRect()
+  const maxLeft = window.innerWidth - SEARCH_PANEL_WIDTH - 8
+  const left = Math.max(8, Math.min(rect.right - SEARCH_PANEL_WIDTH, maxLeft))
+  const next = {
+    top: `${Math.round(rect.bottom + 10)}px`,
+    left: `${Math.round(left)}px`
+  }
+  // 位置没变就不写回，避免滚动过程中反复触发渲染
+  if (next.top === panelStyle.value.top && next.left === panelStyle.value.left) return
+  panelStyle.value = next
+}
+
+// 面板出现时先定位一次；滚动/缩放时跟随搜索框（顶栏会随滚动收起，位置会变）
+watch(navPanelVisible, (visible) => {
+  if (visible) nextTick(syncPanelPosition)
+})
+onMounted(() => {
+  window.addEventListener('scroll', syncPanelPosition, { passive: true })
+  window.addEventListener('resize', syncPanelPosition)
+})
+onUnmounted(() => {
+  window.removeEventListener('scroll', syncPanelPosition)
+  window.removeEventListener('resize', syncPanelPosition)
+})
 
 /**
  * 搜索建议查询回调函数，供 el-autocomplete 使用
- * 无输入时显示搜索历史，有输入时调用远程搜索建议接口
+ * 原生下拉恒被 is-panel-hidden 隐藏，结果改存 suggestions 由自定义标签云面板渲染
  * @param {string} queryString - 用户输入的搜索关键词
- * @param {Function} cb - 回调函数，接收建议项数组
+ * @param {Function} cb - 回调函数，接收建议项数组（这里恒传空，避免原生下拉渲染）
  */
 function querySearch(queryString: string, cb: any) {
   if (!queryString || queryString.trim().length < 1) {
-    const items = searchHistory.value.map((h: any) => ({ value: h, isHistory: true }))
-    cb(items)
+    suggestions.value = []
+    cb([])
     return
   }
   fetchSuggestions(queryString, cb)
 }
 
 /**
- * 选中搜索建议项时的回调
- * 填充搜索关键词并立即执行搜索
- * @param {Object} item - 选中的建议项，包含 value 属性
+ * 选中一个标签：填入输入框并立即搜索
+ * @param {string} tag - 历史关键词或搜索建议
  */
-function onSelectSuggestion(item: any) {
-  searchKeyword.value = item.value
+function pickTag(tag: string) {
+  searchKeyword.value = tag
+  navPanelOpen.value = false
   doSearch()
+}
+
+/**
+ * 清空全部搜索历史（确认弹窗在 composable 内）
+ */
+async function clearHistoryAll() {
+  const ok = await clearHistory()
+  if (ok) navPanelOpen.value = false
 }
 
 /**
  * 调用远程接口获取搜索建议（SPU 补全）
  * @param {string} queryString - 搜索关键词
- * @param {Function} cb - 回调函数，接收建议项数组
+ * @param {Function} cb - 回调函数，接收建议项数组（恒传空，渲染由自定义面板负责）
  */
 async function fetchSuggestions(queryString: string, cb: any) {
   if (!queryString || queryString.trim().length < 1) {
+    suggestions.value = []
     cb([])
     return
   }
   try {
     const res = await suggestSpu(queryString.trim())
     const data: any = res || {}
-    const items = (data.completions || []).map((s: any) => ({ value: s }))
-    cb(items)
+    suggestions.value = (data.completions || []) as string[]
+    cb([])
   } catch (e: any) {
+    suggestions.value = []
     cb([])
   }
 }
@@ -312,7 +383,7 @@ function goMessages() {
 }
 
 // 每 30 秒拉一次未读数
-let unreadTimer: number | null = null
+let unreadTimer: ReturnType<typeof setInterval> | null = null
 onMounted(() => {
   fetchUnreadCount()
   unreadTimer = setInterval(fetchUnreadCount, 30000)
@@ -328,6 +399,7 @@ onUnmounted(() => {
  */
 function handleCommand(cmd: string) {
   if (cmd === 'profile') window.open('/me', '_blank')
+  else if (cmd === 'browse') window.open('/me/browse', '_blank')
   else if (cmd === 'messages') window.open('/me/messages', '_blank')
   else if (cmd === 'aftersale') window.open('/aftersale/list', '_blank')
   else if (cmd === 'wallet') window.open('/wallet', '_blank')
@@ -465,6 +537,115 @@ function handleLogoClick() {
 
 .search-box { margin: 0 12px; position: relative; }
 .nav-search { width: 260px; }
+
+/* 顶栏搜索框 —— 磨砂玻璃质感（与搜索面板、全站玻璃规范同一套材质）。
+ * 注意：class="nav-search" 会被 el-autocomplete 透传到内部 el-input 上，
+ * 那层节点没有本组件的 scope 属性，scoped 选择器勾不到，故用 .search-box 作锚点。 */
+.search-box :deep(.el-input__wrapper) {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.72)) !important;
+  backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+  -webkit-backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+  border-radius: 999px;
+  padding: 0 12px;
+  box-shadow:
+    0 0 0 1px var(--glass-border, rgba(0, 0, 0, 0.06)) inset,
+    inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6)),
+    var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)) !important;
+  transition: box-shadow 0.2s;
+}
+.search-box :deep(.el-input__wrapper.is-focus) {
+  box-shadow:
+    0 0 0 1px var(--brand-primary, #0071e3) inset,
+    inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6)),
+    0 0 0 3px var(--brand-primary-soft, rgba(0, 113, 227, 0.1)) !important;
+}
+.search-box :deep(.el-input__inner) {
+  background: transparent;
+  color: var(--text-primary);
+}
+.search-box :deep(.el-input__inner::placeholder) {
+  color: var(--text-muted);
+}
+
+/* 搜索历史 / 搜索建议 标签云面板（Teleport 到 body，fixed 定位，与商城搜索页同一套样式） */
+.nav-history-panel {
+  --nav-history-tag-bg: rgba(0, 0, 0, 0.08);
+  --nav-history-tag-bg-hover: var(--brand-primary-soft, rgba(0, 113, 227, 0.1));
+
+  position: fixed;
+  width: 440px;
+  max-width: calc(100vw - 16px);
+  background: var(--glass-popover-bg, rgba(255, 255, 255, 0.6));
+  backdrop-filter: var(--glass-popover-blur, blur(28px) saturate(180%));
+  -webkit-backdrop-filter: var(--glass-popover-blur, blur(28px) saturate(180%));
+  border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.08));
+  border-radius: 14px;
+  box-shadow:
+    var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
+    inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
+  padding: 14px 16px 16px;
+  overflow: hidden;
+  z-index: 99;
+  animation: nav-history-in 0.16s ease-out;
+}
+@keyframes nav-history-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+html.theme-dark .nav-history-panel {
+  --nav-history-tag-bg: rgba(255, 255, 255, 0.12);
+  --nav-history-tag-bg-hover: rgba(255, 255, 255, 0.2);
+}
+.nav-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.nav-history-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.nav-history-clear {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.nav-history-clear:hover { color: var(--brand-primary); }
+.nav-history-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  max-height: 268px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.nav-history-tag {
+  max-width: 100%;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--nav-history-tag-bg);
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.25;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.nav-history-tag:hover {
+  background: var(--nav-history-tag-bg-hover);
+  color: var(--brand-primary);
+}
+.nav-history-tag:active { transform: scale(0.97); }
 .search-btn {
   border: none;
   background: transparent;
@@ -486,6 +667,11 @@ function handleLogoClick() {
 .nav-search-popper {
   margin-top: 6px !important;
 
+  /* 输入框为空时由历史标签云面板接管，隐藏原生建议下拉 */
+  &.is-panel-hidden {
+    display: none !important;
+  }
+
   /* ===== 磨砂玻璃质感：弹层根节点即视觉容器 ===== */
   &.el-popper.is-light {
     padding: 0;
@@ -506,70 +692,45 @@ function handleLogoClick() {
   .el-autocomplete-suggestion li.highlighted {
     background: var(--glass-hover, rgba(0, 0, 0, 0.05));
   }
+}
 
-  .el-autocomplete-suggestion__wrap {
-    padding: 4px 0;
-    max-height: 320px;
-  }
-
-  .suggestion-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--text-primary);
-
-    &:hover {
-      background: transparent; /* 高亮已由外层 li 的半透明层提供，避免双层叠加 */
-    }
-
-    &.is-history {
-      .suggestion-text {
-        color: var(--text-secondary);
-      }
-    }
-  }
-
-  .history-clock,
-  .sug-icon {
-    flex-shrink: 0;
-    width: 14px;
-    height: 14px;
-    color: var(--text-muted);
-  }
-
-  .suggestion-text {
-    flex: 1;
+/* 「我的」下拉菜单：磨砂玻璃质感 + 去 focus 蓝色描边 */
+.user-menu-popper {
+  &.el-popper.is-light {
+    padding: 0;
+    background: var(--glass-bg, rgba(255, 255, 255, 0.72));
+    backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+    -webkit-backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+    border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.08));
+    border-radius: var(--radius-md);
+    box-shadow:
+      var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
+      inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
-  .history-del {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 12px;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all 0.15s;
-    opacity: 0;
+  .el-dropdown-menu {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .el-dropdown-menu__item {
+    outline: none !important;
+    color: var(--text-primary);
+    transition: background 0.15s, color 0.15s;
 
     &:hover {
       background: var(--glass-hover, rgba(0, 0, 0, 0.05));
-      color: var(--status-danger, #F56C6C);
-      opacity: 1;
+      color: var(--text-primary);
     }
-  }
 
-  .suggestion-item:hover .history-del {
-    opacity: 1;
+    &:focus,
+    &:focus-visible {
+      outline: none !important;
+      box-shadow: none !important;
+    }
   }
 }
 

@@ -31,27 +31,26 @@
             <span>搜索</span>
           </button>
         </div>
-        <!-- 搜索历史下拉（与主页搜索框共享同一份历史数据） -->
+        <!-- 搜索历史面板（标签云样式，与导航栏搜索框共享同一份历史数据） -->
         <div class="history-panel" v-if="historyOpen && searchHistory.length > 0">
-          <div class="history-panel-head">搜索历史</div>
-          <ul class="history-list">
-            <li
+          <div class="history-panel-head">
+            <span class="history-panel-title">搜索历史</span>
+            <button
+              type="button"
+              class="history-clear-all"
+              @mousedown.stop.prevent="clearHistoryAll"
+            >清空搜索历史</button>
+          </div>
+          <div class="history-tags">
+            <button
               v-for="h in searchHistory"
               :key="h"
-              class="history-item"
+              type="button"
+              class="history-tag"
+              :title="h"
               @mousedown.prevent="pickHistory(h)"
-            >
-              <el-icon :size="14" class="history-clock"><Clock /></el-icon>
-              <span class="history-text">{{ h }}</span>
-              <span
-                class="history-del"
-                title="删除"
-                @mousedown.stop.prevent="removeHistoryItem(h)"
-              >
-                <el-icon :size="12"><Close /></el-icon>
-              </span>
-            </li>
-          </ul>
+            >{{ h }}</button>
+          </div>
         </div>
       </div>
     </div>
@@ -156,7 +155,7 @@
             <div v-for="spu in spus" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
               <div class="spu-image">
                 <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy"
-                  onerror="this.src=window.__PH;this.onerror=null" />
+                  v-placeholder />
                 <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)"
                   :title="favSet.has(spu.id) ? '取消收藏' : '添加收藏'">
                   {{ favSet.has(spu.id) ? '♥' : '♡' }}
@@ -205,7 +204,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Loading, Search, Close, Clock } from '@element-plus/icons-vue'
+import { Loading, Search, Close } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
@@ -233,9 +232,9 @@ const loading = ref(false)
 const loadingMore = ref(false)
 const keyword = ref('')
 const searchKeyword = ref('')  // 顶部大搜索框的输入绑定
-const historyOpen = ref(false) // 搜索历史下拉是否展开
+const historyOpen = ref(false) // 搜索历史面板是否展开
 // 搜索历史（与导航栏/主页搜索框共享同一份数据，按用户隔离）
-const { searchHistory, addToHistory, removeHistory } = useSearchHistory()
+const { searchHistory, addToHistory, clearHistory } = useSearchHistory()
 const categoryId = ref<any>(null)
 const categoryName = ref('')
 const spus = ref<any[]>([])
@@ -333,12 +332,11 @@ function pickHistory(kw: any) {
 }
 
 /**
- * 删除一条搜索历史（确认弹窗在 composable 内），删除后为空则收起面板
- * @param {string} kw - 要删除的关键词
+ * 清空全部搜索历史（确认弹窗在 composable 内），清空后收起面板
  */
-async function removeHistoryItem(kw: any) {
-  const ok = await removeHistory(kw)
-  if (ok && searchHistory.value.length === 0) historyOpen.value = false
+async function clearHistoryAll() {
+  const ok = await clearHistory()
+  if (ok) historyOpen.value = false
 }
 
 // --- 聚合交互 ---
@@ -712,78 +710,92 @@ onMounted(async () => {
   width: 100%;
   max-width: 560px;
 }
-/* 搜索历史下拉 —— 磨砂玻璃质感（半透明底 + 背景模糊 + 细描边 + 顶部内高光） */
+/* 搜索历史面板 —— 磨砂玻璃质感（半透明底 + 背景模糊 + 细描边 + 顶部内高光） */
 .history-panel {
+  /* 标签底色/悬停底色，深浅主题各一套（下方 html.theme-dark 覆盖） */
+  --history-tag-bg: rgba(0, 0, 0, 0.08);
+  --history-tag-bg-hover: var(--brand-primary-soft, rgba(0, 113, 227, 0.1));
+
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
-  background: var(--glass-bg, rgba(255, 255, 255, 0.72));
-  backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
-  -webkit-backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+  background: var(--glass-popover-bg, rgba(255, 255, 255, 0.6));
+  backdrop-filter: var(--glass-popover-blur, blur(28px) saturate(180%));
+  -webkit-backdrop-filter: var(--glass-popover-blur, blur(28px) saturate(180%));
   border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.08));
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow:
     var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
     inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
-  padding: 6px 0 8px;
+  padding: 14px 16px 16px;
   overflow: hidden;
   z-index: 20;
+  animation: history-panel-in 0.16s ease-out;
+}
+@keyframes history-panel-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+html.theme-dark .history-panel {
+  --history-tag-bg: rgba(255, 255, 255, 0.12);
+  --history-tag-bg-hover: rgba(255, 255, 255, 0.2);
 }
 .history-panel-head {
-  padding: 6px 16px 4px;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.history-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  max-height: 280px;
-  overflow-y: auto;
-}
-.history-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  cursor: pointer;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.history-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #1d1d1f);
+  letter-spacing: 0.2px;
+}
+.history-clear-all {
+  border: none;
+  background: transparent;
+  padding: 0;
   font-size: 13px;
-  color: var(--text-primary);
-  transition: background 0.15s;
+  color: var(--text-muted, #6e6e73);
+  cursor: pointer;
+  transition: color 0.15s;
 }
-.history-item:hover {
-  background: var(--glass-hover, rgba(0, 0, 0, 0.05));
+.history-clear-all:hover {
+  color: var(--brand-primary, #0071e3);
 }
-.history-clock {
-  flex-shrink: 0;
-  color: var(--text-muted);
+/* 标签云：自动换行，标签宽度随文字长度自适应 */
+.history-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  max-height: 268px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
-.history-text {
-  flex: 1;
+.history-tag {
+  max-width: 100%;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--history-tag-bg);
+  font-size: 14px;
+  color: var(--text-primary, #1d1d1f);
+  line-height: 1.25;
+  cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: background 0.15s, color 0.15s, transform 0.15s;
 }
-.history-del {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s;
-  opacity: 0;
+.history-tag:hover {
+  background: var(--history-tag-bg-hover);
+  color: var(--brand-primary, #0071e3);
 }
-.history-item:hover .history-del {
-  opacity: 1;
-}
-.history-del:hover {
-  background: var(--glass-hover, rgba(0, 0, 0, 0.05));
-  color: var(--status-danger, #F56C6C);
+.history-tag:active {
+  transform: scale(0.97);
 }
 .shop-search-pill {
   display: flex;
@@ -791,16 +803,24 @@ onMounted(async () => {
   width: 100%;
   max-width: 560px;
   height: 48px;
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-base, #e4e7ed);
+  /* 磨砂玻璃质感：与搜索历史面板、顶栏搜索框同一套材质 */
+  background: var(--glass-bg, rgba(255, 255, 255, 0.72));
+  backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+  -webkit-backdrop-filter: var(--backdrop-blur, blur(20px)) saturate(160%);
+  border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.06));
   border-radius: 24px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  box-shadow:
+    var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
+    inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
   transition: border-color 0.2s, box-shadow 0.2s;
   overflow: hidden;
 }
 .shop-search-pill:focus-within {
-  border-color: var(--brand-primary, #409EFF);
-  box-shadow: 0 2px 16px rgba(64,158,255,0.15);
+  border-color: var(--brand-primary, #0071e3);
+  box-shadow:
+    0 0 0 3px var(--brand-primary-soft, rgba(0, 113, 227, 0.1)),
+    var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
+    inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
 }
 .search-prefix-icon {
   flex-shrink: 0;
@@ -835,7 +855,7 @@ onMounted(async () => {
   margin-right: 4px;
   border: none;
   border-radius: 50%;
-  background: var(--bg-hover, #e8e8e8);
+  background: var(--glass-hover, rgba(0, 0, 0, 0.05));
   color: var(--text-secondary, #888);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -893,6 +913,15 @@ onMounted(async () => {
 }
 .filter-section {
   margin-bottom: 24px;
+  /* 磨砂玻璃面板（全站规范：--glass-bg + backdrop-blur，双前缀） */
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  padding: 14px 16px;
+  overflow: hidden;
 }
 .filter-title {
   font-size: 14px;
@@ -918,7 +947,7 @@ onMounted(async () => {
   margin-bottom: 2px;
 }
 .filter-item:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 .filter-item.active {
@@ -968,13 +997,21 @@ onMounted(async () => {
 
 .result-bar {
   margin-bottom: 24px;
-  padding: 0 4px;
+  padding: 12px 16px;
   font-size: 15px;
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
+  /* 磨砂玻璃面板（全站规范：--glass-bg + backdrop-blur，双前缀） */
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  overflow: hidden;
 }
 .result-count { flex: 1; }
 .result-bar strong { color: var(--text-primary); font-size: 18px; }
@@ -996,11 +1033,17 @@ onMounted(async () => {
   gap: 18px;
 }
 .spu-card {
-  background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden;
-  cursor: pointer; border: 1px solid var(--border-base);
+  /* 磨砂玻璃卡片（全站规范：--glass-bg + backdrop-blur，双前缀） */
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  cursor: pointer;
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
-.spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); border-color: var(--brand-primary-border); }
+.spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary-border); }
 .spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
 .spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
 .spu-card:hover .spu-image img { transform: scale(1.05); }
@@ -1052,6 +1095,7 @@ onMounted(async () => {
     flex-shrink: 0;
     margin-bottom: 0;
     min-width: 120px;
+    padding: 10px 12px;
   }
   .filter-title { font-size: 12px; }
   .filter-item { font-size: 12px; padding: 5px 6px; }

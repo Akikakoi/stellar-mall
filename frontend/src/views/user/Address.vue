@@ -116,34 +116,7 @@ import {
   setDefaultAddress
 } from '@/api/mall'
 import areaData from 'china-area-data'
-
-// 将 china-area-data 转换为 Cascader 需要的 options 格式
-function convertAreaDataToOptions(data: any, parentCode: string): any[] {
-  const options: any[] = []
-  const areas = data[parentCode]
-  if (!areas) return options
-  for (const code in areas) {
-    const name = areas[code]
-    // 跳过"市辖区"、"市辖县"等冗余中间节点
-    if (name === '市辖区' || name === '市辖县') {
-      // 把它的子节点直接提升到当前层级
-      const children = convertAreaDataToOptions(data, code)
-      options.push(...children)
-      continue
-    }
-    const option: Record<string, any> = {
-      value: name,
-      label: name,
-      code: code
-    }
-    const children = convertAreaDataToOptions(data, code)
-    if (children.length > 0) {
-      option.children = children
-    }
-    options.push(option)
-  }
-  return options
-}
+import { convertAreaDataToOptions } from '@/utils/area'
 
 const areaOptions = convertAreaDataToOptions(areaData, '86')
 const selectedArea = ref<string[]>([])

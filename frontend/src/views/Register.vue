@@ -69,7 +69,7 @@ const formRef = ref<any>(null)
 const loading = ref(false)
 const sendingCode = ref(false)
 const codeCountdown = ref(0)
-let timer: number | null = null
+let timer: ReturnType<typeof setInterval> | null = null
 
 // 图形验证码状态
 const captchaId = ref('')

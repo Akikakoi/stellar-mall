@@ -9,6 +9,7 @@
         <el-tab-pane label="待收货" name="3" />
         <el-tab-pane label="已完成" name="5" />
         <el-tab-pane label="已退款" name="7" />
+        <el-tab-pane label="部分退款" name="8" />
       </el-tabs>
 
       <div v-if="orders.length === 0 && !loading" class="empty">
@@ -31,7 +32,7 @@
 
         <div class="order-body" v-if="order.items && order.items.length">
           <div v-for="it in order.items" :key="it.id || it.skuId" class="item-row">
-            <img :src="it.image || it.pic || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
+            <img :src="it.image || it.pic || __PH" class="thumb" v-placeholder />
             <div class="item-info">
               <div class="item-name">{{ it.spuName || it.name || it.skuName }}</div>
               <div class="item-spec">{{ it.skuSpecs || it.specs || '' }}</div>
@@ -199,7 +200,8 @@ const STATUS_MAP: Record<string, any> = {
   [ORDER_STATUS.REVIEWABLE]: ['待评价', 'success'],
   [ORDER_STATUS.COMPLETED]: ['已完成', 'success'],
   [ORDER_STATUS.REFUNDING]: ['退款中', 'warning'],
-  [ORDER_STATUS.REFUNDED]: ['已退款', 'danger']
+  [ORDER_STATUS.REFUNDED]: ['已退款', 'danger'],
+  [ORDER_STATUS.PARTIAL_REFUNDED]: ['部分退款', 'warning']
 }
 
 function statusText(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
@@ -332,6 +334,7 @@ function goAfterSale(order: any) {
 
 function showAfterSale(code: any) {
   return code === ORDER_STATUS.PAID || code === ORDER_STATUS.SHIPPED || code === ORDER_STATUS.COMPLETED
+    || code === ORDER_STATUS.PARTIAL_REFUNDED
 }
 
 /**
