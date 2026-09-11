@@ -29,7 +29,12 @@ import java.util.Map;
 public class DailyReportServiceImpl implements DailyReportService {
 
     /** 与仪表盘一致的有效销售额状态口径 */
-    private static final String PAID_STATUSES = "('PAID', 'SHIPPED', 'COMPLETED')";
+    /** 计入销售额的订单状态（含部分退款：净额按 实付-已完成售后退款 计算）。 */
+    private static final String PAID_STATUSES = "('PAID', 'SHIPPED', 'COMPLETED', 'PARTIAL_REFUNDED')";
+    /** 净销售额 LEFT JOIN 片段：订单已完成售后（status=5）的累计退款额。 */
+    private static final String NET_REFUND_JOIN =
+            " LEFT JOIN (SELECT order_id, SUM(amount) AS refunded FROM stellar_after_sale " +
+            "            WHERE status = 5 GROUP BY order_id) r ON r.order_id = %s.id ";
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -90,9 +95,10 @@ public class DailyReportServiceImpl implements DailyReportService {
                     "WHERE create_time >= ? GROUP BY DATE(create_time) ORDER BY d",
                     start);
             List<Map<String, Object>> amtRows = jdbcTemplate.queryForList(
-                    "SELECT DATE(create_time) d, COALESCE(SUM(pay_amount), 0) s FROM stellar_mall_order " +
-                    "WHERE status IN " + PAID_STATUSES + " AND is_refunded = 0 AND create_time >= ? " +
-                    "GROUP BY DATE(create_time) ORDER BY d",
+                    "SELECT DATE(o.create_time) d, COALESCE(SUM(GREATEST(COALESCE(o.pay_amount, 0) - COALESCE(r.refunded, 0), 0)), 0) s " +
+                    "FROM stellar_mall_order o" + String.format(NET_REFUND_JOIN, "o") +
+                    "WHERE o.status IN " + PAID_STATUSES + " AND o.is_refunded = 0 AND o.create_time >= ? " +
+                    "GROUP BY DATE(o.create_time) ORDER BY d",
                     start);
             Map<String, Long> cntMap = new LinkedHashMap<>();
             for (Map<String, Object> row : cntRows) {
@@ -133,6 +139,8 @@ public class DailyReportServiceImpl implements DailyReportService {
                     "JOIN stellar_mall_order o ON o.id = i.order_id " +
                     "WHERE o.status IN " + PAID_STATUSES + " AND o.is_refunded = 0 " +
                     "AND o.create_time >= ? " +
+                    "AND NOT EXISTS (SELECT 1 FROM stellar_after_sale a WHERE a.order_id = o.id " +
+                    "AND a.status = 5 AND (a.sku_id IS NULL OR a.sku_id = i.sku_id)) " +
                     "GROUP BY i.spu_id, i.spu_name ORDER BY sales DESC LIMIT 5",
                     start);
             List<Map<String, Object>> top = new ArrayList<>();
@@ -159,8 +167,9 @@ public class DailyReportServiceImpl implements DailyReportService {
     private BigDecimal sumSales(LocalDate date) {
         try {
             BigDecimal v = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(pay_amount), 0) FROM stellar_mall_order " +
-                    "WHERE status IN " + PAID_STATUSES + " AND is_refunded = 0 AND DATE(create_time) = ?",
+                    "SELECT COALESCE(SUM(GREATEST(COALESCE(o.pay_amount, 0) - COALESCE(r.refunded, 0), 0)), 0) " +
+                    "FROM stellar_mall_order o" + String.format(NET_REFUND_JOIN, "o") +
+                    "WHERE o.status IN " + PAID_STATUSES + " AND o.is_refunded = 0 AND DATE(o.create_time) = ?",
                     BigDecimal.class, date.format(DATE_FMT));
             return v == null ? BigDecimal.ZERO : v;
         } catch (Exception e) {

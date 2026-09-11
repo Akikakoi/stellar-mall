@@ -27,6 +27,20 @@ public class AdminDashboardController {
     private final JdbcTemplate jdbcTemplate;
     private final DailyReportService dailyReportService;
 
+    /**
+     * 净销售额统计 SQL（按订单创建日期）：
+     * 已付款未整单退款订单（PAID/SHIPPED/COMPLETED/PARTIAL_REFUNDED，is_refunded=0）
+     * 的实付金额，扣除该订单已完成售后（status=5）的退款额，下限 0。
+     * 整单退款订单（is_refunded=1）不参与统计（净额本就为 0）。
+     */
+    private static final String NET_SALES_BY_CREATE_DATE_SQL =
+        "SELECT COALESCE(SUM(GREATEST(COALESCE(o.pay_amount, 0) - COALESCE(r.refunded, 0), 0)), 0) " +
+        "FROM stellar_mall_order o " +
+        "LEFT JOIN (SELECT order_id, SUM(amount) AS refunded FROM stellar_after_sale " +
+        "           WHERE status = 5 GROUP BY order_id) r ON r.order_id = o.id " +
+        "WHERE o.status IN ('PAID', 'SHIPPED', 'COMPLETED', 'PARTIAL_REFUNDED') " +
+        "AND o.is_refunded = 0 AND DATE(o.create_time) = ?";
+
 @RequireRole({1, 2})
     @GetMapping("/stats")
     @ApiOperation("仪表盘统计：员工数 / SPU 数 / SKU 数 / 订单数 / 用户数")
@@ -52,10 +66,10 @@ public class AdminDashboardController {
             data.put("todayOrders", todayOrders == null ? 0L : todayOrders);
         } catch (Exception e) { data.put("todayOrders", 0L); }
         try {
-            // 销售额统计：已付款且未退款的订单（排除 is_refunded = 1）
+            // 销售额统计（净额口径）：已付款未整单退款订单，部分退款订单扣除已完成售后退款额，
+            // 保证部分退款后剩余商品金额仍计入销售额（如 ABCD 四件退 A，BCD 的 2100 仍计入）
             BigDecimal todaySales = jdbcTemplate.queryForObject(
-                "SELECT COALESCE(SUM(pay_amount), 0) FROM stellar_mall_order " +
-                "WHERE status IN ('PAID', 'SHIPPED', 'COMPLETED') AND is_refunded = 0 AND DATE(create_time) = ?",
+                NET_SALES_BY_CREATE_DATE_SQL,
                 BigDecimal.class, today);
             data.put("todaySales", todaySales == null ? BigDecimal.ZERO : todaySales);
         } catch (Exception e) { data.put("todaySales", BigDecimal.ZERO); }
@@ -102,10 +116,10 @@ public class AdminDashboardController {
             for (int i = 6; i >= 0; i--) {
                 String date = LocalDate.now().minusDays(i).format(DateTimeFormatter.ISO_LOCAL_DATE);
                 Long cnt = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM stellar_mall_order WHERE DATE(create_time) = ?", Long.class, date);
+                    "SELECT COUNT(*) FROM stellar_mall_order " +
+                    "WHERE DATE(create_time) = ? AND is_refunded = 0 AND status != 'REFUNDED'", Long.class, date);
                 BigDecimal amt = jdbcTemplate.queryForObject(
-                    "SELECT COALESCE(SUM(pay_amount), 0) FROM stellar_mall_order " +
-                    "WHERE status IN ('PAID', 'SHIPPED', 'COMPLETED') AND is_refunded = 0 AND DATE(create_time) = ?",
+                    NET_SALES_BY_CREATE_DATE_SQL,
                     BigDecimal.class, date);
                 Map<String, Object> item = new HashMap<>();
                 item.put("date", date.substring(5));
