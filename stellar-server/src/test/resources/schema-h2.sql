@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS stellar_user;
 CREATE TABLE stellar_user (
     id            BIGINT   NOT NULL AUTO_INCREMENT,  email VARCHAR(64) NOT NULL,
     password      VARCHAR(64) NOT NULL,              nickname VARCHAR(32),
-    phone         VARCHAR(20),                       avatar VARCHAR(255),
+    avatar VARCHAR(255),
     role          VARCHAR(32) DEFAULT 'user',        status TINYINT NOT NULL DEFAULT 1,
     create_time   DATETIME NOT NULL,                 create_user BIGINT NOT NULL DEFAULT 0,
     update_time   DATETIME NOT NULL,                 update_user BIGINT NOT NULL DEFAULT 0,
@@ -70,6 +70,15 @@ CREATE TABLE stellar_sku (
     status TINYINT NOT NULL DEFAULT 1,
     create_time DATETIME NOT NULL, create_user BIGINT NOT NULL,
     update_time DATETIME NOT NULL, update_user BIGINT NOT NULL, PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS stellar_stock_log;
+CREATE TABLE stellar_stock_log (
+    id BIGINT NOT NULL AUTO_INCREMENT, sku_id BIGINT NOT NULL,
+    type TINYINT NOT NULL, quantity INT NOT NULL,
+    stock_before INT NOT NULL, stock_after INT NOT NULL,
+    remark VARCHAR(255), business_type VARCHAR(32), business_no VARCHAR(64),
+    create_time DATETIME NOT NULL, create_user BIGINT NOT NULL, PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS stellar_mall_order;

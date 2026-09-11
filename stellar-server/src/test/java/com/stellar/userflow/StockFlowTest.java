@@ -4,6 +4,7 @@ import com.stellar.entity.Sku;
 import com.stellar.exception.BaseException;
 import com.stellar.exception.StockInsufficientException;
 import com.stellar.mapper.SkuMapper;
+import com.stellar.mapper.StockLogMapper;
 import com.stellar.service.impl.SkuStockServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ class StockFlowTest {
     @Mock
     private SkuMapper skuMapper;
 
+    @Mock
+    private StockLogMapper stockLogMapper;
+
     @InjectMocks
     private SkuStockServiceImpl skuStockService;
 
@@ -58,7 +62,9 @@ class StockFlowTest {
         assertDoesNotThrow(() -> skuStockService.deduct(100L, 3));
 
         verify(skuMapper, times(1)).deductStockAtomic(100L, 3);
-        verify(skuMapper, never()).getById(anyLong());
+        // 成功后须记录出库流水（读取当前库存 + 写一条 SALE_OUT）
+        verify(skuMapper, times(1)).getById(100L);
+        verify(stockLogMapper, times(1)).insert(any());
     }
 
     @Test
@@ -93,7 +99,9 @@ class StockFlowTest {
         assertDoesNotThrow(() -> skuStockService.rollback(200L, 3));
 
         verify(skuMapper, times(1)).rollbackStockAtomic(200L, 3);
-        verify(skuMapper, never()).getById(anyLong());
+        // 成功后须记录入库流水（读取当前库存 + 写一条 ORDER_ROLLBACK）
+        verify(skuMapper, times(1)).getById(200L);
+        verify(stockLogMapper, times(1)).insert(any());
     }
 
     @Test

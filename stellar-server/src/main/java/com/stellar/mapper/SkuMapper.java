@@ -31,6 +31,9 @@ public interface SkuMapper {
 
     List<Sku> listBySpuId(@Param("spuId") Long spuId);
 
+    /** 批量按 spu_id 列表查询 SKU（导出等一次取多商品 SKU，避免循环单查 N+1）。调用方须先判空。 */
+    List<Sku> listBySpuIds(@Param("spuIds") List<Long> spuIds);
+
     /**
      * 乐观锁扣库存：
      *   UPDATE stellar_sku SET stock = stock - #{qty}, version = version + 1

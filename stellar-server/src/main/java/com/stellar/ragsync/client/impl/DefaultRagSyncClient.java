@@ -7,6 +7,7 @@ import com.stellar.entity.Sku;
 import com.stellar.entity.Spu;
 import com.stellar.ragsync.client.RagSyncClient;
 import com.stellar.ragsync.config.RagSyncProperties;
+import com.stellar.utils.HttpClientUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
@@ -14,8 +15,6 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -47,16 +46,6 @@ public class DefaultRagSyncClient implements RagSyncClient {
     private static final String HEADER_SECRET = "X-Stellar-Rag-Sync-Secret";
 
     private final RagSyncProperties properties;
-
-    private CloseableHttpClient httpClient(int timeoutMs) {
-        int timeout = timeoutMs > 0 ? timeoutMs : 10_000;
-        RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(timeout)
-                .setSocketTimeout(timeout)
-                .setConnectionRequestTimeout(timeout)
-                .build();
-        return HttpClientBuilder.create().setDefaultRequestConfig(config).build();
-    }
 
     @Override
     public boolean syncSpu(Spu spu) {
@@ -142,26 +131,31 @@ public class DefaultRagSyncClient implements RagSyncClient {
     /**
      * 通用 POST：发送 JSON + 共享密钥，返回解析后的响应 Map。
      * 非 2xx / 网络异常 / JSON 解析失败统一抛 RuntimeException。
+     * 复用 HttpClientUtil 的共享连接池客户端，超时通过 per-request RequestConfig 覆盖。
      */
     private Map<String, Object> postJson(String path, Map<String, Object> body, int timeoutMs) {
         String url = trimSlash(properties.getBaseUrl()) + path;
         String json = toJson(body);
+        int timeout = timeoutMs > 0 ? timeoutMs : 10_000;
 
-        try (CloseableHttpClient client = httpClient(timeoutMs)) {
-            HttpPost post = new HttpPost(url);
-            post.setHeader("Content-Type", "application/json; charset=utf-8");
-            post.setHeader(HEADER_SECRET, properties.getInternalSyncSecret());
-            post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
+        HttpPost post = new HttpPost(url);
+        post.setHeader("Content-Type", "application/json; charset=utf-8");
+        post.setHeader(HEADER_SECRET, properties.getInternalSyncSecret());
+        post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
+        post.setConfig(RequestConfig.custom()
+                .setConnectTimeout(timeout)
+                .setSocketTimeout(timeout)
+                .setConnectionRequestTimeout(timeout)
+                .build());
 
-            try (CloseableHttpResponse resp = client.execute(post)) {
-                int code = resp.getStatusLine().getStatusCode();
-                HttpEntity entity = resp.getEntity();
-                String respText = entity == null ? "" : EntityUtils.toString(entity, StandardCharsets.UTF_8);
-                if (code < 200 || code >= 300) {
-                    throw new RuntimeException("RAG " + path + " 返回非 2xx 状态码：" + code + "，body=" + respText);
-                }
-                return MAPPER.readValue(respText, new TypeReference<Map<String, Object>>() {});
+        try (CloseableHttpResponse resp = HttpClientUtil.sharedClient().execute(post)) {
+            int code = resp.getStatusLine().getStatusCode();
+            HttpEntity entity = resp.getEntity();
+            String respText = entity == null ? "" : EntityUtils.toString(entity, StandardCharsets.UTF_8);
+            if (code < 200 || code >= 300) {
+                throw new RuntimeException("RAG " + path + " 返回非 2xx 状态码：" + code + "，body=" + respText);
             }
+            return MAPPER.readValue(respText, new TypeReference<Map<String, Object>>() {});
         } catch (IOException e) {
             throw new RuntimeException("RAG " + path + " HTTP 调用失败：" + e.getMessage(), e);
         }

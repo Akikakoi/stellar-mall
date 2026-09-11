@@ -64,11 +64,13 @@ class OrderServiceProxyTest {
     @Mock private SkuStockService skuStockService;
     @Mock private MallOrderMapper mallOrderMapper;
     @Mock private MallOrderItemMapper mallOrderItemMapper;
+    @Mock private AfterSaleMapper afterSaleMapper;
     @Mock private CouponService couponService;
     @Mock private UserMessageService userMessageService;
     @Mock private WalletService walletService;
     @Mock private NotificationService notificationService;
     @Mock private PointsService pointsService;
+    @Mock private PointsFacade pointsFacade;
     @Mock private OrderCancelService orderCancelService;
 
     @InjectMocks
@@ -489,8 +491,8 @@ class OrderServiceProxyTest {
             verify(mallOrderMapper).casUpdateStatus(ORDER_ID,
                     OrderStatus.PENDING.getBackendValue(), OrderStatus.PAID.getBackendValue());
             verify(spuMapper).incrSaleCount(1L, 2);
-            verify(pointsService).consumeFrozenPointsForOrder(USER_ID, ORDER_ID);
-            verify(pointsService).earnByOrder(eq(USER_ID), eq(ORDER_ID), any());
+            verify(pointsFacade).consumeFrozenForOrderQuietly(USER_ID, ORDER_ID);
+            verify(pointsFacade).earnForOrderQuietly(eq(USER_ID), eq(ORDER_ID), any());
         }
 
         @Test @DisplayName("钱包支付 → payMethod=4 → 走 walletService.payByWallet")
@@ -541,7 +543,7 @@ class OrderServiceProxyTest {
             verify(skuStockService).rollback(10L, 2);
             verify(mallOrderMapper).casUpdateStatus(ORDER_ID,
                     OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
-            verify(pointsService).unfreezePointsForOrder(USER_ID, ORDER_ID);
+            verify(pointsFacade).unfreezeForOrderQuietly(USER_ID, ORDER_ID);
             verify(couponService).returnCouponByOrderId(ORDER_ID);
         }
 
@@ -775,22 +777,43 @@ class OrderServiceProxyTest {
     }
 
     // ================================================================
-    @Nested @DisplayName("11. completeRefund — 完成退款")
+    @Nested @DisplayName("11. completeRefund — 部分退款")
     class CompleteRefundTests {
 
-        @Test @DisplayName("已完成订单退款 → 回滚库存+标记已退款")
+        @Test @DisplayName("部分退款（最后一件商品退完）→ 回滚该SKU库存+订单标记已退款")
         void refundCompleted_success() {
-            // 新实现：markRefunded 幂等占位成功（返回1）后直接回滚库存，
-            // 无需预先 getById（getById 仅在占位失败时用于区分已退款/已取消）
+            MallOrder o = order(ORDER_ID, OrderStatus.REFUNDING.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
+            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
             MallOrderItem it = orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 3, BigDecimal.valueOf(100));
             when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Collections.singletonList(it));
+            // 当前售后单（SKU 10）已完成 → 订单全部商品已退 → 标记整单已退款
+            when(afterSaleMapper.listCompletedSkuIdsByOrder(ORDER_ID)).thenReturn(Collections.singletonList(10L));
             when(mallOrderMapper.markRefunded(ORDER_ID)).thenReturn(1);
 
-            orderService.completeRefund(ORDER_ID);
+            orderService.completeRefund(ORDER_ID, 10L);
 
             verify(skuStockService).rollback(10L, 3);
             verify(mallOrderMapper).markRefunded(ORDER_ID);
-            verify(mallOrderMapper, never()).getById(anyLong());
+            verify(mallOrderMapper, never()).markPartialRefunded(ORDER_ID);
+        }
+
+        @Test @DisplayName("部分退款（仍有商品未退）→ 回滚该SKU库存+订单标记部分退款")
+        void refundPartial_partialMarked() {
+            MallOrder o = order(ORDER_ID, OrderStatus.REFUNDING.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
+            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+            MallOrderItem it = orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 3, BigDecimal.valueOf(100));
+            when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Collections.singletonList(it));
+            // 已完成售后不包含该 SKU（订单还有其他商品未退）→ 标记部分退款
+            when(afterSaleMapper.listCompletedSkuIdsByOrder(ORDER_ID)).thenReturn(Collections.emptyList());
+            when(mallOrderMapper.markPartialRefunded(ORDER_ID)).thenReturn(1);
+
+            orderService.completeRefund(ORDER_ID, 10L);
+
+            verify(skuStockService).rollback(10L, 3);
+            verify(mallOrderMapper).markPartialRefunded(ORDER_ID);
+            verify(mallOrderMapper, never()).markRefunded(ORDER_ID);
         }
 
         @Test @DisplayName("已取消订单 → 不可退款")
@@ -800,7 +823,7 @@ class OrderServiceProxyTest {
             when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
 
             assertThrows(BaseException.class,
-                    () -> orderService.completeRefund(ORDER_ID));
+                    () -> orderService.completeRefund(ORDER_ID, 10L));
             verify(skuStockService, never()).rollback(anyLong(), anyInt());
         }
 
@@ -808,22 +831,29 @@ class OrderServiceProxyTest {
         void refundNonExistent_throws() {
             when(mallOrderMapper.getById(ORDER_ID)).thenReturn(null);
             assertThrows(BaseException.class,
-                    () -> orderService.completeRefund(ORDER_ID));
+                    () -> orderService.completeRefund(ORDER_ID, 10L));
         }
 
-        @Test @DisplayName("已退款订单再次退款 → 幂等跳过，不重复回滚库存")
+        @Test @DisplayName("已整单退款订单再次部分退款 → 跳过，不重复回滚库存")
         void refundAlreadyRefunded_idempotent() {
             MallOrder o = order(ORDER_ID, OrderStatus.REFUNDED.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(400), BigDecimal.valueOf(400));
             o.setIsRefunded(1);
             when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
-            // markRefunded 未 stub → 默认返回 0（SQL 幂等条件 is_refunded=0 不满足）
 
-            orderService.completeRefund(ORDER_ID);
+            orderService.completeRefund(ORDER_ID, 10L);
 
             // 幂等返回，不回滚库存，避免双倍回滚导致库存虚增
             verify(skuStockService, never()).rollback(anyLong(), anyInt());
             verify(mallOrderItemMapper, never()).listByOrderId(anyLong());
+        }
+
+        @Test @DisplayName("skuId 为空 → 跳过（无整单退款入口）")
+        void refundWithoutSkuId_skipped() {
+            orderService.completeRefund(ORDER_ID, null);
+
+            verify(skuStockService, never()).rollback(anyLong(), anyInt());
+            verify(mallOrderMapper, never()).markRefunded(ORDER_ID);
         }
     }
 

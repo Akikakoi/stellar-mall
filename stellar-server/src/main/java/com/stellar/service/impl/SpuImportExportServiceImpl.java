@@ -66,6 +66,17 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
     @Override
     public byte[] exportAll() {
         List<Spu> spuList = spuMapper.listAll();
+        // 一次 IN 查询取全部 SKU 再按 spuId 分组，避免循环单查的 N+1
+        Map<Long, List<Sku>> skusBySpuId = new HashMap<>();
+        if (!spuList.isEmpty()) {
+            List<Long> spuIds = new ArrayList<>(spuList.size());
+            for (Spu spu : spuList) {
+                spuIds.add(spu.getId());
+            }
+            for (Sku sku : skuMapper.listBySpuIds(spuIds)) {
+                skusBySpuId.computeIfAbsent(sku.getSpuId(), k -> new ArrayList<>()).add(sku);
+            }
+        }
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet("商品数据");
             createHeaderRow(sheet);
@@ -74,7 +85,7 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
             CellStyle defaultStyle = createDataStyle(wb);
 
             for (Spu spu : spuList) {
-                List<Sku> skus = skuMapper.listBySpuId(spu.getId());
+                List<Sku> skus = skusBySpuId.getOrDefault(spu.getId(), Collections.emptyList());
                 if (skus.isEmpty()) {
                     // 没有 SKU 的商品也导出一行
                     Row row = sheet.createRow(rowIdx++);

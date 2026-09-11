@@ -159,6 +159,16 @@
         ORDER BY sort ASC, id ASC
     </select>
 
+    <!-- 批量按 spu_id 集合查询 SKU（SPU 导出用，一次 IN 查询代替循环单查） -->
+    <select id="listBySpuIds" resultMap="SkuMap">
+        SELECT * FROM stellar_sku
+        WHERE spu_id IN
+        <foreach collection="spuIds" item="spuId" open="(" separator="," close=")">
+            #{spuId}
+        </foreach>
+        ORDER BY spu_id ASC, sort ASC, id ASC
+    </select>
+
     <!-- ==================== 管理端库存管理 ==================== -->
     <select id="pageForInventory" resultMap="SkuMap">
         SELECT * FROM stellar_sku

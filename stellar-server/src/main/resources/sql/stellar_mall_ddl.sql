@@ -75,8 +75,7 @@ CREATE TABLE stellar_user (
     update_time   DATETIME      NOT NULL                COMMENT '更新时间',
     update_user   BIGINT        NOT NULL DEFAULT 0      COMMENT '更新人',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_user_openid (openid),
-    UNIQUE KEY uk_user_phone (phone)
+    UNIQUE KEY uk_user_openid (openid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='C端用户表';
 
 
@@ -328,7 +327,7 @@ DROP TABLE IF EXISTS stellar_after_sale;
 CREATE TABLE stellar_after_sale (
     id              BIGINT        NOT NULL AUTO_INCREMENT COMMENT '主键',
     order_id        BIGINT        NOT NULL                COMMENT '订单 ID',
-    sku_id          BIGINT        NOT NULL                COMMENT '申请售后的 SKU',
+    sku_id          BIGINT        DEFAULT NULL            COMMENT '申请售后的 SKU；NULL=整单退款',
     user_id         BIGINT        NOT NULL                COMMENT '申请人用户 ID',
     type            TINYINT       NOT NULL                COMMENT '售后类型：1 仅退款，2 退货退款，3 换货',
     status          TINYINT       NOT NULL DEFAULT 1      COMMENT '售后状态：1 申请，2 商家审核中，3 用户退货中，4 退款中，5 完成，6 已拒绝，7 已取消',
@@ -604,12 +603,12 @@ INSERT INTO stellar_sku (id, spu_id, name, specs, price, original_price, stock, 
 
 
 -- ============================================================
--- 20. MallUser 表：C 端用户（和原 stellar_user 并存，简化版只保 phone+password 登录用）
+-- 20. MallUser 表：C 端用户（邮箱登录，唯一）
 -- ============================================================
 DROP TABLE IF EXISTS stellar_mall_user;
 CREATE TABLE stellar_mall_user (
     id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
-    phone         VARCHAR(11)  NOT NULL               COMMENT '手机号=登录账号',
+    email         VARCHAR(100) NOT NULL               COMMENT '邮箱=登录账号，唯一',
     nickname      VARCHAR(64)  DEFAULT NULL           COMMENT '昵称',
     password      VARCHAR(255) NOT NULL               COMMENT 'BCrypt 密码哈希（和 stellar_employee.password_hash 同算法）',
     status        TINYINT      NOT NULL DEFAULT 1     COMMENT '1 正常，0 冻结',
@@ -618,14 +617,14 @@ CREATE TABLE stellar_mall_user (
     update_time   DATETIME     NOT NULL               COMMENT '更新时间',
     update_user   BIGINT       NOT NULL DEFAULT 0     COMMENT '更新人',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_mall_user_phone (phone)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='C端用户表（简化）';
+    UNIQUE KEY uk_mall_user_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='C端用户表（邮箱登录）';
 
--- 种子用户：13900000000 / 123456（BCrypt）+ 2 个备用 13800000001/13800000002
-INSERT INTO stellar_mall_user (id, phone, nickname, password, status, create_time, create_user, update_time, update_user) VALUES
-(1, '13900000000', '测试用户',   '$2b$10$bey3bY4MddvOKfjUBRxxtuAixcohMgc9h0dsDvPXZSB7cy10/OfVK', 1, NOW(), 0, NOW(), 0),
-(2, '13800000001', '测试用户一', '$2b$10$bey3bY4MddvOKfjUBRxxtuAixcohMgc9h0dsDvPXZSB7cy10/OfVK', 1, NOW(), 0, NOW(), 0),
-(3, '13800000002', '测试用户二', '$2b$10$bey3bY4MddvOKfjUBRxxtuAixcohMgc9h0dsDvPXZSB7cy10/OfVK', 1, NOW(), 0, NOW(), 0);
+-- 种子用户：test@stellar.com / 123456（BCrypt）+ 2 个备用
+INSERT INTO stellar_mall_user (id, email, nickname, password, status, create_time, create_user, update_time, update_user) VALUES
+(1, 'test@stellar.com',   '测试用户',   '$2b$10$bey3bY4MddvOKfjUBRxxtuAixcohMgc9h0dsDvPXZSB7cy10/OfVK', 1, NOW(), 0, NOW(), 0),
+(2, 'user2@stellar.com',  '测试用户一', '$2b$10$bey3bY4MddvOKfjUBRxxtuAixcohMgc9h0dsDvPXZSB7cy10/OfVK', 1, NOW(), 0, NOW(), 0),
+(3, 'user3@stellar.com',  '测试用户二', '$2b$10$bey3bY4MddvOKfjUBRxxtuAixcohMgc9h0dsDvPXZSB7cy10/OfVK', 1, NOW(), 0, NOW(), 0);
 
 
 -- ============================================================
@@ -782,3 +781,28 @@ CREATE TABLE stellar_site_config (
     PRIMARY KEY (id),
     UNIQUE KEY uk_config_key (config_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='站点级配置';
+
+
+-- ============================================================
+-- 27. stellar_stock_log：库存变动流水（V20 引入，管理端出入库/调整记录）
+--     quantity 正=入库/盘盈，负=出库/盘亏；stock_before/after 快照便于对账
+-- ============================================================
+DROP TABLE IF EXISTS stellar_stock_log;
+CREATE TABLE stellar_stock_log (
+    id            BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    sku_id        BIGINT       NOT NULL               COMMENT 'SKU ID',
+    type          TINYINT      NOT NULL               COMMENT '变动类型：1 入库，2 出库，3 盘盈，4 盘亏，5 调整',
+    quantity      INT          NOT NULL               COMMENT '变动数量（正数增加，负数减少）',
+    stock_before  INT          NOT NULL               COMMENT '变动前库存',
+    stock_after   INT          NOT NULL               COMMENT '变动后库存',
+    remark        VARCHAR(255) DEFAULT NULL           COMMENT '备注',
+    business_type VARCHAR(32)  DEFAULT NULL           COMMENT '业务类型：SALE_OUT 下单出库 / ORDER_ROLLBACK 取消/售后退回库存 / ADJUSTMENT 手动调整',
+    business_no   VARCHAR(64)  DEFAULT NULL           COMMENT '关联业务单号',
+    create_time   DATETIME     NOT NULL               COMMENT '创建时间',
+    create_user   BIGINT       NOT NULL DEFAULT 0     COMMENT '操作人',
+    PRIMARY KEY (id),
+    KEY idx_stock_log_sku (sku_id),
+    KEY idx_stock_log_type (type),
+    KEY idx_stock_log_business (business_type, business_no),
+    KEY idx_stock_log_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='库存变动流水表';

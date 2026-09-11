@@ -77,6 +77,22 @@ public class SpuSearchService {
     /** 查询向量本地缓存：相同文本的 embedding 只请求一次（有上限，防无界增长）。 */
     private final Map<String, double[]> embedCache = new ConcurrentHashMap<>();
 
+    /** 搜索结果短 TTL 缓存：热门词 60s 窗口内重复搜索不再直打 ES/MySQL
+     *  （ES 关键词搜索 = BM25+向量双查 + MySQL 取详情，成本不低）。
+     *  直接缓存 VO 引用——searchWithHighlight 全链路只读（Controller 仅做 JSON 序列化），
+     *  无 JSON 往返反序列化（records 是裸 List，往返会退化为 LinkedHashMap）。
+     *  TTL 60s 内商品变更最多延迟一分钟可见，可接受；容量超限整体清空。 */
+    private static final long RESULT_CACHE_TTL_MS = 60_000L;
+    private static final int RESULT_CACHE_MAX = 1024;
+    private final Map<String, TimedResult> resultCache = new ConcurrentHashMap<>();
+
+    /** 带过期时间的结果条目。 */
+    private static final class TimedResult {
+        final SearchResultVO vo;
+        final long expireAt;
+        TimedResult(SearchResultVO vo, long expireAt) { this.vo = vo; this.expireAt = expireAt; }
+    }
+
     public SpuSearchService(ElasticsearchOperations esOps, SpuMapper spuMapper,
                             SynonymEngine synonymEngine) {
         this.esOps = esOps; this.spuMapper = spuMapper;
@@ -88,15 +104,47 @@ public class SpuSearchService {
     // ==================== 增强搜索（高亮 + 聚合） ====================
 
     public SearchResultVO searchWithHighlight(SpuPageQueryDTO dto) {
+        // ---- 结果缓存命中检查 ----
+        String cacheKey = resultCacheKey(dto);
+        TimedResult cached = resultCache.get(cacheKey);
+        if (cached != null && cached.expireAt > System.currentTimeMillis()) {
+            log.debug("resultCache HIT  key={}", cacheKey);
+            return cached.vo;
+        }
+
+        SearchResultVO vo = null;
         if (esAvailable) {
-            try { return searchByEs(dto); }
+            try { vo = searchByEs(dto); }
             catch (Exception e) {
                 log.warn("ES failed, fallback MySQL: {}", e.getMessage());
                 esAvailable = false;
                 tryRecoverEs();
             }
         }
-        return fallbackSearch(dto);
+        if (vo == null) vo = fallbackSearch(dto);
+
+        // ---- 写入缓存（异常不影响搜索主流程） ----
+        try {
+            if (resultCache.size() > RESULT_CACHE_MAX) resultCache.clear();
+            resultCache.put(cacheKey, new TimedResult(
+                    vo, System.currentTimeMillis() + RESULT_CACHE_TTL_MS));
+        } catch (Exception e) {
+            log.debug("search result cache put failed: {}", e.getMessage());
+        }
+        return vo;
+    }
+
+    /** 结果缓存 key：覆盖 DTO 全部影响结果的字段（trim 归一化空白）。 */
+    private static String resultCacheKey(SpuPageQueryDTO dto) {
+        return String.join("|",
+                norm(dto.getPage()), norm(dto.getPageSize()), norm(dto.getName()),
+                norm(dto.getCategoryId()), norm(dto.getStatus()), norm(dto.getIsNew()),
+                norm(dto.getIsHot()), norm(dto.getPriceFrom()), norm(dto.getPriceTo()),
+                norm(dto.getSortBy()), norm(dto.getSortOrder()));
+    }
+
+    private static String norm(Object o) {
+        return o == null ? "" : String.valueOf(o).trim();
     }
 
     /** 保持向后兼容——PageResult 接口沿用原逻辑。 */
