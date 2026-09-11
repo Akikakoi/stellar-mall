@@ -1,6 +1,7 @@
 package com.stellar.service;
 
 import com.stellar.dto.MallUserLoginDTO;
+import com.stellar.dto.MallUserPasswordUpdateDTO;
 import com.stellar.dto.MallUserProfileUpdateDTO;
 import com.stellar.entity.MallUser;
 import com.stellar.vo.MallUserLoginVO;
@@ -36,4 +37,30 @@ public interface MallUserService {
 
     /** 注销当前账号（将账号状态置为已注销）。 */
     void deactivateAccount(Long id);
+
+    /**
+     * 发送换绑邮箱验证码到新邮箱。
+     * 校验新邮箱格式合法、不与当前邮箱相同、且未被其他账号注册。
+     * @return 持久化后的验证码实体（开发模式下 Controller 用其 code 作为 devCode 返回）
+     */
+    com.stellar.entity.EmailCode sendEmailChangeCode(Long userId, String newEmail);
+
+    /**
+     * 校验验证码并更换登录邮箱。
+     * 最终提交时再次校验新邮箱未被其他账号占用，占用则拒绝修改。
+     */
+    void changeEmail(Long userId, String newEmail, String code);
+
+    /**
+     * 发送修改密码验证码到当前登录邮箱（用于从未设置过密码的账号自助设置密码）。
+     * @return 持久化后的验证码实体（开发模式下 Controller 用其 code 作为 devCode 返回）
+     */
+    com.stellar.entity.EmailCode sendPasswordChangeCode(Long userId);
+
+    /**
+     * 修改/设置登录密码。
+     * 验证方式二选一：原密码（oldPassword）或当前邮箱验证码（code）；
+     * 校验通过后用 BCrypt 加密写入新密码。
+     */
+    void updatePassword(Long userId, MallUserPasswordUpdateDTO dto);
 }

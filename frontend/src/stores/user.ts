@@ -11,7 +11,6 @@ import type { LoginPayload, LoginResult, UserInfo } from '@/types/models'
 const TOKEN_KEY = 'stellar_user_token'
 const USER_ID_KEY = 'stellar_user_id'
 const NICKNAME_KEY = 'stellar_user_nickname'
-const PHONE_KEY = 'stellar_user_phone'
 const ROLE_KEY = 'stellar_user_role'
 const REFRESH_TOKEN_KEY = 'stellar_user_refresh_token'
 
@@ -43,8 +42,6 @@ interface UserState {
   refreshToken: string
   /** 用户昵称 */
   nickname: string
-  /** 手机号 */
-  phone: string
   /** 角色:admin / 普通用户 */
   role: string
 }
@@ -55,7 +52,6 @@ export const useUserStore = defineStore('user', {
     token: safeGet(TOKEN_KEY) || '',
     refreshToken: safeGet(REFRESH_TOKEN_KEY) || '',
     nickname: safeGet(NICKNAME_KEY) || '',
-    phone: safeGet(PHONE_KEY) || '',
     role: safeGet(ROLE_KEY) || ''
   }),
 
@@ -81,14 +77,12 @@ export const useUserStore = defineStore('user', {
       this.refreshToken = res.refreshToken || ''
       this.userId = res.userId || res.USER_ID || res.id || null
       this.nickname = res.nickname || res.NICKNAME || res.name || ''
-      this.phone = res.phone || payload.email || ''
       this.role = res.role || res.ROLE || ''
 
       safeSet(TOKEN_KEY, this.token)
       safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
       safeSet(USER_ID_KEY, this.userId)
       safeSet(NICKNAME_KEY, this.nickname)
-      safeSet(PHONE_KEY, this.phone)
       safeSet(ROLE_KEY, this.role)
 
       return res
@@ -105,14 +99,12 @@ export const useUserStore = defineStore('user', {
       this.refreshToken = res.refreshToken || ''
       this.userId = res.userId || res.USER_ID || res.id || null
       this.nickname = res.nickname || res.NICKNAME || res.name || ''
-      this.phone = res.phone || payload.email || ''
       this.role = res.role || res.ROLE || ''
 
       safeSet(TOKEN_KEY, this.token)
       safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
       safeSet(USER_ID_KEY, this.userId)
       safeSet(NICKNAME_KEY, this.nickname)
-      safeSet(PHONE_KEY, this.phone)
       safeSet(ROLE_KEY, this.role)
 
       return res
@@ -125,10 +117,6 @@ export const useUserStore = defineStore('user', {
         if (res.nickname) {
           this.nickname = res.nickname
           safeSet(NICKNAME_KEY, this.nickname)
-        }
-        if (res.phone) {
-          this.phone = res.phone
-          safeSet(PHONE_KEY, this.phone)
         }
         if (res.id || res.userId) {
           this.userId = res.id || res.userId
@@ -167,10 +155,6 @@ export const useUserStore = defineStore('user', {
         this.nickname = info.nickname || info.NICKNAME || info.name
         safeSet(NICKNAME_KEY, this.nickname)
       }
-      if (info.phone) {
-        this.phone = info.phone
-        safeSet(PHONE_KEY, this.phone)
-      }
       if (info.token) {
         this.token = info.token
         safeSet(TOKEN_KEY, this.token)
@@ -203,13 +187,11 @@ export const useUserStore = defineStore('user', {
       this.token = ''
       this.refreshToken = ''
       this.nickname = ''
-      this.phone = ''
       this.role = ''
       safeRemove(TOKEN_KEY)
       safeRemove(REFRESH_TOKEN_KEY)
       safeRemove(USER_ID_KEY)
       safeRemove(NICKNAME_KEY)
-      safeRemove(PHONE_KEY)
       safeRemove(ROLE_KEY)
       // 清除购物车本地缓存,避免换账号后串数据
       storage.local.remove('stellar_cart_items')

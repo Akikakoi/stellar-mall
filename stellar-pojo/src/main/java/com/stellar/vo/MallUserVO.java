@@ -22,9 +22,6 @@ public class MallUserVO implements Serializable {
     @ApiModelProperty("用户ID")
     private Long id;
 
-    @ApiModelProperty("手机号")
-    private String phone;
-
     @ApiModelProperty("邮箱")
     private String email;
 

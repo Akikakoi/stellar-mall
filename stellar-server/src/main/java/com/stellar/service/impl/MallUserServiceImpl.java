@@ -3,6 +3,7 @@ package com.stellar.service.impl;
 import com.stellar.constant.JwtClaimsConstant;
 import com.stellar.constant.MessageConstant;
 import com.stellar.dto.MallUserLoginDTO;
+import com.stellar.dto.MallUserPasswordUpdateDTO;
 import com.stellar.dto.MallUserProfileUpdateDTO;
 import com.stellar.entity.MallUser;
 import com.stellar.exception.BaseException;
@@ -11,6 +12,7 @@ import com.stellar.mapper.MallUserMapper;
 import com.stellar.properties.JwtProperties;
 import com.stellar.service.MallUserService;
 import com.stellar.service.LoginAttemptService;
+import com.stellar.service.NotificationService;
 import com.stellar.utils.JwtUtil;
 import com.stellar.vo.MallUserLoginVO;
 import com.stellar.vo.MallUserVO;
@@ -40,10 +42,21 @@ public class MallUserServiceImpl implements MallUserService {
     /** Redis key 前缀：refresh:mall_user:{id}，单设备登录时新登录覆盖旧 refresh */
     private static final String REFRESH_KEY_PREFIX = "refresh:mall_user:";
 
+    /** 换绑邮箱验证码类型（stellar_email_code.type） */
+    private static final String EMAIL_CHANGE_CODE_TYPE = "CHANGE_EMAIL";
+
+    /** 修改密码验证码类型（stellar_email_code.type） */
+    private static final String PASSWORD_CHANGE_CODE_TYPE = "CHANGE_PASSWORD";
+
+    /** 新密码长度下限 / 上限（与前端提示保持一致） */
+    private static final int MIN_PASSWORD_LENGTH = 6;
+    private static final int MAX_PASSWORD_LENGTH = 32;
+
     private final MallUserMapper mallUserMapper;
     private final JwtProperties jwtProperties;
     private final StringRedisTemplate stringRedisTemplate;
     private final LoginAttemptService loginAttemptService;
+    private final NotificationService notificationService;
 
     /**
      * 用户邮箱 + 密码登录；新用户首次登录时自动注册。
@@ -108,7 +121,6 @@ public class MallUserServiceImpl implements MallUserService {
         if (u == null) return null;
         return MallUserVO.builder()
                 .id(u.getId())
-                .phone(u.getPhone())
                 .email(u.getEmail())
                 .nickname(u.getNickname())
                 .status(u.getStatus())
@@ -183,6 +195,149 @@ public class MallUserServiceImpl implements MallUserService {
         upd.setId(id);
         upd.setStatus(2);
         mallUserMapper.update(upd);
+    }
+
+    /**
+     * 发送换绑邮箱验证码到新邮箱。
+     * 校验：新邮箱不与当前邮箱相同、未被其他账号注册；通过后发送 CHANGE_EMAIL 类型验证码。
+     *
+     * @param userId   当前登录用户 ID
+     * @param newEmail 新邮箱地址
+     * @throws BaseException 邮箱非法、与当前相同或已被注册时抛出
+     */
+    @Override
+    public com.stellar.entity.EmailCode sendEmailChangeCode(Long userId, String newEmail) {
+        if (userId == null || newEmail == null || newEmail.isBlank()) {
+            throw new BaseException("请输入新邮箱地址");
+        }
+        MallUser current = mallUserMapper.getById(userId);
+        if (current == null) {
+            throw new BaseException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        if (newEmail.equalsIgnoreCase(current.getEmail())) {
+            throw new BaseException("新邮箱不能与当前邮箱相同");
+        }
+        assertEmailAvailable(newEmail, userId);
+        return notificationService.sendEmailCode(newEmail, EMAIL_CHANGE_CODE_TYPE);
+    }
+
+    /**
+     * 校验验证码并更换登录邮箱。
+     * 顺序：先做新邮箱占用终审（避免占用错误白白消费验证码），再校验验证码（通过即标记已用防重放），最后更新邮箱。
+     *
+     * @param userId   当前登录用户 ID
+     * @param newEmail 新邮箱地址
+     * @param code     用户输入的邮箱验证码
+     * @throws BaseException 邮箱已被注册或验证码错误时抛出
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void changeEmail(Long userId, String newEmail, String code) {
+        if (userId == null || newEmail == null || newEmail.isBlank() || code == null || code.isBlank()) {
+            throw new BaseException("参数不完整");
+        }
+        MallUser current = mallUserMapper.getById(userId);
+        if (current == null) {
+            throw new BaseException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        // 1. 最终校验：新邮箱未被其他账号注册（权威校验，防止发送验证码后被他人抢注）
+        assertEmailAvailable(newEmail, userId);
+        // 2. 校验验证码（校验通过即标记已使用，防重放）
+        if (!notificationService.verifyEmailCode(newEmail, EMAIL_CHANGE_CODE_TYPE, code)) {
+            throw new BaseException("验证码错误或已过期");
+        }
+        // 3. 更新登录邮箱
+        MallUser upd = new MallUser();
+        upd.setId(userId);
+        upd.setEmail(newEmail);
+        mallUserMapper.update(upd);
+        log.info("[换绑邮箱] 用户 {} 登录邮箱已由 {} 变更为 {}", userId, current.getEmail(), newEmail);
+    }
+
+    /**
+     * 发送修改密码验证码到当前登录邮箱。
+     * 用于邮箱验证码注册（从未设置过密码）的账号自助设置密码。
+     *
+     * @param userId 当前登录用户 ID
+     * @return 持久化后的验证码实体（开发模式下 Controller 用其 code 作为 devCode 返回）
+     * @throws BaseException 用户不存在时抛出
+     */
+    @Override
+    public com.stellar.entity.EmailCode sendPasswordChangeCode(Long userId) {
+        if (userId == null) {
+            throw new BaseException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        MallUser user = mallUserMapper.getById(userId);
+        if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new BaseException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+        return notificationService.sendEmailCode(user.getEmail(), PASSWORD_CHANGE_CODE_TYPE);
+    }
+
+    /**
+     * 修改/设置登录密码。
+     * <p>
+     * 验证方式二选一（都传时以邮箱验证码为准）：<br>
+     * 1. 原密码：BCrypt 校验 oldPassword；<br>
+     * 2. 邮箱验证码：校验发往当前登录邮箱的 code（校验通过即标记已用，防重放）。
+     * </p>
+     * 校验通过后用 BCrypt 加密写入新密码；明文密码不落库、不写日志。
+     *
+     * @param userId 当前登录用户 ID
+     * @param dto    改密参数
+     * @throws BaseException 用户不存在 / 原密码错误 / 验证码错误 / 新密码不合规时抛出
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updatePassword(Long userId, MallUserPasswordUpdateDTO dto) {
+        if (userId == null || dto == null) {
+            throw new BaseException("参数不完整");
+        }
+        String newPassword = dto.getNewPassword() == null ? "" : dto.getNewPassword().trim();
+        if (newPassword.length() < MIN_PASSWORD_LENGTH || newPassword.length() > MAX_PASSWORD_LENGTH) {
+            throw new BaseException("密码长度需为 " + MIN_PASSWORD_LENGTH + "-" + MAX_PASSWORD_LENGTH + " 位");
+        }
+        MallUser user = mallUserMapper.getById(userId);
+        if (user == null) {
+            throw new BaseException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+
+        boolean byEmailCode = dto.getCode() != null && !dto.getCode().isBlank();
+        boolean byOldPassword = dto.getOldPassword() != null && !dto.getOldPassword().isBlank();
+        if (!byEmailCode && !byOldPassword) {
+            throw new BaseException("请输入原密码或获取邮箱验证码");
+        }
+
+        if (byEmailCode) {
+            // 邮箱验证码校验（校验通过即标记已使用，防重放）
+            if (!notificationService.verifyEmailCode(user.getEmail(), PASSWORD_CHANGE_CODE_TYPE, dto.getCode().trim())) {
+                throw new BaseException("验证码错误或已过期");
+            }
+        } else {
+            if (user.getPassword() == null || !BCrypt.checkpw(dto.getOldPassword(), user.getPassword())) {
+                throw new BaseException(MessageConstant.PASSWORD_ERROR);
+            }
+            if (dto.getOldPassword().equals(newPassword)) {
+                throw new BaseException("新密码不能与原密码相同");
+            }
+        }
+
+        MallUser upd = new MallUser();
+        upd.setId(userId);
+        upd.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+        mallUserMapper.update(upd);
+        // 安全：不记录明文密码，仅记录验证方式
+        log.info("[修改密码] 用户 {} 密码已更新，验证方式：{}", userId, byEmailCode ? "邮箱验证码" : "原密码");
+    }
+
+    /**
+     * 校验邮箱未被其他账号注册；被占用时抛出"该邮箱已被注册"。
+     */
+    private void assertEmailAvailable(String email, Long selfId) {
+        MallUser exist = mallUserMapper.getByEmail(email);
+        if (exist != null && !exist.getId().equals(selfId)) {
+            throw new BaseException("该邮箱已被注册");
+        }
     }
 
     /**

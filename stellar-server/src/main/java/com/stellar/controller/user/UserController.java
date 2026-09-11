@@ -4,6 +4,7 @@ import com.stellar.annotation.RateLimit;
 import com.stellar.constant.MessageConstant;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.MallUserLoginDTO;
+import com.stellar.dto.MallUserPasswordUpdateDTO;
 import com.stellar.dto.MallUserProfileUpdateDTO;
 import com.stellar.entity.MallUser;
 import com.stellar.exception.BaseException;
@@ -18,11 +19,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user/user")
@@ -110,7 +114,6 @@ public class UserController {
         if (u == null) return Result.success(null);
         return Result.success(MallUserVO.builder()
                 .id(u.getId())
-                .phone(u.getPhone())
                 .email(u.getEmail())
                 .nickname(u.getNickname())
                 .status(u.getStatus())
@@ -137,6 +140,55 @@ public class UserController {
         return Result.success();
     }
 
+    @Value("${stellar.mail.enabled:false}")
+    private boolean mailEnabled;
+
+    @RateLimit(key = "email-change-code", maxRequests = 5, windowSeconds = 60)
+    @PostMapping("/email/change-code")
+    @ApiOperation("发送换绑邮箱验证码到新邮箱（需登录，校验新邮箱未被注册）")
+    public Result<Map<String, Object>> sendEmailChangeCode(@RequestBody @Valid EmailChangeCodeDTO dto) {
+        com.stellar.entity.EmailCode emailCode =
+                mallUserService.sendEmailChangeCode(BaseContext.getCurrentId(), dto.getEmail());
+        Map<String, Object> data = new HashMap<>();
+        data.put("sent", mailEnabled);
+        if (!mailEnabled) {
+            // 开发模式：未配置 SMTP，直接把验证码返回给前端展示
+            data.put("devCode", emailCode.getCode());
+        }
+        return Result.success(data);
+    }
+
+    @RateLimit(key = "email-change", maxRequests = 10, windowSeconds = 60)
+    @PostMapping("/email/change")
+    @ApiOperation("校验验证码并更换登录邮箱（最终校验新邮箱未被占用）")
+    public Result<String> changeEmail(@RequestBody @Valid EmailChangeDTO dto) {
+        mallUserService.changeEmail(BaseContext.getCurrentId(), dto.getEmail(), dto.getCode());
+        return Result.success();
+    }
+
+    @RateLimit(key = "password-change-code", maxRequests = 5, windowSeconds = 60)
+    @PostMapping("/password/code")
+    @ApiOperation("发送修改密码验证码到当前登录邮箱（供从未设置过密码的账号自助设置密码）")
+    public Result<Map<String, Object>> sendPasswordChangeCode() {
+        com.stellar.entity.EmailCode emailCode =
+                mallUserService.sendPasswordChangeCode(BaseContext.getCurrentId());
+        Map<String, Object> data = new HashMap<>();
+        data.put("sent", mailEnabled);
+        if (!mailEnabled) {
+            // 开发模式：未配置 SMTP，直接把验证码返回给前端展示
+            data.put("devCode", emailCode.getCode());
+        }
+        return Result.success(data);
+    }
+
+    @RateLimit(key = "password-change", maxRequests = 10, windowSeconds = 60)
+    @PostMapping("/password")
+    @ApiOperation("修改登录密码（原密码验证 / 邮箱验证码验证 二选一）")
+    public Result<String> updatePassword(@RequestBody @Valid MallUserPasswordUpdateDTO dto) {
+        mallUserService.updatePassword(BaseContext.getCurrentId(), dto);
+        return Result.success();
+    }
+
     // ======================== DTO ========================
 
     @Data
@@ -151,5 +203,19 @@ public class UserController {
         private String captchaId;
         /** 用户识别出的图形验证码 */
         private String captchaCode;
+    }
+
+    @Data
+    public static class EmailChangeCodeDTO {
+        @NotBlank @Email(message = "邮箱格式不正确")
+        private String email;
+    }
+
+    @Data
+    public static class EmailChangeDTO {
+        @NotBlank @Email(message = "邮箱格式不正确")
+        private String email;
+        @NotBlank(message = "验证码不能为空")
+        private String code;
     }
 }
