@@ -68,7 +68,7 @@ class OrderCancelServiceTest {
         boolean ok = orderCancelService.cancelExpiredOrder(order);
 
         assertTrue(ok);
-        verify(skuStockService).rollback(10L, 2);
+        verify(skuStockService).rollback(eq(10L), eq(2), any());
         verify(pointsService).unfreezePointsForOrder(USER_ID, ORDER_ID);
         verify(couponService).returnCouponByOrderId(ORDER_ID);
     }
@@ -80,7 +80,7 @@ class OrderCancelServiceTest {
         boolean ok = orderCancelService.cancelExpiredOrder(order);
 
         assertFalse(ok);
-        verify(skuStockService, never()).rollback(anyLong(), anyInt());
+        verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
         verify(mallOrderItemMapper, never()).listByOrderId(anyLong());
     }
 
@@ -104,7 +104,7 @@ class OrderCancelServiceTest {
                 .qty(1).price(BigDecimal.valueOf(100))
                 .subtotal(BigDecimal.valueOf(100)).build();
         when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Collections.singletonList(it));
-        doThrow(new RuntimeException("库存回滚失败")).when(skuStockService).rollback(10L, 1);
+        doThrow(new RuntimeException("库存回滚失败")).when(skuStockService).rollback(eq(10L), eq(1), any());
 
         assertThrows(RuntimeException.class, () -> orderCancelService.cancelExpiredOrder(order));
         // CAS 已执行但事务未提交，异常传播后由 REQUIRES_NEW 回滚 → 订单不会停留在 CANCELLED

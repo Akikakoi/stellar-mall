@@ -103,8 +103,8 @@ class OrderSubmitTest {
         when(spuMapper.listByIds(anyList())).thenReturn(Arrays.asList(spu1, spu2));
 
         // 扣库存都成功
-        doNothing().when(skuStockService).deduct(10L, 2);
-        doNothing().when(skuStockService).deduct(20L, 1);
+        doNothing().when(skuStockService).deduct(eq(10L), eq(2), any());
+        doNothing().when(skuStockService).deduct(eq(20L), eq(1), any());
 
         // 订单插入
         when(mallOrderMapper.insert(any(MallOrder.class))).thenAnswer(inv -> {
@@ -132,8 +132,8 @@ class OrderSubmitTest {
         assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(400)));
 
         // 每条 SKU 的 deduct 都执行一次
-        verify(skuStockService, times(1)).deduct(10L, 2);
-        verify(skuStockService, times(1)).deduct(20L, 1);
+        verify(skuStockService, times(1)).deduct(eq(10L), eq(2), any());
+        verify(skuStockService, times(1)).deduct(eq(20L), eq(1), any());
 
         // Order + 批量写入 2 条 OrderItem（一次 insertBatch）
         verify(mallOrderMapper, times(1)).insert(any(MallOrder.class));
@@ -183,9 +183,9 @@ class OrderSubmitTest {
         when(spuMapper.listByIds(anyList())).thenReturn(Arrays.asList(spu1, spu2));
 
         // 第一个成功，第二个版本冲突最终失败
-        doNothing().when(skuStockService).deduct(10L, 1);
+        doNothing().when(skuStockService).deduct(eq(10L), eq(1), any());
         doThrow(new StockInsufficientException("并发冲突"))
-                .when(skuStockService).deduct(20L, 1);
+                .when(skuStockService).deduct(eq(20L), eq(1), any());
 
         // 执行：必须抛异常
         assertThrows(StockInsufficientException.class,
@@ -199,8 +199,8 @@ class OrderSubmitTest {
 
         // 但两个 deduct 都被调用过（SkuStockService 自己内部的 rollback
         // 不是业务关心的事，这里只验证调用链）
-        verify(skuStockService, times(1)).deduct(10L, 1);
-        verify(skuStockService, times(1)).deduct(20L, 1);
+        verify(skuStockService, times(1)).deduct(eq(10L), eq(1), any());
+        verify(skuStockService, times(1)).deduct(eq(20L), eq(1), any());
     }
 
     // ========== 购物车为空 ==========
@@ -213,7 +213,7 @@ class OrderSubmitTest {
                 () -> orderService.submit(USER_ID, buildSubmitDto("地址", 1, null)),
                 "购物车为空时必须抛 BaseException（对应 SHOPPING_CART_IS_NULL）");
 
-        verify(skuStockService, never()).deduct(anyLong(), anyInt());
+        verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
         verify(mallOrderMapper, never()).insert(any());
     }
 
@@ -236,7 +236,7 @@ class OrderSubmitTest {
         Spu spu1 = buildSpu(1L, "SPU1");
         when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu1));
 
-        doNothing().when(skuStockService).deduct(10L, 1);
+        doNothing().when(skuStockService).deduct(eq(10L), eq(1), any());
 
         when(mallOrderMapper.insert(any(MallOrder.class))).thenAnswer(inv -> {
             MallOrder mo = inv.getArgument(0);
@@ -270,7 +270,7 @@ class OrderSubmitTest {
         assertThrows(BaseException.class,
                 () -> orderService.submit(USER_ID, buildSubmitDto("地址", 1, null)));
 
-        verify(skuStockService, never()).deduct(anyLong(), anyInt());
+        verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
         verify(mallOrderMapper, never()).insert(any());
     }
 }
