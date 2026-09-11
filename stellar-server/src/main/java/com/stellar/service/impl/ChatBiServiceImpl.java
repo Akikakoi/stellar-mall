@@ -102,15 +102,17 @@ public class ChatBiServiceImpl implements ChatBiService {
             stellar_sku 规格表(SKU): id, spu_id, name(规格名), specs(规格值), price(售价), \
             original_price(原价), stock(库存), warn_stock(库存预警值), status(1启用0停用)
             stellar_category 分类表: id, name(分类名), type(1一级分类 2二级分类), sort, status
-            stellar_mall_user 用户表: id, phone(手机号), nickname(昵称), status(1正常0禁用), \
+            stellar_mall_user 用户表: id, nickname(昵称), email, status(1正常0禁用), \
             create_time(注册时间)
             stellar_after_sale 售后表: id, order_id, sku_id, user_id, type(1仅退款/2退货退款/3换货), \
             status(1申请中/2商家审核中/3用户退货中/4退款中/5已完成/6已拒绝/7已取消), create_time
             stellar_coupon 优惠券表: id, name, type, condition_amount(使用门槛), \
             discount_amount(优惠金额), total_count(发放总量), received_count(已领取), \
             used_count(已使用), per_user_limit(每人限领), start_time, end_time, status, create_time
-            统计口径: 有效销售额 = stellar_mall_order.status IN ('PAID','SHIPPED','COMPLETED') \
-            AND is_refunded = 0 的 SUM(pay_amount)；类目销售额需 stellar_spu 关联 \
+            统计口径: 有效销售额（净额） = stellar_mall_order.status IN ('PAID','SHIPPED','COMPLETED','PARTIAL_REFUNDED') \
+            AND is_refunded = 0 的 SUM(pay_amount - 已完成售后退款额)。其中已完成售后退款额来自 \
+            stellar_after_sale（status=5，按 order_id 汇总 amount）；部分退款订单（PARTIAL_REFUNDED）\
+            只扣除已退部分，剩余商品金额仍计入销售额；类目销售额需 stellar_spu 关联 \
             stellar_category（spu.category_id → 一级分类）
             """;
 

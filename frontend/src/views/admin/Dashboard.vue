@@ -21,7 +21,7 @@
 
     <div class="grid-row">
       <div class="panel chart-panel">
-        <div class="panel-head"><span class="panel-title">近7天订单趋势</span></div>
+        <div class="panel-head"><span class="panel-title">近7天有效订单量</span></div>
         <div ref="orderChartRef" v-show="orderTrendHasData" style="height: 260px;"></div>
         <el-empty v-if="!orderTrendHasData" description="暂无订单数据" :image-size="80" />
       </div>
