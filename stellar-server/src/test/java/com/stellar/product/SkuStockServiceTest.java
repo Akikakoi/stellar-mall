@@ -25,6 +25,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class SkuStockServiceTest {
 
+    /** 出入库日志的业务单号：单测里固定值，便于需要时核对流水 */
+    private static final String BIZ_NO = "UNITTEST";
+
     @Autowired(required = false)
     private SkuStockService skuStockService;
     @Autowired(required = false)
@@ -68,7 +71,7 @@ class SkuStockServiceTest {
         assertNotNull(skuStockService, "RED失败：SkuStockService 未注册");
         Sku s = createSkuWithStock(10);
 
-        skuStockService.deduct(s.getId(), 3);
+        skuStockService.deduct(s.getId(), 3, BIZ_NO);
         Sku got = skuService.getById(s.getId());
         assertEquals(Integer.valueOf(7), got.getStock());
         assertEquals(Integer.valueOf(1), got.getVersion(), "扣减成功 version 必须 +1");
@@ -79,7 +82,7 @@ class SkuStockServiceTest {
         assertNotNull(skuStockService);
         Sku s = createSkuWithStock(2);
 
-        assertThrows(BaseException.class, () -> skuStockService.deduct(s.getId(), 3),
+        assertThrows(BaseException.class, () -> skuStockService.deduct(s.getId(), 3, BIZ_NO),
                 "库存不足必须抛出 BaseException（子类 StockInsufficientException 也行）");
         Sku got = skuService.getById(s.getId());
         assertEquals(Integer.valueOf(2), got.getStock(), "扣失败后库存必须保持原值");
@@ -90,9 +93,9 @@ class SkuStockServiceTest {
     void rollbackStock_incrementsStock_andIncrementsVersion() {
         assertNotNull(skuStockService);
         Sku s = createSkuWithStock(10);
-        skuStockService.deduct(s.getId(), 4); // stock=6, v=1
+        skuStockService.deduct(s.getId(), 4, BIZ_NO); // stock=6, v=1
 
-        skuStockService.rollback(s.getId(), 4);
+        skuStockService.rollback(s.getId(), 4, BIZ_NO);
         Sku got = skuService.getById(s.getId());
         assertEquals(Integer.valueOf(10), got.getStock());
         assertEquals(Integer.valueOf(2), got.getVersion(), "回滚也必须推进 version，避免 ABA");
@@ -110,7 +113,7 @@ class SkuStockServiceTest {
         for (int i = 0; i < threads; i++) {
             ts[i] = new Thread(() -> {
                 try {
-                    skuStockService.deduct(s.getId(), 1);
+                    skuStockService.deduct(s.getId(), 1, BIZ_NO);
                     synchronized (successCount) { successCount[0]++; }
                 } catch (Exception ignored) { }
             });
