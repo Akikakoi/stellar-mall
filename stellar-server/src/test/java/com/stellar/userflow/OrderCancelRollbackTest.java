@@ -114,8 +114,8 @@ class OrderCancelRollbackTest {
         when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Arrays.asList(it1, it2));
 
         // rollback 都成功
-        doNothing().when(skuStockService).rollback(11L, 2);
-        doNothing().when(skuStockService).rollback(22L, 6);
+        doNothing().when(skuStockService).rollback(eq(11L), eq(2), any());
+        doNothing().when(skuStockService).rollback(eq(22L), eq(6), any());
 
         when(mallOrderMapper.casUpdateStatus(ORDER_ID,
                 OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
@@ -124,8 +124,8 @@ class OrderCancelRollbackTest {
         assertDoesNotThrow(() -> orderService.cancel(ORDER_ID, USER_ID));
 
         // 逐条 rollback 被调用
-        verify(skuStockService, times(1)).rollback(11L, 2);
-        verify(skuStockService, times(1)).rollback(22L, 6);
+        verify(skuStockService, times(1)).rollback(eq(11L), eq(2), any());
+        verify(skuStockService, times(1)).rollback(eq(22L), eq(6), any());
 
         // 状态更新为 CANCELLED
         verify(mallOrderMapper, times(1)).casUpdateStatus(ORDER_ID,
@@ -144,7 +144,7 @@ class OrderCancelRollbackTest {
                 () -> orderService.cancel(ORDER_ID, USER_ID),
                 "订单不属于当前用户必须抛异常");
 
-        verify(skuStockService, never()).rollback(anyLong(), anyInt());
+        verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
         verify(mallOrderMapper, never()).casUpdateStatus(anyLong(), anyString(), anyString());
     }
 
@@ -160,7 +160,7 @@ class OrderCancelRollbackTest {
         assertTrue(ex.getMessage().contains("状态") || ex.getMessage().contains(OrderStatus.PENDING.getDescription()),
                 "非 PENDING 取消必须报订单状态错误，实际：" + ex.getMessage());
 
-        verify(skuStockService, never()).rollback(anyLong(), anyInt());
+        verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
         verify(mallOrderMapper, never()).casUpdateStatus(anyLong(), anyString(), anyString());
     }
 
@@ -230,7 +230,7 @@ class OrderCancelRollbackTest {
                 OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue())).thenReturn(1);
 
         assertDoesNotThrow(() -> orderService.cancel(ORDER_ID, USER_ID));
-        verify(skuStockService, never()).rollback(anyLong(), anyInt());
+        verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
         verify(mallOrderMapper, times(1)).casUpdateStatus(ORDER_ID,
                 OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
     }

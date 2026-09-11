@@ -143,7 +143,7 @@ class OrderServiceProxyTest {
             when(skuMapper.listByIds(anyList())).thenReturn(Arrays.asList(s1, s2));
             when(spuMapper.listByIds(anyList())).thenReturn(Arrays.asList(spu(1L, "SPU1"), spu(2L, "SPU2")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(2);
             when(cartMapper.deleteByIds(anyList())).thenReturn(2);
@@ -154,8 +154,8 @@ class OrderServiceProxyTest {
             assertEquals(ORDER_ID, result.getId());
             assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(400)));
             assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(400)));
-            verify(skuStockService).deduct(10L, 2);
-            verify(skuStockService).deduct(20L, 1);
+            verify(skuStockService).deduct(eq(10L), eq(2), any());
+            verify(skuStockService).deduct(eq(20L), eq(1), any());
             verify(cartMapper).deleteByIds(argThat(ids -> ids.contains(1L) && ids.contains(2L)));
         }
 
@@ -170,8 +170,8 @@ class OrderServiceProxyTest {
                     sku(20L, 2L, "S2", "默认", BigDecimal.valueOf(50))));
             when(spuMapper.listByIds(anyList())).thenReturn(Arrays.asList(spu(1L, "P1"), spu(2L, "P2")));
 
-            doNothing().when(skuStockService).deduct(10L, 1);
-            doThrow(new StockInsufficientException("库存不足")).when(skuStockService).deduct(20L, 1);
+            doNothing().when(skuStockService).deduct(eq(10L), eq(1), any());
+            doThrow(new StockInsufficientException("库存不足")).when(skuStockService).deduct(eq(20L), eq(1), any());
 
             assertThrows(StockInsufficientException.class,
                     () -> orderService.submit(USER_ID, submitDto("地址", 1)));
@@ -184,7 +184,7 @@ class OrderServiceProxyTest {
             when(cartMapper.listCheckedByUserId(USER_ID)).thenReturn(Collections.emptyList());
             assertThrows(BaseException.class,
                     () -> orderService.submit(USER_ID, submitDto("地址", 1)));
-            verify(skuStockService, never()).deduct(anyLong(), anyInt());
+            verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
         }
 
         @Test @DisplayName("购物车SKU已下架 → BaseException")
@@ -198,7 +198,7 @@ class OrderServiceProxyTest {
 
             assertThrows(BaseException.class,
                     () -> orderService.submit(USER_ID, submitDto("地址", 1)));
-            verify(skuStockService, never()).deduct(anyLong(), anyInt());
+            verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
         }
 
         @Test @DisplayName("使用优惠券下单 → 抵扣金额正确，券被标记已使用")
@@ -210,7 +210,7 @@ class OrderServiceProxyTest {
             when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(s));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "P1")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
             when(cartMapper.deleteByIds(anyList())).thenReturn(1);
@@ -243,7 +243,7 @@ class OrderServiceProxyTest {
             when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(s));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "P1")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
             when(cartMapper.deleteByIds(anyList())).thenReturn(1);
@@ -338,7 +338,7 @@ class OrderServiceProxyTest {
                     Collections.singletonList(sku(10L, 1L, "直购SKU", "默认", BigDecimal.valueOf(150))));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "直购SPU")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
 
@@ -364,7 +364,7 @@ class OrderServiceProxyTest {
                     Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
 
@@ -391,7 +391,7 @@ class OrderServiceProxyTest {
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
 
             assertThrows(BaseException.class, () -> orderService.submitDirect(USER_ID, dto));
-            verify(skuStockService, never()).deduct(anyLong(), anyInt());
+            verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
             verify(mallOrderMapper, never()).insert(any());
         }
 
@@ -410,7 +410,7 @@ class OrderServiceProxyTest {
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
 
             assertThrows(BaseException.class, () -> orderService.submitDirect(USER_ID, dto));
-            verify(skuStockService, never()).deduct(anyLong(), anyInt());
+            verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
             verify(mallOrderMapper, never()).insert(any());
         }
 
@@ -429,7 +429,7 @@ class OrderServiceProxyTest {
                     Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
 
@@ -457,7 +457,7 @@ class OrderServiceProxyTest {
                     Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
 
@@ -540,7 +540,7 @@ class OrderServiceProxyTest {
 
             orderService.cancel(ORDER_ID, USER_ID);
 
-            verify(skuStockService).rollback(10L, 2);
+            verify(skuStockService).rollback(eq(10L), eq(2), any());
             verify(mallOrderMapper).casUpdateStatus(ORDER_ID,
                     OrderStatus.PENDING.getBackendValue(), OrderStatus.CANCELLED.getBackendValue());
             verify(pointsFacade).unfreezeForOrderQuietly(USER_ID, ORDER_ID);
@@ -555,7 +555,7 @@ class OrderServiceProxyTest {
 
             assertThrows(BaseException.class,
                     () -> orderService.cancel(ORDER_ID, USER_ID));
-            verify(skuStockService, never()).rollback(anyLong(), anyInt());
+            verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
         }
     }
 
@@ -793,7 +793,7 @@ class OrderServiceProxyTest {
 
             orderService.completeRefund(ORDER_ID, 10L);
 
-            verify(skuStockService).rollback(10L, 3);
+            verify(skuStockService).rollback(eq(10L), eq(3), any());
             verify(mallOrderMapper).markRefunded(ORDER_ID);
             verify(mallOrderMapper, never()).markPartialRefunded(ORDER_ID);
         }
@@ -811,7 +811,7 @@ class OrderServiceProxyTest {
 
             orderService.completeRefund(ORDER_ID, 10L);
 
-            verify(skuStockService).rollback(10L, 3);
+            verify(skuStockService).rollback(eq(10L), eq(3), any());
             verify(mallOrderMapper).markPartialRefunded(ORDER_ID);
             verify(mallOrderMapper, never()).markRefunded(ORDER_ID);
         }
@@ -824,7 +824,7 @@ class OrderServiceProxyTest {
 
             assertThrows(BaseException.class,
                     () -> orderService.completeRefund(ORDER_ID, 10L));
-            verify(skuStockService, never()).rollback(anyLong(), anyInt());
+            verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
         }
 
         @Test @DisplayName("订单不存在 → BaseException")
@@ -844,7 +844,7 @@ class OrderServiceProxyTest {
             orderService.completeRefund(ORDER_ID, 10L);
 
             // 幂等返回，不回滚库存，避免双倍回滚导致库存虚增
-            verify(skuStockService, never()).rollback(anyLong(), anyInt());
+            verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
             verify(mallOrderItemMapper, never()).listByOrderId(anyLong());
         }
 
@@ -852,7 +852,7 @@ class OrderServiceProxyTest {
         void refundWithoutSkuId_skipped() {
             orderService.completeRefund(ORDER_ID, null);
 
-            verify(skuStockService, never()).rollback(anyLong(), anyInt());
+            verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
             verify(mallOrderMapper, never()).markRefunded(ORDER_ID);
         }
     }
@@ -955,7 +955,7 @@ class OrderServiceProxyTest {
             when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(s));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "P1")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
             when(cartMapper.deleteByIds(anyList())).thenReturn(1);
@@ -984,7 +984,7 @@ class OrderServiceProxyTest {
             when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(s));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "P1")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
             when(cartMapper.deleteByIds(anyList())).thenReturn(1);
@@ -1055,7 +1055,7 @@ class OrderServiceProxyTest {
                     Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
             when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
 
-            doNothing().when(skuStockService).deduct(anyLong(), anyInt());
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
             when(cartMapper.deleteByIds(anyList())).thenReturn(1);
