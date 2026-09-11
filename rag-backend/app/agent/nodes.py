@@ -2,6 +2,7 @@
 from __future__ import annotations
 import hashlib
 import json
+import re
 from typing import Dict, Any, List
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
@@ -10,6 +11,7 @@ from app.config import settings
 from app.core.logger import logger
 from app.rag.llm import get_langchain_chat
 from app.rag.llm_cache import get_cache_sync, put_cache_sync, single_flight_sync, INTENT_PROMPT_HASH, AGENT_PROMPT_HASH
+from app.rag.retriever import get_query_cache
 from app.agent.state import AgentState
 from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT
 from app.agent.tools import (
@@ -18,6 +20,7 @@ from app.agent.tools import (
     cancel_order_tool, confirm_receipt_tool, query_favorite_tool,
     add_to_cart_tool, query_wallet_tool, product_search_tool, query_reviews_tool,
 )
+from app.agent.tools.kb_tool import kb_specs_for_products
 from app.agent.tools.resolve_sku_tool import resolve_sku_tool
 
 
@@ -213,11 +216,33 @@ def _resolve_query_tags(query: str) -> list | None:
     return None
 
 
+# 规则快路径：字面意图极其明确的指令式表达直接判定，跳过 LLM 调用。
+# 设计原则：宁缺毋滥——只收录"看到这几个字就必然是这个意图"的表达，
+# 带疑问语气（吗/没/了）、需要上下文推断、或咨询/搜索边界模糊的一律交给 LLM。
+# 例："订单取消了吗" 不匹配 cancel_order（无"取消订单/帮我取消"字样），走 LLM 判断。
+_INTENT_RULES = [
+    ("cancel_order", re.compile(r"取消订单|帮我取消|我要取消")),
+    ("confirm_receipt", re.compile(r"确认收货|确认签收")),
+    ("wallet_query", re.compile(r"钱包.*(余额|多少)|余额.*(多少|查)")),
+    ("cart_query", re.compile(r"购物车.*(有什么|看看|查|列表|里面)")),
+    ("order_query", re.compile(r"(订单|物流).*(进度|状态|到哪|物流|列表|查)|查(一下)?(我的)?订单")),
+    ("favorite_query", re.compile(r"收藏(夹)?.*(看看|查|哪些|列表)|看看.*收藏")),
+    ("after_sales", re.compile(r"(申请|发起)售后")),
+]
+
+
 def intent_classification_node(state: AgentState) -> Dict[str, Any]:
     """意图识别节点：判断用户问题属于哪个类别。"""
     query = _get_last_user_query(state)
     if not query:
         return {"intent": "other", "intent_confidence": 0.0}
+
+    # === 规则快路径：显式指令直接返回，省一次 LLM 调用（规则自含语义，不依赖历史） ===
+    for rule_intent, pattern in _INTENT_RULES:
+        m = pattern.search(query)
+        if m:
+            logger.info(f"[Intent] rule HIT  query={query[:30]}...  intent={rule_intent}  matched='{m.group()}'")
+            return {"intent": rule_intent, "intent_confidence": 0.90}
 
     # 构建对话历史文本片段（最多 6 条最近消息）
     history_text = _format_recent_history(state.get("messages", []), max_turns=6)
@@ -847,77 +872,24 @@ def tool_execution_node(state: AgentState) -> Dict[str, Any]:
             ]
             if result.get("success") and result.get("data") and any(kw in query_text for kw in spec_keywords):
                 try:
-                    kb_specs = []
-                    seen_keys = set()  # (doc_name, chunk_index) 去重
-                    # 同时记录每个 product 至少命中了几个 doc，避免重复
-                    seen_product_docs = {}  # pname -> set(doc_name)
                     product_names = [item.get("name", "") for item in result.get("data", []) if item.get("name")][:6]
+
+                    # 优化（原方案 1/2/3 逐商品 hybrid_retrieve 最多 13 次向量检索）：
+                    # 改为一次全量拉取 ChromaDB + 按商品名分组打分，0 次向量搜索。
+                    # 打分关键词：优先用问题中提取的规格属性（如"充电功率 有线快充"），
+                    # 其次用问题命中的 spec_keywords，都没有则用通用充电词表兜底。
                     spec_attrs = _extract_spec_attrs(query_text)
-
-                    def _add_sources(kb_res, pname=None):
-                        if not kb_res.get("success") or not kb_res.get("sources"):
-                            return 0
-                        added = 0
-                        for src in kb_res["sources"]:
-                            key = (src.get("doc_name", ""), src.get("chunk_index", 0))
-                            if key not in seen_keys:
-                                seen_keys.add(key)
-                                if pname and not src.get("matched_product"):
-                                    src["matched_product"] = pname
-                                # 记录 product 命中过哪些 doc
-                                if pname:
-                                    seen_product_docs.setdefault(pname, set()).add(src.get("doc_name", ""))
-                                kb_specs.append(src)
-                                added += 1
-                        return added
-
-                    # 方案 1：逐个商品单独检索（精准但召回可能不足）
-                    # 重要修复：tags_filter 用准确的 "智能手机"（KB 文档的真实 tag）
-                    #            之前用 "手机" 虽能 $contains 命中，但语义不对且容易被改库影响
-                    for pname in product_names:
-                        kb_q = f"{pname} {spec_attrs}" if spec_attrs else f"{pname} 充电功率 有线快充 电池容量"
-                        try:
-                            kb_res = kb_search_tool.invoke({
-                                "query": kb_q,
-                                "top_k": 6,
-                                "tags_filter": ["智能手机"],
-                            })
-                            _add_sources(kb_res, pname)
-                        except Exception:
-                            pass
-                        if len(kb_specs) >= 18:  # 6 款商品 * 3 条
-                            break
-
-                    # 方案 2（关键修复）：始终跑一次全量兜底检索，覆盖未被方案 1 命中的商品
-                    # 之前错误地写成 `if not kb_specs`：只要方案 1 找到任意一条，方案 2 就不跑
-                    # 导致其他商品的 spec（比如玉米手机 10 Pro 的 120W）永远拿不到
-                    # 现在：始终跑一次，不带 tags_filter，覆盖更广
-                    try:
-                        fallback_res = kb_search_tool.invoke({
-                            "query": query_text,
-                            "top_k": 12,
-                        })
-                        _add_sources(fallback_res)
-                    except Exception:
-                        pass
-
-                    # 方案 3（关键修复）：对每个还没命中 spec 的商品，再单独查一次（不带 tags_filter）
-                    # 确保每款返回的商品都有 spec 片段进入上下文
-                    for pname in product_names:
-                        if pname in seen_product_docs and seen_product_docs[pname]:
-                            continue  # 已经被方案 1/2 命中，跳过
-                        try:
-                            kb_res = kb_search_tool.invoke({
-                                "query": f"{pname} 充电功率 有线快充 电池容量",
-                                "top_k": 5,
-                            })
-                            _add_sources(kb_res, pname)
-                        except Exception:
-                            pass
-
+                    score_keywords = (
+                        spec_attrs.split()
+                        or [kw for kw in spec_keywords if kw in query_text]
+                        or ["充电", "快充", "电池", "容量"]
+                    )
+                    kb_res = kb_specs_for_products(query_text, product_names, score_keywords)
+                    kb_specs = kb_res.get("sources") or []
                     if kb_specs:
                         logger.info(
-                            f"[product_search+KB] 为 {len(product_names)} 款商品补充 {len(kb_specs)} 条规格参数片段, 命中商品={list(seen_product_docs.keys())}"
+                            f"[product_search+KB] 单次全量检索为 {len(product_names)} 款商品补充 "
+                            f"{len(kb_specs)} 条规格参数片段, 命中商品={kb_res.get('matched')}"
                         )
                 except Exception as e:
                     logger.warning(f"[product_search+KB] 知识库补充失败: {e}")
@@ -980,6 +952,29 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
     preset_answer = state.get("final_answer", "")
     if preset_answer and not state.get("current_tool"):
         return {"final_answer": preset_answer}
+
+    # === FAQ 缓存旁路（仅 KB 静态知识类回答） ===
+    # 白名单：product_consult + kb_search 工具成功——kb_search 返回的是知识库文档
+    # （静态规格/政策），不含价格库存等实时数据，缓存安全；product_search 等
+    # 实时工具结果绝不走此旁路。命中直接返回，跳过 LLM 调用。
+    # 短追问（"那电池呢"）跳过：脱离上下文的裸 query 做向量匹配容易误命中。
+    # KB 文档变更时 kb_service._clear_query_cache() 会清空缓存，失效链路现成。
+    if (intent == "product_consult"
+            and state.get("current_tool") == "kb_search"
+            and tool_result.get("success")
+            and len(query.strip()) > 6):
+        try:
+            faq_hit = get_query_cache().get(query)
+            if faq_hit:
+                faq_answer, faq_sources = faq_hit
+                logger.info(f"[FAQ] Agent 旁路命中  query={query[:30]}...")
+                return {
+                    "final_answer": faq_answer,
+                    "stream_chunks": [faq_answer],
+                    "sources": faq_sources,
+                }
+        except Exception as e:  # noqa
+            logger.warning(f"[FAQ] Agent 旁路查询异常: {e}")
 
     if intent == "small_talk":
         return _handle_small_talk(state)
@@ -1073,6 +1068,18 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                     answer_chunks.append(str(txt))
 
             full_answer = "".join(answer_chunks)
+
+            # === FAQ 缓存写入（与上方旁路读取同一白名单） ===
+            # 只收 KB 静态知识类回答：工具成功 + 有 sources + 回答非空。
+            if (intent == "product_consult"
+                    and state.get("current_tool") == "kb_search"
+                    and tool_result.get("success")):
+                faq_sources = state.get("sources") or []
+                if faq_sources and full_answer:
+                    try:
+                        get_query_cache().put(query, full_answer, faq_sources)
+                    except Exception as e:  # noqa
+                        logger.warning(f"[FAQ] Agent 侧写入失败: {e}")
 
             # === 异步写入缓存 ===
             try:

@@ -93,6 +93,8 @@ class Settings(BaseSettings):
     LLM_MODEL_NAME: str = "qwen-plus"
     LLM_TEMPERATURE: float = 0.3
     LLM_MAX_TOKENS: int = 2048
+    LLM_TIMEOUT_SECONDS: float = 60.0   # 单次 LLM 请求超时（秒），防止卡死拖垮整条链路
+    LLM_MAX_RETRIES: int = 1            # 客户端层重试次数（不含首次调用）
 
     # Embedding
     EMBEDDING_MODEL_NAME: str = "BAAI/bge-large-zh-v1.5"
@@ -115,7 +117,7 @@ class Settings(BaseSettings):
     # RAG
     RETRIEVER_TOP_K: int = 20
     RERANK_TOP_K: int = 5
-    SIMILARITY_THRESHOLD: float = 0.25   # 降到 0.25：自然语言问句 vs 结构化 spec 的语义相似度本身偏低
+    SIMILARITY_THRESHOLD: float = 0.4    # 与 .env 实际值保持一致（默认值仅在不带 .env 的环境生效）
 
     # Reranker（BGE CrossEncoder 精排）
     RERANKER_ENABLED: bool = True
@@ -129,7 +131,10 @@ class Settings(BaseSettings):
 
     # 缓存（旧版 _QueryCache，逐步弃用）
     QUERY_CACHE_MAXSIZE: int = 128
-    QUERY_CACHE_SIM_THRESHOLD: float = 0.97
+    # FAQ 相似度阈值。实测（text-embedding-v2）：近重复（仅礼貌语/标点差异）~0.94，
+    # 真改写（怎么开发票 vs 可以开发票吗）~0.78，无关 <0.6。
+    # 旧默认 0.97 高于近重复带，几乎永远命中不了；0.92 接住近重复、远离歧义带。
+    QUERY_CACHE_SIM_THRESHOLD: float = 0.92
     QUERY_CACHE_TTL_SECONDS: int = 300  # FAQ 查询缓存默认 5 分钟过期
 
     # ============ LLM 缓存（新三层缓存架构） ============

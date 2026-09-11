@@ -28,10 +28,13 @@ def get_langchain_chat():
         raise RuntimeError("未配置 DASHSCOPE_API_KEY，请在 backend/.env 中填写")
 
     # 通用参数：两边都要
+    # request_timeout：ChatOpenAI 与 ChatTongyi 均支持该字段名；
+    # max_retries：仅 ChatOpenAI 支持，ChatTongyi 单独处理（见下）。
     common = dict(
         model=settings.LLM_MODEL_NAME,
         temperature=settings.LLM_TEMPERATURE,
         max_tokens=settings.LLM_MAX_TOKENS,
+        request_timeout=settings.LLM_TIMEOUT_SECONDS,
         streaming=True,
     )
 
@@ -39,7 +42,12 @@ def get_langchain_chat():
     base_url = settings.OPENAI_COMPATIBLE_BASE_URL
     try:
         from langchain_openai import ChatOpenAI
-        llm = ChatOpenAI(api_key=api_key, base_url=base_url, **common)
+        llm = ChatOpenAI(
+            api_key=api_key,
+            base_url=base_url,
+            max_retries=settings.LLM_MAX_RETRIES,
+            **common,
+        )
         logger.info(
             f"[LLM] 使用 ChatOpenAI(DashScope兼容模式): model={settings.LLM_MODEL_NAME}"
             f" base_url={base_url}"
