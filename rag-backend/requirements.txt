@@ -5,6 +5,9 @@ pydantic==2.9.2
 pydantic-settings==2.5.2
 python-dotenv==1.0.1
 passlib[bcrypt]==1.7.4
+# passlib 1.7.4 读取 bcrypt.__about__，bcrypt>=4.1 移除该属性会导致 hash_password 运行时 AttributeError。
+# 必须锁死 4.0.x（此行同时约束 passlib[bcrypt] extra 的传递依赖）。
+bcrypt>=4.0.1,<4.1
 pyjwt==2.9.0
 python-multipart==0.0.12
 loguru==0.7.2

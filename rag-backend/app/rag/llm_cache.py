@@ -19,6 +19,7 @@ import os
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
+from collections import deque
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from app.config import settings
@@ -131,28 +132,46 @@ def _init_prompt_hashes() -> None:
 # 指标统计
 # ==============================================
 class _CacheMetrics:
-    """线程不安全的简化指标收集器。"""
+    """线程安全的指标收集器。
+
+    写入方有三个：FastAPI 事件循环线程、LangGraph 线程池节点、缓存后台写线程池，
+    因此计数与延迟采样都必须过锁；延迟队列用 deque(maxlen=100) 自动限长。
+    """
 
     def __init__(self):
+        self._lock = threading.Lock()
         self.l1_hits = 0
         self.l2_hits = 0
         self.misses = 0
         self.write_oks = 0
         self.write_fails = 0
-        self.l1_latency_ms: List[float] = []  # 最近 100 次
-        self.l2_latency_ms: List[float] = []
+        self.l1_latency_ms: deque = deque(maxlen=100)  # 最近 100 次
+        self.l2_latency_ms: deque = deque(maxlen=100)
+
+    def incr(self, attr: str, n: int = 1) -> None:
+        with self._lock:
+            setattr(self, attr, getattr(self, attr) + n)
+
+    def record_latency(self, layer: str, elapsed_ms: float) -> None:
+        with self._lock:
+            (self.l1_latency_ms if layer == "l1" else self.l2_latency_ms).append(elapsed_ms)
 
     def snapshot(self) -> Dict[str, Any]:
-        total = self.l1_hits + self.l2_hits + self.misses
-        avg_l1 = sum(self.l1_latency_ms[-50:]) / max(len(self.l1_latency_ms[-50:]), 1)
-        avg_l2 = sum(self.l2_latency_ms[-50:]) / max(len(self.l2_latency_ms[-50:]), 1)
+        with self._lock:
+            l1_list = list(self.l1_latency_ms)
+            l2_list = list(self.l2_latency_ms)
+            l1_hits, l2_hits, misses = self.l1_hits, self.l2_hits, self.misses
+            write_oks, write_fails = self.write_oks, self.write_fails
+        total = l1_hits + l2_hits + misses
+        avg_l1 = sum(l1_list[-50:]) / max(len(l1_list[-50:]), 1)
+        avg_l2 = sum(l2_list[-50:]) / max(len(l2_list[-50:]), 1)
         return {
-            "l1_hits": self.l1_hits,
-            "l2_hits": self.l2_hits,
-            "misses": self.misses,
-            "hit_ratio": round((self.l1_hits + self.l2_hits) / max(total, 1), 4),
-            "write_oks": self.write_oks,
-            "write_fails": self.write_fails,
+            "l1_hits": l1_hits,
+            "l2_hits": l2_hits,
+            "misses": misses,
+            "hit_ratio": round((l1_hits + l2_hits) / max(total, 1), 4),
+            "write_oks": write_oks,
+            "write_fails": write_fails,
             "avg_l1_latency_ms": round(avg_l1, 2),
             "avg_l2_latency_ms": round(avg_l2, 2),
         }
@@ -259,6 +278,11 @@ def _bloom_add(
 # ==============================================
 # 缓存击穿防护：Single-Flight（同一查询并发去重）
 # ==============================================
+# 等待 leader 的最长时限。leader（真实 LLM 调用）若异常挂起/线程被杀，
+# 等待者超时后自行执行 producer 兜底，并清掉残留的 map 条目，避免永久阻塞与泄漏。
+_SF_WAIT_TIMEOUT = 120.0
+
+
 async def _single_flight_async(key: str, producer: Callable[[], Any]):
     """异步 single-flight：并发相同 key 只执行一次 producer，其余等待复用首次结果。
 
@@ -278,8 +302,16 @@ async def _single_flight_async(key: str, producer: Callable[[], Any]):
             _sf_async_map[key] = fut
 
     if not leader:
-        # 非 leader：等待并复用 leader 的结果 / 错误
-        return await asyncio.shield(fut)
+        # 非 leader：限时等待并复用 leader 的结果 / 错误
+        try:
+            return await asyncio.wait_for(asyncio.shield(fut), timeout=_SF_WAIT_TIMEOUT)
+        except asyncio.TimeoutError:
+            # leader 挂起（未来得及清理 map 条目）：移除残留后自己执行兜底
+            with _sf_async_lock:
+                if _sf_async_map.get(key) is fut and not fut.done():
+                    _sf_async_map.pop(key, None)
+            logger.warning(f"[LLMCache] single-flight 等待超时({key[:40]}...)，兜底自行执行")
+            return await producer()
 
     try:
         result = await producer()
@@ -318,8 +350,14 @@ def _single_flight_sync(key: str, producer: Callable[[], Any]):
             _sf_sync_map[key] = flight
 
     if not leader:
-        # 非 leader：阻塞等待 leader 完成并复用结果
-        flight.done.wait()
+        # 非 leader：限时阻塞等待 leader 完成并复用结果
+        if not flight.done.wait(timeout=_SF_WAIT_TIMEOUT):
+            # leader 挂起（未来得及清理 map 条目）：移除残留后自己执行兜底
+            with _sf_sync_lock:
+                if _sf_sync_map.get(key) is flight and not flight.done.is_set():
+                    _sf_sync_map.pop(key, None)
+            logger.warning(f"[LLMCache] single-flight(sync) 等待超时({key[:40]}...)，兜底自行执行")
+            return producer()
         if flight.error is not None:
             raise flight.error
         return flight.result
@@ -370,6 +408,11 @@ def _redis_key(
     return f"llm:exact:{cache_type}:{_sha256(raw)}"
 
 
+def _pid_index_key(pid: int) -> str:
+    """商品 ID → 精确缓存 key 的反向索引（SET），供商品变更时精准清 L1。"""
+    return f"llm:exact:idx:pid:{pid}"
+
+
 async def _redis_get(
     query: str, model: str, temperature: float,
     system_prompt_hash: str, context_hash: Optional[str],
@@ -388,10 +431,8 @@ async def _redis_get(
         if raw:
             data = json.loads(raw)
             elapsed = (time.monotonic() - t0) * 1000
-            _metrics.l1_hits += 1
-            _metrics.l1_latency_ms.append(elapsed)
-            if len(_metrics.l1_latency_ms) > 100:
-                _metrics.l1_latency_ms.pop(0)
+            _metrics.incr("l1_hits")
+            _metrics.record_latency("l1", elapsed)
             logger.debug(f"[LLMCache] L1 HIT  query={query[:30]}...  latency={elapsed:.1f}ms")
             return data
     except Exception as e:
@@ -403,15 +444,21 @@ async def _redis_put(
     query: str, model: str, temperature: float,
     system_prompt_hash: str, context_hash: Optional[str],
     data: Dict[str, Any], ttl: int = 7200, cache_type: str = "answer",
+    product_ids: Optional[List[int]] = None,
 ) -> bool:
-    """写入 Redis 精确缓存（异步）。"""
+    """写入 Redis 精确缓存（异步）。携带 product_ids 时同步登记反向索引，供失效时精准删除。"""
     if not _redis_available or not _redis_client:
         return False
     try:
         key = _redis_key(query, model, temperature, system_prompt_hash, context_hash, cache_type)
         data["_cached_at"] = time.time()
         await _redis_client.setex(key, ttl, json.dumps(data, ensure_ascii=False))
-        _metrics.write_oks += 1
+        if product_ids:
+            for pid in product_ids:
+                ik = _pid_index_key(pid)
+                await _redis_client.sadd(ik, key)
+                await _redis_client.expire(ik, ttl)
+        _metrics.incr("write_oks")
         _bloom_add(query, model, temperature, system_prompt_hash, context_hash, cache_type)
         return True
     except Exception as e:
@@ -438,10 +485,8 @@ def _redis_get_sync(
         if raw:
             data = json.loads(raw)
             elapsed = (time.monotonic() - t0) * 1000
-            _metrics.l1_hits += 1
-            _metrics.l1_latency_ms.append(elapsed)
-            if len(_metrics.l1_latency_ms) > 100:
-                _metrics.l1_latency_ms.pop(0)
+            _metrics.incr("l1_hits")
+            _metrics.record_latency("l1", elapsed)
             logger.debug(f"[LLMCache] L1 HIT(sync)  query={query[:30]}...  latency={elapsed:.1f}ms")
             return data
     except Exception as e:
@@ -453,15 +498,21 @@ def _redis_put_sync(
     query: str, model: str, temperature: float,
     system_prompt_hash: str, context_hash: Optional[str],
     data: Dict[str, Any], ttl: int = 7200, cache_type: str = "answer",
+    product_ids: Optional[List[int]] = None,
 ) -> bool:
-    """写入 Redis 精确缓存（同步）。"""
+    """写入 Redis 精确缓存（同步）。携带 product_ids 时同步登记反向索引，供失效时精准删除。"""
     if not _redis_available or not _redis_sync:
         return False
     try:
         key = _redis_key(query, model, temperature, system_prompt_hash, context_hash, cache_type)
         data["_cached_at"] = time.time()
         _redis_sync.setex(key, ttl, json.dumps(data, ensure_ascii=False))
-        _metrics.write_oks += 1
+        if product_ids:
+            for pid in product_ids:
+                ik = _pid_index_key(pid)
+                _redis_sync.sadd(ik, key)
+                _redis_sync.expire(ik, ttl)
+        _metrics.incr("write_oks")
         _bloom_add(query, model, temperature, system_prompt_hash, context_hash, cache_type)
         return True
     except Exception as e:
@@ -477,6 +528,10 @@ _semantic_collection: Any = None
 _semantic_available = False
 
 _SEMANTIC_COLLECTION_NAME = "llm_semantic_cache"
+
+# L2 容量淘汰节流：全表扫描淘汰是重操作，两次淘汰间隔不低于此秒数
+_L2_EVICT_MIN_INTERVAL = 300.0
+_l2_evict_last = [0.0]  # 上次淘汰时间戳（list 包装以便函数内直接赋值）
 
 
 def _get_semantic_collection():
@@ -608,10 +663,8 @@ async def _semantic_search(
             pass
 
         elapsed = (time.monotonic() - t0) * 1000
-        _metrics.l2_hits += 1
-        _metrics.l2_latency_ms.append(elapsed)
-        if len(_metrics.l2_latency_ms) > 100:
-            _metrics.l2_latency_ms.pop(0)
+        _metrics.incr("l2_hits")
+        _metrics.record_latency("l2", elapsed)
         logger.info(f"[LLMCache] L2 HIT  query={query[:30]}...  "
                      f"best_score={best_score:.3f}  latency={elapsed:.1f}ms")
 
@@ -624,7 +677,7 @@ async def _semantic_search(
     except Exception as e:
         logger.warning(f"[LLMCache] L2 语义检索异常: {e}")
         elapsed = (time.monotonic() - t0) * 1000
-        _metrics.misses += 1
+        _metrics.incr("misses")
     return None
 
 
@@ -678,27 +731,28 @@ async def _semantic_put(
             metadatas=[metadata],
         )
 
-        # 容量控制：超过 maxsize 时淘汰 hit_count 最低的 20%
-        current_count = col.count()
-        maxsize = settings.LLM_CACHE_SEMANTIC_MAXSIZE
-        if current_count > maxsize:
-            try:
-                all_data = col.get(include=["metadatas"])
-                all_ids = all_data.get("ids", [])
-                all_metas = all_data.get("metadatas", [])
-                if len(all_ids) > maxsize:
-                    # 按 hit_count 排序，淘汰最低的 20%
-                    pairs = list(zip(all_ids, all_metas))
-                    pairs.sort(key=lambda x: int((x[1] or {}).get("hit_count", 0)))
-                    evict_count = max(1, int(len(pairs) * 0.2))
-                    evict_ids = [p[0] for p in pairs[:evict_count]]
-                    col.delete(ids=evict_ids)
-                    logger.info(f"[LLMCache] L2 容量淘汰: evicted={evict_count}  "
-                                f"current={col.count()}  max={maxsize}")
-            except Exception:
-                pass
+        # 容量控制：超过 maxsize 时淘汰 hit_count 最低的 20%（300s 节流，避免每次 put 全表扫）
+        if time.time() - _l2_evict_last[0] >= _L2_EVICT_MIN_INTERVAL:
+            maxsize = settings.LLM_CACHE_SEMANTIC_MAXSIZE
+            if col.count() > maxsize:
+                _l2_evict_last[0] = time.time()
+                try:
+                    all_data = col.get(include=["metadatas"])
+                    all_ids = all_data.get("ids", [])
+                    all_metas = all_data.get("metadatas", [])
+                    if len(all_ids) > maxsize:
+                        # 按 hit_count 排序，淘汰最低的 20%
+                        pairs = list(zip(all_ids, all_metas))
+                        pairs.sort(key=lambda x: int((x[1] or {}).get("hit_count", 0)))
+                        evict_count = max(1, int(len(pairs) * 0.2))
+                        evict_ids = [p[0] for p in pairs[:evict_count]]
+                        col.delete(ids=evict_ids)
+                        logger.info(f"[LLMCache] L2 容量淘汰: evicted={evict_count}  "
+                                    f"current={col.count()}  max={maxsize}")
+                except Exception:
+                    pass
 
-        _metrics.write_oks += 1
+        _metrics.incr("write_oks")
         logger.debug(f"[LLMCache] L2 PUT  query={query[:30]}...  id={doc_id}")
         return True
     except Exception as e:
@@ -737,7 +791,8 @@ def _do_put_sync(
             "tokens_used": tokens_used,
             "ts": int(time.time()),
         }
-        _redis_put_sync(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type)
+        _redis_put_sync(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type,
+                        product_ids=product_ids)
         # L2: Chroma 语义写入（内部是同步 client，但方法为 async，用 asyncio.run 驱动）
         try:
             asyncio.run(_semantic_put(
@@ -747,8 +802,9 @@ def _do_put_sync(
                 tokens_used=tokens_used, product_ids=product_ids,
                 cache_type=cache_type,
             ))
-        except RuntimeError:
-            pass
+        except RuntimeError as e:
+            # 后台写线程不应有运行中的事件循环；出现说明调用环境异常，记日志便于排查
+            logger.warning(f"[LLMCache] L2 写入被跳过（当前线程已有事件循环）: {e}")
     except Exception as e:
         logger.warning(f"[LLMCache] 异步写入失败(后台): {e}")
 
@@ -788,7 +844,7 @@ class LLMCache:
             return result
 
         # 全部 miss
-        _metrics.misses += 1
+        _metrics.incr("misses")
         return None
 
     async def put(
@@ -822,7 +878,8 @@ class LLMCache:
         }
 
         # L1 写入
-        await _redis_put(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type)
+        await _redis_put(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type,
+                         product_ids=product_ids)
         # L2 写入
         await _semantic_put(
             query=query, model=model, temperature=temperature,
@@ -865,7 +922,7 @@ class LLMCache:
             _redis_put_sync(query, model, temperature, system_prompt_hash, None, result, ttl, cache_type)
             return result
 
-        _metrics.misses += 1
+        _metrics.incr("misses")
         return None
 
     def put_sync(
@@ -894,48 +951,77 @@ class LLMCache:
         )
 
     async def invalidate_by_product_ids(self, product_ids: List[int]) -> int:
-        """按商品 ID 精准失效语义缓存。返回清除条数。"""
+        """按商品 ID 精准失效语义缓存 + Redis 精确缓存。返回清除条数。"""
         col = _get_semantic_collection()
-        if col is None or not product_ids:
+        if col is None and not (_redis_available and _redis_client):
             return 0
-        try:
-            all_data = col.get(include=["metadatas"])
-            all_ids = all_data.get("ids", [])
-            all_metas = all_data.get("metadatas", [])
-            ids_to_delete = []
-            for i, meta in enumerate(all_metas):
-                if not meta:
-                    continue
-                cached_pids = str(meta.get("product_ids", ""))
+        if not product_ids:
+            return 0
+        cleared_l2 = 0
+        cleared_l1 = 0
+        # L2: Chroma 语义缓存按元数据过滤删除
+        if col is not None:
+            try:
+                all_data = col.get(include=["metadatas"])
+                all_ids = all_data.get("ids", [])
+                all_metas = all_data.get("metadatas", [])
+                ids_to_delete = []
+                for i, meta in enumerate(all_metas):
+                    if not meta:
+                        continue
+                    cached_pids = str(meta.get("product_ids", ""))
+                    for pid in product_ids:
+                        if f",{pid}," in f",{cached_pids},":
+                            ids_to_delete.append(all_ids[i])
+                            break
+                if ids_to_delete:
+                    col.delete(ids=ids_to_delete)
+                cleared_l2 = len(ids_to_delete)
+            except Exception as e:
+                logger.warning(f"[LLMCache] 精准失效 L2 异常: {e}")
+        # L1: Redis 通过 pid 反向索引集找到关联精确 key 后删除
+        if _redis_available and _redis_client:
+            try:
                 for pid in product_ids:
-                    if f",{pid}," in f",{cached_pids},":
-                        ids_to_delete.append(all_ids[i])
-                        break
-            if ids_to_delete:
-                col.delete(ids=ids_to_delete)
-                logger.info(f"[LLMCache] 精准失效: product_ids={product_ids}  "
-                            f"cleared={len(ids_to_delete)}")
-            return len(ids_to_delete)
-        except Exception as e:
-            logger.warning(f"[LLMCache] 精准失效异常: {e}")
-            return 0
+                    ik = _pid_index_key(pid)
+                    members = await _redis_client.smembers(ik)
+                    if members:
+                        cache_keys = [m if isinstance(m, str) else m.decode("utf-8") for m in members]
+                        cleared_l1 += int(await _redis_client.delete(*cache_keys))
+                    await _redis_client.delete(ik)
+            except Exception as e:
+                logger.warning(f"[LLMCache] 精准失效 L1 异常: {e}")
+        if cleared_l1 or cleared_l2:
+            logger.info(f"[LLMCache] 精准失效: product_ids={product_ids}  "
+                        f"L2_cleared={cleared_l2}  L1_cleared={cleared_l1}")
+        return cleared_l1 + cleared_l2
 
     async def invalidate_all(self) -> int:
-        """清空所有语义缓存。返回清除条数。"""
+        """清空所有语义缓存 + Redis 精确缓存。返回清除条数。"""
         col = _get_semantic_collection()
-        if col is None:
-            return 0
-        try:
-            count = col.count()
-            all_ids = col.get(include=[])["ids"]
-            if all_ids:
-                col.delete(ids=all_ids)
-            logger.info(f"[LLMCache] 全量失效: cleared={count}")
-            # Redis 端：自然过期（TTL），不需要手动清理
-            return count
-        except Exception as e:
-            logger.warning(f"[LLMCache] 全量失效异常: {e}")
-            return 0
+        cleared_l2 = 0
+        if col is not None:
+            try:
+                cleared_l2 = col.count()
+                all_ids = col.get(include=[])["ids"]
+                if all_ids:
+                    col.delete(ids=all_ids)
+            except Exception as e:
+                logger.warning(f"[LLMCache] 全量失效 L2 异常: {e}")
+        # Redis L1: 精确缓存 key 与 pid 反向索引全部删除（llm:exact:* 一个前缀全覆盖）
+        cleared_l1 = 0
+        if _redis_available and _redis_client:
+            try:
+                keys = []
+                async for k in _redis_client.scan_iter(match="llm:exact:*", count=500):
+                    keys.append(k)
+                if keys:
+                    cleared_l1 = int(await _redis_client.delete(*keys))
+            except Exception as e:
+                logger.warning(f"[LLMCache] 全量失效 L1 异常: {e}")
+        if cleared_l1 or cleared_l2:
+            logger.info(f"[LLMCache] 全量失效: L2_cleared={cleared_l2}  L1_cleared={cleared_l1}")
+        return cleared_l1 + cleared_l2
 
 
 # ==============================================
@@ -977,3 +1063,20 @@ def put_cache_sync(
         )
     except Exception:
         pass
+
+
+def invalidate_llm_cache_nowait() -> None:
+    """全量失效三层缓存（L1 Redis + L2 Chroma），同步上下文安全调用。
+
+    用途：知识库内容变更等"影响面大、无法按商品精准失效"的场景。
+    内部自动适配事件循环：已有运行中 loop 时投递后台任务，否则同步驱动。
+    """
+    try:
+        cache = get_llm_cache()
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(cache.invalidate_all())
+        except RuntimeError:
+            asyncio.run(cache.invalidate_all())
+    except Exception as e:
+        logger.warning(f"[LLMCache] 全量失效调用失败: {e}")

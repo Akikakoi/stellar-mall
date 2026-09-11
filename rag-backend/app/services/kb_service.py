@@ -16,6 +16,7 @@ from app.core.exceptions import BizError
 from app.core.logger import logger
 from app.core.utils import escape_sql_like
 from app.models import KbDocument, User
+from app.rag.llm_cache import invalidate_llm_cache_nowait
 from app.rag.retriever import get_query_cache
 from app.schemas import KbDocInfo, KbDocUpdateReq, KbPreviewResp
 from app.services.operation_log_service import log_operation
@@ -29,12 +30,17 @@ class KbService:
 
     @staticmethod
     def _clear_query_cache() -> None:
-        """知识库内容发生变更后清空 FAQ 查询缓存，避免返回过期答案。"""
+        """知识库内容发生变更后清空 FAQ 查询缓存 + 三层 LLM 缓存，避免返回过期答案。
+
+        LLM 缓存（L1 Redis 精确 / L2 Chroma 语义）里的答案引用了 KB 内容，
+        KB 变更无法按商品维度精准失效，走全量清空（KB 变更是低频管理操作，可接受）。
+        """
         try:
             get_query_cache().clear()
             logger.info("知识库变更，已清空查询缓存")
         except Exception as e:  # noqa
             logger.warning(f"清空查询缓存失败: {e}")
+        invalidate_llm_cache_nowait()
 
     # ---------- 列表 ----------
     def list_docs(self, page: int = 1, page_size: int = 20, keyword: str = "",
