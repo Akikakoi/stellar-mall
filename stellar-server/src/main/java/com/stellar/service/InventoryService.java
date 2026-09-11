@@ -1,15 +1,15 @@
 package com.stellar.service;
 
 import com.stellar.entity.Sku;
-import com.stellar.entity.StockLog;
 import com.stellar.result.PageResult;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 /**
  * 库存管理服务（管理端）。
- * 提供库存分页查询、调整、批量操作及流水追溯。
+ * 提供库存分页查询、调整、批量操作及出入库日志追溯。
  */
 public interface InventoryService {
 
@@ -33,31 +33,16 @@ public interface InventoryService {
      */
     void batchUpdateStock(List<Map<String, Object>> items);
 
-    /** 查询指定 SKU 的库存变动流水。 */
-    PageResult pageStockLog(Long skuId, Integer page, Integer pageSize);
-
-    /** 查询所有 SKU 的库存变动流水。 */
-    PageResult pageAllStockLog(Integer page, Integer pageSize);
-
     /**
-     * 入库操作（采购入库 / 退货入库 / 盘盈入库）。
+     * 出入库日志分页查询（按时间倒序）。
      *
-     * @param skuId        SKU ID
-     * @param quantity     入库数量（正数）
-     * @param businessType 业务类型：PURCHASE_IN / RETURN_IN / INVENTORY_PROFIT
-     * @param businessNo   关联业务单号（如采购单号）
-     * @param remark       备注
+     * @param skuId   SKU ID（精确筛选，可空）
+     * @param keyword 商品名称模糊（可空）
+     * @param type    操作类型：1 入库，2 出库（可空）
+     * @param begin   操作时间起（含，可空）
+     * @param end     操作时间止（含，可空）
      */
-    void inbound(Long skuId, int quantity, String businessType, String businessNo, String remark);
-
-    /**
-     * 出库操作（销售出库 / 报废出库 / 盘亏出库）。
-     *
-     * @param skuId        SKU ID
-     * @param quantity     出库数量（正数）
-     * @param businessType 业务类型：SALE_OUT / SCRAP_OUT / INVENTORY_LOSS
-     * @param businessNo   关联业务单号（如订单号）
-     * @param remark       备注
-     */
-    void outbound(Long skuId, int quantity, String businessType, String businessNo, String remark);
+    PageResult pageStockLog(Long skuId, String keyword, Integer type,
+                            LocalDateTime begin, LocalDateTime end,
+                            Integer page, Integer pageSize);
 }

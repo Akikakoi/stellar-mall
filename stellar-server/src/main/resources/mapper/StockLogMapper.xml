@@ -15,7 +15,34 @@
         <result property="businessNo" column="business_no"/>
         <result property="createTime" column="create_time"/>
         <result property="createUser" column="create_user"/>
+        <result property="skuName" column="sku_name"/>
+        <result property="specs" column="specs"/>
+        <result property="operatorName" column="operator_name"/>
     </resultMap>
+
+    <!-- 联查商品信息（LEFT JOIN，SKU 被清理后日志仍可展示）；
+         操作人仅对管理端调整类操作关联员工表（C 端订单操作 create_user 是用户 ID，
+         与员工 ID 空间重叠，不能无条件 JOIN，否则会张冠李戴） -->
+    <sql id="selectWithJoin">
+        SELECT l.*,
+               s.name  AS sku_name,
+               s.specs AS specs,
+               CASE WHEN l.business_type = 'ADJUSTMENT' THEN e.name END AS operator_name
+        FROM stellar_stock_log l
+        LEFT JOIN stellar_sku s ON s.id = l.sku_id
+        LEFT JOIN stellar_employee e
+               ON e.id = l.create_user AND l.business_type = 'ADJUSTMENT'
+    </sql>
+
+    <sql id="filterConditions">
+        <where>
+            <if test="skuId != null">AND l.sku_id = #{skuId}</if>
+            <if test="keyword != null and keyword != ''">AND s.name LIKE CONCAT('%', #{keyword}, '%')</if>
+            <if test="type != null">AND l.type = #{type}</if>
+            <if test="begin != null">AND l.create_time &gt;= #{begin}</if>
+            <if test="end != null">AND l.create_time &lt;= #{end}</if>
+        </where>
+    </sql>
 
     <insert id="insert" parameterType="com.stellar.entity.StockLog"
             useGeneratedKeys="true" keyProperty="id" keyColumn="id">
@@ -30,26 +57,18 @@
         )
     </insert>
 
-    <select id="pageBySkuId" resultMap="StockLogMap">
-        SELECT * FROM stellar_stock_log
-        WHERE sku_id = #{skuId}
-        ORDER BY create_time DESC, id DESC
+    <select id="page" resultMap="StockLogMap">
+        <include refid="selectWithJoin"/>
+        <include refid="filterConditions"/>
+        ORDER BY l.create_time DESC, l.id DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
-    <select id="countBySkuId" resultType="long">
-        SELECT COUNT(*) FROM stellar_stock_log
-        WHERE sku_id = #{skuId}
-    </select>
-
-    <select id="pageAll" resultMap="StockLogMap">
-        SELECT * FROM stellar_stock_log
-        ORDER BY create_time DESC, id DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <select id="countAll" resultType="long">
-        SELECT COUNT(*) FROM stellar_stock_log
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM stellar_stock_log l
+        LEFT JOIN stellar_sku s ON s.id = l.sku_id
+        <include refid="filterConditions"/>
     </select>
 
 </mapper>

@@ -37,4 +37,12 @@ public class StockLog implements Serializable {
     private String businessNo;
     private LocalDateTime createTime;
     private Long createUser;
+
+    // ===== 以下为查询展示字段（联查 stellar_sku / stellar_employee 填充，不落库） =====
+    /** 商品名称（SKU 名） */
+    private String skuName;
+    /** 商品规格 */
+    private String specs;
+    /** 操作人姓名（仅管理端调整类操作关联员工；C 端订单操作为用户/系统） */
+    private String operatorName;
 }

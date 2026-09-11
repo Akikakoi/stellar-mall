@@ -29,6 +29,10 @@
           <el-icon><Goods /></el-icon>
           <template #title>商品管理</template>
         </el-menu-item>
+        <el-menu-item index="/admin/inventory">
+          <el-icon><Box /></el-icon>
+          <template #title>出入库日志</template>
+        </el-menu-item>
         <el-menu-item index="/admin/category">
           <el-icon><Menu /></el-icon>
           <template #title>分类管理</template>
@@ -36,10 +40,6 @@
         <el-menu-item index="/admin/kb">
           <el-icon><Document /></el-icon>
           <template #title>知识库管理</template>
-        </el-menu-item>
-        <el-menu-item index="/admin/inventory-flow">
-          <el-icon><Switch /></el-icon>
-          <template #title>出入库管理</template>
         </el-menu-item>
         <el-menu-item index="/admin/orders">
           <el-icon><Tickets /></el-icon>
@@ -135,8 +135,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   DataBoard, Goods, Menu, User,
   Fold, Expand, ArrowDown, Document, Setting, Tickets,
-  Discount, ChatLineSquare, Picture, Warning, Sunny, Moon, Stamp, Star, TrendCharts,
-  Switch
+  Discount, ChatLineSquare, Picture, Warning, Sunny, Moon, Stamp, Star, TrendCharts, Box
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -151,9 +150,9 @@ const activeMenu = computed(() => route.path)
 const TITLE_MAP: Record<string, string> = {
   '/admin/dashboard': '控制台',
   '/admin/spu': '商品管理',
+  '/admin/inventory': '出入库日志',
   '/admin/category': '分类管理',
   '/admin/kb': '知识库管理',
-  '/admin/inventory-flow': '出入库管理',
   '/admin/orders': '订单管理',
   '/admin/aftersale': '售后管理',
   '/admin/coupon': '优惠券管理',

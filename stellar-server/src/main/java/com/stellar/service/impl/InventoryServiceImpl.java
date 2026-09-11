@@ -26,7 +26,6 @@ import java.util.Map;
  * 使用 MyBatis Mapper 操作，并自动记录库存变动流水。
  * </p>
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {
@@ -56,6 +55,11 @@ public class InventoryServiceImpl implements InventoryService {
 
         // 2. 调整库存
         if (delta != null && delta != 0) {
+            // 出库调整（delta<0）须先校验库存充足，避免 GREATEST 静默截断导致流水 quantity 与实际变动不一致
+            if (delta < 0 && stockBefore < -delta) {
+                throw new BaseException(MessageConstant.STOCK_NOT_ENOUGH
+                        + " (当前库存=" + stockBefore + ", 需求=" + (-delta) + ")");
+            }
             // 使用 GREATEST(0, stock + delta) 防止库存为负，同时推进 version
             skuMapper.adjustStock(skuId, delta);
             // 重新读取以确保 stock_after 准确
@@ -105,107 +109,12 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public PageResult pageStockLog(Long skuId, Integer page, Integer pageSize) {
-        if (skuId == null) {
-            return new PageResult(0L, new ArrayList<>());
-        }
+    public PageResult pageStockLog(Long skuId, String keyword, Integer type,
+                                   LocalDateTime begin, LocalDateTime end,
+                                   Integer page, Integer pageSize) {
         int offset = (page - 1) * pageSize;
-        List<StockLog> list = stockLogMapper.pageBySkuId(skuId, offset, pageSize);
-        long total = stockLogMapper.countBySkuId(skuId);
+        List<StockLog> list = stockLogMapper.page(skuId, keyword, type, begin, end, offset, pageSize);
+        long total = stockLogMapper.count(skuId, keyword, type, begin, end);
         return new PageResult(total, list == null ? new ArrayList<>() : new ArrayList<>(list));
-    }
-
-    @Override
-    public PageResult pageAllStockLog(Integer page, Integer pageSize) {
-        int offset = (page - 1) * pageSize;
-        List<StockLog> list = stockLogMapper.pageAll(offset, pageSize);
-        long total = stockLogMapper.countAll();
-        return new PageResult(total, list == null ? new ArrayList<>() : new ArrayList<>(list));
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void inbound(Long skuId, int quantity, String businessType, String businessNo, String remark) {
-        if (quantity <= 0) {
-            throw new BaseException("入库数量必须为正数");
-        }
-
-        Sku sku = skuMapper.getById(skuId);
-        if (sku == null) {
-            throw new BaseException(MessageConstant.SKU_NOT_FOUND);
-        }
-
-        int stockBefore = sku.getStock() == null ? 0 : sku.getStock();
-        Long currentUser = BaseContext.getCurrentId();
-
-        // 增加库存，推进 version
-        skuMapper.adjustStock(skuId, quantity);
-        Sku updated = skuMapper.getById(skuId);
-        int stockAfter = updated == null ? 0 : (updated.getStock() == null ? 0 : updated.getStock());
-
-        // 确定入库类型：1=入库
-        int type = 1;
-
-        StockLog log = StockLog.builder()
-                .skuId(skuId)
-                .type(type)
-                .quantity(quantity)
-                .stockBefore(stockBefore)
-                .stockAfter(stockAfter)
-                .remark(remark)
-                .businessType(businessType != null ? businessType : "PURCHASE_IN")
-                .businessNo(businessNo)
-                .createTime(LocalDateTime.now())
-                .createUser(currentUser == null ? 0L : currentUser)
-                .build();
-        stockLogMapper.insert(log);
-
-        InventoryServiceImpl.log.info("入库操作完成: skuId={}, quantity={}, type={}, businessNo={}", skuId, quantity, businessType, businessNo);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void outbound(Long skuId, int quantity, String businessType, String businessNo, String remark) {
-        if (quantity <= 0) {
-            throw new BaseException("出库数量必须为正数");
-        }
-
-        Sku sku = skuMapper.getById(skuId);
-        if (sku == null) {
-            throw new BaseException(MessageConstant.SKU_NOT_FOUND);
-        }
-
-        int currentStock = sku.getStock() == null ? 0 : sku.getStock();
-        if (currentStock < quantity) {
-            throw new BaseException(MessageConstant.STOCK_NOT_ENOUGH
-                    + " (当前库存=" + currentStock + ", 需求=" + quantity + ")");
-        }
-
-        int stockBefore = currentStock;
-        Long currentUser = BaseContext.getCurrentId();
-
-        // 减少库存（传负数）
-        skuMapper.adjustStock(skuId, -quantity);
-        Sku updated = skuMapper.getById(skuId);
-        int stockAfter = updated == null ? 0 : (updated.getStock() == null ? 0 : updated.getStock());
-
-        // 确定出库类型：2=出库
-        int type = 2;
-
-        StockLog log = StockLog.builder()
-                .skuId(skuId)
-                .type(type)
-                .quantity(-quantity)
-                .stockBefore(stockBefore)
-                .stockAfter(stockAfter)
-                .remark(remark)
-                .businessType(businessType != null ? businessType : "SALE_OUT")
-                .businessNo(businessNo)
-                .createTime(LocalDateTime.now())
-                .createUser(currentUser == null ? 0L : currentUser)
-                .build();
-        stockLogMapper.insert(log);
-
-        InventoryServiceImpl.log.info("出库操作完成: skuId={}, quantity={}, type={}, businessNo={}", skuId, quantity, businessType, businessNo);
     }
 }

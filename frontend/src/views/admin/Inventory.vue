@@ -2,62 +2,117 @@
   <div class="inventory-page">
     <div class="panel">
       <div class="panel-head">
-        <span class="panel-title">库存管理</span>
+        <span class="panel-title">出入库日志</span>
         <div style="display: flex; gap: 8px;">
           <el-button @click="openBatchDialog">批量调整</el-button>
-          <el-button type="primary" @click="exportCSV">导出CSV</el-button>
+          <el-button type="primary" @click="openAdjustDialog">库存调整</el-button>
         </div>
       </div>
 
       <div class="filter-bar">
-        <el-input v-model="keyword" placeholder="搜索商品名称" style="width: 300px" clearable @keyup.enter="load" />
-        <el-select v-model="filterLowStock" placeholder="库存状态" clearable style="width: 150px;" @change="load">
-          <el-option label="低库存预警" value="1" />
-          <el-option label="全部" value="" />
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="YYYY-MM-DD"
+          style="width: 260px"
+          @change="resetAndLoad"
+        />
+        <el-input
+          v-model="keyword"
+          placeholder="搜索商品名称"
+          style="width: 220px"
+          clearable
+          @keyup.enter="resetAndLoad"
+          @clear="resetAndLoad"
+        />
+        <el-select v-model="filterType" placeholder="操作类型" clearable style="width: 130px;" @change="resetAndLoad">
+          <el-option label="入库" :value="1" />
+          <el-option label="出库" :value="2" />
         </el-select>
+        <el-button type="primary" plain @click="resetAndLoad">查询</el-button>
+        <el-button @click="resetFilters">重置</el-button>
       </div>
 
       <el-table :data="list" v-loading="loading" stripe>
-        <el-table-column prop="name" label="SKU名称" min-width="180" />
-        <el-table-column prop="specs" label="规格" width="120" />
-        <el-table-column label="价格" width="100">
-          <template #default="{ row }">¥{{ Number(row.price || 0).toFixed(2) }}</template>
+        <el-table-column label="操作时间" width="170">
+          <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
         </el-table-column>
-        <el-table-column label="库存" width="120">
+        <el-table-column label="商品" min-width="220">
           <template #default="{ row }">
-            <span :class="{ 'low-stock': row.stock <= (row.warnStock || 10) }">
-              {{ row.stock }}
+            <div class="goods-cell">
+              <span class="goods-name">{{ row.skuName || `SKU#${row.skuId}` }}</span>
+              <span v-if="row.specs" class="goods-specs">{{ row.specs }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作类型" width="90">
+          <template #default="{ row }">
+            <el-tag :type="logTypeTag(row.type)" size="small">{{ logTypeLabel(row.type) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="数量" width="80">
+          <template #default="{ row }">
+            <span :style="{ color: (row.quantity || 0) > 0 ? 'var(--status-success)' : 'var(--status-danger)' }">
+              {{ (row.quantity || 0) > 0 ? '+' : '' }}{{ row.quantity }}
             </span>
-            <el-tag v-if="row.stock <= (row.warnStock || 10)" type="danger" size="small" style="margin-left: 6px">低库存</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="warnStock" label="预警值" width="80" />
-        <el-table-column label="状态" width="80">
+        <el-table-column label="变更前 → 变更后" width="130" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">{{ row.status === 1 ? '在售' : '停售' }}</el-tag>
+            <span class="stock-transition">{{ row.stockBefore }} → {{ row.stockAfter }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column label="业务来源" width="110">
           <template #default="{ row }">
-            <el-button type="primary" link size="small" @click="openEditStock(row)">调整库存</el-button>
-            <el-button type="primary" link size="small" @click="openStockLog(row)">流水</el-button>
+            <el-tag size="small" :type="bizTypeTag(row.businessType)" effect="plain">{{ bizTypeLabel(row.businessType, row.type) }}</el-tag>
           </template>
+        </el-table-column>
+        <el-table-column label="相关单据" min-width="150">
+          <template #default="{ row }">{{ row.businessNo || '—' }}</template>
+        </el-table-column>
+        <el-table-column label="操作人" width="110">
+          <template #default="{ row }">{{ operatorLabel(row) }}</template>
+        </el-table-column>
+        <el-table-column label="备注" min-width="140">
+          <template #default="{ row }">{{ row.remark || '—' }}</template>
         </el-table-column>
       </el-table>
 
       <div class="pagination-wrap">
         <el-pagination
           v-model:current-page="pageNum" v-model:page-size="pageSize" :total="total"
-          layout="total, prev, pager, next" @current-change="load" @size-change="load"
+          :page-sizes="[15, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next" @current-change="load" @size-change="resetAndLoad"
         />
       </div>
     </div>
 
-    <!-- 调整库存对话框 -->
-    <el-dialog v-model="stockDialogVisible" title="调整库存" width="420px">
+    <!-- 库存调整对话框 -->
+    <el-dialog v-model="stockDialogVisible" title="库存调整" width="460px">
       <el-form :model="stockForm" label-width="100px">
+        <el-form-item label="选择商品">
+          <el-select
+            v-model="stockForm.skuId"
+            filterable
+            remote
+            :remote-method="searchSku"
+            :loading="skuSearching"
+            placeholder="输入 SKU 名称搜索"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="s in skuOptions"
+              :key="s.id"
+              :label="`${s.name}${s.specs ? ' (' + s.specs + ')' : ''} — 库存 ${s.stock}`"
+              :value="s.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="当前库存">
-          <span>{{ stockForm.currentStock }}</span>
+          <span>{{ selectedSku?.stock ?? '—' }}</span>
         </el-form-item>
         <el-form-item label="调整数量">
           <el-input-number v-model="stockForm.delta" :min="-9999" :max="9999" />
@@ -93,74 +148,35 @@
         <el-button type="primary" :loading="batchSubmitting" @click="handleBatchUpdate">执行批量调整</el-button>
       </template>
     </el-dialog>
-
-    <!-- 库存流水对话框 -->
-    <el-dialog v-model="logDialogVisible" title="库存变动流水" width="800px">
-      <template #header>
-        <span>库存变动流水<template v-if="logSkuName"> — {{ logSkuName }}</template></span>
-      </template>
-      <el-table :data="logList" v-loading="logLoading" stripe size="small">
-        <el-table-column label="时间" width="160">
-          <template #default="{ row }">{{ row.createTime }}</template>
-        </el-table-column>
-        <el-table-column label="类型" width="80">
-          <template #default="{ row }">
-            <el-tag :type="logTypeTag(row.type)" size="small">{{ logTypeLabel(row.type) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="变动数量" width="100">
-          <template #default="{ row }">
-            <span :style="{ color: (row.quantity || 0) > 0 ? 'var(--status-success)' : 'var(--status-danger)' }">
-              {{ (row.quantity || 0) > 0 ? '+' : '' }}{{ row.quantity }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column label="变动前" width="80" prop="stockBefore" />
-        <el-table-column label="变动后" width="80" prop="stockAfter" />
-        <el-table-column label="备注" min-width="160" prop="remark" />
-        <el-table-column label="操作人" width="100" prop="createUser" />
-      </el-table>
-      <div class="pagination-wrap" style="margin-top: 16px;">
-        <el-pagination
-          v-model:current-page="logPageNum" v-model:page-size="logPageSize" :total="logTotal"
-          layout="total, prev, pager, next" @current-change="loadStockLog" @size-change="loadStockLog"
-          small
-        />
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminRequest } from '@/api/request'
 
 const loading = ref(false)
 const submitting = ref(false)
 const keyword = ref('')
-const filterLowStock = ref('')
+const filterType = ref<number | ''>('')
+const dateRange = ref<[string, string] | null>(null)
 const list = ref<any[]>([])
 const total = ref(0)
 const pageNum = ref(1)
 const pageSize = ref(20)
+
+// 库存调整
 const stockDialogVisible = ref(false)
-const stockForm = reactive<any>({ skuId: null, currentStock: 0, delta: 0, warnStock: 10, remark: '' })
+const skuSearching = ref(false)
+const skuOptions = ref<any[]>([])
+const stockForm = reactive<any>({ skuId: null, delta: 0, warnStock: 10, remark: '' })
+const selectedSku = computed(() => skuOptions.value.find(s => s.id === stockForm.skuId))
 
 // 批量调整
 const batchDialogVisible = ref(false)
 const batchSubmitting = ref(false)
 const batchInput = ref('')
-
-// 库存流水
-const logDialogVisible = ref(false)
-const logLoading = ref(false)
-const logSkuName = ref('')
-const logSkuId = ref<number | null>(null)
-const logList = ref<any[]>([])
-const logTotal = ref(0)
-const logPageNum = ref(1)
-const logPageSize = ref(15)
 
 const typeLabels: Record<number, string> = { 1: '入库', 2: '出库', 3: '盘盈', 4: '盘亏', 5: '调整' }
 const typeTags: Record<number, string> = { 1: 'success', 2: 'danger', 3: 'warning', 4: 'info', 5: '' }
@@ -168,38 +184,100 @@ const typeTags: Record<number, string> = { 1: 'success', 2: 'danger', 3: 'warnin
 function logTypeLabel(type: number) { return typeLabels[type] || `未知(${type})` }
 function logTypeTag(type: number) { return typeTags[type] || 'info' }
 
+/** 业务来源（businessType）展示：自动流水（订单出库/取消回滚）、手动调整等 */
+const bizTypeLabels: Record<string, string> = {
+  SALE_OUT: '订单出库',
+  ORDER_ROLLBACK: '取消回滚',
+  ADJUSTMENT: '手动调整'
+}
+const bizTypeTags: Record<string, string> = {
+  SALE_OUT: 'danger',
+  ORDER_ROLLBACK: 'success',
+  ADJUSTMENT: 'warning'
+}
+function bizTypeLabel(businessType?: string, type?: number) {
+  if (businessType && bizTypeLabels[businessType]) return bizTypeLabels[businessType]
+  // 手动调整未落 businessType（旧数据）时按 type 兜底
+  if (!businessType && type) return typeLabels[type] || logTypeLabel(type)
+  return businessType || '—'
+}
+function bizTypeTag(businessType?: string) {
+  return (businessType && bizTypeTags[businessType]) || 'info'
+}
+
+/** 操作人展示：管理端调整 → 员工姓名；订单自动流水 → 系统买家/系统 */
+function operatorLabel(row: any) {
+  if (row.operatorName) return row.operatorName
+  if (!row.createUser || row.createUser === 0) return '系统'
+  if (row.businessType === 'SALE_OUT' || row.businessType === 'ORDER_ROLLBACK') return `买家#${row.createUser}`
+  return `#${row.createUser}`
+}
+
+function formatTime(t?: string) {
+  if (!t) return '—'
+  return String(t).replace('T', ' ').slice(0, 19)
+}
+
+function resetAndLoad() {
+  pageNum.value = 1
+  load()
+}
+
+function resetFilters() {
+  keyword.value = ''
+  filterType.value = ''
+  dateRange.value = null
+  resetAndLoad()
+}
+
 async function load() {
   loading.value = true
   try {
     const params: Record<string, any> = { page: pageNum.value, pageSize: pageSize.value }
-    if (keyword.value) params.name = keyword.value
-    if (filterLowStock.value === '1') params.lowStock = 1
-    const res: any = await adminRequest({ url: '/admin/inventory/page', method: 'get', params })
+    if (keyword.value.trim()) params.keyword = keyword.value.trim()
+    if (filterType.value !== '' && filterType.value != null) params.type = filterType.value
+    if (dateRange.value?.[0]) params.begin = dateRange.value[0]
+    if (dateRange.value?.[1]) params.end = dateRange.value[1]
+    const res: any = await adminRequest({ url: '/admin/inventory/log', method: 'get', params })
     const d = res?.data || res || {}
     list.value = d.records || d.list || []
     total.value = d.total || 0
   } catch (e: any) { /* ignore */ } finally { loading.value = false }
 }
 
-function openEditStock(row: any) {
-  stockForm.skuId = row.id
-  stockForm.currentStock = row.stock || 0
+// -------- 库存调整（弹窗内远程搜索 SKU） --------
+function openAdjustDialog() {
+  stockForm.skuId = null
   stockForm.delta = 0
-  stockForm.warnStock = row.warnStock || 10
+  stockForm.warnStock = 10
   stockForm.remark = ''
+  skuOptions.value = []
   stockDialogVisible.value = true
 }
 
+async function searchSku(query: string) {
+  skuSearching.value = true
+  try {
+    const params: Record<string, any> = { page: 1, pageSize: 20 }
+    if (query) params.name = query
+    const res: any = await adminRequest({ url: '/admin/inventory/page', method: 'get', params })
+    const d = res?.data || res || {}
+    skuOptions.value = d.records || d.list || []
+  } catch (e: any) { /* ignore */ } finally { skuSearching.value = false }
+}
+
 async function handleUpdateStock() {
+  if (!stockForm.skuId) { ElMessage.warning('请先选择商品'); return }
   submitting.value = true
   try {
     await adminRequest({ url: '/admin/inventory/stock', method: 'put', data: { ...stockForm } })
-    ElMessage.success('库存已更新')
+    ElMessage.success('库存已调整')
     stockDialogVisible.value = false
     await load()
-  } catch (e: any) { ElMessage.error('操作失败') } finally { submitting.value = false }
+  } catch (e: any) { ElMessage.error(e?.response?.data?.msg || '操作失败') } finally { submitting.value = false }
 }
 
+// -------- 批量调整 --------
 function openBatchDialog() {
   batchInput.value = ''
   batchDialogVisible.value = true
@@ -223,38 +301,7 @@ async function handleBatchUpdate() {
     ElMessage.success(`批量调整完成，共 ${items.length} 项`)
     batchDialogVisible.value = false
     await load()
-  } catch (e: any) { ElMessage.error('批量调整失败') } finally { batchSubmitting.value = false }
-}
-
-function openStockLog(row: any) {
-  logSkuId.value = row.id
-  logSkuName.value = row.name
-  logPageNum.value = 1
-  loadStockLog()
-  logDialogVisible.value = true
-}
-
-async function loadStockLog() {
-  logLoading.value = true
-  try {
-    const params: Record<string, any> = { skuId: logSkuId.value, page: logPageNum.value, pageSize: logPageSize.value }
-    const res: any = await adminRequest({ url: '/admin/inventory/log', method: 'get', params })
-    const d = res?.data || res || {}
-    logList.value = d.records || d.list || []
-    logTotal.value = d.total || 0
-  } catch (e: any) { /* ignore */ } finally { logLoading.value = false }
-}
-
-function exportCSV() {
-  let csv = 'SKU ID,SPU ID,名称,规格,价格,库存,预警值,状态\n'
-  list.value.forEach((r: any) => {
-    csv += `${r.id},${r.spuId},"${r.name || ''}","${r.specs || ''}",${r.price},${r.stock},${r.warnStock},${r.status === 1 ? '在售' : '停售'}\n`
-  })
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url; a.download = '库存报表.csv'; a.click()
-  URL.revokeObjectURL(url)
+  } catch (e: any) { ElMessage.error(e?.response?.data?.msg || '批量调整失败') } finally { batchSubmitting.value = false }
 }
 
 onMounted(load)
@@ -287,7 +334,11 @@ onMounted(load)
   padding: 12px 16px;
 }
 .pagination-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
-.low-stock { color: var(--status-danger); font-weight: 600; }
+
+.goods-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.goods-name { color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.goods-specs { font-size: 12px; color: var(--text-muted); }
+.stock-transition { font-variant-numeric: tabular-nums; }
 
 :deep(.el-dialog) {
   border-radius: var(--radius-lg);

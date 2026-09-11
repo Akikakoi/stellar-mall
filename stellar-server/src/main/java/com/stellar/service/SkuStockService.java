@@ -9,7 +9,17 @@ public interface SkuStockService {
     void deduct(Long skuId, int qty);
 
     /**
+     * 扣减库存并记录出入库日志（businessNo = 关联业务单号，如订单号）。
+     */
+    void deduct(Long skuId, int qty, String businessNo);
+
+    /**
      * 回滚库存（给取消订单场景用），同样乐观锁重试。
      */
     void rollback(Long skuId, int qty);
+
+    /**
+     * 回滚库存并记录出入库日志（businessNo = 关联业务单号，如订单号）。
+     */
+    void rollback(Long skuId, int qty, String businessNo);
 }
