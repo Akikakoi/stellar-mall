@@ -22,7 +22,9 @@ public enum OrderStatus {
     /** 退款中 */
     REFUNDING("REFUNDING", 6, "退款中"),
     /** 已退款 */
-    REFUNDED("REFUNDED", 7, "已退款");
+    REFUNDED("REFUNDED", 7, "已退款"),
+    /** 部分退款（订单仅部分商品已退款，仍有商品未退） */
+    PARTIAL_REFUNDED("PARTIAL_REFUNDED", 8, "部分退款");
 
     private final String backendValue;
     private final int frontendCode;

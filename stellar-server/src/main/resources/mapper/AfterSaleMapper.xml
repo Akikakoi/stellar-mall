@@ -124,6 +124,31 @@
           AND status IN (1, 2, 3, 4)
     </select>
 
+    <!-- 统计订单下某 SKU 已完成退款的售后单数，防同一商品重复退款 -->
+    <select id="countCompletedByOrderAndSku" resultType="int">
+        SELECT COUNT(*) FROM stellar_after_sale
+        WHERE order_id = #{orderId}
+          AND sku_id = #{skuId}
+          AND status = 5
+    </select>
+
+    <!-- 查询订单下已完成退款的售后单覆盖的 SKU（NULL 表示整单退款，覆盖全部商品） -->
+    <select id="listCompletedSkuIdsByOrder" resultType="java.lang.Long">
+        SELECT sku_id FROM stellar_after_sale
+        WHERE order_id = #{orderId}
+          AND status = 5
+    </select>
+
+    <!-- 批量查询多个订单下已完成退款的售后单（含 SKU 与退款金额），订单明细商品级退款标记用 -->
+    <select id="listCompletedByOrders" resultMap="AfterSaleMap">
+        SELECT * FROM stellar_after_sale
+        WHERE status = 5
+          AND order_id IN
+        <foreach collection="orderIds" item="oid" open="(" separator="," close=")">
+            #{oid}
+        </foreach>
+    </select>
+
     <!-- 按订单 + 用户查询售后单（用户端校验归属） -->
     <select id="getByOrderIdAndUserId" resultMap="AfterSaleMap">
         SELECT * FROM stellar_after_sale

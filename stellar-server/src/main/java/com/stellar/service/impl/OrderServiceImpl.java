@@ -53,11 +53,14 @@ public class OrderServiceImpl implements OrderService {
     private final SkuStockService skuStockService;
     private final MallOrderMapper mallOrderMapper;
     private final MallOrderItemMapper mallOrderItemMapper;
+    private final AfterSaleMapper afterSaleMapper;
     private final CouponService couponService;
     private final UserMessageService userMessageService;
     private final com.stellar.service.WalletService walletService;
     private final NotificationService notificationService;
     private final PointsService pointsService;
+    /** 积分跟随主流程的静默操作统一收口（失败吞掉 + [POINTS_LOSS] 告警日志）。 */
+    private final com.stellar.service.PointsFacade pointsFacade;
     /** 过期订单逐笔取消（独立 REQUIRES_NEW 事务），避免批量取消中一笔失败影响其他笔。 */
     private final OrderCancelService orderCancelService;
 
@@ -84,14 +87,17 @@ public class OrderServiceImpl implements OrderService {
         }
 
         List<OrderLine> lines = buildLinesFromCarts(carts);
-        deductStock(lines);
+        // 先生成订单号再扣库存，出入库日志可关联业务单号
+        String orderNo = generateOrderNo();
+        deductStock(lines, orderNo);
         List<Long> cartIdsToDelete = carts.stream().map(Cart::getId).collect(Collectors.toList());
 
         return createOrder(uid, dto.getAddress(), dto.getConsignee(), dto.getPhone(),
                 dto.getPayMethod(), dto.getRemark(),
                 calculateTotal(lines), lines, cartIdsToDelete,
                 dto.getUserCouponId(),
-                dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount());
+                dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount(),
+                orderNo);
     }
 
     /**
@@ -117,7 +123,9 @@ public class OrderServiceImpl implements OrderService {
         }
 
         List<OrderLine> lines = buildLinesFromItems(dto.getItems());
-        deductStock(lines);
+        // 先生成订单号再扣库存，出入库日志可关联业务单号
+        String orderNo = generateOrderNo();
+        deductStock(lines, orderNo);
 
         // 直接购买模式下，仅当显式要求清空购物车时，才清理用户已勾选的购物车项
         List<Long> cartIdsToDelete = null;
@@ -133,7 +141,8 @@ public class OrderServiceImpl implements OrderService {
                 dto.getPayMethod(), dto.getRemark(),
                 calculateTotal(lines), lines, cartIdsToDelete,
                 dto.getUserCouponId(),
-                dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount());
+                dto.getUsePoints() != null && dto.getUsePoints(), dto.getPointsAmount(),
+                orderNo);
     }
 
     private void validateSubmitDto(OrderSubmitDTO dto) {
@@ -269,9 +278,9 @@ public class OrderServiceImpl implements OrderService {
         return new OrderLine(cart, sku, spu, qty, price, subtotal, extraAmount, serviceInfo);
     }
 
-    private void deductStock(List<OrderLine> lines) {
+    private void deductStock(List<OrderLine> lines, String orderNo) {
         for (OrderLine line : lines) {
-            skuStockService.deduct(line.sku.getId(), line.qty);
+            skuStockService.deduct(line.sku.getId(), line.qty, orderNo);
         }
     }
 
@@ -285,7 +294,8 @@ public class OrderServiceImpl implements OrderService {
                                    Integer payMethod, String remark,
                                    BigDecimal total, List<OrderLine> lines, List<Long> cartIdsToDelete,
                                    Long userCouponId,
-                                   boolean usePoints, BigDecimal requestedPointsAmount) {
+                                   boolean usePoints, BigDecimal requestedPointsAmount,
+                                   String orderNo) {
         // 校验并使用优惠券。抵扣金额由服务端按优惠券面值/折扣率计算，不信任前端传入的 discountAmount
         BigDecimal discount = BigDecimal.ZERO;
         if (userCouponId != null) {
@@ -316,7 +326,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 构造订单（先用原始 payAmount，积分抵扣后再更新）
         MallOrder order = MallOrder.builder()
-                .orderNo(generateOrderNo())
+                .orderNo(orderNo)
                 .userId(uid)
                 .totalAmount(total)
                 .payAmount(payAmountBeforePoints)
@@ -432,9 +442,9 @@ public class OrderServiceImpl implements OrderService {
         // 累加商品销量
         incrSaleCountForOrder(orderId);
         // 积分抵扣：将冻结的积分转为实际消费
-        consumeOrderPointsQuietly(userId, orderId);
+        pointsFacade.consumeFrozenForOrderQuietly(userId, orderId);
         // 下单奖励积分（不影响支付主流程）
-        earnOrderPointsQuietly(userId, orderId, order.getPayAmount());
+        pointsFacade.earnForOrderQuietly(userId, orderId, order.getPayAmount());
     }
 
     /** 支付后累加订单中各 SPU 的销量。 */
@@ -449,43 +459,7 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
         } catch (Exception e) {
-            log.error("[OrderService] 销量累加失败（支付不受影响）: orderId={}", orderId, e);
-        }
-    }
-
-    /**
-     * 支付后发放积分。任何异常不抛出，确保支付主流程不受积分系统影响。
-     */
-    private void earnOrderPointsQuietly(Long userId, Long orderId, BigDecimal payAmount) {
-        try {
-            pointsService.earnByOrder(userId, orderId, payAmount);
-        } catch (Exception e) {
-            log.error("[OrderService] 积分发放失败（支付不受影响）: orderId={}, userId={}, payAmount={}",
-                    orderId, userId, payAmount, e);
-        }
-    }
-
-    /**
-     * 支付后将冻结的积分转为实际消费。任何异常不抛出，确保支付主流程不受积分系统影响。
-     */
-    private void consumeOrderPointsQuietly(Long userId, Long orderId) {
-        try {
-            pointsService.consumeFrozenPointsForOrder(userId, orderId);
-        } catch (Exception e) {
-            log.error("[OrderService] 积分扣减失败（支付不受影响）: orderId={}, userId={}",
-                    orderId, userId, e);
-        }
-    }
-
-    /**
-     * 取消订单时解冻积分。任何异常不抛出，取消失败不影响积分。
-     */
-    private void unfreezeOrderPointsQuietly(Long userId, Long orderId) {
-        try {
-            pointsService.unfreezePointsForOrder(userId, orderId);
-        } catch (Exception e) {
-            log.error("[OrderService] 积分解冻失败（取消不受影响）: orderId={}, userId={}",
-                    orderId, userId, e);
+            log.error("[SALES_LOSS] 销量累加失败（支付不受影响）: orderId={}", orderId, e);
         }
     }
 
@@ -522,12 +496,12 @@ public class OrderServiceImpl implements OrderService {
         if (items != null) {
             for (MallOrderItem it : items) {
                 skuStockService.rollback(it.getSkuId(),
-                        it.getQty() == null ? 0 : it.getQty());
+                        it.getQty() == null ? 0 : it.getQty(), order.getOrderNo());
             }
         }
 
         // 解冻积分
-        unfreezeOrderPointsQuietly(userId, orderId);
+        pointsFacade.unfreezeForOrderQuietly(userId, orderId);
 
         // 退还优惠券
         couponService.returnCouponByOrderId(orderId);
@@ -657,7 +631,8 @@ public class OrderServiceImpl implements OrderService {
         Map<Long, List<MallOrderItem>> itemMap = loadItemsByOrderIds(Collections.singletonList(orderId));
         List<MallOrderItem> items = itemMap.getOrDefault(orderId, Collections.emptyList());
         Map<Long, String> imageMap = loadSpuMainImages(extractSpuIds(items));
-        return toOrderVO(order, items, imageMap);
+        Map<Long, List<AfterSale>> refundMap = loadCompletedAfterSales(Collections.singletonList(orderId));
+        return toOrderVO(order, items, imageMap, refundMap.getOrDefault(orderId, Collections.emptyList()));
     }
 
     /**
@@ -758,11 +733,22 @@ public class OrderServiceImpl implements OrderService {
         List<MallOrderItem> allItems = itemMap.values().stream()
                 .flatMap(List::stream).collect(Collectors.toList());
         Map<Long, String> imageMap = loadSpuMainImages(extractSpuIds(allItems));
+        // 商品级退款标记：批量加载各订单已完成退款的售后单（含退款金额）
+        Map<Long, List<AfterSale>> refundMap = loadCompletedAfterSales(orderIds);
         List<MallOrderVO> vos = new ArrayList<>(orders.size());
         for (MallOrder o : orders) {
-            vos.add(toOrderVO(o, itemMap.getOrDefault(o.getId(), Collections.emptyList()), imageMap));
+            vos.add(toOrderVO(o, itemMap.getOrDefault(o.getId(), Collections.emptyList()),
+                    imageMap, refundMap.getOrDefault(o.getId(), Collections.emptyList())));
         }
         return vos;
+    }
+
+    /** 批量加载已完成退款的售后单，按订单 ID 分组（用于订单明细商品级退款标记）。 */
+    private Map<Long, List<AfterSale>> loadCompletedAfterSales(List<Long> orderIds) {
+        if (orderIds == null || orderIds.isEmpty()) return Collections.emptyMap();
+        List<AfterSale> list = afterSaleMapper.listCompletedByOrders(orderIds);
+        if (list == null || list.isEmpty()) return Collections.emptyMap();
+        return list.stream().collect(Collectors.groupingBy(AfterSale::getOrderId));
     }
 
     private Map<Long, List<MallOrderItem>> loadItemsByOrderIds(List<Long> orderIds) {
@@ -793,13 +779,35 @@ public class OrderServiceImpl implements OrderService {
         return map;
     }
 
-    private MallOrderVO toOrderVO(MallOrder o, List<MallOrderItem> items, Map<Long, String> spuImageMap) {
+    private MallOrderVO toOrderVO(MallOrder o, List<MallOrderItem> items,
+                                  Map<Long, String> spuImageMap, List<AfterSale> completedAfterSales) {
+        // 商品级退款标记：按 SKU 汇总已完成售后退款金额；整单售后单（skuId=null，历史数据）覆盖全部商品
+        Map<Long, BigDecimal> refundBySku = new HashMap<>();
+        boolean wholeRefunded = false;
+        BigDecimal wholeRefundAmount = BigDecimal.ZERO;
+        if (completedAfterSales != null) {
+            for (AfterSale as : completedAfterSales) {
+                BigDecimal amt = as.getAmount() == null ? BigDecimal.ZERO : as.getAmount();
+                if (as.getSkuId() == null) {
+                    wholeRefunded = true;
+                    wholeRefundAmount = wholeRefundAmount.add(amt);
+                } else {
+                    refundBySku.merge(as.getSkuId(), amt, BigDecimal::add);
+                }
+            }
+        }
+        final boolean wholeRef = wholeRefunded;
+        final BigDecimal wholeRefund = wholeRefundAmount;
         List<MallOrderItemVO> ivos = items == null ? Collections.emptyList() :
                 items.stream().map(it -> {
                     String pic = null;
                     if (it.getSpuId() != null && spuImageMap != null) {
                         pic = spuImageMap.get(it.getSpuId());
                     }
+                    boolean refunded = wholeRef
+                            || (it.getSkuId() != null && refundBySku.containsKey(it.getSkuId()));
+                    BigDecimal refundedAmount = wholeRef ? wholeRefund
+                            : (it.getSkuId() != null ? refundBySku.get(it.getSkuId()) : null);
                     return MallOrderItemVO.builder()
                             .id(it.getId())
                             .spuId(it.getSpuId())
@@ -812,6 +820,8 @@ public class OrderServiceImpl implements OrderService {
                             .extraAmount(it.getExtraAmount())
                             .serviceInfo(it.getServiceInfo())
                             .pic(pic)
+                            .refunded(refunded)
+                            .refundedAmount(refundedAmount)
                             .build();
                 }).collect(Collectors.toList());
         // 前端数字 status：0已取消/1待付款/2待发货/3待收货/4待评价/5已完成/6退款中
@@ -870,12 +880,13 @@ public class OrderServiceImpl implements OrderService {
             log.info("[OrderService] 订单 {} 已是退款中，跳过重复标记", orderId);
             return;
         }
-        // 仅已支付/已发货/已完成可退款
+        // 仅已支付/已发货/已完成/部分退款可退款（部分退款后仍可对未退商品继续申请售后）
         if (!OrderStatus.PAID.getBackendValue().equals(status)
                 && !OrderStatus.SHIPPED.getBackendValue().equals(status)
-                && !OrderStatus.COMPLETED.getBackendValue().equals(status)) {
+                && !OrderStatus.COMPLETED.getBackendValue().equals(status)
+                && !OrderStatus.PARTIAL_REFUNDED.getBackendValue().equals(status)) {
             throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
-                    + "（当前状态=" + status + "，仅已支付/已发货/已完成订单可申请退款）");
+                    + "（当前状态=" + status + "，仅已支付/已发货/已完成/部分退款订单可申请退款）");
         }
         // CAS 占位：并发下订单状态可能刚被变更（如已取消），rows==0 即中止
         int rows = mallOrderMapper.casUpdateStatus(orderId, status, OrderStatus.REFUNDING.getBackendValue());
@@ -886,44 +897,91 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 完成退款处理。
-     * 回滚订单项库存，将订单标记为已退款。已取消的订单不可退款。
-     * <p>幂等保护：先用带 {@code is_refunded = 0} 条件的 {@code markRefunded} 原子占位，
-     * rows==0 说明已退款或状态不允许——已退款则直接返回（不重复回滚库存），
-     * 已取消则抛业务异常，从根上杜绝重复退款导致库存被回滚两次。</p>
+     * 完成退款处理（部分退款）。
+     * <p>仅回滚本次退款 SKU 的库存；若订单所有商品都已退款则订单标记为整单已退款（REFUNDED），
+     * 否则标记为部分退款（PARTIAL_REFUNDED），用户仍可对剩余商品继续申请售后。</p>
+     * <p>重复退款防线：每个售后单在确认退款事务中一次性完成（售后单状态机保证不会二次确认），
+     * 库存回滚与订单状态变更同事务提交/回滚，不存在同一 SKU 被回滚两次的路径。</p>
      *
      * @param orderId 订单ID
+     * @param skuId   本次退款的 SKU（必传）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void completeRefund(Long orderId) {
-        // 幂等占位：仅未退款且非已取消/已退款的订单会被标记，rows==0 时不再回滚库存
-        int rows = mallOrderMapper.markRefunded(orderId);
-        if (rows == 0) {
-            MallOrder order = mallOrderMapper.getById(orderId);
-            if (order == null) {
-                throw new BaseException(MessageConstant.ORDER_NOT_FOUND);
-            }
-            if (OrderStatus.CANCELLED.getBackendValue().equals(order.getStatus())) {
-                throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
-                        + "（当前状态=" + order.getStatus() + "，已取消的订单不可退款）");
-            }
-            // 已退款（is_refunded=1）或状态不允许 → 幂等跳过，避免重复回滚库存导致库存虚增
-            log.warn("[OrderService] 订单 {} 退款被跳过（status={}, isRefunded={}），可能已处理过",
-                    orderId, order.getStatus(), order.getIsRefunded());
+    public void completeRefund(Long orderId, Long skuId) {
+        if (skuId == null) {
+            log.warn("[OrderService] 订单 {} 部分退款缺少 skuId，跳过", orderId);
             return;
         }
 
-        // 占位成功 → 回滚库存
-        List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(orderId);
-        if (items != null) {
-            for (MallOrderItem it : items) {
-                skuStockService.rollback(it.getSkuId(),
-                        it.getQty() == null ? 0 : it.getQty());
-            }
+        MallOrder order = mallOrderMapper.getById(orderId);
+        if (order == null) {
+            throw new BaseException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if (OrderStatus.CANCELLED.getBackendValue().equals(order.getStatus())) {
+            throw new BaseException(MessageConstant.ORDER_STATUS_ERROR
+                    + "（当前状态=" + order.getStatus() + "，已取消的订单不可退款）");
+        }
+        if (OrderStatus.REFUNDED.getBackendValue().equals(order.getStatus())) {
+            log.warn("[OrderService] 订单 {} 已整单退款，跳过部分退款库存回滚", orderId);
+            return;
         }
 
-        log.info("[OrderService] 订单 {} 退款完成，库存已回滚，已标记退款", orderId);
+        // 回滚本次退款商品的库存
+        rollbackSkuStock(orderId, skuId);
+
+        // 判断订单所有商品是否都已退款 → 是则标记整单已退款，否则标记部分退款
+        List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(orderId);
+        boolean allRefunded = allItemsRefunded(items);
+        if (allRefunded) {
+            int rows = mallOrderMapper.markRefunded(orderId);
+            if (rows == 0) {
+                log.warn("[OrderService] 订单 {} 全部商品已退，但整单标记未生效（状态可能已变更）", orderId);
+            } else {
+                log.info("[OrderService] 订单 {} 最后一件商品退款完成，订单标记为已退款", orderId);
+            }
+        } else {
+            int rows = mallOrderMapper.markPartialRefunded(orderId);
+            if (rows == 0) {
+                log.warn("[OrderService] 订单 {} 部分退款标记未生效（状态可能已变更）", orderId);
+            } else {
+                log.info("[OrderService] 订单 {} 部分退款完成（SKU {}），订单标记为部分退款", orderId, skuId);
+            }
+        }
+    }
+
+    /** 部分退款：回滚指定 SKU 的库存（取订单明细中的购买数量）。 */
+    private void rollbackSkuStock(Long orderId, Long skuId) {
+        if (skuId == null) return;
+        List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(orderId);
+        if (items == null) return;
+        MallOrder order = mallOrderMapper.getById(orderId);
+        String orderNo = order == null ? null : order.getOrderNo();
+        for (MallOrderItem it : items) {
+            if (skuId.equals(it.getSkuId())) {
+                skuStockService.rollback(it.getSkuId(),
+                        it.getQty() == null ? 0 : it.getQty(), orderNo);
+                return;
+            }
+        }
+    }
+
+    /**
+     * 判断订单所有商品是否都已完成退款。
+     * 已完成售后覆盖的 SKU 含 NULL（整单售后）时视为全部已退。
+     */
+    private boolean allItemsRefunded(List<MallOrderItem> items) {
+        if (items == null || items.isEmpty()) return false;
+        List<Long> doneSkuIds = afterSaleMapper.listCompletedSkuIdsByOrder(items.get(0).getOrderId());
+        if (doneSkuIds == null || doneSkuIds.isEmpty()) return false;
+        if (doneSkuIds.contains(null)) return true; // 存在整单售后 → 全部已退
+        Set<Long> done = doneSkuIds.stream().filter(Objects::nonNull).collect(Collectors.toSet());
+        for (MallOrderItem it : items) {
+            if (it.getSkuId() != null && !done.contains(it.getSkuId())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** 内部行对象：一次 for 循环的计算结果传给后续步骤，避免重复查询。 */

@@ -81,9 +81,14 @@ public interface OrderService {
     void markRefunding(Long orderId);
 
     /**
-     * 完成退款：订单 REFUNDING → COMPLETED，回滚库存，由售后模块调用。
+     * 完成部分退款：订单 REFUNDING → REFUNDED/PARTIAL_REFUNDED，回滚该 SKU 库存，由售后模块调用。
+     * <p>仅回滚本次退款 SKU 的库存；若订单所有商品均已退款则订单标记为已退款（REFUNDED），
+     * 否则标记为部分退款（PARTIAL_REFUNDED），用户仍可对剩余商品继续申请售后。</p>
+     *
+     * @param orderId 订单ID
+     * @param skuId   本次退款的 SKU（必传）
      */
-    void completeRefund(Long orderId);
+    void completeRefund(Long orderId, Long skuId);
 
     /**
      * 自动取消过期的待付款订单（由定时任务调用，15 分钟超时）。

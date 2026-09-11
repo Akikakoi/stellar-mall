@@ -74,6 +74,9 @@ public interface MallOrderMapper {
     /** 退款完成：状态 → REFUNDED 并标记 is_refunded = 1。 */
     int markRefunded(@Param("id") Long id);
 
+    /** 部分退款完成：状态 → PARTIAL_REFUNDED（仅退款中订单可转，防止覆盖已退款等状态）。 */
+    int markPartialRefunded(@Param("id") Long id);
+
     /** 导出：查询全部订单（关联用户手机号），支持筛选。 */
     List<MallOrder> listAllForExport(@Param("status") String status,
                                      @Param("startTime") String startTime,

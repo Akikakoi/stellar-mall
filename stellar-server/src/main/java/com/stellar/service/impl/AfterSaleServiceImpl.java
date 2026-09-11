@@ -58,7 +58,8 @@ public class AfterSaleServiceImpl implements AfterSaleService {
     private final CouponService couponService;
     private final UserMessageService userMessageService;
     private final WalletService walletService;
-    private final PointsService pointsService;
+    /** 积分跟随主流程的静默操作统一收口（失败吞掉 + [POINTS_LOSS] 告警日志）。 */
+    private final com.stellar.service.PointsFacade pointsFacade;
 
     // -------- 用户提交售后 --------
 
@@ -93,10 +94,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
             throw new BaseException(MessageConstant.AFTER_SALE_ORDER_NOT_PAID);
         }
 
-        // 2) 校验无进行中的售后单
+        // 2) 校验该 SKU 无进行中的售后单
         int activeCount = afterSaleMapper.countActiveByOrderAndSku(dto.getOrderId(), dto.getSkuId());
         if (activeCount > 0) {
             throw new BaseException(MessageConstant.AFTER_SALE_ALREADY_EXISTS);
+        }
+
+        // 2.5) 防重复退款：该商品已完成退款则拒绝再次申请
+        if (afterSaleMapper.countCompletedByOrderAndSku(dto.getOrderId(), dto.getSkuId()) > 0) {
+            throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "：该商品已退款，请勿重复申请");
         }
 
         // 3) 校验售后类型
@@ -426,9 +432,9 @@ public class AfterSaleServiceImpl implements AfterSaleService {
         afterSaleMapper.update(update);
         log.info("[AfterSaleService] 售后单已更新为完成: id={}", id);
 
-        // 订单 → REFUNDED 并回滚库存
-        orderService.completeRefund(afterSale.getOrderId());
-        log.info("[AfterSaleService] 订单退款完成: orderId={}", afterSale.getOrderId());
+        // 订单 → REFUNDED / PARTIAL_REFUNDED 并按售后 SKU 回滚库存
+        orderService.completeRefund(afterSale.getOrderId(), afterSale.getSkuId());
+        log.info("[AfterSaleService] 订单退款完成: orderId={}, skuId={}", afterSale.getOrderId(), afterSale.getSkuId());
 
         // 退款到钱包
         walletService.refundToWallet(afterSale.getUserId(), afterSale.getOrderId(), afterSale.getAmount());
@@ -545,17 +551,26 @@ public class AfterSaleServiceImpl implements AfterSaleService {
                                  Map<Long, Sku> skuMap, Map<Long, Spu> spuMap,
                                  Map<Long, List<MallOrderItem>> itemsMap) {
         MallOrder order = orderMap.get(a.getOrderId());
-        Sku sku = skuMap.get(a.getSkuId());
+        Sku sku = a.getSkuId() != null ? skuMap.get(a.getSkuId()) : null;
 
         // 匹配售后单对应的订单明细（含下单时的商品名/规格/spuId 快照，SKU 被删后兜底）
         MallOrderItem matchedItem = null;
         List<MallOrderItem> items = itemsMap.get(a.getOrderId());
         if (items != null) {
             for (MallOrderItem item : items) {
-                if (item.getSkuId() != null && item.getSkuId().equals(a.getSkuId())) {
+                if (a.getSkuId() != null && a.getSkuId().equals(item.getSkuId())) {
                     matchedItem = item;
                     break;
                 }
+            }
+        }
+
+        // 整单退款（skuId 为空）：商品维度信息用订单明细快照汇总展示
+        boolean wholeOrder = a.getSkuId() == null;
+        int wholeQty = 0;
+        if (wholeOrder && items != null) {
+            for (MallOrderItem item : items) {
+                wholeQty += item.getQty() == null ? 0 : item.getQty();
             }
         }
 
@@ -564,8 +579,9 @@ public class AfterSaleServiceImpl implements AfterSaleService {
                 : (matchedItem != null ? matchedItem.getSpuId() : null);
         Spu spu = spuId != null ? spuMap.get(spuId) : null;
 
-        // 购买数量：优先订单明细，缺省 1
-        int qty = matchedItem != null && matchedItem.getQty() != null ? matchedItem.getQty() : 1;
+        // 购买数量：整单取订单商品总数量，否则优先订单明细，缺省 1
+        int qty = wholeOrder ? (wholeQty > 0 ? wholeQty : 1)
+                : (matchedItem != null && matchedItem.getQty() != null ? matchedItem.getQty() : 1);
 
         AfterSaleType type = AfterSaleType.fromCode(a.getType());
         AfterSaleStatus status = AfterSaleStatus.fromCode(a.getStatus());
@@ -575,13 +591,15 @@ public class AfterSaleServiceImpl implements AfterSaleService {
                 .orderId(a.getOrderId())
                 .orderNo(order != null ? order.getOrderNo() : null)
                 .skuId(a.getSkuId())
-                .skuSpecs(sku != null ? sku.getSpecs()
-                        : (matchedItem != null ? matchedItem.getSkuSpecs() : null))
-                .spuId(spu != null ? spu.getId() : spuId)
-                .spuName(spu != null ? spu.getName()
+                .skuSpecs(wholeOrder ? null
+                        : (sku != null ? sku.getSpecs()
+                        : (matchedItem != null ? matchedItem.getSkuSpecs() : null)))
+                .spuId(wholeOrder ? null : (spu != null ? spu.getId() : spuId))
+                .spuName(wholeOrder ? "整单退款"
+                        : (spu != null ? spu.getName()
                         : (matchedItem != null ? matchedItem.getSpuName()
-                        : (sku != null ? sku.getName() : null)))
-                .spuImage(spu != null ? spu.getMainImage() : null)
+                        : (sku != null ? sku.getName() : null))))
+                .spuImage(wholeOrder ? null : (spu != null ? spu.getMainImage() : null))
                 .qty(qty)
                 .userId(a.getUserId())
                 .type(a.getType())
@@ -630,39 +648,13 @@ public class AfterSaleServiceImpl implements AfterSaleService {
 
     /**
      * 退款时处理积分：退还抵扣积分 + 收回奖励积分。异常不影响退款主流程。
+     * 收口在 {@link com.stellar.service.PointsFacade}，失败记 [POINTS_LOSS] 告警日志。
      */
     private void refundPointsQuietly(AfterSale afterSale) {
         // 1) 收回订单赠送的奖励积分
-        try {
-            pointsService.reclaimOrderEarnPoints(afterSale.getUserId(), afterSale.getOrderId());
-        } catch (Exception e) {
-            log.error("[AfterSaleService] 收回奖励积分失败（退款不受影响）: orderId={}", afterSale.getOrderId(), e);
-        }
+        pointsFacade.reclaimEarnForOrderQuietly(afterSale.getUserId(), afterSale.getOrderId());
 
-        // 2) 退还抵扣积分
-        try {
-            MallOrder order = mallOrderMapper.getById(afterSale.getOrderId());
-            if (order == null) return;
-            int pointsDeducted = order.getPointsDeducted() != null ? order.getPointsDeducted() : 0;
-            if (pointsDeducted <= 0) return;
-
-            // 计算退款比例：售后退款金额 / 订单实付金额
-            BigDecimal orderPayAmount = order.getPayAmount() != null ? order.getPayAmount() : BigDecimal.ZERO;
-            // 订单实付需要还原为积分抵扣前的金额（payAmount + pointsAmount）
-            BigDecimal pointsAmount = order.getPointsAmount() != null ? order.getPointsAmount() : BigDecimal.ZERO;
-            BigDecimal actualPayBeforePoints = orderPayAmount.add(pointsAmount);
-            if (actualPayBeforePoints.compareTo(BigDecimal.ZERO) <= 0) return;
-
-            BigDecimal refundAmount = afterSale.getAmount() != null ? afterSale.getAmount() : BigDecimal.ZERO;
-            BigDecimal refundRatio = refundAmount.divide(actualPayBeforePoints, 4, java.math.RoundingMode.HALF_UP);
-            if (refundRatio.compareTo(BigDecimal.ONE) > 0) {
-                refundRatio = BigDecimal.ONE;
-            }
-
-            pointsService.refundPointsForOrder(afterSale.getUserId(), afterSale.getOrderId(), refundRatio);
-        } catch (Exception e) {
-            log.error("[AfterSaleService] 积分退还失败（退款不受影响）: orderId={}, userId={}",
-                    afterSale.getOrderId(), afterSale.getUserId(), e);
-        }
+        // 2) 按退款比例退还抵扣积分（比例计算在 Facade 内，口径：与订单实付金额同口径）
+        pointsFacade.refundForOrderQuietly(afterSale.getUserId(), afterSale.getOrderId(), afterSale.getAmount());
     }
 }

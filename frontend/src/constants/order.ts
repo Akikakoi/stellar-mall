@@ -10,7 +10,8 @@ export const ORDER_STATUS = {
   REVIEWABLE: 4,   // 待评价(前端展示态,后端对应 COMPLETED)
   COMPLETED: 5,    // 已完成
   REFUNDING: 6,    // 退款中
-  REFUNDED: 7      // 已退款
+  REFUNDED: 7,     // 已退款
+  PARTIAL_REFUNDED: 8  // 部分退款(仅部分商品已退款)
 } as const
 
 /** 订单状态对应的中文文本映射 */
@@ -22,7 +23,8 @@ export const ORDER_STATUS_TEXT: Record<number, string> = {
   [ORDER_STATUS.REVIEWABLE]: '待评价',
   [ORDER_STATUS.COMPLETED]: '已完成',
   [ORDER_STATUS.REFUNDING]: '退款中',
-  [ORDER_STATUS.REFUNDED]: '已退款'
+  [ORDER_STATUS.REFUNDED]: '已退款',
+  [ORDER_STATUS.PARTIAL_REFUNDED]: '部分退款'
 }
 
 /** 售后状态枚举 */

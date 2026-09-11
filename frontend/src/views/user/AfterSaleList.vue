@@ -15,10 +15,11 @@
           <el-tag :type="statusTag(item.status)" size="small">{{ item.statusText }}</el-tag>
         </div>
         <div class="card-body">
-          <img :src="item.spuImage || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
+          <img v-if="item.skuId" :src="item.spuImage || __PH" class="thumb" v-placeholder />
+          <div v-else class="thumb whole-thumb"><el-icon :size="24"><Box /></el-icon></div>
           <div class="item-info">
             <div class="item-name">{{ item.spuName || '商品' }}</div>
-            <div class="item-spec">{{ item.skuSpecs || '默认规格' }}</div>
+            <div class="item-spec">{{ item.skuId ? (item.skuSpecs || '默认规格') : '退还订单全部商品' }}</div>
             <div class="item-meta">
               <span>{{ item.typeText }}</span>
               <span class="sep">|</span>
@@ -70,7 +71,7 @@ import { useRouter } from 'vue-router'
 import { listAfterSales, cancelAfterSale, submitReturnTracking } from '@/api/mall'
 import { AFTER_SALE_STATUS } from '@/constants/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowRight } from '@element-plus/icons-vue'
+import { ArrowRight, Box } from '@element-plus/icons-vue'
 
 const __PH = window.__PH
 const router = useRouter()
@@ -189,21 +190,23 @@ onMounted(loadList)
 }
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   margin-bottom: 14px;
   cursor: pointer;
   transition: box-shadow .2s;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
 }
-.card:hover { box-shadow: var(--shadow-md); }
+.card:hover { box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); }
 
 .card-head {
   display: flex; justify-content: space-between; align-items: center;
   padding: 14px 20px;
-  background: var(--bg-hover);
-  border-bottom: 1px solid var(--border-subtle);
+  background: var(--glass-hover);
+  border-bottom: 1px solid var(--glass-border);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 .as-no { color: var(--text-secondary); font-size: 14px; font-family: 'Courier New', monospace; }
@@ -212,6 +215,11 @@ onMounted(loadList)
   display: flex; align-items: center; padding: 14px 20px;
 }
 .thumb { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; margin-right: 14px; }
+.whole-thumb {
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in srgb, var(--brand-primary, #409eff) 8%, transparent);
+  color: var(--brand-primary, #409eff);
+}
 .item-info { flex: 1; }
 .item-name { color: var(--text-primary); font-size: 14px; font-weight: 500; margin-bottom: 4px; }
 .item-spec { color: var(--text-muted); font-size: 12px; }
@@ -222,7 +230,7 @@ onMounted(loadList)
 .card-foot {
   display: flex; justify-content: space-between; align-items: center;
   padding: 10px 20px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
   color: var(--text-muted); font-size: 13px;
 }
 .pagination-wrapper { display: flex; justify-content: center; margin-top: 24px; }

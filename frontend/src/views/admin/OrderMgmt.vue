@@ -24,6 +24,7 @@
           <el-option label="已完成" value="COMPLETED" />
           <el-option label="已取消" value="CANCELLED" />
           <el-option label="已退款" value="REFUNDED" />
+          <el-option label="部分退款" value="PARTIAL_REFUNDED" />
         </el-select>
         <el-button type="primary" :disabled="loading" @click="onQueryClick">查询</el-button>
       </div>
@@ -146,7 +147,8 @@ const STATUS_MAP: Record<string, any> = {
   COMPLETED: '已完成',
   CANCELLED: '已取消',
   REFUNDING: '退款中',
-  REFUNDED: '已退款'
+  REFUNDED: '已退款',
+  PARTIAL_REFUNDED: '部分退款'
 }
 
 /** 获取订单状态的中文标签 */
@@ -164,6 +166,7 @@ function statusTagType(s: any) {
     case 'CANCELLED': return 'danger'
     case 'REFUNDING': return 'warning'
     case 'REFUNDED': return 'danger'
+    case 'PARTIAL_REFUNDED': return 'warning'
     default: return 'info'
   }
 }

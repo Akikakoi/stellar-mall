@@ -14,17 +14,20 @@
           <div 
             v-for="it in orderItems" :key="it.skuId" 
             class="item-row"
-            :class="{ selected: selectedItem?.skuId === it.skuId }"
-            @click="selectedItem = it"
+            :class="{ selected: selectedItem?.skuId === it.skuId, 'refunded-item': it.refunded }"
+            @click="selectItem(it)"
           >
-            <el-radio v-model="selectedSkuId" :value="it.skuId" class="item-radio" />
-            <img :src="it.pic || it.image || __PH" class="thumb" onerror="this.src=window.__PH;this.onerror=null" />
+            <el-radio v-model="selectedSkuId" :value="it.skuId" :disabled="!!it.refunded" class="item-radio" @click.stop.prevent="selectItem(it)" />
+            <img :src="it.pic || it.image || __PH" class="thumb" v-placeholder />
             <div class="item-info">
               <div class="item-name">{{ it.spuName }}</div>
               <div class="item-spec">{{ it.skuSpecs || '默认规格' }}</div>
             </div>
             <div class="item-price">¥{{ Number(it.price || 0).toFixed(2) }}</div>
             <div class="item-qty">x{{ it.qty || 1 }}</div>
+            <el-tag v-if="it.refunded" type="danger" size="small" class="refunded-tag">
+              已退款 ¥{{ Number(it.refundedAmount || 0).toFixed(2) }}
+            </el-tag>
           </div>
         </div>
 
@@ -46,7 +49,7 @@
           <el-form-item label="退款金额" required>
             <span class="refund-amount">¥{{ refundAmount.toFixed(2) }}</span>
             <span class="hint">
-              （商品 ¥{{ Number(selectedItem.price || 0).toFixed(2) }} x {{ selectedItem.qty || 1 }}
+              （商品 ¥{{ Number(selectedItem?.price || 0).toFixed(2) }} x {{ selectedItem?.qty || 1 }}
               <template v-if="hasCouponDiscount">，已按优惠券比例折算</template>）
             </span>
           </el-form-item>
@@ -78,8 +81,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { listOrder, getOrder, submitAfterSale } from '@/api/mall'
 import { ElMessage } from 'element-plus'
+import { listOrder, getOrder, submitAfterSale } from '@/api/mall'
 import { ORDER_STATUS, AFTER_SALE_TYPE } from '@/constants/order'
 
 const __PH = window.__PH
@@ -130,6 +133,16 @@ watch(selectedSkuId, (val: any) => {
 })
 
 /**
+ * 选择单个商品（已退款的商品不可选择）
+ * @param {Object} it - 订单商品项
+ */
+function selectItem(it: any) {
+  if (!it || it.refunded) return
+  selectedSkuId.value = it.skuId
+  selectedItem.value = it
+}
+
+/**
  * 加载用户订单列表，筛选出可申请售后的订单（已支付/已发货/已完成/可评价）
  */
 async function loadAvailableOrders() {
@@ -137,11 +150,12 @@ async function loadAvailableOrders() {
   try {
     const res: any = await listOrder({ page: 1, pageSize: 100 }) // 兼容 records/list/裸数组多种返回结构
     const all = res?.records || res?.list || (Array.isArray(res) ? res : [])
-    // 筛选可售后订单：PAID(2)/SHIPPED(3)/COMPLETED(5)
+    // 筛选可售后订单：PAID(2)/SHIPPED(3)/COMPLETED(5)/部分退款(8)
     availableOrders.value = all.filter((o: any) => {
       const s = o.statusCode
       return s === ORDER_STATUS.PAID || s === ORDER_STATUS.SHIPPED 
         || s === ORDER_STATUS.COMPLETED || s === ORDER_STATUS.REVIEWABLE
+        || s === ORDER_STATUS.PARTIAL_REFUNDED
     })
   } catch (e: any) {
     ElMessage.error(e?.response?.data?.msg || '加载订单失败')
@@ -230,12 +244,14 @@ onMounted(() => {
 .main-content { padding: 32px 20px 60px; }
 
 .panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 20px 24px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
 }
 .panel-head {
   padding-bottom: 12px; margin-bottom: 16px;
@@ -253,6 +269,9 @@ onMounted(() => {
 }
 .item-row:hover { background: var(--bg-hover); }
 .item-row.selected { border-color: var(--brand-primary); background: var(--bg-hover); }
+.item-row.refunded-item { opacity: 0.55; cursor: not-allowed; }
+.item-row.refunded-item:hover { background: transparent; }
+.refunded-tag { flex-shrink: 0; }
 .item-radio { margin-right: 12px; }
 .thumb { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; margin-right: 12px; }
 .item-info { flex: 1; }
