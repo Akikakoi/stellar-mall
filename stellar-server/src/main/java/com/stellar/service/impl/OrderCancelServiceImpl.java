@@ -59,7 +59,8 @@ public class OrderCancelServiceImpl implements OrderCancelService {
         List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(order.getId());
         if (items != null) {
             for (MallOrderItem it : items) {
-                skuStockService.rollback(it.getSkuId(), it.getQty() == null ? 0 : it.getQty());
+                skuStockService.rollback(it.getSkuId(), it.getQty() == null ? 0 : it.getQty(),
+                        order.getOrderNo());
             }
         }
 

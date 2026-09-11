@@ -1,10 +1,13 @@
 package com.stellar.service.impl;
 
 import com.stellar.constant.MessageConstant;
+import com.stellar.context.BaseContext;
 import com.stellar.entity.Sku;
+import com.stellar.entity.StockLog;
 import com.stellar.exception.BaseException;
 import com.stellar.exception.StockInsufficientException;
 import com.stellar.mapper.SkuMapper;
+import com.stellar.mapper.StockLogMapper;
 import com.stellar.service.SkuStockService;
 import com.stellar.utils.RedisLockUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -41,6 +45,7 @@ public class SkuStockServiceImpl implements SkuStockService {
     private static final long LOCK_TIMEOUT_SECONDS = 10;
 
     private final SkuMapper skuMapper;
+    private final StockLogMapper stockLogMapper;
     private final RedisLockUtil redisLockUtil;
 
     @Value("${stellar.stock.lock-mode:optimistic}")
@@ -59,6 +64,12 @@ public class SkuStockServiceImpl implements SkuStockService {
     @Override
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     public void deduct(Long skuId, int qty) {
+        deduct(skuId, qty, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    public void deduct(Long skuId, int qty, String businessNo) {
         validateParam(skuId, qty);
 
         if ("redis".equalsIgnoreCase(lockMode)) {
@@ -66,6 +77,8 @@ public class SkuStockServiceImpl implements SkuStockService {
         } else {
             deductWithOptimisticLock(skuId, qty);
         }
+        // 记录出库流水（下单/抵扣等扣减库存）
+        writeStockLog(skuId, -qty, 2, "SALE_OUT", businessNo);
     }
 
     /**
@@ -81,6 +94,12 @@ public class SkuStockServiceImpl implements SkuStockService {
     @Override
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
     public void rollback(Long skuId, int qty) {
+        rollback(skuId, qty, null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    public void rollback(Long skuId, int qty, String businessNo) {
         validateParam(skuId, qty);
 
         if ("redis".equalsIgnoreCase(lockMode)) {
@@ -88,6 +107,8 @@ public class SkuStockServiceImpl implements SkuStockService {
         } else {
             rollbackWithOptimisticLock(skuId, qty);
         }
+        // 记录入库流水（取消/超时关闭/售后退货等回滚库存）
+        writeStockLog(skuId, qty, 1, "ORDER_ROLLBACK", businessNo);
     }
 
     /**
@@ -192,6 +213,32 @@ public class SkuStockServiceImpl implements SkuStockService {
         if (rows == 0) {
             throw new BaseException(MessageConstant.SKU_NOT_FOUND);
         }
+    }
+
+    /**
+     * 库存变动后写一条流水，用于审计/对账。
+     *
+     * @param skuId        SKU ID
+     * @param quantity     变动数量（正=增加/入库，负=减少/出库）
+     * @param type         变动类型：1 入库，2 出库
+     * @param businessType 业务类型：SALE_OUT / ORDER_ROLLBACK 等
+     */
+    private void writeStockLog(Long skuId, int quantity, int type, String businessType, String businessNo) {
+        Sku sku = skuMapper.getById(skuId);
+        int stockAfter = sku == null || sku.getStock() == null ? 0 : sku.getStock();
+        Long currentUser = BaseContext.getCurrentId();
+        StockLog log = StockLog.builder()
+                .skuId(skuId)
+                .type(type)
+                .quantity(quantity)
+                .stockBefore(stockAfter - quantity)
+                .stockAfter(stockAfter)
+                .businessType(businessType)
+                .businessNo(businessNo)
+                .createTime(LocalDateTime.now())
+                .createUser(currentUser == null ? 0L : currentUser)
+                .build();
+        stockLogMapper.insert(log);
     }
 
     /**
