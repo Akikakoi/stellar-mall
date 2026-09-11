@@ -13,7 +13,7 @@
         <!-- 商品图片轮播 -->
         <div class="gallery">
           <div v-if="galleryImages.length === 1" class="single-image" @click="openZoom(0)">
-            <img :src="galleryImages[0]" :alt="spu.name" onerror="this.src=window.__PH;this.onerror=null" />
+            <img :src="galleryImages[0]" :alt="spu.name" v-placeholder />
             <div class="zoom-trigger">
               <el-icon><ZoomIn /></el-icon>
             </div>
@@ -33,7 +33,7 @@
                   :alt="`${spu.name} - 图片 ${idx + 1}`"
                   class="carousel-img"
                   @click="openZoom(idx)"
-                  onerror="this.src=window.__PH;this.onerror=null"
+                  v-placeholder
                 />
                 <div class="zoom-trigger" @click.stop="openZoom(idx)">
                   <el-icon><ZoomIn /></el-icon>
@@ -53,7 +53,7 @@
               <el-icon :size="36"><ArrowLeft /></el-icon>
             </div>
             <div class="zoom-body" @click.stop>
-              <img :src="galleryImages[zoomIndex]" :alt="`${spu.name} - 大图`" onerror="this.src=window.__PH;this.onerror=null" />
+              <img :src="galleryImages[zoomIndex]" :alt="`${spu.name} - 大图`" v-placeholder />
             </div>
             <div class="zoom-next" v-if="galleryImages.length > 1" @click.stop="nextImage">
               <el-icon :size="36"><ArrowRight /></el-icon>
@@ -67,7 +67,7 @@
                 :class="{ active: idx === zoomIndex }"
                 @click="zoomIndex = idx"
               >
-                <img :src="img" :alt="`缩略图 ${idx + 1}`" onerror="this.src=window.__PH;this.onerror=null" />
+                <img :src="img" :alt="`缩略图 ${idx + 1}`" v-placeholder />
               </div>
             </div>
           </div>
@@ -169,7 +169,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getSpu, addFavorite, removeFavorite, isFavorited, getReviewComments, submitReviewComment } from '@/api/mall'
+import { getSpu, addFavorite, removeFavorite, isFavorited, getReviewComments, submitReviewComment, recordBrowse } from '@/api/mall'
 import { userRequest } from '@/api/request'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
@@ -395,6 +395,10 @@ async function loadDetail() {
         scene: 'detail',
         amount: Number(spu.value.minPrice) || null
       })
+      // 浏览历史：仅登录用户记录，失败静默不影响详情展示
+      if (userStore.token) {
+        recordBrowse(Number(spu.value.id)).catch(() => {})
+      }
     }
   } catch (e: any) {
     const msg = (e?.response?.data?.msg) || e?.message || ''
