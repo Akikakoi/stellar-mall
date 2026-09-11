@@ -443,6 +443,21 @@ export interface Favorite {
   createTime?: string
 }
 
+// =========================== 浏览历史 ===========================
+
+/** 浏览历史条目(对齐 BrowseHistoryVO) */
+export interface BrowseHistory {
+  id: number
+  spuId: number
+  skuId?: number
+  spuName?: string
+  spuImage?: string
+  minPrice?: number
+  /** 1 上架 / 0 下架 / null 已删除 */
+  spuStatus?: number
+  browseTime?: string
+}
+
 // =========================== 消息 ===========================
 
 /** 站内消息(字段以实际接口返回为准,宽松兜底) */

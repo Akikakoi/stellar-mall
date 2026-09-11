@@ -100,6 +100,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '我的消息', requiresUserAuth: true }
   },
   {
+    path: '/me/browse',
+    name: 'BrowseHistory',
+    component: () => import('@/views/user/BrowseHistory.vue'),
+    meta: { title: '浏览历史', requiresUserAuth: true }
+  },
+  {
     path: '/aftersale/apply',
     name: 'AfterSaleApply',
     component: () => import('@/views/user/AfterSaleApply.vue'),
@@ -239,12 +245,6 @@ const routes: RouteRecordRaw[] = [
         name: 'AdminInventory',
         component: () => import('@/views/admin/Inventory.vue'),
         meta: { title: '库存管理', requiresAdminAuth: true, requiresRole: [1, 2] }
-      },
-      {
-        path: 'inventory-flow',
-        name: 'AdminInventoryFlow',
-        component: () => import('@/views/admin/InventoryFlow.vue'),
-        meta: { title: '出入库管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
         path: 'banner',

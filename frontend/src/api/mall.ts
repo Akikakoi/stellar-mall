@@ -13,7 +13,7 @@ import type {
   Spu, SearchSuggest, Category,
   CartRowVO, Order, Address, Wallet, WalletTransaction,
   PointsRecord, PointsRedeem, UserPoints, PointsProduct, CheckinResult,
-  AfterSale, Favorite, MallMessage,
+  AfterSale, Favorite, MallMessage, BrowseHistory,
 } from '@/types/models'
 
 // =========================== 用户认证 ===========================
@@ -316,6 +316,42 @@ export function batchCheckFavorites(spuIds: number[]): Promise<Record<number, bo
     url: '/user/favorite/batch-check',
     method: 'post',
     data: { spuIds }
+  })
+}
+
+// =========================== 浏览历史 ===========================
+
+/** 记录一次商品浏览（需登录；未登录前端不会调用） */
+export function recordBrowse(spuId: number, skuId?: number): Promise<any> {
+  return userRequest({
+    url: `/user/browse/${spuId}`,
+    method: 'post',
+    params: skuId ? { skuId } : undefined
+  })
+}
+
+/** 分页查询当前用户浏览历史 */
+export function listBrowseHistory(params: PageParams): Promise<PageResult<BrowseHistory>> {
+  return userRequest({
+    url: '/user/browse/page',
+    method: 'get',
+    params
+  })
+}
+
+/** 删除单条浏览记录 */
+export function deleteBrowseHistory(id: number): Promise<any> {
+  return userRequest({
+    url: `/user/browse/${id}`,
+    method: 'delete'
+  })
+}
+
+/** 清空全部浏览记录 */
+export function clearBrowseHistory(): Promise<any> {
+  return userRequest({
+    url: '/user/browse/clear',
+    method: 'delete'
   })
 }
 

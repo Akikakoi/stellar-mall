@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- ============================================================
+     商品浏览历史 Mapper（stellar_browse_history）
+     - upsert：同一用户浏览同一商品时刷新最近浏览时间，足迹去重。
+     - deleteOverLimit：超出单用户最大保留条数时，淘汰最旧一条。
+     - page：分页查询含 SPU 快照（LEFT JOIN），不过滤下架/已删除商品。
+     - 删除均带 user_id 条件，防止横向越权。
+     ============================================================ -->
+<mapper namespace="com.stellar.mapper.BrowseHistoryMapper">
+
+    <!-- 浏览记录 upsert：存在则刷新时间，否则新增 -->
+    <insert id="upsert">
+        INSERT INTO stellar_browse_history (user_id, spu_id, sku_id, browse_time, create_time)
+        VALUES (#{userId}, #{spuId}, #{skuId}, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE browse_time = NOW(), sku_id = VALUES(sku_id)
+    </insert>
+
+    <!-- 淘汰当前用户超过 maxKeep 保留上限的最旧记录 -->
+    <delete id="deleteOverLimit">
+        DELETE h FROM stellar_browse_history h
+        JOIN (
+            SELECT id FROM stellar_browse_history
+            WHERE user_id = #{userId}
+            ORDER BY browse_time DESC, id DESC
+            LIMIT 1 OFFSET #{maxKeep}
+        ) d ON h.id = d.id
+    </delete>
+
+    <!-- 浏览历史分页（含 SPU 快照；LEFT JOIN 保留下架/已删除商品，字段缺失由前端兜底） -->
+    <resultMap id="BrowseHistoryVOMap" type="com.stellar.vo.BrowseHistoryVO">
+        <id     property="id"         column="id"/>
+        <result property="spuId"      column="spu_id"/>
+        <result property="skuId"      column="sku_id"/>
+        <result property="spuName"    column="spu_name"/>
+        <result property="spuImage"   column="spu_image"/>
+        <result property="minPrice"   column="min_price"/>
+        <result property="spuStatus"  column="spu_status"/>
+        <result property="browseTime" column="browse_time"/>
+    </resultMap>
+
+    <select id="page" resultMap="BrowseHistoryVOMap">
+        SELECT h.id,
+               h.spu_id,
+               h.sku_id,
+               s.name      AS spu_name,
+               s.main_image AS spu_image,
+               s.min_price  AS min_price,
+               s.status     AS spu_status,
+               h.browse_time
+        FROM stellar_browse_history h
+        LEFT JOIN stellar_spu s ON s.id = h.spu_id
+        WHERE h.user_id = #{userId}
+        ORDER BY h.browse_time DESC, h.id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 当前用户浏览历史总数 -->
+    <select id="countByUserId" resultType="long">
+        SELECT COUNT(*) FROM stellar_browse_history WHERE user_id = #{userId}
+    </select>
+
+    <!-- 删除单条记录（按 userId + id 双条件） -->
+    <delete id="deleteById">
+        DELETE FROM stellar_browse_history WHERE user_id = #{userId} AND id = #{id}
+    </delete>
+
+    <!-- 清空当前用户全部浏览记录 -->
+    <delete id="clearByUserId">
+        DELETE FROM stellar_browse_history WHERE user_id = #{userId}
+    </delete>
+
+</mapper>
