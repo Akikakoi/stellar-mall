@@ -57,6 +57,21 @@
         )
     </insert>
 
+    <!-- 批量插入流水：单条 INSERT 多组 VALUES，替代 for 循环逐条 insert。
+         批量调库存时流水条数 = 入参条数，逐条插入会产生 2N 次数据库往返。 -->
+    <insert id="insertBatch">
+        INSERT INTO stellar_stock_log (
+            sku_id, type, quantity, stock_before, stock_after,
+            remark, business_type, business_no,
+            create_time, create_user
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.skuId}, #{item.type}, #{item.quantity}, #{item.stockBefore}, #{item.stockAfter},
+             #{item.remark}, #{item.businessType}, #{item.businessNo},
+             #{item.createTime}, #{item.createUser})
+        </foreach>
+    </insert>
+
     <select id="page" resultMap="StockLogMap">
         <include refid="selectWithJoin"/>
         <include refid="filterConditions"/>
