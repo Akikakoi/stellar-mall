@@ -45,6 +45,32 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
+  # 线程池：@Async 与 @Scheduled 的池化配置
+  # ⚠️ task.execution 只对「未指定执行器名」的 @Async 生效。本项目自定义了 Executor Bean
+  # （见 AsyncExecutorConfig / BehaviorExecutorConfig），Spring Boot 的默认
+  # applicationTaskExecutor 因此不再创建，业务 @Async 一律显式写执行器名；
+  # 这里保留兜底配置，防止将来新增未命名的 @Async 时退化到 SimpleAsyncTaskExecutor
+  # —— 那个执行器每次调用都新建线程且无上限，是典型的线程耗尽来源。
+  task:
+    execution:
+      pool:
+        core-size: 4
+        max-size: 16
+        queue-capacity: 500
+      thread-name-prefix: stellar-async-
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+    # 定时任务调度池：默认池只有 1 个线程，订单过期扫描 / RAG outbox 同步 / 优惠券提醒
+    # 会串行抢同一个线程 —— 任一轮阻塞就会整体推迟其余定时任务。
+    scheduling:
+      pool:
+        size: 4
+      thread-name-prefix: stellar-sched-
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.stellar.entity

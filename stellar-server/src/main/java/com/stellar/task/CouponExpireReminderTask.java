@@ -9,9 +9,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -25,8 +25,20 @@ public class CouponExpireReminderTask {
     private final CouponMapper couponMapper;
     private final NotificationService notificationService;
 
+    /**
+     * 单机重入保护。
+     * <p>调度池扩容后定时任务可能并行调度，多实例部署也会各触发一次；重复执行会把同一批
+     * 用户重复通知一遍，这里用 CAS 保证同一时刻只有一轮在跑。</p>
+     */
+    private final AtomicBoolean running = new AtomicBoolean(false);
+
+    /** 每天 10:00 执行一次。 */
     @Scheduled(cron = "0 0 10 * * ?")
     public void remindExpiringCoupons() {
+        if (!running.compareAndSet(false, true)) {
+            log.warn("[定时任务] 上一轮提醒尚未结束，跳过本轮");
+            return;
+        }
         log.info("[定时任务] 开始检查即将过期的优惠券");
 
         try {
@@ -54,6 +66,8 @@ public class CouponExpireReminderTask {
 
         } catch (Exception e) {
             log.error("[定时任务] 优惠券到期提醒执行失败", e);
+        } finally {
+            running.set(false);
         }
     }
 }

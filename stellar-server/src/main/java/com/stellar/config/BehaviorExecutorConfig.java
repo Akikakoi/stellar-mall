@@ -28,6 +28,8 @@ public class BehaviorExecutorConfig {
         executor.setKeepAliveSeconds(60);
         executor.setThreadNamePrefix("stellar-behavior-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+        // 统一挂上下文传递：埋点若需要记录「当前登录用户」，在池线程里也能读到
+        executor.setTaskDecorator(new BaseContextTaskDecorator());
         executor.initialize();
         log.info("behavior executor initialized: core=2 max=8 queue=2000");
         return executor;

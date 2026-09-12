@@ -211,10 +211,16 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <excludes>
+                                <!-- 以下均为 @SpringBootTest 类：需要 application-dev.yml 提供
+                                     stellar.datasource.* / stellar.redis.* 等占位符值，而该文件被
+                                     .gitignore 忽略（含密钥，不入库），CI 上不存在 → 上下文无法启动。
+                                     故在 unit-only 中排除，改动这些用例覆盖的逻辑时需在本地单独运行。 -->
                                 <exclude>**/CategoryServiceTest.java</exclude>
                                 <exclude>**/SkuStockServiceTest.java</exclude>
                                 <exclude>**/SpuSkuServiceTest.java</exclude>
                                 <exclude>**/RagSyncServiceTest.java</exclude>
+                                <exclude>**/InventoryBatchStockTest.java</exclude>
+                                <exclude>**/AsyncWiringIntegrationTest.java</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
