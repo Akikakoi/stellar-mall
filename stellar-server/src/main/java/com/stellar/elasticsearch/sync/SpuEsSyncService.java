@@ -2,6 +2,7 @@ package com.stellar.elasticsearch.sync;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.stellar.config.AsyncExecutorConfig;
 import com.stellar.elasticsearch.doc.SpuDocument;
 import com.stellar.elasticsearch.event.SpuChangedEvent;
 import com.stellar.entity.Spu;
@@ -50,7 +51,7 @@ public class SpuEsSyncService {
         this.spuMapper = spuMapper;
     }
 
-    @Async
+    @Async(AsyncExecutorConfig.ES_SYNC_EXECUTOR)
     @EventListener
     public void onSpuChanged(SpuChangedEvent event) {
         if (!esEnabled) return;

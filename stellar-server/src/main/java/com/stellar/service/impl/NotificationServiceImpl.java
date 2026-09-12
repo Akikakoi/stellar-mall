@@ -1,5 +1,6 @@
 package com.stellar.service.impl;
 
+import com.stellar.config.AsyncExecutorConfig;
 import com.stellar.entity.*;
 import com.stellar.mapper.EmailCodeMapper;
 import com.stellar.mapper.NotificationLogMapper;
@@ -7,13 +8,11 @@ import com.stellar.mapper.UserMessageMapper;
 import com.stellar.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.mail.MailProperties;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,24 +31,22 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailCodeMapper emailCodeMapper;
     private final NotificationLogMapper notificationLogMapper;
     private final UserMessageMapper userMessageMapper;
-    private final JavaMailSender javaMailSender;
-    private final MailProperties mailProperties;
+    /** 真实发信由独立 Bean 承载：既把阻塞 IO 挪出事务，也避开同 Bean 自调用导致 @Async 失效。 */
+    private final MailDispatcher mailDispatcher;
 
     private static final int CODE_EXPIRE_MINUTES = 5;
     /** 验证码使用加密安全随机数，防止 java.util.Random 可预测导致验证码被爆破 */
     private static final java.security.SecureRandom RANDOM = new java.security.SecureRandom();
-
-    /** 是否启用真实 SMTP 发送；false 时为开发模式，不真实发信 */
-    @Value("${stellar.mail.enabled:false}")
-    private boolean mailEnabled;
 
     // ======================== 邮箱验证码 ========================
 
     /**
      * 生成并发送邮箱验证码。
      *
-     * <p>生成 6 位随机数字验证码，写入数据库。配置了 SMTP（stellar.mail.enabled=true）
-     * 时通过 JavaMailSender 真实发送；否则为开发模式，仅记录日志并在日志中输出验证码。</p>
+     * <p>生成 6 位随机数字验证码并写入数据库，随后把「真实发信」注册到事务提交回调里，
+     * 交由 {@link MailDispatcher} 在专用线程池中异步投递——SMTP 发送是阻塞网络 IO，
+     * 留在本事务内会把数据库事务与连接一起拖住。配置了 SMTP（stellar.mail.enabled=true）
+     * 时真实发送；否则为开发模式，仅记录日志并在日志中输出验证码。</p>
      *
      * @param email 邮箱地址
      * @param type  验证码类型
@@ -71,30 +68,28 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
         emailCodeMapper.insert(emailCode);
 
-        if (mailEnabled) {
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setFrom(mailProperties.getUsername());
-                message.setTo(email);
-                message.setSubject("【星耀商城】验证码");
-                message.setText("【星耀商城】您的验证码是 " + code + "，5分钟内有效。若非本人操作请忽略。");
-                javaMailSender.send(message);
-                log.info("[邮箱验证码] 已发送 邮箱:{} 类型:{} 验证码:{}", email, type, code);
-                logNotification(null, null, email, "EMAIL", "VERIFY_CODE",
-                        "验证码", "【星耀商城】您的验证码是 " + code + "，5分钟内有效。", 1, null);
-            } catch (Exception e) {
-                log.error("[邮箱验证码] 发送失败 邮箱:{} 类型:{}", email, type, e);
-                logNotification(null, null, email, "EMAIL", "VERIFY_CODE",
-                        "验证码", "【星耀商城】您的验证码是 " + code + "，5分钟内有效。", 2, e.getMessage());
-            }
-        } else {
-            // 开发模式：未配置 SMTP，不真实发信，验证码直接打印日志由前端兜底展示
-            log.info("[邮箱验证码] 开发模式（未配置 SMTP，不真实发送） 邮箱:{} 类型:{} 验证码:{}", email, type, code);
-            logNotification(null, null, email, "EMAIL", "VERIFY_CODE",
-                    "验证码", "开发模式未真实发送，验证码 " + code, 0, "SMTP 未配置");
-        }
+        // 提交后才发信：回滚时若已投递，用户会拿到一个数据库里并不存在的验证码
+        dispatchMailAfterCommit(email, type, code);
 
         return emailCode;
+    }
+
+    /**
+     * 在事务提交后触发异步发信。
+     *
+     * <p>没有事务上下文时（被非事务方法直接调用）立即发信，避免「验证码已入库却没发出去」。</p>
+     */
+    private void dispatchMailAfterCommit(String email, String type, String code) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            mailDispatcher.sendVerifyCodeMail(email, type, code);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                mailDispatcher.sendVerifyCodeMail(email, type, code);
+            }
+        });
     }
 
     /**
@@ -130,7 +125,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @param order 已发货的订单
      */
     @Override
-    @Async
+    @Async(AsyncExecutorConfig.NOTIFICATION_EXECUTOR)
     public void sendOrderShippedNotice(MallOrder order) {
         String content = String.format("【星耀商城】您的订单 %s 已发货，请留意物流信息。",
                 order.getOrderNo());
@@ -149,7 +144,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @param order 已确认收货的订单
      */
     @Override
-    @Async
+    @Async(AsyncExecutorConfig.NOTIFICATION_EXECUTOR)
     public void sendOrderReceivedNotice(MallOrder order) {
         String content = String.format("【星耀商城】您的订单 %s 已确认收货，感谢您的惠顾！",
                 order.getOrderNo());
@@ -168,7 +163,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @param coupons 即将过期的优惠券列表
      */
     @Override
-    @Async
+    @Async(AsyncExecutorConfig.NOTIFICATION_EXECUTOR)
     public void sendCouponExpireNotice(Long userId, List<UserCoupon> coupons) {
         if (coupons.isEmpty()) return;
         StringBuilder sb = new StringBuilder("【星耀商城】您有 ");
@@ -199,7 +194,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @param errorMsg 错误信息（可为 null）
      */
     @Override
-    @Async
+    @Async(AsyncExecutorConfig.NOTIFICATION_EXECUTOR)
     public void logNotification(Long userId, String phone, String email, String channel,
                                  String type, String title, String content, int status, String errorMsg) {
         NotificationLog logEntry = NotificationLog.builder()
