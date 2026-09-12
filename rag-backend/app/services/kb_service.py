@@ -17,7 +17,7 @@ from app.core.logger import logger
 from app.core.utils import escape_sql_like
 from app.models import KbDocument, User
 from app.rag.llm_cache import invalidate_llm_cache_nowait
-from app.rag.retriever import get_query_cache
+from app.rag.retriever import get_query_cache, invalidate_bm25_cache
 from app.schemas import KbDocInfo, KbDocUpdateReq, KbPreviewResp
 from app.services.operation_log_service import log_operation
 
@@ -40,6 +40,11 @@ class KbService:
             logger.info("知识库变更，已清空查询缓存")
         except Exception as e:  # noqa
             logger.warning(f"清空查询缓存失败: {e}")
+        # BM25 索引常驻缓存：KB 增删后必须失效，否则新文档检索不到 / 旧文档仍命中
+        try:
+            invalidate_bm25_cache()
+        except Exception as e:  # noqa
+            logger.warning(f"清空 BM25 缓存失败: {e}")
         invalidate_llm_cache_nowait()
 
     # ---------- 列表 ----------

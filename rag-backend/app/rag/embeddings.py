@@ -6,20 +6,72 @@
   2) 专属业务空间 Key（sk-ws-xxx）：业务空间域名未开放百炼原生 services/embeddings
      接口，必须走 OpenAI 兼容协议的 `/v1/embeddings`（与 LLM 同 base_url，即
      settings.OPENAI_COMPATIBLE_BASE_URL），模型名仍然是 text-embedding-v2。
+
+性能说明（全链路耗时优化）：
+    同一次问答请求内，同一段 query 文本会被多处要求 embedding——
+    向量召回、FAQ 缓存查询、FAQ 缓存写入、L2 语义缓存查询。
+    云端 text-embedding-v2 单次约 1.3s，重复调用是纯浪费。
+    这里用 _CachedEmbeddings 包一层线程安全 LRU，对 embed_query 做文本级去重。
 """
 from __future__ import annotations
+import threading
+from collections import OrderedDict
+from typing import List
+
 from app.config import settings
 from app.core.logger import logger
 
 _embedding_instance = None
 
 
+class _CachedEmbeddings:
+    """Embeddings 装饰器：对 embed_query 做进程级 LRU memo（线程安全）。
+
+    只缓存单条 query 的向量（批量 embed_documents 不缓存，避免大对象驻留）。
+    同一 query 文本在召回 / FAQ 缓存 / L2 缓存之间重复出现时直接命中，
+    省掉一次云端往返（约 1.3s）。
+    """
+
+    def __init__(self, inner, maxsize: int = 512):
+        self._inner = inner
+        self._maxsize = max(1, int(maxsize))
+        self._lock = threading.Lock()
+        self._cache: "OrderedDict[str, List[float]]" = OrderedDict()
+
+    def __getattr__(self, item):
+        # 其余接口（embed_documents / aembed_* 等）透传给被包装实例
+        return getattr(self._inner, item)
+
+    def embed_query(self, text: str) -> List[float]:
+        if not isinstance(text, str) or not text:
+            return self._inner.embed_query(text)
+        with self._lock:
+            hit = self._cache.get(text)
+            if hit is not None:
+                self._cache.move_to_end(text)
+                return hit
+        vec = self._inner.embed_query(text)
+        with self._lock:
+            self._cache[text] = vec
+            self._cache.move_to_end(text)
+            while len(self._cache) > self._maxsize:
+                self._cache.popitem(last=False)
+        return vec
+
+
 def get_embeddings():
-    """返回 LangChain Embeddings 接口的实例（单例）。"""
+    """返回 LangChain Embeddings 接口的实例（单例，带 query 向量 LRU 缓存）。"""
     global _embedding_instance
     if _embedding_instance is not None:
         return _embedding_instance
 
+    base = _build_embeddings()
+    _embedding_instance = _CachedEmbeddings(base)
+    return _embedding_instance
+
+
+def _build_embeddings():
+    """构造底层 Embeddings 实现（不含缓存包装）。"""
     api_key = settings.DASHSCOPE_API_KEY
     is_workspace = isinstance(api_key, str) and api_key.startswith("sk-ws-")
 
@@ -48,7 +100,6 @@ def get_embeddings():
                     f"{settings.DASHSCOPE_EMBEDDING_MODEL} "
                     f"base_url={settings.OPENAI_COMPATIBLE_BASE_URL}"
                 )
-                _embedding_instance = emb
                 return emb
             except Exception as e:  # noqa
                 logger.warning(f"workspace OpenAIEmbedding 初始化失败: {e}")
@@ -79,7 +130,6 @@ def get_embeddings():
             logger.info(
                 f"[Embedding] 使用 DashScopeEmbeddings: {settings.DASHSCOPE_EMBEDDING_MODEL}"
             )
-            _embedding_instance = emb
             return emb
         except Exception as e:  # noqa
             logger.warning(f"DashScope Embedding 初始化失败，尝试本地: {e}")
@@ -93,7 +143,6 @@ def get_embeddings():
             encode_kwargs={"normalize_embeddings": True, "show_progress_bar": False},
         )
         logger.info(f"[Embedding] 使用本地 BGE: {settings.EMBEDDING_MODEL_NAME}")
-        _embedding_instance = emb
         return emb
     except Exception as e:  # noqa
         raise RuntimeError(f"Embedding 初始化失败（DashScope+本地都不可用）: {e}")

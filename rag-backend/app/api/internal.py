@@ -230,6 +230,15 @@ def sync_spu(
     except Exception:
         pass  # 缓存失效异常不影响主流程
 
+    # === 失效 BM25 索引缓存 ===
+    # 本接口是「先删旧分块再写新分块」，总条数可能不变，
+    # 仅靠 count 校验无法发现内容已更新，必须显式置空。
+    try:
+        from app.rag.retriever import invalidate_bm25_cache
+        invalidate_bm25_cache()
+    except Exception:
+        pass
+
     return SyncResponse(
         ok=True, biz_type="SPU", biz_id=biz_id,
         processed_chunk_count=chunk_count,
@@ -281,6 +290,13 @@ def sync_doc(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Vector store failed: {e}",
             ) from e
+
+    # === 失效 BM25 索引缓存（先删后写，总数可能不变，需显式置空） ===
+    try:
+        from app.rag.retriever import invalidate_bm25_cache
+        invalidate_bm25_cache()
+    except Exception:
+        pass
 
     return SyncResponse(
         ok=True, biz_type=metadata_base["biz_type"], biz_id=biz_id,

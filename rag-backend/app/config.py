@@ -92,7 +92,9 @@ class Settings(BaseSettings):
     DASHSCOPE_API_HOST: str = "dashscope.aliyuncs.com"
     LLM_MODEL_NAME: str = "qwen-plus"
     LLM_TEMPERATURE: float = 0.3
-    LLM_MAX_TOKENS: int = 2048
+    # 输出上限：2048 会让模型生成冗长回答（生成时长直接随输出 token 增长）。
+    # 客服导购场景 800 足够（约 500-600 汉字），既提速又更聚焦。
+    LLM_MAX_TOKENS: int = 800
     LLM_TIMEOUT_SECONDS: float = 60.0   # 单次 LLM 请求超时（秒），防止卡死拖垮整条链路
     LLM_MAX_RETRIES: int = 1            # 客户端层重试次数（不含首次调用）
 
@@ -115,7 +117,9 @@ class Settings(BaseSettings):
         return [e.strip().lower() for e in self.ALLOWED_EXTENSIONS.split(",") if e.strip()]
 
     # RAG
-    RETRIEVER_TOP_K: int = 20
+    # 召回条数：20 → 12。Rerank 是 O(候选数) 次 CrossEncoder 前向，降候选数直接减半精排耗时；
+    # 精排目标仍是 top5，12 条召回的最终质量与 20 条差异极小（可用评测集回归验证）。
+    RETRIEVER_TOP_K: int = 12
     RERANK_TOP_K: int = 5
     SIMILARITY_THRESHOLD: float = 0.4    # 与 .env 实际值保持一致（默认值仅在不带 .env 的环境生效）
 
@@ -128,6 +132,10 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = 1024
     CHUNK_OVERLAP: int = 200
     QUERY_REWRITE_ENABLED: bool = True
+    # 改写条件化的长度阈值：无指代词且长度 >= 该值 → 视为自足问句，跳过改写（省一次 LLM 往返）。
+    # 设得越大越保守（越多问句走改写）。中文完整问句通常 6 字起（如"保修政策是什么"=7 字），
+    # 故取 6：既接住完整短问，又让"多少钱""怎么样"这类语义不完整的超短问句走改写。
+    QUERY_REWRITE_MIN_LEN: int = 6
 
     # 缓存（旧版 _QueryCache，逐步弃用）
     QUERY_CACHE_MAXSIZE: int = 128
