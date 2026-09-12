@@ -1,6 +1,7 @@
 package com.stellar.mapper;
 
 import com.stellar.annotation.AutoFill;
+import com.stellar.dto.SkuStockChange;
 import com.stellar.entity.Sku;
 import com.stellar.enumeration.OperationType;
 import org.apache.ibatis.annotations.Mapper;
@@ -104,8 +105,26 @@ public interface SkuMapper {
     int adjustStock(@Param("id") Long id, @Param("delta") Integer delta);
 
     /**
+     * 管理端批量调整库存：单条 CASE WHEN UPDATE 完成多 SKU 改动，语义与逐条
+     * {@link #adjustStock} 一致（GREATEST 防负 + 推进 version + 刷新 update_time）。
+     *
+     * <p>此前的批量入口是 for 循环调 {@link #adjustStock}，每个 SKU 要 2 次查询 + 1 次更新 +
+     * 1 次流水插入，N 个 SKU 就是 4N 次往返。这里合并成 1 条 UPDATE。</p>
+     *
+     * <p><b>items 中同一 SKU 只能出现一次</b>：CASE 表达式命中第一个匹配的 WHEN 就返回，
+     * 重复项会被忽略，调用方必须先合并增量（见 {@link SkuStockChange}）。</p>
+     */
+    int adjustStockBatch(@Param("items") List<SkuStockChange> items);
+
+    /**
      * 管理端更新 SKU 元数据（预警库存等，不触发 @AutoFill）。
      * 仅更新 warnStock、update_time、update_user。
      */
     int updateStockMeta(Sku sku);
+
+    /**
+     * 管理端批量更新预警库存：单条 CASE WHEN UPDATE，只改 warn_stock / update_time / update_user。
+     * 调用方须保证 items 中的 id 唯一（原因同 {@link #adjustStockBatch}）。
+     */
+    int updateStockMetaBatch(@Param("items") List<Sku> items, @Param("updateUser") Long updateUser);
 }

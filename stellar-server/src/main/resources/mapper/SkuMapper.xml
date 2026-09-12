@@ -205,6 +205,25 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 管理端批量调整库存：单条 CASE WHEN 完成多 SKU 更新，替代 N 次 adjustStock 调用。
+         ⚠️ CASE 命中第一个匹配的 WHEN 即返回，因此 items 中的 id 必须唯一
+         （调用方已在 Service 层按 SKU 合并增量）。
+         delta 已合并，故同批次内 version 只推进一次 —— 一次批量操作视为一次库存变更。 -->
+    <update id="adjustStockBatch">
+        UPDATE stellar_sku
+        SET stock = GREATEST(0, stock + CASE id
+                <foreach collection="items" item="item">
+                    WHEN #{item.id} THEN #{item.delta}
+                </foreach>
+                ELSE 0 END),
+            version = version + 1,
+            update_time = NOW()
+        WHERE id IN
+        <foreach collection="items" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+    </update>
+
     <!-- 管理端更新 SKU 元数据（预警库存），不触发 @AutoFill，手动维护 update 字段 -->
     <update id="updateStockMeta" parameterType="com.stellar.entity.Sku">
         UPDATE stellar_sku
@@ -212,6 +231,22 @@
             update_time = NOW(),
             update_user = #{updateUser}
         WHERE id = #{id}
+    </update>
+
+    <!-- 管理端批量更新预警库存：单条 CASE WHEN，只动 warn_stock 与 update 字段 -->
+    <update id="updateStockMetaBatch">
+        UPDATE stellar_sku
+        SET warn_stock = CASE id
+                <foreach collection="items" item="item">
+                    WHEN #{item.id} THEN #{item.warnStock}
+                </foreach>
+                ELSE warn_stock END,
+            update_time = NOW(),
+            update_user = #{updateUser}
+        WHERE id IN
+        <foreach collection="items" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
     </update>
 
 </mapper>

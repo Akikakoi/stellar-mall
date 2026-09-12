@@ -16,6 +16,13 @@ public interface StockLogMapper {
     int insert(StockLog log);
 
     /**
+     * 批量插入库存变动流水：单条 INSERT ... VALUES (...),(...) 一次落库，
+     * 替代 for 循环逐条 insert。批量调库存时流水条数 = 入参条数，
+     * 逐条插入会让「N 个 SKU」的操作产生 2N 次数据库往返。
+     */
+    int insertBatch(@Param("list") List<StockLog> list);
+
+    /**
      * 出入库日志分页查询（按时间倒序），支持组合筛选：
      * @param skuId   SKU ID（精确，可空）
      * @param keyword 商品名称模糊（联查 stellar_sku.name，可空）
