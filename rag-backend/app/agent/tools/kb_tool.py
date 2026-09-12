@@ -5,7 +5,7 @@ import re
 
 from app.config import settings
 from app.core.logger import logger
-from app.rag.retriever import hybrid_retrieve, rerank, _matches_tag_filter
+from app.rag.retriever import hybrid_retrieve, rerank, _matches_tag_filter, _get_all_docs_cached
 from app.rag.chains import _fix_garbled_tags
 
 
@@ -59,25 +59,19 @@ def kb_specs_for_products(query: str, product_names: List[str],
         per_product: 每个商品最多返回的 chunk 数，默认 3
     """
     try:
-        from app.rag.vector_store import get_vector_store
-        from langchain_core.documents import Document
-
-        vs = get_vector_store()
-        col = vs.lc._collection
-        batch = col.get(include=["documents", "metadatas"])
-        raw_docs = batch.get("documents") or []
-        raw_metas = batch.get("metadatas") or []
+        # 复用 retriever 的进程级全量文档缓存（避免每次工具调用都 col.get() 全库）
+        raw_docs = _get_all_docs_cached()
 
         # 按商品分组（归一化名称 -> 该商品的文档列表）。
         # 注意：库里存在 doc_name 缺失的 chunk，归一化后为空串——空串是任意字符串
         # 的子串，会参与下面的双向子串匹配导致误命中，必须跳过。
         group_docs = defaultdict(list)
-        for d, m in zip(raw_docs, raw_metas):
-            cname = _clean_product_name(str((m or {}).get("doc_name", "")))
+        for d in raw_docs:
+            cname = _clean_product_name(str((d.metadata or {}).get("doc_name", "")))
             n = _norm_name(cname)
             if not n:
                 continue
-            group_docs[n].append(Document(page_content=d, metadata=m or {}))
+            group_docs[n].append(d)
 
         keyword_lower = [k.lower() for k in spec_keywords if k]
         sources = []
@@ -185,22 +179,13 @@ def kb_spec_compare(query: str, tags_filter: List[str], spec_keywords: List[str]
         per_product: 每个产品最多返回的 chunk 数，默认 3
     """
     try:
-        # 1) 直接从 ChromaDB 取出全部文档，Python 过滤 tags
-        from app.rag.vector_store import get_vector_store
-        from langchain_core.documents import Document
-
-        vs = get_vector_store()
-        col = vs.lc._collection
-        batch = col.get(include=["documents", "metadatas"])
-        raw_docs = batch.get("documents") or []
-        raw_metas = batch.get("metadatas") or []
-        all_docs = [Document(page_content=d, metadata=m or {})
-                    for d, m in zip(raw_docs, raw_metas)]
+        # 1) 复用 retriever 的进程级全量文档缓存，Python 过滤 tags
+        all_docs = _get_all_docs_cached()
 
         tagged_docs = [d for d in all_docs if _matches_tag_filter(d.metadata, tags_filter)] if tags_filter else all_docs
+        # 注意：项目 logger 是 loguru，占位符是 {} 不是 %s/%d（用 % 会原样打印）
         logger.info(
-            f"[kb_spec_compare] 全库 %d 条 -> tags_filter=%s -> %d 条",
-            len(all_docs), tags_filter, len(tagged_docs)
+            f"[kb_spec_compare] 全库 {len(all_docs)} 条 -> tags_filter={tags_filter} -> {len(tagged_docs)} 条"
         )
 
         if not tagged_docs:
@@ -231,10 +216,10 @@ def kb_spec_compare(query: str, tags_filter: List[str], spec_keywords: List[str]
             if prod not in products_in_scored:
                 scored.append((doc, 0))
 
+        _fallback_cnt = sum(1 for p in unscored_by_product if p not in products_in_scored)
         logger.info(
-            f"[kb_spec_compare] 关键词匹配后 %d 条（品类共 %d 条，兜底补充 %d 款产品）",
-            len(scored), len(tagged_docs),
-            sum(1 for p in unscored_by_product if p not in products_in_scored)
+            f"[kb_spec_compare] 关键词匹配后 {len(scored)} 条"
+            f"（品类共 {len(tagged_docs)} 条，兜底补充 {_fallback_cnt} 款产品）"
         )
 
         # 3) 按产品分组，每个产品取命中数最高的前 per_product 个 chunk
@@ -261,8 +246,8 @@ def kb_spec_compare(query: str, tags_filter: List[str], spec_keywords: List[str]
 
         product_names = sorted(product_chunks.keys())
         logger.info(
-            f"[kb_spec_compare] 最终返回 %d 条，覆盖 %d 款产品: %s",
-            len(sources), len(product_chunks), product_names
+            f"[kb_spec_compare] 最终返回 {len(sources)} 条，"
+            f"覆盖 {len(product_chunks)} 款产品: {product_names}"
         )
         return {
             "success": True,

@@ -83,12 +83,129 @@ def _build_history_window(history: List[Tuple[str, str]], max_turns: int = 6) ->
     return list(history[-max_turns:]) if history else []
 
 
+# ---------------------------------------------------------------------------
+# Query Rewrite 条件化
+# ---------------------------------------------------------------------------
+# 改写是一次完整 LLM 往返（1-2s）。多轮对话下原实现【每次都改写】，
+# 但绝大多数追问本身已自足（"星耀X100的充电功率"、"保修政策是什么"），
+# 改写只会原样返回，白白多花一次往返。这里先用零成本启发式判断是否需要改写。
+#
+# 本模块顶层不要 import re（历史上 chains.py 无该依赖），在函数内局部导入。
+def _query_needs_rewrite(query: str, history: List[Tuple[str, str]]) -> bool:
+    """判断当前 query 是否真的需要改写（零 LLM 成本启发式）。
+
+    返回 True 表示「需要改写」，即存在指代/省略，脱离上下文无法独立检索。
+    返回 False 表示「已自足」，直接用原 query 检索即可。
+
+    判定思路：
+      1. 无历史 → 自足。
+      2. 含指代词/省略触发词 → 需要改写（"它/这个/那个/还有呢/那...呢"）。
+      3. 含明确领域名词 → 自足（"发票怎么开"这类短问也已完整，不依赖上下文）。
+      4. 长度足够且不含指代 → 自足（长问句通常已含完整实体）。
+      5. 其余模糊短问 → 需要改写（保守，避免召回变差）。
+    """
+    import re
+
+    if not history:
+        return False
+
+    q = (query or "").strip()
+    if not q:
+        return False
+
+    # 指代 / 省略触发词：命中即需改写
+    # 注意：中文指示代词组合极多（这台/这条/这批/这只…），用「这/那 + 量词」的宽松形式覆盖，
+    # 只写死"这个/这款"会漏掉"这台多少钱"这类高频追问。
+    _REF_PATTERNS = (
+        r'(它|它们|这台|这条|这批|这[个款种只件部套])',
+        r'(那台|那条|那批|那[个款种只件部套])',
+        r'(该款|此款|此商品|该商品|这个商品)',
+        r'(还有|还有呢|别的|其他的|其它的|另外|再来|再推荐|换一个|换一款|其他的呢)',
+        r'(呢|吗)\s*[?？]?$',          # "那电池呢" / "价格呢"
+        r'^(那|那么|然后|接着|所以|继续)',
+        r'(上面|刚才|之前|前面|刚说|你说的|推荐的那)',
+    )
+    if any(re.search(p, q) for p in _REF_PATTERNS):
+        return True
+
+    # 明确领域名词：出现即说明问句自带主题，无需依赖上下文补全实体
+    _TOPIC_NOUNS = (
+        "发票", "保修", "质保", "退换", "退货", "换货", "退款", "物流", "快递", "运费",
+        "配送", "发货", "收货", "政策", "规则", "流程", "说明", "参数", "规格", "配置",
+        "充电", "电池", "屏幕", "像素", "内存", "存储", "处理器", "芯片", "摄像头",
+        "价格", "多少钱", "优惠", "优惠券", "积分", "会员", "支付", "订单", "售后",
+        "安装", "维修", "保养", "激活", "序列号", "防伪",
+    )
+    if any(n in q for n in _TOPIC_NOUNS):
+        return False
+
+    # 无指代且足够长 → 视为自足，跳过改写
+    if len(q) >= settings.QUERY_REWRITE_MIN_LEN:
+        return False
+
+    # 短问句又无指代（如"怎么样""有货吗"）→ 语义不完整，保守走改写
+    return True
+
+
+def _rewrite_cache_key(query: str, history: List[Tuple[str, str]]) -> str:
+    """改写缓存 key：只依赖上一轮用户问句 + 当前 query（避免整段历史抖动导致不命中）。"""
+    last_user = ""
+    for role, content in reversed(history or []):
+        if role == "user":
+            last_user = content or ""
+            break
+    raw = f"{last_user}\n>>>\n{query}"
+    return "llm:rewrite:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _rewrite_cache_get(key: str) -> Optional[str]:
+    """从 L1 Redis 读改写结果（同步，短超时，失败静默）。"""
+    try:
+        from app.rag.llm_cache import _redis_sync, _redis_available
+        if not _redis_available or not _redis_sync:
+            return None
+        val = _redis_sync.get(key)
+        return val if isinstance(val, str) and val else None
+    except Exception:
+        return None
+
+
+def _rewrite_cache_put(key: str, value: str) -> None:
+    """写入改写结果到 L1 Redis（失败静默）。"""
+    try:
+        from app.rag.llm_cache import _redis_sync, _redis_available
+        if not _redis_available or not _redis_sync:
+            return
+        _redis_sync.setex(key, settings.LLM_CACHE_REDIS_TTL_REWRITE, value)
+    except Exception:
+        pass
+
+
 async def _rewrite_query_if_needed(query: str, history: List[Tuple[str, str]]) -> str:
-    """若开启改写且存在多轮上下文，则改写；否则返回原 query。"""
+    """按需改写 query：命中缓存的改写结果 / 判断无需改写时直接返回原 query。
+
+    优化点（对比原实现）：
+      1. 自足问句直接跳过（不调 LLM）；
+      2. 改写结果按 (上一轮问句, 当前问句) 入 L1 缓存，重复追问零成本命中；
+      3. 失败静默回退原 query，行为与原实现一致。
+    """
     if not settings.QUERY_REWRITE_ENABLED:
         return query
     if not history or len(history) < 1:
         return query
+
+    # 1) 零成本启发式：自足问句直接跳过改写
+    if not _query_needs_rewrite(query, history):
+        logger.info(f"[QueryRewrite] 跳过（问句已自足）: {query[:40]!r}")
+        return query
+
+    # 2) 改写结果缓存（同一上一轮 + 同一追问 → 复用）
+    ck = _rewrite_cache_key(query, history)
+    cached = _rewrite_cache_get(ck)
+    if cached:
+        logger.info(f"[QueryRewrite] 命中缓存: {query[:30]} -> {cached[:30]}")
+        return cached
+
     try:
         llm = get_langchain_chat()
         from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
@@ -102,7 +219,10 @@ async def _rewrite_query_if_needed(query: str, history: List[Tuple[str, str]]) -
         resp = await llm.ainvoke(msgs)
         rewritten = (resp.content or "").strip()
         logger.info(f"[QueryRewrite] 原: {query[:30]} -> 新: {rewritten[:30]}")
-        return rewritten or query
+        if rewritten:
+            _rewrite_cache_put(ck, rewritten)
+            return rewritten
+        return query
     except Exception as e:  # noqa
         logger.warning(f"查询改写失败，使用原 query: {e}")
         return query

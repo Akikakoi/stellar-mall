@@ -1,5 +1,6 @@
 """检索器：向量召回 + BM25 混合 + Rerank 精排 + 缓存。"""
 from __future__ import annotations
+import threading
 from typing import List, Optional, Tuple
 
 from app.config import settings
@@ -10,6 +11,57 @@ from app.rag.vector_store import get_vector_store
 # BGE Reranker 单例（懒加载）
 _reranker_instance = None
 _reranker_load_attempted = False
+
+
+# =====================================================
+# BM25 索引缓存（进程级单例 + 失效重建）
+# =====================================================
+# 背景：原实现每次 hybrid_retrieve() 都从 Chroma 全量拉取并重新分词建 BM25 倒排，
+# 数据量越大越慢，且与请求数成线性关系。这里改为进程级缓存：
+#   - 缓存全量 Document 列表（未过滤 tags），过滤在每次查询时轻量进行；
+#   - 按 doc 数量做失效校验，知识库增删后 count 变化即自动重建；
+#   - 知识库变更方也可显式调用 invalidate_bm25_cache() 立即置空。
+_bm25_docs_cache: Optional[List] = None
+_bm25_docs_count: int = -1
+_bm25_lock = threading.Lock()
+
+
+def invalidate_bm25_cache() -> None:
+    """置空 BM25 文档缓存，下次查询时重建。知识库增删文档后调用。"""
+    global _bm25_docs_cache, _bm25_docs_count
+    with _bm25_lock:
+        _bm25_docs_cache = None
+        _bm25_docs_count = -1
+    logger.info("[BM25] 索引缓存已失效，下次检索将重建")
+
+
+def _get_all_docs_cached() -> List:
+    """获取知识库全量 Document（进程级缓存）。count 变化时自动重建。"""
+    global _bm25_docs_cache, _bm25_docs_count
+    from langchain_core.documents import Document
+
+    vs = get_vector_store()
+    try:
+        current_count = vs.count()
+    except Exception:
+        current_count = -1
+
+    with _bm25_lock:
+        if _bm25_docs_cache is not None and _bm25_docs_count == current_count:
+            return _bm25_docs_cache
+        try:
+            col = vs.lc._collection
+            batch = col.get(include=["documents", "metadatas"])
+        except Exception as e:  # noqa
+            logger.warning(f"从 Chroma 取全量失败: {e}")
+            return _bm25_docs_cache if _bm25_docs_cache is not None else []
+        docs = batch.get("documents") or []
+        metas = batch.get("metadatas") or []
+        all_docs = [Document(page_content=d, metadata=m or {}) for d, m in zip(docs, metas)]
+        _bm25_docs_cache = all_docs
+        _bm25_docs_count = current_count if current_count >= 0 else len(all_docs)
+        logger.info(f"[BM25] 全量文档缓存已重建: {len(all_docs)} 条")
+        return all_docs
 
 
 # =====================================================
@@ -29,26 +81,22 @@ def _matches_tag_filter(metadata: dict, tags_filter: List[str]) -> bool:
 
 
 def _build_bm25_retriever_from_chroma(top_k: int, tags_filter: Optional[List[str]]):
-    """从 Chroma 拿全部 docs 构建一个 BM25（量级不大时可行）。更高级可切到 Elasticsearch 等。"""
+    """从缓存的 Chroma 全量 docs 构建 BM25（索引常驻，避免每次请求重建）。
+
+    优化点：全量拉取 + 分词建索引已下沉到 _get_all_docs_cached()，
+    仅在知识库 count 变化时重建；此处只做 tags 过滤与 BM25 对象构建。
+    注：BM25 对象本身仍按查询构建（涉及 tags_filter 不同），但省掉了最重的
+    全量 IO 与分词；如需进一步优化可对 BM25 也做 (top_k, tags) 维度缓存。
+    """
     try:
         from langchain_community.retrievers import BM25Retriever
     except Exception as e:  # noqa
         logger.warning(f"BM25Retriever 不可用: {e}")
         return None
-    vs = get_vector_store()
-    col = vs.lc._collection
-    try:
-        batch = col.get(include=["documents", "metadatas"])
-    except Exception as e:  # noqa
-        logger.warning(f"从 Chroma 取全量失败: {e}")
+    all_docs = _get_all_docs_cached()
+    if not all_docs:
         return None
-    docs = batch.get("documents") or []
-    metas = batch.get("metadatas") or []
-    if not docs:
-        return None
-    from langchain_core.documents import Document
-    all_docs = [Document(page_content=d, metadata=m or {}) for d, m in zip(docs, metas)]
-    # Python 层后过滤（兼容 ChromaDB 1.x 无 string $contains）
+    # tags 过滤在缓存的 doc 列表上做（浅拷贝列表，Document 对象复用）
     if tags_filter:
         all_docs = [d for d in all_docs if _matches_tag_filter(d.metadata, tags_filter)]
     if not all_docs:
@@ -223,6 +271,7 @@ class _QueryCache:
         threshold = threshold or settings.QUERY_CACHE_SIM_THRESHOLD
         if self._ttl_seconds <= 0:
             return None
+        # embed_query 走 embeddings 层 LRU：本请求若已算过同一 query（召回阶段），此处零成本
         emb = get_embeddings().embed_query(query)
         import numpy as np
         with self._lock:

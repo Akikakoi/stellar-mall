@@ -573,19 +573,26 @@ async def _semantic_search(
     system_prompt_hash: str,
     cache_type: str = "answer",
     context_hash: Optional[str] = None,
+    query_emb: Optional[List[float]] = None,
 ) -> Optional[Dict[str, Any]]:
     """从 Chroma 语义缓存检索。
 
-    流程：query embedding → Chroma 向量检索 (k) → 过滤匹配 model/temp/sys_hash → Reranker 精排 → 阈值判定。
+    流程：query embedding → Chroma 向量检索 (k) → 过滤匹配 model/temp/sys_hash → 相似度精排 → 阈值判定。
+
+    :param query_emb: 可选的预计算查询向量。调用方（如 retrieve 链路）若已算过同一
+        query 的 embedding，应透传复用，避免重复调用云端 embedding（单次约 1.3s）。
     """
     col = _get_semantic_collection()
     if col is None:
         return None
     t0 = time.monotonic()
     try:
-        from app.rag.embeddings import get_embeddings
-        emb = get_embeddings()
-        q_emb = emb.embed_query(query)
+        if query_emb is None:
+            from app.rag.embeddings import get_embeddings
+            emb = get_embeddings()
+            q_emb = emb.embed_query(query)
+        else:
+            q_emb = query_emb
 
         k = min(settings.LLM_CACHE_SEMANTIC_K, col.count()) if col.count() > 0 else 0
         if k == 0:
@@ -677,6 +684,117 @@ async def _semantic_search(
     except Exception as e:
         logger.warning(f"[LLMCache] L2 语义检索异常: {e}")
         elapsed = (time.monotonic() - t0) * 1000
+        _metrics.incr("misses")
+    return None
+
+
+def _semantic_search_sync(
+    query: str,
+    model: str,
+    temperature: float,
+    system_prompt_hash: str,
+    cache_type: str = "answer",
+    context_hash: Optional[str] = None,
+    query_emb: Optional[List[float]] = None,
+) -> Optional[Dict[str, Any]]:
+    """_semantic_search 的纯同步实现（供 get_sync 使用，避免 asyncio.run 开销）。
+
+    与 async 版的检索/过滤/精排逻辑保持一致；Chroma client 本身即同步调用，
+    因此这里无需事件循环。二者返回值结构相同。
+    """
+    col = _get_semantic_collection()
+    if col is None:
+        return None
+    t0 = time.monotonic()
+    try:
+        if query_emb is None:
+            from app.rag.embeddings import get_embeddings
+            q_emb = get_embeddings().embed_query(query)
+        else:
+            q_emb = query_emb
+
+        total = col.count()
+        k = min(settings.LLM_CACHE_SEMANTIC_K, total) if total > 0 else 0
+        if k == 0:
+            return None
+        results = col.query(query_embeddings=[q_emb], n_results=k,
+                            include=["documents", "metadatas", "distances", "embeddings"])
+
+        ids_list = results.get("ids", [[]])[0]
+        metas_list = results.get("metadatas", [[]])[0]
+        embeddings = results.get("embeddings", [[]])[0]
+
+        if not ids_list:
+            return None
+
+        # 过滤：model、temperature、system_prompt_hash、cache_type 必须匹配
+        candidates: List[Tuple[int, Dict[str, Any]]] = []
+        for i, meta in enumerate(metas_list):
+            if not meta:
+                continue
+            if (meta.get("model") != model
+                    or abs(float(meta.get("temperature", 0)) - temperature) > 0.01
+                    or meta.get("system_prompt_hash") != system_prompt_hash
+                    or meta.get("cache_type") != cache_type):
+                continue
+            if context_hash and meta.get("context_hash") and meta.get("context_hash") != context_hash:
+                continue
+            created_at = float(meta.get("created_at", 0))
+            ttl = settings.LLM_CACHE_SEMANTIC_TTL_ANSWER if cache_type == "answer" else settings.LLM_CACHE_SEMANTIC_TTL_INTENT
+            if time.time() - created_at > ttl:
+                continue
+            candidates.append((i, meta))
+
+        if not candidates:
+            return None
+
+        # 复用本已算出的 q_emb + Chroma 已存向量做余弦精排，不再触发云端 embedding
+        import numpy as np
+        q_np = np.asarray(q_emb, dtype=np.float32).reshape(1, -1)
+        best_idx = None
+        best_score = 0.0
+        for pos, (idx, _meta) in enumerate(candidates):
+            if idx >= len(embeddings):
+                continue
+            d_np = np.asarray(embeddings[idx], dtype=np.float32).reshape(1, -1)
+            score = float((d_np @ q_np.T).ravel()[0] / (
+                np.linalg.norm(d_np) * np.linalg.norm(q_np) + 1e-9))
+            if score > best_score:
+                best_score = score
+                best_idx = pos
+
+        if best_idx is None:
+            return None
+
+        best_meta = candidates[best_idx][1]
+        threshold = settings.LLM_CACHE_SEMANTIC_RERANK_THRESHOLD
+        if best_score < threshold:
+            logger.debug(f"[LLMCache] L2(sync) miss: best_score={best_score:.4f} < threshold={threshold}")
+            return None
+
+        try:
+            hit_count = int(best_meta.get("hit_count", 0)) + 1
+            col.update(
+                ids=[ids_list[candidates[best_idx][0]]],
+                metadatas=[{**best_meta, "hit_count": hit_count}],
+            )
+        except Exception:
+            pass
+
+        elapsed = (time.monotonic() - t0) * 1000
+        _metrics.incr("l2_hits")
+        _metrics.record_latency("l2", elapsed)
+        logger.info(f"[LLMCache] L2 HIT(sync)  query={query[:30]}...  "
+                    f"best_score={best_score:.3f}  latency={elapsed:.1f}ms")
+
+        return {
+            "answer": best_meta.get("answer", ""),
+            "sources": json.loads(best_meta.get("sources_json", "[]")),
+            "intent": best_meta.get("intent", ""),
+            "tokens_used": int(best_meta.get("tokens_used", 0)),
+        }
+    except Exception as e:
+        logger.warning(f"[LLMCache] L2 语义检索(sync)异常: {e}")
         _metrics.incr("misses")
     return None
 
@@ -897,25 +1015,26 @@ class LLMCache:
         system_prompt_hash: str,
         context_hash: Optional[str] = None,
         cache_type: str = "answer",
+        query_emb: Optional[List[float]] = None,
     ) -> Optional[Dict[str, Any]]:
         """同步查询缓存（供线程池中的 LangGraph 节点使用）。
 
-        L1 用 sync Redis、L2 用 Chroma（Chroma 是同步的），无需 event loop。
+        L1 用 sync Redis；L2 用 Chroma（同步 client）+ 本函数内直算，不新建事件循环。
+
+        :param query_emb: 可选的预计算查询向量，透传给 L2 避免重复 embedding。
         """
         if not settings.LLM_CACHE_ENABLED:
             return None
 
-        # L1: 同步 Redis
+        # L1: 同步 Redis（纯同步，无 loop）
         result = _redis_get_sync(query, model, temperature, system_prompt_hash, context_hash, cache_type)
         if result:
             return result
 
-        # L2: Chroma 语义缓存（需要 embedding + rerank，内部用 asyncio.run()）
-        try:
-            result = asyncio.run(_semantic_search(query, model, temperature, system_prompt_hash, cache_type, context_hash))
-        except RuntimeError:
-            # 若有运行中的 loop（不应在 get_sync 场景出现），走兜底
-            return None
+        # L2: Chroma 语义缓存——走同步实现，避免 asyncio.run 每次新建/销毁事件循环
+        result = _semantic_search_sync(
+            query, model, temperature, system_prompt_hash, cache_type, context_hash, query_emb
+        )
         if result:
             # 语义命中后回写 L1（同步）
             ttl = settings.LLM_CACHE_REDIS_TTL_ANSWER if cache_type == "answer" else settings.LLM_CACHE_REDIS_TTL_INTENT
@@ -1044,9 +1163,15 @@ def get_cache_sync(
     query: str, model: str, temperature: float,
     system_prompt_hash: str, context_hash: Optional[str] = None,
     cache_type: str = "answer",
+    query_emb: Optional[List[float]] = None,
 ) -> Optional[Dict[str, Any]]:
-    """同步查询缓存（供 LangGraph 线程池节点使用）。"""
-    return get_llm_cache().get_sync(query, model, temperature, system_prompt_hash, context_hash, cache_type)
+    """同步查询缓存（供 LangGraph 线程池节点使用）。
+
+    :param query_emb: 可选预计算查询向量，透传 L2 避免重复 embedding。
+    """
+    return get_llm_cache().get_sync(
+        query, model, temperature, system_prompt_hash, context_hash, cache_type, query_emb
+    )
 
 
 def put_cache_sync(

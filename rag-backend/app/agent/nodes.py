@@ -1071,9 +1071,12 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
 
             # === FAQ 缓存写入（与上方旁路读取同一白名单） ===
             # 只收 KB 静态知识类回答：工具成功 + 有 sources + 回答非空。
+            # 注意：读取侧有 len(query) > 6 的短追问跳过规则，写入侧必须一致，
+            # 否则短追问会被写入却永远读不到，白白浪费一次 embedding。
             if (intent == "product_consult"
                     and state.get("current_tool") == "kb_search"
-                    and tool_result.get("success")):
+                    and tool_result.get("success")
+                    and len(query.strip()) > 6):
                 faq_sources = state.get("sources") or []
                 if faq_sources and full_answer:
                     try:
