@@ -109,6 +109,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
+        <!-- Caffeine：进程内缓存（W-TinyLFU 按访问频率淘汰 + 写入过期）。
+             替代手写 ConcurrentHashMap 的「超过上限整体 clear + 惰性过期」：
+             前者会把热 key 一起清空造成缓存抖动，后者让冷 key 永远留在内存里。
+             版本由 spring-boot-starter-parent 统一管理。 -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
 
         <!-- WebSocket -->
         <dependency>

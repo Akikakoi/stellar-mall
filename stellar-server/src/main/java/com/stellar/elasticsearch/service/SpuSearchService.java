@@ -2,6 +2,8 @@ package com.stellar.elasticsearch.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.elasticsearch.doc.SpuDocument;
 import com.stellar.entity.Spu;
@@ -37,7 +39,6 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -74,24 +75,28 @@ public class SpuSearchService {
 
     private volatile boolean esAvailable = true;
 
-    /** 查询向量本地缓存：相同文本的 embedding 只请求一次（有上限，防无界增长）。 */
-    private final Map<String, double[]> embedCache = new ConcurrentHashMap<>();
+    /** 查询向量本地缓存：相同文本的 embedding 只请求一次。
+     *  容量上限交给 Caffeine 的 maximumSize —— 按访问频率（W-TinyLFU）淘汰冷 key，
+     *  不再用「超过 512 就整体 clear」的粗暴做法：那样会把正在被高频访问的热 key
+     *  连同冷 key 一起清掉，下一次搜索被迫重新走一遍 embedding 请求。 */
+    private static final int EMBED_CACHE_MAX = 512;
+    private final Cache<String, double[]> embedCache = Caffeine.newBuilder()
+            .maximumSize(EMBED_CACHE_MAX)
+            .build();
 
     /** 搜索结果短 TTL 缓存：热门词 60s 窗口内重复搜索不再直打 ES/MySQL
      *  （ES 关键词搜索 = BM25+向量双查 + MySQL 取详情，成本不低）。
      *  直接缓存 VO 引用——searchWithHighlight 全链路只读（Controller 仅做 JSON 序列化），
      *  无 JSON 往返反序列化（records 是裸 List，往返会退化为 LinkedHashMap）。
-     *  TTL 60s 内商品变更最多延迟一分钟可见，可接受；容量超限整体清空。 */
-    private static final long RESULT_CACHE_TTL_MS = 60_000L;
+     *  TTL 60s 内商品变更最多延迟一分钟可见，可接受。
+     *  过期由 Caffeine 的 expireAfterWrite 管理：写入时即确定过期点，
+     *  冷 key 到点立刻回收，不像原来的惰性过期那样只能靠读命中才发现已过期、白白常驻内存。 */
+    private static final long RESULT_CACHE_TTL_SECONDS = 60L;
     private static final int RESULT_CACHE_MAX = 1024;
-    private final Map<String, TimedResult> resultCache = new ConcurrentHashMap<>();
-
-    /** 带过期时间的结果条目。 */
-    private static final class TimedResult {
-        final SearchResultVO vo;
-        final long expireAt;
-        TimedResult(SearchResultVO vo, long expireAt) { this.vo = vo; this.expireAt = expireAt; }
-    }
+    private final Cache<String, SearchResultVO> resultCache = Caffeine.newBuilder()
+            .maximumSize(RESULT_CACHE_MAX)
+            .expireAfterWrite(RESULT_CACHE_TTL_SECONDS, TimeUnit.SECONDS)
+            .build();
 
     public SpuSearchService(ElasticsearchOperations esOps, SpuMapper spuMapper,
                             SynonymEngine synonymEngine) {
@@ -106,10 +111,10 @@ public class SpuSearchService {
     public SearchResultVO searchWithHighlight(SpuPageQueryDTO dto) {
         // ---- 结果缓存命中检查 ----
         String cacheKey = resultCacheKey(dto);
-        TimedResult cached = resultCache.get(cacheKey);
-        if (cached != null && cached.expireAt > System.currentTimeMillis()) {
+        SearchResultVO cached = resultCache.getIfPresent(cacheKey);
+        if (cached != null) {
             log.debug("resultCache HIT  key={}", cacheKey);
-            return cached.vo;
+            return cached;
         }
 
         SearchResultVO vo = null;
@@ -125,9 +130,7 @@ public class SpuSearchService {
 
         // ---- 写入缓存（异常不影响搜索主流程） ----
         try {
-            if (resultCache.size() > RESULT_CACHE_MAX) resultCache.clear();
-            resultCache.put(cacheKey, new TimedResult(
-                    vo, System.currentTimeMillis() + RESULT_CACHE_TTL_MS));
+            resultCache.put(cacheKey, vo);
         } catch (Exception e) {
             log.debug("search result cache put failed: {}", e.getMessage());
         }
@@ -309,7 +312,7 @@ public class SpuSearchService {
      *  维度与 ES mapping 不一致时返回 null——cosineSimilarity 的 query_vector 维度不匹配
      *  会让 script 查询抛 400，进而触发整库降级 MySQL 30 秒，这里必须提前拦截。 */
     private double[] fetchQueryEmbedding(String text) {
-        double[] cached = embedCache.get(text);
+        double[] cached = embedCache.getIfPresent(text);
         if (cached != null) {
             log.debug("embedCache HIT  text={}", text);
             return cached;
@@ -337,7 +340,6 @@ public class SpuSearchService {
                         arr.length, vectorDim, text);
                 return null;
             }
-            if (embedCache.size() > 512) embedCache.clear(); // 简单上限保护
             embedCache.put(text, arr);
             return arr;
         } catch (Exception e) { log.warn("Embedding query failed: {}", e.getMessage()); return null; }
