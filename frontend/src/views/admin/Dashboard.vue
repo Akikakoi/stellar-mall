@@ -327,7 +327,9 @@ async function handleExport(type: any) {
   overflow: hidden;
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
-.stat-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+@media (hover: hover) {
+  .stat-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+}
 .stat-card.clickable { cursor: pointer; }
 .stat-card.clickable:hover .stat-label { color: var(--brand-primary); }
 .stat-card::before {
@@ -370,7 +372,7 @@ async function handleExport(type: any) {
   border-radius: var(--radius-md);
   background: var(--bg-hover);
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: background var(--transition-color), border-color var(--transition-color), transform var(--transition-base);
   border: 1px solid transparent;
 }
 .action-item:hover { background: var(--brand-primary-soft); border-color: var(--brand-primary-border); transform: var(--hover-lift); }

@@ -265,7 +265,7 @@ async function handleLogin() {
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  transition: all .2s;
+  transition: color var(--transition-color), border-color var(--transition-color);
   user-select: none;
 }
 .tab:hover { color: var(--brand-primary); }

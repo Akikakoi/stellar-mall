@@ -172,11 +172,12 @@ onMounted(() => { loadAvailable(); loadMy() })
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  transition: transform var(--transition-base);
 }
-.coupon-card:hover {
-  transform: var(--hover-lift);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+@media (hover: hover) {
+  .coupon-card:hover {
+    transform: var(--hover-lift);
+  }
 }
 .coupon-card.used, .coupon-card.expired { opacity: 0.5; }
 .coupon-left {

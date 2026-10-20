@@ -773,8 +773,10 @@ onUnmounted(() => {
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
 }
-.cat-banner img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s; }
-.cat-banner:hover img { transform: scale(1.04); }
+.cat-banner img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.25s var(--ease-out); }
+@media (hover: hover) {
+  .cat-banner:hover img { transform: scale(1.04); }
+}
 .cat-banner .banner-text {
   position: absolute; left: 0; right: 0; top: 0;
   padding: 22px 14px 40px; text-align: center; color: #fff;
@@ -796,7 +798,9 @@ onUnmounted(() => {
   padding: 22px 16px 18px; cursor: pointer;
   transition: transform .25s, box-shadow .25s; overflow: hidden;
 }
-.p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); }
+@media (hover: hover) {
+  .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); }
+}
 .p-card img { width: 140px; height: 140px; object-fit: cover; margin-bottom: 14px; border-radius: 10px; background: #fff; }
 .p-name { font-size: 14px; font-weight: 500; text-align: center; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .p-desc { font-size: 12px; color: var(--text-muted); margin-top: 6px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
@@ -811,7 +815,7 @@ onUnmounted(() => {
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .25s;
+  cursor: pointer; transition: transform var(--transition-base), box-shadow var(--transition-color), border-color var(--transition-color);
 }
 .more-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary); }
 .more-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; }
@@ -838,17 +842,19 @@ onUnmounted(() => {
   -webkit-backdrop-filter: var(--backdrop-blur);
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
-.spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary-border); }
 .spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
-.spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.spu-card:hover .spu-image img { transform: scale(1.05); }
+.spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s var(--ease-out); }
+@media (hover: hover) {
+  .spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary-border); }
+  .spu-card:hover .spu-image img { transform: scale(1.05); }
+}
 .fav-btn {
   position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;
   border-radius: 50%; border: none;
   background: rgba(0,0,0,0.35); backdrop-filter: blur(8px);
   color: rgba(255,255,255,0.9); font-size: 18px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; line-height: 1; padding: 0;
+  transition: background var(--transition-color), color var(--transition-color), transform var(--transition-base); line-height: 1; padding: 0;
 }
 .fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
 .fav-btn.active { color: var(--status-danger); background: rgba(255,59,48,0.18); }
@@ -863,7 +869,7 @@ onUnmounted(() => {
 .coupon-entry-card {
   background: linear-gradient(135deg, #fff8f0, #fff0e0);
   border-radius: var(--radius-lg); cursor: pointer;
-  transition: all .25s; border: 1px solid #ffe0c0;
+  transition: transform var(--transition-base), box-shadow var(--transition-color); border: 1px solid #ffe0c0;
 }
 .coupon-entry-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,140,0,0.15); }
 .coupon-entry-inner {

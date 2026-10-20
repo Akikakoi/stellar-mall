@@ -451,7 +451,7 @@ function handleLogoClick() {
   top: 0;
   z-index: 100;
   transform: translateY(0);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s var(--ease-out);
 }
 .top-bar.hidden {
   transform: translateY(-100%);

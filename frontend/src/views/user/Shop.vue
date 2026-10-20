@@ -943,7 +943,7 @@ html.theme-dark .history-panel {
   cursor: pointer;
   font-size: 13px;
   color: var(--text-secondary);
-  transition: all 0.15s;
+  transition: background var(--transition-color), color var(--transition-color);
   margin-bottom: 2px;
 }
 .filter-item:hover {
@@ -1043,15 +1043,19 @@ html.theme-dark .history-panel {
   cursor: pointer;
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
-.spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary-border); }
+@media (hover: hover) {
+  .spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary-border); }
+}
 .spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
-.spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.spu-card:hover .spu-image img { transform: scale(1.05); }
+.spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s var(--ease-out); }
+@media (hover: hover) {
+  .spu-card:hover .spu-image img { transform: scale(1.05); }
+}
 .fav-btn {
   position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
   border: none; background: rgba(0,0,0,0.35); backdrop-filter: blur(8px); color: rgba(255,255,255,0.9);
   font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; line-height: 1; padding: 0;
+  transition: background var(--transition-color), color var(--transition-color), transform var(--transition-base); line-height: 1; padding: 0;
 }
 .fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
 .fav-btn.active { color: var(--status-danger); background: rgba(255,59,48,0.18); }

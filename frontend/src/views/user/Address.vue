@@ -326,15 +326,17 @@ onMounted(loadAddresses)
   padding: 20px;
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease;
+  transition: transform var(--transition-base), box-shadow var(--transition-color);
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   box-shadow: var(--glass-shadow);
 }
 
-.address-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+@media (hover: hover) {
+  .address-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .address-card.default {

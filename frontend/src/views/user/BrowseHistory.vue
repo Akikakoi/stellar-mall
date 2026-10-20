@@ -193,7 +193,9 @@ onMounted(async () => {
   cursor: pointer;
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
-.browse-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+@media (hover: hover) {
+  .browse-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+}
 .browse-card.is-delisted { opacity: 0.75; }
 
 .browse-image {
@@ -202,8 +204,10 @@ onMounted(async () => {
   overflow: hidden;
   background: var(--bg-hover);
 }
-.browse-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.browse-card:hover .browse-image img { transform: scale(1.05); }
+.browse-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s var(--ease-out); }
+@media (hover: hover) {
+  .browse-card:hover .browse-image img { transform: scale(1.05); }
+}
 .delisted-mask {
   position: absolute;
   inset: 0;

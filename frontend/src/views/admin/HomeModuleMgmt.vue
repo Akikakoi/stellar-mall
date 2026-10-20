@@ -626,7 +626,7 @@ onMounted(async () => {
   border: 1px solid var(--border-base);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: all 0.2s;
+  transition: background var(--transition-color), border-color var(--transition-color), box-shadow var(--transition-color), transform var(--transition-base), opacity var(--transition-color);
   cursor: default;
 }
 .module-card:hover {
