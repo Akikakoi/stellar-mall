@@ -26,14 +26,22 @@ function readInitialTheme(): Theme {
 /**
  * 将指定的主题应用到 DOM 上。
  * 通过操作 document.documentElement 的 class 和 style 来实现暗色/亮色模式的切换,
- * 并加入过渡锁防止切换时出现闪烁动画。
+ * 切换瞬间加锁统一全站过渡时长（350ms），让所有颜色同步渐变、不闪烁。
  */
 export function applyThemeToDOM(value: Theme) {
   if (typeof document === 'undefined') return
   const root = document.documentElement
   const isDark = value === THEMES.DARK
 
-  // 1) 先加锁,强制浏览器提交这一帧——此时所有过渡已冻结
+  // 0) DOM 已是目标主题时直接跳过：避免每个组件挂载时都重放
+  //    「加锁→切换→解锁」流程（会对全站过渡时长做一次无意义干预）
+  const alreadyApplied =
+    root.classList.contains('theme-dark') === isDark &&
+    root.classList.contains('theme-light') === !isDark &&
+    root.style.colorScheme === (isDark ? 'dark' : 'light')
+  if (alreadyApplied) return
+
+  // 1) 先加锁,统一过渡时长——此时浏览器尚未提交主题变更
   root.classList.add('theme-transitioning')
   if (transitionLockTimer) clearTimeout(transitionLockTimer)
 
