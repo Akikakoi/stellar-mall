@@ -197,10 +197,15 @@ onMounted(loadList)
   border-radius: var(--radius-lg);
   margin-bottom: 14px;
   cursor: pointer;
-  transition: box-shadow .2s;
+  transition: border-color var(--transition-color), transform var(--transition-base), box-shadow var(--transition-color);
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
 }
-.card:hover { box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight); }
+@media (hover: hover) {
+  .card:hover {
+    border-color: var(--brand-primary-border);
+    transform: translateY(-2px);
+  }
+}
 
 .card-head {
   display: flex; justify-content: space-between; align-items: center;
