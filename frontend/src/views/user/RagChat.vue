@@ -282,12 +282,24 @@ async function ensureActiveFromUrl() {
 }
 
 /**
+ * 判断用户是否停留在消息列表底部附近（40px 容差）。
+ * 须在内容变化「之前」调用，读到的是上一帧的滚动位置。
+ */
+function isNearBottom(): boolean {
+  const el = msgsRef.value
+  if (!el) return true
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 40
+}
+
+/**
  * 滚动消息列表至底部
- * @param {boolean} [force=false] - 预留参数，当前未使用
+ * @param {boolean} [force=false] - true 强制滚底（用户发消息/加载会话）；
+ *   false 仅当用户本来就停留在底部附近时才跟随滚动，
+ *   流式输出期间用户向上回看历史时不会被拽回。
  */
 function scrollToBottom(force = false) {
   nextTick(() => {
-    if (msgsRef.value) {
+    if (msgsRef.value && (force || isNearBottom())) {
       msgsRef.value.scrollTop = msgsRef.value.scrollHeight
     }
   })
@@ -491,7 +503,7 @@ async function send(text: any) {
   const userMsg = chatStore.pushUserMessage(query)
   const asstId = chatStore.pushAssistantPlaceholder().id
   chatStore.loading = true
-  scrollToBottom()
+  scrollToBottom(true) // 用户主动发消息，强制滚底看回显
   const controller = new AbortController()
   activeController = controller
 
@@ -544,17 +556,19 @@ async function send(text: any) {
         if (ev.event === 'token') {
           const chunk = typeof ev.data === 'string' ? ev.data : (ev.data?.content || '')
           fullContent += chunk
+          const stick = isNearBottom()
           chatStore.updateAssistant(asstId, {
             content: fullContent,
             streaming: true,
           })
-          scrollToBottom()
+          scrollToBottom(stick)
         } else if (ev.event === 'sources') {
           sourcesData = Array.isArray(ev.data) ? ev.data : []
         } else if (ev.event === 'agent_thought') {
           reactThinking = typeof ev.data === 'string' ? ev.data : (ev.data?.content || '')
+          const stick = isNearBottom()
           chatStore.updateAssistant(asstId, { thinking: reactThinking, streaming: true })
-          scrollToBottom()
+          scrollToBottom(stick)
         } else if (ev.event === 'tool_call') {
           toolCalls.push({
             type: 'call',
@@ -562,12 +576,14 @@ async function send(text: any) {
             params: ev.data?.params || {},
             success: false,
           })
+          const stick = isNearBottom()
           chatStore.updateAssistant(asstId, { tool_calls: toolCalls, streaming: true })
-          scrollToBottom()
+          scrollToBottom(stick)
         } else if (ev.event === 'tool_result') {
           toolCalls.push({ type: 'result', tool: ev.data?.tool || '', success: !!ev.data?.success })
+          const stick = isNearBottom()
           chatStore.updateAssistant(asstId, { tool_calls: toolCalls, streaming: true })
-          scrollToBottom()
+          scrollToBottom(stick)
         } else if (ev.event === 'done') {
           if (ev.data && typeof ev.data === 'object') {
             tokensUsed = ev.data.tokens || 0
@@ -708,7 +724,7 @@ function parseEvent(block: any) {
   color: var(--text-primary);
   border-radius: var(--radius-md);
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: background var(--transition-color), border-color var(--transition-color), color var(--transition-color), box-shadow var(--transition-color);
 
   &:hover {
     background: var(--bg-hover);
@@ -735,7 +751,7 @@ function parseEvent(block: any) {
   cursor: pointer;
   color: var(--text-secondary);
   position: relative;
-  transition: all 0.15s ease;
+  transition: background var(--transition-color), color var(--transition-color), border-color var(--transition-color);
 
   &:hover {
     background: var(--glass-hover);
@@ -770,7 +786,7 @@ function parseEvent(block: any) {
   color: var(--text-muted);
   font-size: 13px;
   flex-shrink: 0;
-  transition: all 0.15s ease;
+  transition: background var(--transition-color), color var(--transition-color);
 }
 
 .ci-title {
@@ -788,7 +804,7 @@ function parseEvent(block: any) {
   flex-shrink: 0;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.15s ease;
+  transition: opacity var(--transition-color), visibility var(--transition-color);
 }
 
 .op-btn {
@@ -802,7 +818,7 @@ function parseEvent(block: any) {
   background: var(--bg-card);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background var(--transition-color), color var(--transition-color), border-color var(--transition-color);
   font-size: 13px;
 
   &:hover {
@@ -847,7 +863,7 @@ function parseEvent(block: any) {
   cursor: pointer;
   text-decoration: none;
   font-weight: 500;
-  transition: all 0.15s ease;
+  transition: background var(--transition-color), color var(--transition-color), border-color var(--transition-color), box-shadow var(--transition-color);
 
   &:hover {
     background: var(--bg-hover);
@@ -952,7 +968,7 @@ function parseEvent(block: any) {
   color: var(--text-secondary);
   padding: 4px 10px;
   border-radius: var(--radius-lg);
-  transition: all 0.15s ease;
+  transition: background var(--transition-color), color var(--transition-color);
 
   &:hover {
     background: var(--bg-hover);
@@ -1092,7 +1108,7 @@ function parseEvent(block: any) {
   align-items: center;
   font-size: 13px;
   line-height: 1.5;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background var(--transition-color), border-color var(--transition-color), transform var(--transition-base), box-shadow var(--transition-color);
   text-align: left;
   animation: promptSlideIn 0.4s ease-out both;
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
@@ -1136,7 +1152,7 @@ function parseEvent(block: any) {
 .prompt-arrow {
   font-size: 14px;
   color: var(--text-muted);
-  transition: all 0.2s ease;
+  transition: transform var(--transition-base), color var(--transition-color);
   flex-shrink: 0;
 }
 
@@ -1218,7 +1234,7 @@ function parseEvent(block: any) {
   background: var(--bg-input);
   border: 1px solid var(--border-base);
   border-radius: var(--radius-xl);
-  transition: all 0.2s ease;
+  transition: border-color var(--transition-color), box-shadow var(--transition-color);
 
   &:hover {
     border-color: var(--border-strong);
@@ -1258,7 +1274,7 @@ function parseEvent(block: any) {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: transform var(--transition-base), box-shadow var(--transition-color), background var(--transition-color), opacity var(--transition-color);
   background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-active));
   border: none;
   box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
