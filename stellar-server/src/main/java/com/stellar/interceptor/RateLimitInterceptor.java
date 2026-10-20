@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -16,14 +17,23 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.UUID;
 
 /**
- * 接口限流拦截器：基于 Redis 实现简单滑动窗口计数。
+ * 接口限流拦截器：基于 Redis + Lua 实现真实滑动窗口计数。
  * <p>
  * 限流策略：每个 IP + 限流 key 在 windowSeconds 秒内最多 maxRequests 次。
- * Redis key 格式：rate_limit:{key}:{ip}:{window_bucket}
- * </p>
+ * Redis 结构：ZSET，key = rate_limit:{key}:{ip}，member = {时间戳}:{uuid}，score = 时间戳。
+ * <p>
+ * 为什么用 Lua + ZSET 而不是 INCR+EXPIRE 固定窗口：
+ * <ul>
+ *   <li>固定窗口在两个窗口交界处可瞬间放行最多 2 倍流量（边界突发）；</li>
+ *   <li>原实现 INCR 与 EXPIRE 是两条命令，进程在两步之间崩溃会留下永不过期的 key，
+ *       之后每个窗口首请求 count==1 会重新补 EXPIRE，但 key 本身泄漏到那时为止。</li>
+ * </ul>
+ * Lua 脚本内原子完成「清理过期成员 → 计数 → 判断 → 写入 → 续 TTL」，两个问题同时消除。
+ * Redis 不可用时放行（保证可用性优先）。
  */
 @Slf4j
 @Component
@@ -32,6 +42,29 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private static final String REDIS_PREFIX = "rate_limit:";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    /**
+     * 滑动窗口计数脚本：
+     * ARGV: [1]=当前毫秒时间戳, [2]=窗口毫秒, [3]=最大请求数, [4]=本次请求唯一值
+     * 返回 1=放行，0=限流。
+     */
+    private static final DefaultRedisScript<Long> SLIDING_WINDOW_SCRIPT = new DefaultRedisScript<>("""
+            local key = KEYS[1]
+            local now_ms = tonumber(ARGV[1])
+            local window_ms = tonumber(ARGV[2])
+            local max_requests = tonumber(ARGV[3])
+            redis.call('ZREMRANGEBYSCORE', key, 0, now_ms - window_ms)
+            local count = redis.call('ZCARD', key)
+            if count >= max_requests then
+                redis.call('PEXPIRE', key, window_ms)
+                return 0
+            end
+            redis.call('ZADD', key, now_ms, now_ms .. ':' .. ARGV[4])
+            -- PEXPIRE 必须在 ZADD 之后：首次请求时 key 尚不存在，先 PEXPIRE 是空操作，
+            -- ZADD 会创建一个永不过期的 key（TTL 泄漏）
+            redis.call('PEXPIRE', key, window_ms)
+            return 1
+            """, Long.class);
 
     private final StringRedisTemplate stringRedisTemplate;
 
@@ -75,23 +108,22 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 检查是否触发限流，使用 Redis INCR + EXPIRE 实现固定窗口计数。
+     * 检查是否触发限流，Lua 脚本原子完成滑动窗口计数。
      */
     private boolean isRateLimited(String key, String clientIp, int maxRequests, int windowSeconds) {
-        // 使用固定窗口：按秒数取整
-        long windowBucket = System.currentTimeMillis() / 1000 / windowSeconds;
-        String redisKey = REDIS_PREFIX + key + ":" + clientIp + ":" + windowBucket;
+        String redisKey = REDIS_PREFIX + key + ":" + clientIp;
+        long nowMs = System.currentTimeMillis();
+        long windowMs = windowSeconds * 1000L;
 
         try {
-            Long count = stringRedisTemplate.opsForValue().increment(redisKey);
-            if (count == null) {
-                return false;
-            }
-            // 首次设置过期时间（窗口结束后的一个窗口内自动清理）
-            if (count == 1) {
-                stringRedisTemplate.expire(redisKey, windowSeconds * 2L, TimeUnit.SECONDS);
-            }
-            return count > maxRequests;
+            Long allowed = stringRedisTemplate.execute(
+                    SLIDING_WINDOW_SCRIPT,
+                    List.of(redisKey),
+                    String.valueOf(nowMs),
+                    String.valueOf(windowMs),
+                    String.valueOf(maxRequests),
+                    UUID.randomUUID().toString());
+            return !Long.valueOf(1L).equals(allowed);
         } catch (Exception e) {
             // Redis 不可用时放行，避免影响正常业务
             log.warn("[限流] Redis 操作异常，放行请求: {}", e.getMessage());

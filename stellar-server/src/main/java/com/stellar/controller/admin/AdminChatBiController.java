@@ -1,6 +1,7 @@
 package com.stellar.controller.admin;
 
 import com.stellar.result.Result;
+import com.stellar.annotation.RateLimit;
 import com.stellar.annotation.RequireRole;
 import com.stellar.service.ChatBiService;
 import io.swagger.annotations.Api;
@@ -28,6 +29,8 @@ public class AdminChatBiController {
     private final ChatBiService chatBiService;
 
 @RequireRole({1, 2})
+    // LLM 生成 SQL 按次计费且耗时数秒，限制单 IP 频次防止被刷放大成本
+    @RateLimit(key = "admin-chatbi", maxRequests = 10, windowSeconds = 60)
     @PostMapping("/query")
     @ApiOperation("自然语言查数（LLM 生成 SQL 并执行，耗时较长，前端需放宽超时）")
     public Result<Map<String, Object>> query(@RequestBody Map<String, String> body) {
