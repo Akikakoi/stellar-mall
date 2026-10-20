@@ -76,7 +76,7 @@ services:
       - --maxmemory 256mb
       - --maxmemory-policy allkeys-lru
     ports:
-      - "6379:6379"
+      - "6380:6379" # 原来是   - "6379:6379"
     volumes:
       - redis-data:/data
     networks:
