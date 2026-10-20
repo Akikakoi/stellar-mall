@@ -45,12 +45,14 @@
         </div>
         <transition name="sources-expand">
           <div v-show="sourcesExpanded" class="sources-body">
-            <SourceCard
-              v-for="s in msg.sources"
-              :key="s.id || s.doc_name + s.chunk_index"
-              :src="s"
-              :query="currentQuery"
-            />
+            <div class="sources-body-inner">
+              <SourceCard
+                v-for="s in msg.sources"
+                :key="s.id || s.doc_name + s.chunk_index"
+                :src="s"
+                :query="currentQuery"
+              />
+            </div>
           </div>
         </transition>
       </div>
@@ -247,7 +249,6 @@ function toolName(tool: any) {
 .avatar {
   flex-shrink: 0;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease;
 
   &.user {
     background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-active));
@@ -370,7 +371,7 @@ function toolName(tool: any) {
   border-radius: var(--radius-md);
   background: var(--bg-card);
   overflow: hidden;
-  transition: all 0.2s ease;
+  transition: border-color var(--transition-color);
 
   &:hover {
     border-color: var(--border-base);
@@ -419,21 +420,28 @@ function toolName(tool: any) {
   }
 }
 
+/* 展开动画：grid-template-rows 0fr→1fr，按真实内容高度动画
+   （旧 max-height 方案的上限是拍脑袋值，内容不足时长前段空转、曲线变形） */
 .sources-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-height: 0;
+}
+
+.sources-body-inner {
+  overflow: hidden;
+  min-height: 0;
   padding: 0 14px 14px;
 }
 
 .sources-expand-enter-active,
 .sources-expand-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 600px;
-  opacity: 1;
-  overflow: hidden;
+  transition: grid-template-rows 0.25s var(--ease-out), opacity 0.2s var(--ease-out);
 }
 
 .sources-expand-enter-from,
 .sources-expand-leave-to {
-  max-height: 0;
+  grid-template-rows: 0fr;
   opacity: 0;
 }
 
@@ -498,7 +506,7 @@ function toolName(tool: any) {
   margin-bottom: 8px;
   background: var(--bg-hover);
   border: 1px solid transparent;
-  transition: all 0.15s ease;
+  transition: background var(--transition-color), border-color var(--transition-color), color var(--transition-color);
 
   &:last-child { margin-bottom: 0; }
 
@@ -608,7 +616,7 @@ function toolName(tool: any) {
   color: var(--text-muted);
   cursor: pointer;
   font-size: 15px;
-  transition: all 0.15s ease;
+  transition: background var(--transition-color), color var(--transition-color);
 
   &:hover {
     background: var(--bg-hover);

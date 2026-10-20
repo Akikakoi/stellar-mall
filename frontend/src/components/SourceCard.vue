@@ -20,7 +20,7 @@
         </div>
       </div>
       <div class="header-right">
-        <el-icon class="arrow"><ArrowDown v-if="!expanded" /><ArrowUp v-else /></el-icon>
+        <el-icon class="arrow" :class="{ expanded }"><ArrowDown /></el-icon>
       </div>
     </div>
 
@@ -37,7 +37,9 @@
 
     <transition name="content-expand">
       <div v-show="expanded" class="card-body">
-        <div class="content-text">{{ highlight(src.content) }}</div>
+        <div class="card-body-inner">
+          <div class="content-text">{{ highlight(src.content) }}</div>
+        </div>
       </div>
     </transition>
   </div>
@@ -45,7 +47,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ArrowUp, ArrowDown, Document, Star } from '@element-plus/icons-vue'
+import { Document, Star } from '@element-plus/icons-vue'
 
 const props = defineProps({
   src: { type: Object, required: true },
@@ -89,7 +91,7 @@ function highlight(text: any) {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   margin-bottom: 8px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color var(--transition-color), box-shadow var(--transition-color);
   overflow: hidden;
 
   &:hover {
@@ -201,7 +203,11 @@ function highlight(text: any) {
 .arrow {
   font-size: 14px;
   color: var(--text-muted);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s var(--ease-out);
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
 }
 
 /* ===== 标签行 ===== */
@@ -217,8 +223,28 @@ function highlight(text: any) {
 }
 
 /* ===== 卡片内容 ===== */
+/* 展开动画：grid-template-rows 0fr→1fr，按真实内容高度动画（替代 max-height 猜测值） */
 .card-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-height: 0;
+}
+
+.card-body-inner {
+  overflow: hidden;
+  min-height: 0;
   padding: 0 14px 14px 56px;
+}
+
+.content-expand-enter-active,
+.content-expand-leave-active {
+  transition: grid-template-rows 0.25s var(--ease-out), opacity 0.2s var(--ease-out);
+}
+
+.content-expand-enter-from,
+.content-expand-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
 }
 
 .content-text {
@@ -233,22 +259,5 @@ function highlight(text: any) {
   background: var(--bg-hover);
   border-radius: var(--radius-sm);
   border-left: 3px solid var(--brand-primary);
-}
-
-/* 内容展开动画 */
-.content-expand-enter-active,
-.content-expand-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 400px;
-  opacity: 1;
-  overflow: hidden;
-}
-
-.content-expand-enter-from,
-.content-expand-leave-to {
-  max-height: 0;
-  opacity: 0;
-  padding-top: 0;
-  padding-bottom: 0;
 }
 </style>
