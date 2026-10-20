@@ -36,11 +36,13 @@
       </div>
 
       <!-- 批量操作工具栏 -->
-      <div v-if="selectedRows.length > 0" class="batch-toolbar">
-        <span class="batch-tip">已选择 {{ selectedRows.length }} 件商品</span>
-        <el-button type="warning" size="small" @click="handleBatchShelfOff">批量下架</el-button>
-        <el-button type="success" size="small" @click="handleBatchShelfOn">批量上架</el-button>
-      </div>
+      <Transition name="toolbar-slide">
+        <div v-if="selectedRows.length > 0" class="batch-toolbar">
+          <span class="batch-tip">已选择 {{ selectedRows.length }} 件商品</span>
+          <el-button type="warning" size="small" @click="handleBatchShelfOff">批量下架</el-button>
+          <el-button type="success" size="small" @click="handleBatchShelfOn">批量上架</el-button>
+        </div>
+      </Transition>
 
       <el-table :data="records" v-loading="loading" stripe empty-text="暂无数据" style="width: 100%;"
         @selection-change="handleSelectionChange" :row-class-name="tableRowClassName">
@@ -1094,7 +1096,9 @@ async function handleStockAdjust() {
 .panel-actions { display: flex; gap: 8px; align-items: center; }
 .panel-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 .filter-bar { margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--bg-card); border: 1px solid var(--border-base); border-radius: var(--radius-md); padding: 12px 16px; }
-.batch-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px 16px; background: var(--brand-primary-soft); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); }
+.batch-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px 16px; background: var(--brand-primary-soft); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); overflow: hidden; }
+.toolbar-slide-enter-active, .toolbar-slide-leave-active { transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), margin-bottom 0.15s var(--ease-out); }
+.toolbar-slide-enter-from, .toolbar-slide-leave-to { opacity: 0; transform: translateY(-6px); margin-bottom: 0; }
 .batch-tip { font-size: 14px; font-weight: 500; color: var(--brand-primary); flex: 1; }
 .pagination-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
 .img-placeholder { width: 48px; height: 48px; background: var(--bg-hover); color: var(--text-muted); display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 12px; }
