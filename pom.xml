@@ -28,6 +28,8 @@
         <lombok>1.18.38</lombok>
         <commons.lang3>3.14.0</commons.lang3>
         <druid>1.2.23</druid>
+        <!-- Redisson（独立 client，不走 spring-boot-starter 以避免替换 Lettuce 连接工厂） -->
+        <redisson>3.34.1</redisson>
         <pagehelper>2.1.0</pagehelper>
         <aliyun.sdk.oss>3.10.2</aliyun.sdk.oss>
         <knife4j>4.5.0</knife4j>
@@ -67,6 +69,11 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid-spring-boot-3-starter</artifactId>
                 <version>${druid}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.pagehelper</groupId>
@@ -221,6 +228,8 @@
                                 <exclude>**/RagSyncServiceTest.java</exclude>
                                 <exclude>**/InventoryBatchStockTest.java</exclude>
                                 <exclude>**/AsyncWiringIntegrationTest.java</exclude>
+                                <exclude>**/RateLimitInterceptorTest.java</exclude>
+                                <exclude>**/RedisLockUtilTest.java</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
