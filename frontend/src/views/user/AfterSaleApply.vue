@@ -265,7 +265,7 @@ onMounted(() => {
 .item-row {
   display: flex; align-items: center; padding: 12px;
   border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
-  margin-bottom: 10px; cursor: pointer; transition: all .2s;
+  margin-bottom: 10px; cursor: pointer; transition: background var(--transition-color), border-color var(--transition-color);
 }
 .item-row:hover { background: var(--bg-hover); }
 .item-row.selected { border-color: var(--brand-primary); background: var(--bg-hover); }

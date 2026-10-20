@@ -190,7 +190,6 @@ async function readAll() {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 16px 20px;
-  transition: background var(--transition-base);
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   box-shadow: var(--glass-shadow);

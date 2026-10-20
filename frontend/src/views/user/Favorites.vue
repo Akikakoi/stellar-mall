@@ -155,15 +155,19 @@ onMounted(async () => {
   overflow: hidden;
   transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
-.fav-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+@media (hover: hover) {
+  .fav-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+}
 .fav-image {
   aspect-ratio: 1;
   overflow: hidden;
   background: var(--bg-hover);
   cursor: pointer;
 }
-.fav-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.fav-card:hover .fav-image img { transform: scale(1.05); }
+.fav-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s var(--ease-out); }
+@media (hover: hover) {
+  .fav-card:hover .fav-image img { transform: scale(1.05); }
+}
 .fav-info { padding: 14px 16px 18px; }
 .fav-name {
   font-size: 14px;

@@ -617,7 +617,7 @@ onMounted(() => { loadDetail(); loadReviews() })
   border-radius: 0;
   background: rgba(255, 255, 255, 0.5);
   opacity: 1;
-  transition: all 0.25s ease;
+  transition: width 0.25s var(--ease-out), background-color 0.25s var(--ease-out);
 }
 .carousel-wrap :deep(.el-carousel__indicator.is-active .el-carousel__button) {
   width: 36px;
@@ -677,6 +677,12 @@ onMounted(() => { loadDetail(); loadReviews() })
 }
 .zoom-trigger:hover {
   background: rgba(0, 0, 0, 0.7);
+}
+/* 触屏无 hover：放大按钮常显 */
+@media (hover: none) {
+  .carousel-wrap .zoom-trigger {
+    opacity: 1;
+  }
 }
 
 /* ===== 放大预览遮罩 ===== */
@@ -769,7 +775,7 @@ onMounted(() => { loadDetail(); loadReviews() })
   border: 2px solid transparent;
   cursor: pointer;
   opacity: 0.5;
-  transition: all 0.2s;
+  transition: opacity var(--transition-color), border-color var(--transition-color);
   flex-shrink: 0;
 }
 .zoom-thumb:hover { opacity: 0.8; }
@@ -811,7 +817,7 @@ onMounted(() => { loadDetail(); loadReviews() })
   color: var(--text-secondary);
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color var(--transition-color), color var(--transition-color), background var(--transition-color);
 }
 .sku-capsule:hover { border-color: var(--brand-primary); color: var(--text-primary); }
 .sku-capsule.active { border-color: var(--brand-primary); background: var(--brand-primary-soft); color: var(--brand-primary); }
@@ -826,7 +832,7 @@ onMounted(() => { loadDetail(); loadReviews() })
   border: 1px solid var(--border-base);
   color: var(--text-secondary);
   background: var(--bg-card);
-  transition: all 0.2s;
+  transition: border-color var(--transition-color), color var(--transition-color), background var(--transition-color);
 }
 .btn-fav.active {
   border-color: var(--status-danger);

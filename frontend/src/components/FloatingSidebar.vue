@@ -73,7 +73,9 @@ const items = computed(() => [
 ])
 
 function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  // 减少动态效果偏好下退化为瞬时跳转
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
 }
 
 function onScroll() {
@@ -121,7 +123,7 @@ onUnmounted(() => {
   border-radius: var(--radius-md);
   cursor: pointer;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: background var(--transition-color), color var(--transition-color);
   min-width: 60px;
 }
 .sidebar-item:hover {

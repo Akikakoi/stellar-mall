@@ -410,7 +410,7 @@ onMounted(() => {
   color: var(--text-secondary);
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background var(--transition-color), color var(--transition-color), border-color var(--transition-color), opacity var(--transition-color);
   line-height: 1.4;
 }
 
@@ -423,7 +423,6 @@ onMounted(() => {
   border-color: var(--spec-active, var(--brand-primary));
   background: var(--spec-active-soft, var(--brand-primary-soft));
   color: var(--spec-active, var(--brand-primary));
-  font-weight: 500;
 }
 
 .spec-option:disabled {
@@ -507,7 +506,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color var(--transition-color), border-color var(--transition-color), opacity var(--transition-color);
 }
 
 .qty-btn:first-of-type {
@@ -593,7 +592,7 @@ onMounted(() => {
   border-radius: var(--radius-md);
   background: var(--bg-card);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background var(--transition-color), border-color var(--transition-color);
   width: fit-content;
   font-size: 14px;
 }
