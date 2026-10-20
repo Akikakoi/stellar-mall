@@ -76,22 +76,26 @@
           <span>选购更多</span>
           <el-icon :class="{ rotated: serviceExpanded }"><ArrowDown /></el-icon>
         </div>
-        <div v-show="serviceExpanded" class="service-list">
-          <label
-            v-for="svc in services"
-            :key="svc.id"
-            class="service-option"
-            :class="{ active: selectedServices.includes(svc.id) }"
-          >
-            <input
-              type="checkbox"
-              :value="svc.id"
-              v-model="selectedServices"
-            />
-            <span class="service-title">{{ svc.title }}</span>
-            <span class="service-price">¥{{ Number(svc.price || 0).toFixed(2) }}</span>
-          </label>
-        </div>
+        <transition name="service-expand">
+          <div v-show="serviceExpanded" class="service-list">
+            <div class="service-list-inner">
+              <label
+                v-for="svc in services"
+                :key="svc.id"
+                class="service-option"
+                :class="{ active: selectedServices.includes(svc.id) }"
+              >
+                <input
+                  type="checkbox"
+                  :value="svc.id"
+                  v-model="selectedServices"
+                />
+                <span class="service-title">{{ svc.title }}</span>
+                <span class="service-price">¥{{ Number(svc.price || 0).toFixed(2) }}</span>
+              </label>
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -576,11 +580,31 @@ onMounted(() => {
   transform: rotate(180deg);
 }
 
+/* 展开动画：grid-template-rows 0fr→1fr，按真实内容高度动画 */
 .service-list {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-height: 0;
+}
+
+.service-list-inner {
+  overflow: hidden;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 8px 0;
+}
+
+.service-expand-enter-active,
+.service-expand-leave-active {
+  transition: grid-template-rows 0.25s var(--ease-out), opacity 0.2s var(--ease-out);
+}
+
+.service-expand-enter-from,
+.service-expand-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
 }
 
 .service-option {

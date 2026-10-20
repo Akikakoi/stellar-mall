@@ -53,7 +53,7 @@
               <el-icon :size="36"><ArrowLeft /></el-icon>
             </div>
             <div class="zoom-body" @click.stop>
-              <img :src="galleryImages[zoomIndex]" :alt="`${spu.name} - 大图`" v-placeholder />
+              <img :key="zoomIndex" :src="galleryImages[zoomIndex]" :alt="`${spu.name} - 大图`" v-placeholder />
             </div>
             <div class="zoom-next" v-if="galleryImages.length > 1" @click.stop="nextImage">
               <el-icon :size="36"><ArrowRight /></el-icon>
@@ -744,6 +744,11 @@ onMounted(() => { loadDetail(); loadReviews() })
   border-radius: 4px;
   user-select: none;
   -webkit-user-drag: none;
+  /* 切图时随 :key 重挂载重放 180ms 淡入，替代硬跳变 */
+  animation: zoom-img-in 0.18s var(--ease-out);
+}
+@keyframes zoom-img-in {
+  from { opacity: 0; }
 }
 
 .zoom-counter {
