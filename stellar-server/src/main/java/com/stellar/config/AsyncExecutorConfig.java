@@ -48,8 +48,9 @@ public class AsyncExecutorConfig {
 
     /**
      * 聚合查询池的线程数。
-     * <p>不能再大：Druid 未显式配置连接池，走的是默认 {@code max-active=8}。
-     * 并行度超过连接数只会让线程堵在 {@code getConnection} 上，白白占着线程还拿不到收益。</p>
+     * <p>Druid 连接池已在 application.yml 显式配置（max-active=20），此池并行度 8
+     * 仍有余量；但本池专供「请求内并行聚合查询」，这类查询单个就偏重（看板 20+ 次统计），
+     * 并行度再高收益递减还会抬高 DB 负载，故维持 8。</p>
      */
     private static final int AGGREGATE_POOL_SIZE = 8;
 

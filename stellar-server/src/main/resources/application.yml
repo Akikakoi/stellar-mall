@@ -23,6 +23,27 @@ spring:
       url: jdbc:mysql://${stellar.datasource.host}:${stellar.datasource.port}/${stellar.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&allowMultiQueries=true
       username: ${stellar.datasource.username}
       password: ${stellar.datasource.password}
+      # ===== 连接池显式配置 =====
+      # 不配置时 Druid 默认 max-active=8：Tomcat 200 个工作线程高峰期会大量阻塞在
+      # getConnection 上。显式给到 20，并配合空闲检测保活，避免 MySQL wait_timeout 断连。
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      # 获取连接最大等待 6s，超时快速失败而不是无限堆积线程
+      max-wait: 6000
+      validation-query: SELECT 1
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      keep-alive: true
+      # 空闲连接超过 5 分钟可回收，每 60s 检测一轮
+      min-evictable-idle-time-millis: 300000
+      time-between-eviction-runs-millis: 60000
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 2000
   # Redis：Spring Boot 3.x 属性前缀是 spring.data.redis（2.x 的 spring.redis 已废弃不生效）
   data:
     redis:
