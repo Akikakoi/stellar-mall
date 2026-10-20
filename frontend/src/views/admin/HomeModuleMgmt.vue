@@ -19,6 +19,7 @@
       <div
         v-for="(item, idx) in list"
         :key="item.id"
+        :data-module-id="item.id"
         class="module-card"
         draggable="true"
         @dragstart="onDragStart($event, idx)"
@@ -228,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest, userRequest } from '@/api/request'
 import { getSiteBgConfig, saveSiteBgConfig, uploadImages } from '@/api/admin'
@@ -385,9 +386,34 @@ async function onDrop(e: any, toIdx: any) {
   dragIdx.value = -1
   if (fromIdx === toIdx || fromIdx < 0) return
 
+  // FLIP：重排前记录各卡片位置，重排后从旧位置平滑滑到新位置（避免其余卡片瞬移）
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  const firstRects = new Map<string, DOMRect>()
+  if (!reduceMotion) {
+    document.querySelectorAll<HTMLElement>('.module-card[data-module-id]').forEach((el) => {
+      firstRects.set(el.dataset.moduleId!, el.getBoundingClientRect())
+    })
+  }
+
   // 本地重排
   const moved = list.value.splice(fromIdx, 1)[0]
   list.value.splice(toIdx, 0, moved)
+
+  if (!reduceMotion && firstRects.size) {
+    await nextTick()
+    document.querySelectorAll<HTMLElement>('.module-card[data-module-id]').forEach((el) => {
+      const first = firstRects.get(el.dataset.moduleId!)
+      if (!first) return
+      const last = el.getBoundingClientRect()
+      const dx = first.left - last.left
+      const dy = first.top - last.top
+      if (!dx && !dy) return
+      el.animate(
+        [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
+        { duration: 250, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' }
+      )
+    })
+  }
 
   // 更新 sort_order 并批量提交
   const items = list.value.map((item: any, i: any) => ({ id: item.id, sortOrder: i }))

@@ -11,58 +11,59 @@
       </div>
 
       <el-form :model="form" :rules="rules" ref="formRef" label-width="0" class="login-form">
-        <!-- 密码模式：邮箱 -->
-        <el-form-item v-if="loginMode === 'password'" prop="email">
-          <el-input v-model="form.email" placeholder="请输入邮箱地址" size="large" autocomplete="email" />
-        </el-form-item>
-
-        <!-- 验证码模式：邮箱 -->
-        <el-form-item v-if="loginMode === 'email'" prop="email">
-          <el-input v-model="form.email" placeholder="请输入邮箱地址" size="large" autocomplete="email" />
-        </el-form-item>
-
-        <!-- 密码模式 -->
-        <el-form-item v-if="loginMode === 'password'" prop="password">
-          <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" show-password />
-        </el-form-item>
-
-        <!-- 验证码模式 -->
-        <el-form-item v-if="loginMode === 'email'" prop="code">
-          <div class="code-row">
-            <el-input v-model="form.code" placeholder="请输入验证码" size="large" style="flex:1" />
-            <el-button
-              class="code-btn"
-              :disabled="codeCountdown > 0"
-              :loading="sendingCode"
-              @click="sendCode"
-              size="large"
-            >
-              {{ codeCountdown > 0 ? `${codeCountdown}s 后重发` : '获取验证码' }}
-            </el-button>
+        <Transition name="mode-fade" mode="out-in">
+          <!-- 密码模式 -->
+          <div v-if="loginMode === 'password'" key="password" class="mode-fields">
+            <el-form-item prop="email">
+              <el-input v-model="form.email" placeholder="请输入邮箱地址" size="large" autocomplete="email" />
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input v-model="form.password" type="password" placeholder="请输入密码" size="large" show-password />
+            </el-form-item>
           </div>
-        </el-form-item>
 
-        <!-- 验证码模式：图形验证码（登录提交时校验） -->
-        <el-form-item v-if="loginMode === 'email'" prop="captchaCode">
-          <div class="captcha-row">
-            <el-input
-              v-model="form.captchaCode"
-              placeholder="请输入图形验证码"
-              size="large"
-              style="flex:1"
-              autocomplete="off"
-            />
-            <img
-              v-if="captchaImage"
-              :src="captchaImage"
-              alt="图形验证码"
-              class="captcha-img"
-              title="点击刷新"
-              @click="refreshCaptcha"
-            />
-            <div v-else class="captcha-placeholder" @click="refreshCaptcha">点击加载</div>
+          <!-- 验证码模式 -->
+          <div v-else key="email" class="mode-fields">
+            <el-form-item prop="email">
+              <el-input v-model="form.email" placeholder="请输入邮箱地址" size="large" autocomplete="email" />
+            </el-form-item>
+            <el-form-item prop="code">
+              <div class="code-row">
+                <el-input v-model="form.code" placeholder="请输入验证码" size="large" style="flex:1" />
+                <el-button
+                  class="code-btn"
+                  :disabled="codeCountdown > 0"
+                  :loading="sendingCode"
+                  @click="sendCode"
+                  size="large"
+                >
+                  {{ codeCountdown > 0 ? `${codeCountdown}s 后重发` : '获取验证码' }}
+                </el-button>
+              </div>
+            </el-form-item>
+            <!-- 图形验证码（登录提交时校验） -->
+            <el-form-item prop="captchaCode">
+              <div class="captcha-row">
+                <el-input
+                  v-model="form.captchaCode"
+                  placeholder="请输入图形验证码"
+                  size="large"
+                  style="flex:1"
+                  autocomplete="off"
+                />
+                <img
+                  v-if="captchaImage"
+                  :src="captchaImage"
+                  alt="图形验证码"
+                  class="captcha-img"
+                  title="点击刷新"
+                  @click="refreshCaptcha"
+                />
+                <div v-else class="captcha-placeholder" @click="refreshCaptcha">点击加载</div>
+              </div>
+            </el-form-item>
           </div>
-        </el-form-item>
+        </Transition>
 
         <el-button type="primary" size="large" class="submit-btn" :loading="loading" @click="handleLogin">
           {{ loginMode === 'password' ? '登 录' : '登录 / 注册' }}
@@ -276,6 +277,11 @@ async function handleLogin() {
 }
 
 .code-row { display: flex; gap: 10px; }
+/* 登录方式切换过渡：旧字段上移淡出、新字段下移淡入 */
+.mode-fields { display: block; }
+.mode-fade-enter-active, .mode-fade-leave-active { transition: opacity 0.15s ease, transform 0.15s var(--ease-out); }
+.mode-fade-enter-from { opacity: 0; transform: translateY(6px); }
+.mode-fade-leave-to { opacity: 0; transform: translateY(-4px); }
 .code-btn {
   white-space: nowrap;
   min-width: 120px;

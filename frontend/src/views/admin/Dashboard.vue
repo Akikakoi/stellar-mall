@@ -208,6 +208,8 @@ function renderCharts(orderTrend: any, salesTrend: any) {
         if (!orderChart) orderChart = echarts.init(orderChartRef.value)
         const dates = orderTrendData.value.map((d: any) => d.date)
         orderChart.setOption({
+          animationDuration: 400,
+          animationDurationUpdate: 200,
           tooltip: { trigger: 'axis' },
           grid: { left: 40, right: 20, top: 20, bottom: 30 },
           xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 11 } },
@@ -226,6 +228,8 @@ function renderCharts(orderTrend: any, salesTrend: any) {
         if (!salesChart) salesChart = echarts.init(salesChartRef.value)
         const dates = salesTrendData.value.map((d: any) => d.date)
         salesChart.setOption({
+          animationDuration: 400,
+          animationDurationUpdate: 200,
           tooltip: { trigger: 'axis' },
           grid: { left: 50, right: 20, top: 20, bottom: 30 },
           xAxis: { type: 'category', data: dates, axisLabel: { fontSize: 11 } },
