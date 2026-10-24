@@ -51,14 +51,3 @@ async def delete_conversation(conv_id: int, current_user: User = Depends(get_cur
     from app.services.conversation_service import ConversationService
     ConversationService(db, current_user).delete(conv_id)
     return ok(message="删除成功")
-
-
-@router.post("/{conv_id}/messages/{msg_id}/feedback")
-async def feedback(
-    conv_id: int, msg_id: int, body: dict,
-    current_user: User = Depends(get_current_user), db: Session = Depends(get_db),
-):
-    from app.services.conversation_service import ConversationService
-    fb = int(body.get("feedback", 0))
-    ConversationService(db, current_user).set_feedback(conv_id, msg_id, fb)
-    return ok()

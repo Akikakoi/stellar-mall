@@ -155,7 +155,6 @@
             v-for="m in chatStore.messages"
             :key="m.id"
             :msg="m"
-            :conversation-id="chatStore.activeId as any"
             :current-query="currentQueryOf(m)"
           />
         </template>

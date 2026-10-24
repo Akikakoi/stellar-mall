@@ -99,10 +99,3 @@ class ConversationService:
              .order_by(Message.created_at.desc())
              .limit(limit))
         return list(reversed(q.all()))
-
-    def set_feedback(self, conv_id: int, msg_id: int, fb: int) -> None:
-        msg = self.db.query(Message).filter(Message.id == msg_id, Message.conversation_id == conv_id).first()
-        if not msg or msg.user_id != self.user.id:
-            raise BizError("消息不存在或无权操作", http_status=404)
-        msg.feedback = int(fb)
-        self.db.commit()

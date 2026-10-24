@@ -66,15 +66,6 @@ export function apiDeleteConversation(id: number): Promise<RagResponse<any>> {
   })
 }
 
-/** 对消息提交反馈(点赞/点踩) */
-export function apiFeedbackMessage(convId: number, msgId: number, feedback: string): Promise<RagResponse<any>> {
-  return ragRequest({
-    url: `/ragapi/api/conversations/${convId}/messages/${msgId}/feedback`,
-    method: 'post',
-    data: { feedback }
-  })
-}
-
 // =========================== 欢迎页提问示例 ===========================
 
 /** 动态提问示例：基于真实商品库生成，每次请求随机抽样 */
