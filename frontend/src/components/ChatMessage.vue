@@ -95,16 +95,6 @@
       <div class="actions" v-if="!msg.streaming && msg.role === 'assistant'">
         <span class="meta">{{ meta }}</span>
         <div class="action-btns">
-          <el-tooltip content="有帮助" placement="top">
-            <button class="action-btn" :class="{ active: msg.feedback === 1 }" @click="onFb(1)">
-              <el-icon><Star /></el-icon>
-            </button>
-          </el-tooltip>
-          <el-tooltip content="无帮助" placement="top">
-            <button class="action-btn" :class="{ active: msg.feedback === -1 }" @click="onFb(-1)">
-              <el-icon><StarFilled style="transform: rotate(180deg)" /></el-icon>
-            </button>
-          </el-tooltip>
           <el-tooltip content="复制回答" placement="top">
             <button class="action-btn" @click="copy">
               <el-icon><CopyDocument /></el-icon>
@@ -118,24 +108,19 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { Star, StarFilled, CopyDocument, Document, Cpu, Loading, Setting, CircleCheck, CircleClose, ChatDotRound, ArrowDown } from '@element-plus/icons-vue'
+import { CopyDocument, Document, Cpu, Loading, Setting, CircleCheck, CircleClose, ChatDotRound, ArrowDown } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
 import SourceCard from './SourceCard.vue'
 import { useUserStore } from '@/stores/user'
-import { apiFeedbackMessage } from '@/api/rag'
-import { useChatStore } from '@/stores/chat'
 
 const props = defineProps({
   msg: { type: Object, required: true },
-  conversationId: { type: [Number, String], default: null },
   currentQuery: { type: String, default: '' },
 })
-const emit = defineEmits(['feedback'])
 
 const userStore = useUserStore()
-const chatStore = useChatStore()
 const renderedMd = ref('')
 const sourcesExpanded = ref(false)
 const md = new MarkdownIt({ html: false, linkify: true, breaks: true })
@@ -182,15 +167,6 @@ function escapeHtml(s: any) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 }
 
-async function onFb(v: any) {
-  if (!props.conversationId || !props.msg.id) return
-  try {
-    await apiFeedbackMessage(props.conversationId as number, props.msg.id, v)
-    chatStore.updateAssistant(props.msg.id, { feedback: v })
-    ElMessage.success('已提交反馈，感谢！')
-    emit('feedback', v)
-  } catch {}
-}
 function copy() {
   if (!props.msg.content) return
   navigator.clipboard?.writeText(props.msg.content)
@@ -610,11 +586,6 @@ function toolName(tool: any) {
   &:hover {
     background: var(--bg-hover);
     color: var(--text-secondary);
-  }
-
-  &.active {
-    color: var(--brand-primary);
-    background: var(--brand-primary-soft);
   }
 
   :deep(.el-icon) {

@@ -107,10 +107,6 @@ class SourceRef(BaseModel):
     tags: Optional[str]
 
 
-class MessageFeedbackReq(BaseModel):
-    feedback: int = Field(..., ge=-1, le=1)
-
-
 # ================ 知识库 ================
 class KbDocInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
