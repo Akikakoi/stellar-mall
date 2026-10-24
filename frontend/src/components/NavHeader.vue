@@ -489,8 +489,8 @@ function handleLogoClick() {
   border-radius: 2px;
   background: var(--brand-primary);
   pointer-events: none;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: transform 0.3s var(--ease-in-out),
+              width 0.3s var(--ease-in-out),
               opacity 0.2s ease;
 }
 .nav-item {
@@ -501,7 +501,7 @@ function handleLogoClick() {
   font-size: 15px;
   font-weight: 500;
   text-decoration: none;
-  transition: color 0.25s ease;
+  transition: color var(--transition-color);
   padding: 6px 0;
 }
 .nav-item:hover {
@@ -513,7 +513,7 @@ function handleLogoClick() {
 .nav-icon {
   width: 16px;
   height: 16px;
-  transition: color 0.25s ease, transform 0.25s ease;
+  transition: color var(--transition-color), transform var(--transition-base);
 }
 .nav-item:hover .nav-icon {
   transform: translateY(-1px);
@@ -615,7 +615,7 @@ html.theme-dark .nav-history-panel {
   font-size: 13px;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color var(--transition-color);
 }
 .nav-history-clear:hover { color: var(--brand-primary); }
 .nav-history-tags {
@@ -639,7 +639,7 @@ html.theme-dark .nav-history-panel {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, transform 0.15s;
+  transition: background var(--transition-color), color var(--transition-color), transform var(--transition-base);
 }
 .nav-history-tag:hover {
   background: var(--nav-history-tag-bg-hover);
@@ -650,7 +650,7 @@ html.theme-dark .nav-history-panel {
   border: none;
   background: transparent;
   color: var(--text-muted);
-  transition: color 0.2s;
+  transition: color var(--transition-color);
   padding: 0;
 }
 .search-btn:hover:not(:disabled) {
@@ -719,7 +719,7 @@ html.theme-dark .nav-history-panel {
   .el-dropdown-menu__item {
     outline: none !important;
     color: var(--text-primary);
-    transition: background 0.15s, color 0.15s;
+    transition: background var(--transition-color), color var(--transition-color);
 
     &:hover {
       background: var(--glass-hover, rgba(0, 0, 0, 0.05));

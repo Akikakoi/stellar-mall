@@ -736,7 +736,7 @@ onUnmounted(() => {
 .sub-tab {
   font-size: 15px; color: var(--text-secondary); cursor: pointer;
   padding-bottom: 4px; border-bottom: 2px solid transparent;
-  transition: color .2s, border-color .2s; user-select: none;
+  transition: color var(--transition-color), border-color var(--transition-color); user-select: none;
 }
 .sub-tab:hover { color: var(--brand-primary); }
 .sub-tab.active { color: var(--brand-primary); border-bottom-color: var(--brand-primary); font-weight: 600; }
@@ -745,7 +745,7 @@ onUnmounted(() => {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 6px 14px; border-radius: 20px;
   background: var(--brand-primary-soft);
-  transition: background .25s, color .25s, box-shadow .25s;
+  transition: background var(--transition-color), color var(--transition-color), box-shadow var(--transition-color);
 }
 .view-more:hover {
   background: var(--brand-primary);
@@ -753,7 +753,7 @@ onUnmounted(() => {
   box-shadow: 0 2px 10px rgba(64, 158, 255, 0.35);
 }
 .view-more .arrow-icon {
-  transition: transform .25s;
+  transition: transform var(--transition-base);
 }
 .view-more:hover .arrow-icon {
   transform: translateX(3px);
@@ -796,7 +796,7 @@ onUnmounted(() => {
   -webkit-backdrop-filter: var(--backdrop-blur);
   display: flex; flex-direction: column; align-items: center;
   padding: 22px 16px 18px; cursor: pointer;
-  transition: transform .25s, box-shadow .25s; overflow: hidden;
+  transition: transform var(--transition-base), box-shadow var(--transition-color); overflow: hidden;
 }
 @media (hover: hover) {
   .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); }
@@ -817,11 +817,13 @@ onUnmounted(() => {
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: transform var(--transition-base), box-shadow var(--transition-color), border-color var(--transition-color);
 }
-.more-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary); }
+@media (hover: hover) {
+  .more-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary); }
+}
 .more-inner { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.more-txt { font-size: 16px; font-weight: 600; color: var(--text-secondary); transition: color .2s; }
+.more-txt { font-size: 16px; font-weight: 600; color: var(--text-secondary); transition: color var(--transition-color); }
 .more-sub { font-size: 12px; color: var(--text-muted); }
-.more-arrow { margin-top: 2px; color: var(--brand-primary); transition: transform .2s; }
+.more-arrow { margin-top: 2px; color: var(--brand-primary); transition: transform var(--transition-base); }
 .more-card:hover .more-txt { color: var(--brand-primary); }
 .more-card:hover .more-arrow { transform: translateX(3px); }
 
@@ -856,7 +858,9 @@ onUnmounted(() => {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background var(--transition-color), color var(--transition-color), transform var(--transition-base); line-height: 1; padding: 0;
 }
-.fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
+@media (hover: hover) {
+  .fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
+}
 .fav-btn.active { color: var(--status-danger); background: rgba(255,59,48,0.18); }
 .spu-info { padding: 18px 20px 22px; }
 .spu-name { font-size: 15px; color: var(--text-primary); margin: 0 0 10px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 45px; }
@@ -871,7 +875,9 @@ onUnmounted(() => {
   border-radius: var(--radius-lg); cursor: pointer;
   transition: transform var(--transition-base), box-shadow var(--transition-color); border: 1px solid #ffe0c0;
 }
-.coupon-entry-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,140,0,0.15); }
+@media (hover: hover) {
+  .coupon-entry-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,140,0,0.15); }
+}
 .coupon-entry-inner {
   display: flex; align-items: center; gap: 18px;
   padding: 28px 32px;

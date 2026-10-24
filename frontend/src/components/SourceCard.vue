@@ -35,7 +35,7 @@
       >{{ t }}</el-tag>
     </div>
 
-    <transition name="content-expand">
+    <transition name="expand">
       <div v-show="expanded" class="card-body">
         <div class="card-body-inner">
           <div class="content-text">{{ highlight(src.content) }}</div>
@@ -234,17 +234,6 @@ function highlight(text: any) {
   overflow: hidden;
   min-height: 0;
   padding: 0 14px 14px 56px;
-}
-
-.content-expand-enter-active,
-.content-expand-leave-active {
-  transition: grid-template-rows 0.25s var(--ease-out), opacity 0.2s var(--ease-out);
-}
-
-.content-expand-enter-from,
-.content-expand-leave-to {
-  grid-template-rows: 0fr;
-  opacity: 0;
 }
 
 .content-text {

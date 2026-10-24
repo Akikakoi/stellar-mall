@@ -43,7 +43,7 @@
           <span class="sources-count">参考了 {{ msg.sources.length }} 个知识片段</span>
           <el-icon class="sources-arrow" :class="{ expanded: sourcesExpanded }"><ArrowDown /></el-icon>
         </div>
-        <transition name="sources-expand">
+        <transition name="expand">
           <div v-show="sourcesExpanded" class="sources-body">
             <div class="sources-body-inner">
               <SourceCard
@@ -224,7 +224,7 @@ function toolName(tool: any) {
   display: flex;
   gap: 14px;
   padding: 20px 0;
-  animation: msgFadeIn 0.35s ease-out;
+  animation: msgFadeIn 0.24s var(--ease-out);
   max-width: 100%;
 
   &:last-child {
@@ -413,7 +413,7 @@ function toolName(tool: any) {
 
 .sources-arrow {
   font-size: 14px;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.25s var(--ease-in-out);
 
   &.expanded {
     transform: rotate(180deg);
@@ -432,17 +432,6 @@ function toolName(tool: any) {
   overflow: hidden;
   min-height: 0;
   padding: 0 14px 14px;
-}
-
-.sources-expand-enter-active,
-.sources-expand-leave-active {
-  transition: grid-template-rows 0.25s var(--ease-out), opacity 0.2s var(--ease-out);
-}
-
-.sources-expand-enter-from,
-.sources-expand-leave-to {
-  grid-template-rows: 0fr;
-  opacity: 0;
 }
 
 /* ===== ReAct 思考过程 ===== */

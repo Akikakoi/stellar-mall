@@ -695,7 +695,7 @@ onMounted(() => { loadDetail(); loadReviews() })
   align-items: center;
   justify-content: center;
   outline: none;
-  animation: zoomFadeIn 0.2s ease;
+  animation: zoomFadeIn 0.2s var(--ease-out);
 }
 @keyframes zoomFadeIn {
   from { opacity: 0; }
@@ -748,7 +748,7 @@ onMounted(() => { loadDetail(); loadReviews() })
   animation: zoom-img-in 0.18s var(--ease-out);
 }
 @keyframes zoom-img-in {
-  from { opacity: 0; }
+  from { opacity: 0; transform: scale(0.98); }
 }
 
 .zoom-counter {

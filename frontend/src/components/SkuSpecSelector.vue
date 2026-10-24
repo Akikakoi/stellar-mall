@@ -76,7 +76,7 @@
           <span>选购更多</span>
           <el-icon :class="{ rotated: serviceExpanded }"><ArrowDown /></el-icon>
         </div>
-        <transition name="service-expand">
+        <transition name="expand">
           <div v-show="serviceExpanded" class="service-list">
             <div class="service-list-inner">
               <label
@@ -594,17 +594,6 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
   padding: 8px 0;
-}
-
-.service-expand-enter-active,
-.service-expand-leave-active {
-  transition: grid-template-rows 0.25s var(--ease-out), opacity 0.2s var(--ease-out);
-}
-
-.service-expand-enter-from,
-.service-expand-leave-to {
-  grid-template-rows: 0fr;
-  opacity: 0;
 }
 
 .service-option {

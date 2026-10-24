@@ -1097,8 +1097,8 @@ async function handleStockAdjust() {
 .panel-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 .filter-bar { margin-bottom: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--bg-card); border: 1px solid var(--border-base); border-radius: var(--radius-md); padding: 12px 16px; }
 .batch-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px 16px; background: var(--brand-primary-soft); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); overflow: hidden; }
-.toolbar-slide-enter-active, .toolbar-slide-leave-active { transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out), margin-bottom 0.15s var(--ease-out); }
-.toolbar-slide-enter-from, .toolbar-slide-leave-to { opacity: 0; transform: translateY(-6px); margin-bottom: 0; }
+.toolbar-slide-enter-active, .toolbar-slide-leave-active { transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out); }
+.toolbar-slide-enter-from, .toolbar-slide-leave-to { opacity: 0; transform: translateY(-6px); }
 .batch-tip { font-size: 14px; font-weight: 500; color: var(--brand-primary); flex: 1; }
 .pagination-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
 .img-placeholder { width: 48px; height: 48px; background: var(--bg-hover); color: var(--text-muted); display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 12px; }
