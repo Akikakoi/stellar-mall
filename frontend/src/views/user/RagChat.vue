@@ -125,13 +125,26 @@
             </h2>
             <p class="hero-desc">我能帮你解答平台商品的规格、价格、售后政策等问题</p>
             <div class="prompts">
-              <div class="prompt" v-for="(p, idx) in prompts" :key="p" @click="send(p)" :style="{ animationDelay: `${idx * 0.06}s` }">
-                <div class="prompt-icon">
-                  <el-icon><Promotion /></el-icon>
+              <template v-if="loadingPrompts">
+                <div
+                  class="prompt prompt-skeleton"
+                  v-for="i in 8"
+                  :key="'skeleton-' + i"
+                  :style="{ animationDelay: `${i * 0.06}s` }"
+                >
+                  <div class="prompt-icon"></div>
+                  <div class="skeleton-line"></div>
                 </div>
-                <span class="prompt-text">{{ p }}</span>
-                <el-icon class="prompt-arrow"><ArrowRight /></el-icon>
-              </div>
+              </template>
+              <template v-else>
+                <div class="prompt" v-for="(p, idx) in prompts" :key="idx + '-' + p" @click="send(p)" :style="{ animationDelay: `${idx * 0.06}s` }">
+                  <div class="prompt-icon">
+                    <el-icon><Promotion /></el-icon>
+                  </div>
+                  <span class="prompt-text">{{ p }}</span>
+                  <el-icon class="prompt-arrow"><ArrowRight /></el-icon>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -206,6 +219,7 @@ import { useUserStore } from '@/stores/user'
 import { useChatStore } from '@/stores/chat'
 import ChatMessage from '@/components/ChatMessage.vue'
 import { getAccessToken, ragRequest } from '@/api/request'
+import { apiSuggestions } from '@/api/rag'
 import { storage } from '@/utils/storage'
 
 const userStore = useUserStore()
@@ -229,16 +243,48 @@ const currentConvTitle = computed(() => {
   return c?.title
 })
 
-const prompts = [
-  '星耀 X100 Pro 多少钱？有哪些配置版本？',
-  '清逸 Book Air 14 续航和接口介绍一下',
-  '极净 BCD-520W 冰箱的保修政策是什么？',
-  '御风空调质保多久？有没有免费安装？',
-  '逸彩 65Q75 画质参数和售后亮点',
-  '平台手机 7 天无理由退货的条件？',
+/**
+ * 后端不可用时的兜底示例：不包含具体商品名，避免展示不存在的商品。
+ */
+const FALLBACK_PROMPTS = [
+  '帮我推荐几款热门商品',
+  '最近有哪些新品上架？',
+  '怎么查看商品的规格参数？',
+  '平台商品支持几天无理由退货？',
+  '商品保修政策是怎么样的？',
+  '有哪些优惠活动值得关注？',
   '帮我查一下订单状态',
-  '我要申请售后退货',
+  '我想申请售后退货，怎么操作？',
 ]
+
+/** 欢迎页提问示例（由后端基于真实商品库动态生成） */
+const prompts = ref<string[]>([])
+const loadingPrompts = ref(true)
+let promptsLoading = false
+
+/**
+ * 拉取动态提问示例。
+ * 后端会基于真实上架商品生成问题池并随机抽样，每次打开结果不同；
+ * 请求失败时回退到本地兜底文案。
+ */
+async function loadPrompts() {
+  if (promptsLoading) return
+  promptsLoading = true
+  loadingPrompts.value = true
+  try {
+    const res: any = await apiSuggestions(8)
+    const items = res?.data?.items
+    if (Array.isArray(items) && items.length) {
+      prompts.value = items.slice(0, 8)
+    }
+  } catch (e: any) {
+    /* 网络异常或未登录时保留兜底文案 */
+  } finally {
+    if (!prompts.value.length) prompts.value = FALLBACK_PROMPTS
+    loadingPrompts.value = false
+    promptsLoading = false
+  }
+}
 
 /**
  * 获取助手消息对应的用户问题文本
@@ -351,6 +397,7 @@ onMounted(async () => {
   leaving = false
   updateLayoutHeight()
   window.addEventListener('resize', updateLayoutHeight)
+  loadPrompts()
   try {
     await fetchConvs()
   } catch (e: any) { /* 网络异常不影响页面加载 */ }
@@ -408,6 +455,7 @@ watch(() => chatStore.activeId, () => {
 async function startNew() {
   await chatStore.createConversation('新的对话')
   input.value = ''
+  loadPrompts()
   scrollToBottom(true)
 }
 
@@ -466,6 +514,7 @@ function onLogout() {
 function goHome() {
   chatStore.setActive(null as any)
   router.replace('/rag/chat').catch(() => {})
+  loadPrompts()
 }
 
 /**
@@ -678,9 +727,12 @@ function parseEvent(block: any) {
   gap: 10px;
   cursor: pointer;
   margin-bottom: 14px;
+}
 
-  &:hover .brand-icon {
-    transform: scale(1.05) rotate(-5deg);
+/* 品牌图标 hover：只做轻微放大，不做旋转/回弹，与全站克制调性一致 */
+@media (hover: hover) {
+  .brand:hover .brand-icon {
+    transform: scale(1.03);
   }
 }
 
@@ -694,7 +746,7 @@ function parseEvent(block: any) {
   background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-active));
   color: #fff;
   font-size: 20px;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform var(--transition-base);
   box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
 }
 
@@ -1112,23 +1164,49 @@ function parseEvent(block: any) {
   text-align: left;
   animation: promptSlideIn 0.4s ease-out both;
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
 
-  &:hover {
+@media (hover: hover) {
+  .prompt:hover {
     background: var(--glass-hover);
     border-color: var(--brand-primary);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0, 113, 227, 0.12);
-
-    .prompt-arrow {
-      transform: translateX(4px);
-      color: var(--brand-primary);
-    }
+  }
+  .prompt:hover .prompt-arrow {
+    transform: translateX(4px);
+    color: var(--brand-primary);
   }
 }
 
 @keyframes promptSlideIn {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* 动态示例加载骨架 */
+.prompt-skeleton {
+  cursor: default;
+  pointer-events: none;
+}
+
+.skeleton-line {
+  flex: 1;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(128, 128, 128, 0.12) 25%,
+    rgba(128, 128, 128, 0.22) 37%,
+    rgba(128, 128, 128, 0.12) 63%
+  );
+  background-size: 400% 100%;
+  animation: skeletonShimmer 1.3s ease infinite;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
 }
 
 .prompt-icon {
