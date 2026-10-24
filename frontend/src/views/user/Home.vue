@@ -479,6 +479,7 @@ const sectionsLoading = ref(false)
 function buildSections(tree: any) {
   sections.value = (tree || []).map((c: any) => ({
     id: c.id, name: c.name,
+    subs: Array.isArray(c.children) ? c.children : [],
     activeSubId: null, products: [], total: 0, loading: false
   }))
   sections.value.sort((a: any, b: any) => a.name === '智能手机' ? -1 : b.name === '智能手机' ? 1 : 0)
@@ -713,6 +714,14 @@ onUnmounted(() => {
 @keyframes cursor-blink { to { opacity: 0; } }
 .hero-cta { height: 52px; padding: 0 36px; font-size: 17px; border-radius: 8px; }
 
+/* 首屏：标题 → 副标题 → 按钮，依次轻轻浮上来（只在进页面时播一次） */
+.hero-title { animation: hero-rise 0.5s var(--ease-out) backwards; }
+.hero-subtitle { animation: hero-rise 0.5s var(--ease-out) 80ms backwards; }
+.hero-cta { animation: hero-rise 0.5s var(--ease-out) 160ms backwards; }
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(12px); }
+}
+
 /* Banner */
 .banner, .banner-wrap { background: var(--bg-surface); }
 .banner-caption {
@@ -797,6 +806,7 @@ onUnmounted(() => {
   display: flex; flex-direction: column; align-items: center;
   padding: 22px 16px 18px; cursor: pointer;
   transition: transform var(--transition-base), box-shadow var(--transition-color); overflow: hidden;
+  animation: card-rise 0.32s var(--ease-out) backwards;
 }
 @media (hover: hover) {
   .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); }
@@ -843,6 +853,7 @@ onUnmounted(() => {
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+  animation: card-rise 0.32s var(--ease-out) backwards;
 }
 .spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
 .spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s var(--ease-out); }
@@ -868,6 +879,33 @@ onUnmounted(() => {
 .spu-meta { font-size: 12px; color: var(--text-muted); margin: -2px 0 8px; }
 .spu-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
 .add-cart-btn { border-radius: 8px; }
+
+/* 商品卡错峰入场：每张比前一张晚 30ms，最多 8 张参与，后面的直接显示 */
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(10px); }
+}
+.cat-grid .p-card:nth-child(2) { animation-delay: 0ms; }
+.cat-grid .p-card:nth-child(3) { animation-delay: 30ms; }
+.cat-grid .p-card:nth-child(4) { animation-delay: 60ms; }
+.cat-grid .p-card:nth-child(5) { animation-delay: 90ms; }
+.cat-grid .p-card:nth-child(6) { animation-delay: 120ms; }
+.cat-grid .p-card:nth-child(7) { animation-delay: 150ms; }
+.cat-grid .p-card:nth-child(8) { animation-delay: 180ms; }
+.spu-grid .spu-card:nth-child(2) { animation-delay: 30ms; }
+.spu-grid .spu-card:nth-child(3) { animation-delay: 60ms; }
+.spu-grid .spu-card:nth-child(4) { animation-delay: 90ms; }
+.spu-grid .spu-card:nth-child(5) { animation-delay: 120ms; }
+.spu-grid .spu-card:nth-child(6) { animation-delay: 150ms; }
+.spu-grid .spu-card:nth-child(7) { animation-delay: 180ms; }
+.spu-grid .spu-card:nth-child(8) { animation-delay: 210ms; }
+/* 减少动态效果：入场本来就是极短的透明度变化，这里再去掉排队延迟 */
+@media (prefers-reduced-motion: reduce) {
+  .hero-title,
+  .hero-subtitle,
+  .hero-cta,
+  .p-card,
+  .spu-card { animation-delay: 0ms !important; }
+}
 
 /* ===== 领券入口 ===== */
 .coupon-entry-card {
