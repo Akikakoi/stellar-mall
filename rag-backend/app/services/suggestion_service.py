@@ -185,7 +185,7 @@ def _inner_data(payload: Dict[str, Any]) -> Dict[str, Any]:
 
 async def _build_llm_pool(products: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     """调用 LLM 生成问题池；失败/超时返回 None 交给模板兜底。"""
-    if not settings.LLM_MODEL_NAME or not settings.DASHSCOPE_API_KEY:
+    if not settings.LLM_MODEL_NAME or not (settings.LLM_API_KEY or settings.DASHSCOPE_API_KEY):
         return None
     try:
         llm = get_langchain_chat()
