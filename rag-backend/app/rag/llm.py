@@ -1,31 +1,32 @@
-"""LLM 客户端封装：基于 DashScope / 通义千问，兼容 LangChain ChatModel。
+"""LLM 客户端封装：基于 OpenAI 兼容协议，兼容 DeepSeek / 阿里云百炼（通义千问）。
 
-支持两类 API Key：
-  1) 公共账号 Key（sk-xxx）：默认走 https://dashscope.aliyuncs.com
-  2) 专属业务空间 Key（sk-ws-xxx）：必须走 settings.OPENAI_COMPATIBLE_BASE_URL
-     里配置的 workspace 专属域名，否则会报 InvalidApiKey。
+配置来源：
+  - LLM_API_KEY / LLM_BASE_URL：对话模型专用（如 DeepSeek：
+    https://api.deepseek.com/v1 + deepseek-chat）
+  - 两者留空时回退到 DASHSCOPE_API_KEY / OPENAI_COMPATIBLE_BASE_URL（百炼）
 
-策略：优先走 ChatOpenAI（OpenAI 兼容模式），用户体验更稳定；若失败再回退
-ChatTongyi（百炼原生 SDK）。两种模式都会读取 settings.OPENAI_COMPATIBLE_BASE_URL /
-settings.DASHSCOPE_BASE_URL 作为 base_url。
+兼容策略：优先走 ChatOpenAI；若 endpoint 属于百炼（阿里云），再回退 ChatTongyi
+（百炼原生 SDK）。DeepSeek 等第三方 endpoint 不做 ChatTongyi 回退。
 """
 from __future__ import annotations
-from typing import Any
 
 from app.config import settings
 from app.core.logger import logger
 
 
-def _is_workspace_key(api_key: str) -> bool:
-    """判断是不是专属业务空间 Key（sk-ws- 开头），这类 Key 必须走 workspace 专属域名。"""
-    return isinstance(api_key, str) and api_key.startswith("sk-ws-")
+def _is_dashscope_endpoint(base_url: str) -> bool:
+    """判断 endpoint 是否属于阿里云百炼（DashScope）。"""
+    url = (base_url or "").lower()
+    return "dashscope" in url or "aliyuncs" in url
 
 
 def get_langchain_chat():
     """返回 LangChain 可用的 Chat Model。优先使用 OpenAI 兼容模式 ChatOpenAI。"""
-    api_key = settings.DASHSCOPE_API_KEY
+    api_key = settings.LLM_API_KEY or settings.DASHSCOPE_API_KEY
     if not api_key:
-        raise RuntimeError("未配置 DASHSCOPE_API_KEY，请在 backend/.env 中填写")
+        raise RuntimeError("未配置 LLM_API_KEY（或 DASHSCOPE_API_KEY），请在 backend/.env 中填写")
+
+    base_url = settings.LLM_BASE_URL or settings.OPENAI_COMPATIBLE_BASE_URL
 
     # 通用参数：两边都要
     # request_timeout：ChatOpenAI 与 ChatTongyi 均支持该字段名；
@@ -38,8 +39,7 @@ def get_langchain_chat():
         streaming=True,
     )
 
-    # 1) 优先：ChatOpenAI（OpenAI 兼容协议，业务空间 Key 必须走这里 + 自定义 base_url）
-    base_url = settings.OPENAI_COMPATIBLE_BASE_URL
+    # 1) 优先：ChatOpenAI（OpenAI 兼容协议）
     try:
         from langchain_openai import ChatOpenAI
         llm = ChatOpenAI(
@@ -49,16 +49,16 @@ def get_langchain_chat():
             **common,
         )
         logger.info(
-            f"[LLM] 使用 ChatOpenAI(DashScope兼容模式): model={settings.LLM_MODEL_NAME}"
+            f"[LLM] 使用 ChatOpenAI(OpenAI兼容): model={settings.LLM_MODEL_NAME}"
             f" base_url={base_url}"
-            + (" workspace专用Key" if _is_workspace_key(api_key) else "")
         )
         return llm
     except Exception as e:  # noqa
+        if not _is_dashscope_endpoint(base_url):
+            raise RuntimeError(f"无法初始化 LLM 客户端（ChatOpenAI 失败）: {e}")
         logger.warning(f"ChatOpenAI 初始化失败，尝试 ChatTongyi: {e}")
 
-    # 2) 兜底：ChatTongyi（百炼原生 langchain_community 适配器）
-    #    注意：ChatTongyi 主要支持公共 Key，业务空间 Key 很可能因 host 不匹配而失败
+    # 2) 兜底：ChatTongyi（仅百炼 endpoint；第三方 endpoint 在上一分支已抛错）
     try:
         from langchain_community.chat_models.tongyi import ChatTongyi
         llm = ChatTongyi(

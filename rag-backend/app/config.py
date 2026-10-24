@@ -80,16 +80,20 @@ class Settings(BaseSettings):
     # 数据库
     DATABASE_URL: str = "sqlite:///./data/sqlite/app.db"
 
-    # 通义千问
+    # 通义千问 DashScope（仅用于 Embedding：DeepSeek 不提供 Embedding API）
     DASHSCOPE_API_KEY: str = ""
     # 业务空间专属域名（阿里云百炼「专属业务空间」sk-ws- 开头的 Key 必须走下面自定义域名）
-    #   OPENAI_COMPATIBLE_BASE_URL：LangChain ChatOpenAI / ChatTongyi 兼容模式 endpoint
+    #   OPENAI_COMPATIBLE_BASE_URL：Embedding 的 OpenAI 兼容 endpoint（workspace Key）
     #   DASHSCOPE_BASE_URL：百炼原生 SDK / DashScopeEmbeddings endpoint（包含 /api/v1）
     #   DASHSCOPE_WORKSPACE_ID / DASHSCOPE_API_HOST：可选，排查问题时留痕
     OPENAI_COMPATIBLE_BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     DASHSCOPE_BASE_URL: str = "https://dashscope.aliyuncs.com/api/v1"
     DASHSCOPE_WORKSPACE_ID: str = ""
     DASHSCOPE_API_HOST: str = "dashscope.aliyuncs.com"
+    # 对话模型（LLM）Key / endpoint：留空则回退到 DASHSCOPE_API_KEY / OPENAI_COMPATIBLE_BASE_URL
+    # 配置 DeepSeek 时：LLM_API_KEY=sk-xxx，LLM_BASE_URL=https://api.deepseek.com/v1
+    LLM_API_KEY: str = ""
+    LLM_BASE_URL: str = ""
     LLM_MODEL_NAME: str = "qwen-plus"
     LLM_TEMPERATURE: float = 0.3
     # 输出上限：2048 会让模型生成冗长回答（生成时长直接随输出 token 增长）。
@@ -230,11 +234,16 @@ class Settings(BaseSettings):
         _validate_secret_key_strength(self.STELLAR_ADMIN_SECRET_KEY, source="Settings.STELLAR_ADMIN_SECRET_KEY")
         _validate_secret_key_strength(self.STELLAR_USER_SECRET_KEY, source="Settings.STELLAR_USER_SECRET_KEY")
         _validate_secret_key_strength(self.STELLAR_RAG_INTERNAL_SYNC_SECRET, source="Settings.STELLAR_RAG_INTERNAL_SYNC_SECRET")
-        if not self.DASHSCOPE_API_KEY:
-            from app.core.logger import logger as _logger
+        from app.core.logger import logger as _logger
+        if not (self.LLM_API_KEY or self.DASHSCOPE_API_KEY):
             _logger.warning(
-                "[Settings] DASHSCOPE_API_KEY 为空，RAG 大模型问答会失败。"
-                "请在 .env 或环境变量中配置 DASHSCOPE_API_KEY（阿里云百炼 API Key）。"
+                "[Settings] LLM_API_KEY / DASHSCOPE_API_KEY 均为空，RAG 大模型问答会失败。"
+                "请在 .env 或环境变量中配置 LLM_API_KEY（对话模型）或 DASHSCOPE_API_KEY。"
+            )
+        if not self.DASHSCOPE_API_KEY:
+            _logger.warning(
+                "[Settings] DASHSCOPE_API_KEY 为空，向量化（Embedding）会失败并降级到本地 BGE。"
+                "DeepSeek 不提供 Embedding API，需保留阿里云百炼 Key 用于 Embedding。"
             )
 
 

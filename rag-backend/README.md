@@ -122,7 +122,10 @@ pip install -r requirements.txt
 复制 `.env.example` 为 `.env`，重点配置：
 
 ```bash
-DASHSCOPE_API_KEY=sk-xxxx              # 通义千问 API Key
+LLM_API_KEY=sk-xxxx                    # 对话模型 Key（如 DeepSeek）
+LLM_BASE_URL=https://api.deepseek.com/v1
+LLM_MODEL_NAME=deepseek-chat
+DASHSCOPE_API_KEY=sk-xxxx              # 百炼 Key，仅用于 Embedding（DeepSeek 不提供）
 # 与 Mall Java 后端必须完全一致的密钥：
 STELLAR_ADMIN_SECRET_KEY=...           # 对应 Mall stellar.jwt.admin-secret-key
 STELLAR_USER_SECRET_KEY=...            # 对应 Mall stellar.jwt.user-secret-key
