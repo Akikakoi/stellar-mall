@@ -651,6 +651,13 @@ onMounted(() => { loadDetail(); loadReviews() })
   display: block;
   background: #ffffff;
 }
+/* 切到新图时从 1.02 轻轻落回原尺寸：多一点点“翻页”的实感，不是硬切 */
+.carousel-wrap :deep(.el-carousel__item.is-active) .carousel-img {
+  animation: carousel-img-settle 0.4s var(--ease-out);
+}
+@keyframes carousel-img-settle {
+  from { transform: scale(1.02); }
+}
 
 /* 放大按钮 */
 .zoom-trigger {
