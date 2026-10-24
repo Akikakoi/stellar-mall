@@ -201,7 +201,7 @@ html.theme-transitioning *,
 html.theme-transitioning *::before,
 html.theme-transitioning *::after {
   transition-duration: 350ms !important;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-timing-function: var(--ease-in-out) !important;
 }
 
 /* ===== 减少动态效果（系统级无障碍偏好）=====
@@ -432,6 +432,47 @@ body {
     box-shadow: var(--shadow-md);
   }
 }
+/* ===== 按压反馈（:active）=====
+   按下时轻微下沉：按钮 0.97，可点击卡片 0.98 并落回表面（不再保持 hover 抬升）。
+   160ms + 强 ease-out，松开时走元素自身的 transform 过渡回弹。
+   颜色类属性沿用全局 --transition-color，避免覆盖 body * 的颜色过渡。 */
+.el-button:not(.is-disabled):not(.is-link):not(.is-text) {
+  transition:
+    transform 160ms var(--ease-out),
+    background-color var(--transition-color),
+    color var(--transition-color),
+    border-color var(--transition-color),
+    box-shadow var(--transition-color);
+}
+.el-button:not(.is-disabled):not(.is-link):not(.is-text):active {
+  transform: scale(0.97);
+}
+
+.spu-card:active,
+.more-card:active,
+.coupon-entry-card:active,
+.coupon-card:active,
+.fav-card:active,
+.p-card:active,
+.action-item:active,
+.sidebar-item:active,
+.fav-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+/* ===== 自适应高度展开/收起（grid-template-rows 0fr↔1fr）=====
+   统一用于：SKU 服务说明、AI 引用来源、来源卡片正文。
+   时长取 200ms（原 250ms 收缩到 UI 预算内）。 */
+.expand-enter-active,
+.expand-leave-active {
+  transition: grid-template-rows 200ms var(--ease-out), opacity 200ms var(--ease-out);
+  overflow: hidden;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
 .skeleton {
   background: linear-gradient(90deg, var(--bg-hover) 25%, var(--bg-card) 50%, var(--bg-hover) 75%);
   background-size: 200% 100%;
@@ -523,14 +564,14 @@ body .dialog-fade-enter-active {
   animation: dialog-pure-fade-in 0.25s ease-out both;
 }
 body .dialog-fade-leave-active {
-  animation: dialog-pure-fade-out 0.2s ease-in both;
+  animation: dialog-pure-fade-out 0.2s var(--ease-out) both;
 }
 /* 弹窗内容容器跟随遮罩一起纯透明度淡入淡出（覆盖 element-plus 默认的位移+透明度动画） */
 body .dialog-fade-enter-active .el-overlay-dialog {
   animation: dialog-pure-fade-in 0.25s ease-out both;
 }
 body .dialog-fade-leave-active .el-overlay-dialog {
-  animation: dialog-pure-fade-out 0.2s ease-in both;
+  animation: dialog-pure-fade-out 0.2s var(--ease-out) both;
 }
 
 /* ===== 玻璃弹窗（.glass-dialog）：开启动画不透明度保持稳定，返回轻微缩放淡入。
@@ -538,16 +579,16 @@ body .dialog-fade-leave-active .el-overlay-dialog {
  * 的闪帧（尤其配合 destroy-on-close 每次重建 DOM）。因此玻璃面板不随遮罩一起做透明度动画，
  * 只保留视觉缩放入场感，磨砂由一开始即稳定生效。 */
 body .dialog-fade-enter-active .el-overlay.glass-overlay .el-overlay-dialog {
-  animation: glass-dialog-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: glass-dialog-in 0.25s var(--ease-out) both;
 }
 body .dialog-fade-enter-active .el-overlay.glass-overlay {
   animation: dialog-pure-fade-in 0.25s ease-out both;
 }
 body .dialog-fade-leave-active .el-overlay.glass-overlay .el-overlay-dialog {
-  animation: glass-dialog-out 0.2s ease-in both;
+  animation: glass-dialog-out 0.2s var(--ease-out) both;
 }
 body .dialog-fade-leave-active .el-overlay.glass-overlay {
-  animation: dialog-pure-fade-out 0.2s ease-in both;
+  animation: dialog-pure-fade-out 0.2s var(--ease-out) both;
 }
 @keyframes glass-dialog-in {
   from { opacity: 1; transform: scale(0.98) translateY(6px); }

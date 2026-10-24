@@ -123,7 +123,7 @@ onUnmounted(() => {
   border-radius: var(--radius-md);
   cursor: pointer;
   color: var(--text-secondary);
-  transition: background var(--transition-color), color var(--transition-color);
+  transition: background var(--transition-color), color var(--transition-color), transform 160ms var(--ease-out);
   min-width: 60px;
 }
 .sidebar-item:hover {

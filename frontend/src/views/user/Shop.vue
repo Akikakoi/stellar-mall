@@ -761,7 +761,7 @@ html.theme-dark .history-panel {
   font-size: 13px;
   color: var(--text-muted, #6e6e73);
   cursor: pointer;
-  transition: color 0.15s;
+  transition: color var(--transition-color);
 }
 .history-clear-all:hover {
   color: var(--brand-primary, #0071e3);
@@ -788,7 +788,7 @@ html.theme-dark .history-panel {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s, transform 0.15s;
+  transition: background var(--transition-color), color var(--transition-color), transform var(--transition-base);
 }
 .history-tag:hover {
   background: var(--history-tag-bg-hover);
@@ -812,7 +812,7 @@ html.theme-dark .history-panel {
   box-shadow:
     var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06)),
     inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 0.6));
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color var(--transition-color), box-shadow var(--transition-color);
   overflow: hidden;
 }
 .shop-search-pill:focus-within {
@@ -858,7 +858,7 @@ html.theme-dark .history-panel {
   background: var(--glass-hover, rgba(0, 0, 0, 0.05));
   color: var(--text-secondary, #888);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--transition-color), color var(--transition-color);
   padding: 0;
 }
 .search-clear-btn:hover {
@@ -880,7 +880,7 @@ html.theme-dark .history-panel {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s, opacity 0.2s;
+  transition: background var(--transition-color), opacity var(--transition-color);
 }
 .search-submit-btn:hover:not(:disabled) {
   background: var(--brand-primary-hover, #337ecc);
@@ -1057,7 +1057,9 @@ html.theme-dark .history-panel {
   font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background var(--transition-color), color var(--transition-color), transform var(--transition-base); line-height: 1; padding: 0;
 }
-.fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
+@media (hover: hover) {
+  .fav-btn:hover { background: rgba(0,0,0,0.55); transform: scale(1.15); }
+}
 .fav-btn.active { color: var(--status-danger); background: rgba(255,59,48,0.18); }
 .spu-info { padding: 18px 20px 22px; }
 .spu-name {
@@ -1114,14 +1116,14 @@ html.theme-dark .history-panel {
 .skeleton-box {
   background: linear-gradient(90deg, var(--bg-hover, #f0f0f0) 25%, var(--bg-card, #e8e8e8) 50%, var(--bg-hover, #f0f0f0) 75%);
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s infinite;
+  animation: skeleton-shimmer 1.5s linear infinite;
 }
 .skeleton-line {
   height: 14px;
   border-radius: 4px;
   background: linear-gradient(90deg, var(--bg-hover, #f0f0f0) 25%, var(--bg-card, #e8e8e8) 50%, var(--bg-hover, #f0f0f0) 75%);
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.5s infinite;
+  animation: skeleton-shimmer 1.5s linear infinite;
   margin-bottom: 10px;
 }
 .skeleton-line--long { width: 100%; height: 16px; }

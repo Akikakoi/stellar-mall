@@ -379,7 +379,9 @@ async function handleExport(type: any) {
   transition: background var(--transition-color), border-color var(--transition-color), transform var(--transition-base);
   border: 1px solid transparent;
 }
-.action-item:hover { background: var(--brand-primary-soft); border-color: var(--brand-primary-border); transform: var(--hover-lift); }
+@media (hover: hover) {
+  .action-item:hover { background: var(--brand-primary-soft); border-color: var(--brand-primary-border); transform: var(--hover-lift); }
+}
 .action-item span { color: var(--text-secondary); font-size: 13px; transition: color var(--transition-base); }
 .action-item:hover span { color: var(--brand-primary); }
 .action-item .el-icon { color: var(--text-secondary); transition: color var(--transition-base); }

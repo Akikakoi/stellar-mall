@@ -190,7 +190,7 @@ onMounted(async () => {
 .sidebar {
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-base);
-  transition: width var(--transition-base);
+  /* 折叠是结构性切换：宽度瞬切，避免 200ms 内反复重排右侧表格/图表 */
   overflow: hidden;
 }
 .brand {
