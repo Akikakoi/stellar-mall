@@ -131,8 +131,17 @@ async def lifespan(app: FastAPI):
         logger.warning(f"LLM Cache Redis 初始化跳过: {e}")
     # 把较重的向量化/样例加载放到后台线程，立即开放 HTTP 端口
     threading.Thread(target=_warmup_and_seed, daemon=True).start()
+    # 预热欢迎页提问示例池（真实商品 + LLM，后台执行）
+    warm_task = None
+    try:
+        from app.services.suggestion_service import start_warmup
+        warm_task = start_warmup()
+    except Exception as e:
+        logger.warning(f"提问示例池预热跳过: {e}")
     logger.info(f"🚀 {settings.APP_NAME} HTTP 服务已就绪: http://{settings.APP_HOST}:{settings.APP_PORT}")
     yield
+    if warm_task is not None:
+        warm_task.cancel()
     # 关闭 Redis
     try:
         from app.rag.llm_cache import close_redis
@@ -273,11 +282,12 @@ def create_app() -> FastAPI:
         return body
 
     # ---------- API 路由挂载 ----------
-    from app.api import auth, conversation, chat, knowledge_base, admin as admin_api, internal as internal_sync, embed, daily_report, chat_bi
+    from app.api import auth, conversation, chat, knowledge_base, admin as admin_api, internal as internal_sync, embed, daily_report, chat_bi, suggestions
     API_PREFIX = "/api"
     app.include_router(auth.router, prefix=API_PREFIX, tags=["认证授权"])
     app.include_router(conversation.router, prefix=API_PREFIX, tags=["会话管理"])
     app.include_router(chat.router, prefix=API_PREFIX, tags=["RAG 问答"])
+    app.include_router(suggestions.router, prefix=API_PREFIX, tags=["RAG 问答"])
     app.include_router(knowledge_base.router, prefix=API_PREFIX, tags=["知识库管理(管理员)"])
     app.include_router(admin_api.router, prefix=API_PREFIX, tags=["系统管理(管理员)"])
     app.include_router(internal_sync.router, prefix=f"{API_PREFIX}/internal", tags=["Mall 内部同步桥"])

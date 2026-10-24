@@ -75,6 +75,24 @@ export function apiFeedbackMessage(convId: number, msgId: number, feedback: stri
   })
 }
 
+// =========================== 欢迎页提问示例 ===========================
+
+/** 动态提问示例：基于真实商品库生成，每次请求随机抽样 */
+export interface SuggestionResult {
+  items: string[]
+  source: 'llm' | 'template' | 'static' | string
+  generated_at?: number
+}
+
+/** 获取 AI 欢迎页的提问示例 */
+export function apiSuggestions(limit = 8): Promise<RagResponse<SuggestionResult>> {
+  return ragRequest({
+    url: '/ragapi/api/suggestions',
+    method: 'get',
+    params: { limit }
+  })
+}
+
 // =========================== 知识库 ===========================
 
 /** 分页查询知识库文档列表 */
