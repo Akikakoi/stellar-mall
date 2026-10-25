@@ -72,10 +72,7 @@
         </div>
         <div class="card-preview">
           <div class="preview-mini">
-            <div v-if="item.type === 'BANNER'" class="preview-banner">
-              <span>轮播图区</span>
-            </div>
-            <div v-else-if="item.type === 'SINGLE_IMAGE' && parsedConfig(item).imageUrl" class="preview-image">
+            <div v-if="item.type === 'SINGLE_IMAGE' && parsedConfig(item).imageUrl" class="preview-image">
               <img :src="parsedConfig(item).imageUrl" alt="" />
             </div>
             <div v-else class="preview-products">
@@ -444,7 +441,6 @@ async function saveOrbit() {
 
 // ========== 模块类型定义 ==========
 const MODULE_TYPES = [
-  { value: 'BANNER',           label: '轮播图',      icon: '🎠' },
   { value: 'HOT_PRODUCTS',     label: '热门推荐',    icon: '🔥' },
   { value: 'NEW_PRODUCTS',     label: '新品上市',    icon: '✨' },
   { value: 'CATEGORY_SHOWCASE',label: '分类展示',    icon: '📂' },
@@ -457,7 +453,7 @@ const TYPE_MAP = Object.fromEntries(MODULE_TYPES.map((t: any) => [t.value, t]))
 function typeLabel(type: any) { return TYPE_MAP[type]?.label || type }
 function typeIcon(type: any) { return TYPE_MAP[type]?.icon || '📦' }
 function typeTagColor(type: any) {
-  const colors: Record<string, any> = { BANNER: 'danger', HOT_PRODUCTS: 'warning', NEW_PRODUCTS: 'success', CATEGORY_SHOWCASE: '', COUPON_ENTRY: 'primary', PRODUCT_GRID: 'warning', SINGLE_IMAGE: 'info' }
+  const colors: Record<string, any> = { HOT_PRODUCTS: 'warning', NEW_PRODUCTS: 'success', CATEGORY_SHOWCASE: '', COUPON_ENTRY: 'primary', PRODUCT_GRID: 'warning', SINGLE_IMAGE: 'info' }
   return colors[type] || ''
 }
 
@@ -489,7 +485,6 @@ const form = reactive<any>({
 })
 
 const titlePlaceholder: Record<string, any> = {
-  BANNER: '如：首页轮播',
   HOT_PRODUCTS: '如：热门推荐',
   NEW_PRODUCTS: '如：新品上市',
   CATEGORY_SHOWCASE: '如：手机数码',
@@ -928,18 +923,6 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-.preview-banner {
-  width: 100%;
-  height: 48px;
-  background: linear-gradient(135deg, var(--brand-primary-soft), var(--brand-primary-border));
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--brand-primary);
-  font-size: 13px;
-  font-weight: 500;
 }
 .preview-image {
   width: 100%;

@@ -70,20 +70,8 @@
     <div ref="contentRef" class="home-content">
       <template v-if="!filterMode">
         <template v-for="mod in modules" :key="mod.id">
-          <!-- 轮播图 -->
-          <div v-if="mod.type === 'BANNER' && banners.length > 0" class="banner-wrap">
-            <el-carousel :interval="4000" height="320px" indicator-position="outside">
-              <el-carousel-item v-for="b in banners" :key="b.id">
-                <a :href="b.linkUrl || 'javascript:;'" :target="b.linkUrl ? '_blank' : '_self'">
-                  <img :src="b.imageUrl" :alt="b.title" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
-                  <div class="banner-caption">{{ b.title }}</div>
-                </a>
-              </el-carousel-item>
-            </el-carousel>
-          </div>
-
           <!-- 分类展示：滚动到视口附近再加载对应分类商品 -->
-          <template v-else-if="mod.type === 'CATEGORY_SHOWCASE'">
+          <template v-if="mod.type === 'CATEGORY_SHOWCASE'">
             <section
               v-if="mod._loading || !mod._loaded || mod._products.length > 0"
               :data-product-lazy="`module-${mod.id}`"
