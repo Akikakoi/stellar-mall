@@ -1,20 +1,24 @@
 <template>
   <div class="home-page">
     <!-- Hero 区域 -->
-    <section class="hero">
-      <!-- 环绕轨道：圆形旋转环，矩形卡片底边始终朝向圆心；图片在框内保持直立 -->
+    <section ref="heroRef" class="hero" :class="{ 'hero-idle': heroIdle }">
+      <!-- 环绕轨道：圆形旋转环，矩形卡片底边始终朝向圆心；图片在框内保持直立。
+           槽位始终占位（未取到商品/图片未解码时显示骨架卡），环与标题同一拍出现，
+           数据到达后只替换卡片内容，环的角度不重排、不重播入场。 -->
       <div class="hero-orbit" :class="{ paused: orbitPaused }">
         <div class="orbit-ring">
           <div
-            v-for="(p, i) in orbitProducts"
-            :key="p.id"
+            v-for="(p, i) in orbitSlots"
+            :key="i"
             class="orbit-slot"
             :style="{
-              '--slot': `${(i * 360) / orbitProducts.length}deg`
+              '--slot': `${(i * 360) / orbitSlots.length}deg`
             }"
           >
             <a
+              v-if="p"
               class="orbit-card"
+              :class="{ 'is-loading': !orbitImageLoaded.has(p.id) }"
               :href="`/spu/${p.id}`"
               target="_blank"
               rel="noopener"
@@ -25,9 +29,16 @@
               @blur="orbitPaused = false"
             >
               <span class="orbit-photo">
-                <img :src="p.mainImage || __PH" :alt="p.name" v-placeholder />
+                <img
+                  :src="ossThumb(p.mainImage) || __PH"
+                  :alt="p.name"
+                  decoding="async"
+                  v-placeholder
+                  @load="markOrbitImageLoaded(p.id)"
+                />
               </span>
             </a>
+            <span v-else class="orbit-card orbit-card--skeleton" aria-hidden="true"></span>
           </div>
         </div>
       </div>
@@ -90,14 +101,14 @@
               </div>
               <div class="cat-grid" v-loading="mod._loading">
                 <div v-if="mod._products[0]" class="cat-banner" :style="{ gridRow: mod._products.length > 5 ? '1 / 3' : '1 / 2' }" @click="goDetail(mod._products[0].id)">
-                  <img :src="mod._products[0].mainImage || __PH" :alt="mod._products[0].name" loading="lazy" v-placeholder />
+                  <img :src="ossThumb(mod._products[0].mainImage, 480) || __PH" :alt="mod._products[0].name" loading="lazy" v-placeholder />
                   <div class="banner-text">
                     <h3>{{ mod._products[0].name }}</h3>
                     <p>¥{{ Number(mod._products[0].minPrice || 0).toFixed(2) }} 起</p>
                   </div>
                 </div>
                 <div v-for="p in mod._products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
-                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" v-placeholder />
+                  <img :src="ossThumb(p.mainImage, 480) || __PH" :alt="p.name" loading="lazy" v-placeholder />
                   <div class="p-name">{{ p.name }}</div>
                   <div class="p-desc">已售 {{ p.saleCount || 0 }} · 评论 {{ p.commentCount || 0 }}</div>
                   <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
@@ -128,7 +139,7 @@
               <div class="spu-grid" v-loading="mod._loading">
                 <div v-for="spu in mod._products" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
                   <div class="spu-image">
-                    <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" v-placeholder />
+                    <img :src="ossThumb(spu.mainImage, 640) || __PH" :alt="spu.name" loading="lazy" v-placeholder />
                     <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)">{{ favSet.has(spu.id) ? '♥' : '♡' }}</button>
                   </div>
                   <div class="spu-info">
@@ -199,11 +210,11 @@
               </div>
               <div class="cat-grid" v-loading="sec.loading">
                 <div v-if="sec.products[0]" class="cat-banner" :style="{ gridRow: sec.products.length > 5 ? '1 / 3' : '1 / 2' }" @click="goDetail(sec.products[0].id)">
-                  <img :src="sec.products[0].mainImage || __PH" :alt="sec.products[0].name" loading="lazy" v-placeholder />
+                  <img :src="ossThumb(sec.products[0].mainImage, 480) || __PH" :alt="sec.products[0].name" loading="lazy" v-placeholder />
                   <div class="banner-text"><h3>{{ sec.products[0].name }}</h3><p>¥{{ Number(sec.products[0].minPrice || 0).toFixed(2) }} 起</p></div>
                 </div>
                 <div v-for="p in sec.products.slice(1, 8)" :key="p.id" class="p-card" @click="goDetail(p.id)">
-                  <img :src="p.mainImage || __PH" :alt="p.name" loading="lazy" v-placeholder />
+                  <img :src="ossThumb(p.mainImage, 480) || __PH" :alt="p.name" loading="lazy" v-placeholder />
                   <div class="p-name">{{ p.name }}</div><div class="p-desc">已售 {{ p.saleCount || 0 }} · 评论 {{ p.commentCount || 0 }}</div>
                   <div class="p-price"><span class="cur">¥{{ Number(p.minPrice || 0).toFixed(2) }}</span></div>
                 </div>
@@ -221,7 +232,7 @@
       <div v-if="filterMode" class="spu-grid container main-content" v-loading="loading" v-infinite-scroll="loadMore" :infinite-scroll-disabled="!hasMore || loading || loadingMore" :infinite-scroll-distance="120" :infinite-scroll-immediate="false">
         <div v-for="spu in spus" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
           <div class="spu-image">
-            <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy" v-placeholder />
+            <img :src="ossThumb(spu.mainImage, 640) || __PH" :alt="spu.name" loading="lazy" v-placeholder />
             <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)">{{ favSet.has(spu.id) ? '♥' : '♡' }}</button>
           </div>
           <div class="spu-info">
@@ -256,15 +267,29 @@
   </div>
 </template>
 
+<script lang="ts">
+/**
+ * 首屏环绕商品的会话级缓存。
+ * 必须放在普通 <script>（模块作用域）：<script setup> 的顶层变量跟随组件实例，
+ * 路由离开再回到首页会重新初始化，缓存就失效了。
+ * TTL 只保留 60s：快速前进/后退时复用同一批卡片，避免闪烁；正常逛一会再回来
+ * 会重新抽取（配合 orbitRecent 的近期去重，尽量看到不同商品）。
+ */
+const ORBIT_CACHE_TTL = 60 * 1000
+let orbitCache: { products: any[]; at: number } | null = null
+</script>
+
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
-import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart, getSiteOrbit, getRandomSpus } from '@/api/mall'
+import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart, getSiteOrbit, getRandomSpus, getOrbitSpus } from '@/api/mall'
 import { userRequest } from '@/api/request'
 import { track } from '@/utils/tracker'
+import { ossThumb } from '@/utils/imgThumb'
+import { loadOrbitRecent, rememberOrbitRecent } from '@/utils/orbitRecent'
 import { ElMessage } from 'element-plus'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 
@@ -287,10 +312,56 @@ const showCursor = ref(true)
 const fullSubtitle = '精选好物，品质生活'
 let typewriterTimer: any = null
 
+/** 每屏环绕展示的商品数量（与参考站一致，8 张） */
+const ORBIT_DISPLAY_COUNT = 8
+
 /** Hero 环绕轨道商品（管理端配置候选池；未配置时每次刷新从整个商品库随机抽取） */
 const orbitProducts = ref<any[]>([])
 /** 悬停/聚焦商品卡时暂停整圈公转，避免只剩单卡停转而打乱队形 */
 const orbitPaused = ref(false)
+/** 首轮取数是否已结束：结束且无商品时撤掉骨架环，避免空环一直转 */
+const orbitSettled = ref(false)
+/** 已加载完成的商品主图 id：未完成前卡片保持骨架底，避免图未到先露白 */
+const orbitImageLoaded = reactive(new Set<number>())
+
+/**
+ * 环绕槽位：数据未就绪时用 null 占位，保证环的结构首帧就成立；
+ * 数据到达后槽位数量与角度一次性确定，图片再逐张淡入。
+ */
+const orbitSlots = computed<(any | null)[]>(() => {
+  if (orbitProducts.value.length > 0) return orbitProducts.value
+  return orbitSettled.value ? [] : new Array(ORBIT_DISPLAY_COUNT).fill(null)
+})
+
+function markOrbitImageLoaded(id: number) {
+  if (id != null) orbitImageLoaded.add(id)
+}
+
+// ========== 持续旋转的暂停策略 ==========
+/** 页面切到后台（其他标签/窗口）时暂停 */
+const pageHidden = ref(typeof document !== 'undefined' ? document.hidden : false)
+/** Hero 是否还在视口内：滚到下面商品区后暂停旋转，省电省 GPU */
+const heroInView = ref(true)
+const heroRef = ref<HTMLElement | null>(null)
+/** 空闲暂停：后台标签页 / 首屏已滚出视口时，环、卡片高光、右侧分类条一并停转 */
+const heroIdle = computed(() => pageHidden.value || !heroInView.value)
+let heroVisibilityHandler: (() => void) | null = null
+let heroObserver: IntersectionObserver | null = null
+
+/**
+ * 注册「离开可见区域就停转」的监听。
+ * 路由切到其他页面时组件会卸载，动画本身会随之消失；这里额外覆盖
+ * 「切到其他浏览器标签/窗口」和「在首页向下滚出首屏」两种不可见场景。
+ */
+function setupHeroIdleWatchers() {
+  heroVisibilityHandler = () => { pageHidden.value = document.hidden }
+  document.addEventListener('visibilitychange', heroVisibilityHandler)
+  if (typeof IntersectionObserver === 'undefined' || !heroRef.value) return
+  heroObserver = new IntersectionObserver((entries) => {
+    heroInView.value = entries.some((entry) => entry.isIntersecting)
+  }, { threshold: 0 })
+  heroObserver.observe(heroRef.value)
+}
 
 /**
  * 启动 Hero 区域打字机动画效果，逐字显示副标题文本
@@ -613,30 +684,44 @@ function refreshLazyProductSections() {
 }
 
 // ========== 首屏环绕商品 ==========
-/** 每屏环绕展示的商品数量（与参考站一致，8 张） */
-const ORBIT_DISPLAY_COUNT = 8
-
 /**
- * 加载首屏环绕商品：
- * 1. 管理端配置了候选池 → 拉取候选商品详情；
- * 2. 未配置或候选全部失效 → 调用随机接口从整个商品库抽取；
- * 3. 接口异常 → 回退首页已加载商品。
- * 最终每次刷新从候选池中随机取 ORBIT_DISPLAY_COUNT 个（不足则全部展示）。
+ * 加载首屏环绕商品（独立启动，不阻塞首屏其它请求）：
+ * 1. 优先请求后端合并接口 /user/spu/orbit（候选池 + 随机兜底一次算完，轻量字段）；
+ * 2. 旧后端没有该接口时回退：读候选池配置 → 拉候选详情 / 调用随机接口；
+ * 3. 接口全部异常 → 回退首页已加载商品。
+ * 数据一到就挂卡（槽位已由骨架占住），单张图片由卡片自己加载淡入；
+ * 不再等全部图片 decode 后整圈一次性出现，避免始终比标题慢一拍。
  */
 async function loadOrbitProducts() {
+  // 同一会话内（如从商品详情返回首页）直接复用上次结果：图片走浏览器缓存，基本瞬间出图
+  if (orbitCache && Date.now() - orbitCache.at < ORBIT_CACHE_TTL) {
+    orbitImageLoaded.clear()
+    orbitProducts.value = orbitCache.products
+    orbitSettled.value = true
+    return
+  }
   let pool: any[] = []
+  // 优先走后端合并接口：一次 RTT 拿到最终卡片数据（弱网下省掉 2~9 次串行请求）；
+  // 同时把最近展示过的商品 id 传给后端，让它优先从没出现过的商品里抽
   try {
-    const cfg: any = await getSiteOrbit()
-    const ids: number[] = Array.isArray(cfg?.spuIds) ? cfg.spuIds : []
-    if (ids.length > 0) {
-      const results = await Promise.allSettled(
-        ids.map((id: number) => userRequest({ url: `/user/spu/${id}`, method: 'get', __silent: true }))
-      )
-      pool = results
-        .filter((r: any) => r.status === 'fulfilled' && r.value)
-        .map((r: any) => r.value)
-    }
+    const list = await getOrbitSpus(ORBIT_DISPLAY_COUNT, loadOrbitRecent())
+    pool = Array.isArray(list) ? list : []
   } catch (e: any) {}
+  // 回退：旧后端未部署 /user/spu/orbit（接口 404）或请求异常时，仍走旧的两步流程
+  if (pool.length === 0) {
+    try {
+      const cfg: any = await getSiteOrbit()
+      const ids: number[] = Array.isArray(cfg?.spuIds) ? cfg.spuIds : []
+      if (ids.length > 0) {
+        const results = await Promise.allSettled(
+          ids.map((id: number) => userRequest({ url: `/user/spu/${id}`, method: 'get', __silent: true }))
+        )
+        pool = results
+          .filter((r: any) => r.status === 'fulfilled' && r.value)
+          .map((r: any) => r.value)
+      }
+    } catch (e: any) {}
+  }
   if (pool.length === 0) {
     try {
       const list = await getRandomSpus(ORBIT_DISPLAY_COUNT)
@@ -645,43 +730,17 @@ async function loadOrbitProducts() {
   }
   if (pool.length === 0) pool = pickDefaultOrbitProducts()
   const chosen = shuffle(pool).slice(0, ORBIT_DISPLAY_COUNT)
+  orbitSettled.value = true
   if (chosen.length === 0) {
+    // 全部兜底失败：撤掉骨架环，别让空环一直转
     orbitProducts.value = []
     return
   }
-  // 图片全部预加载并解码后再挂载卡片，避免旋转过程中出现空白卡
-  const loaded = await Promise.all(chosen.map((p: any) => preloadOrbitImage(p.mainImage || __PH)))
-  orbitProducts.value = chosen.filter((_: any, i: number) => loaded[i])
-}
-
-/**
- * 预加载并解码图片：成功返回 true；失败或超时返回 false，
- * 避免单张慢图长时间拖住整圈渲染。
- */
-function preloadOrbitImage(url: string, timeout = 3000): Promise<boolean> {
-  if (!url) return Promise.resolve(false)
-  return new Promise((resolve) => {
-    const image = new Image()
-    let settled = false
-    let timer: ReturnType<typeof setTimeout> | undefined
-    const finish = (ok: boolean) => {
-      if (settled) return
-      settled = true
-      if (timer) clearTimeout(timer)
-      resolve(ok)
-    }
-    timer = setTimeout(() => finish(false), timeout)
-    image.onload = () => {
-      // decode 完成后再挂载，避免首帧解码闪白
-      if (typeof image.decode === 'function') {
-        image.decode().then(() => finish(true)).catch(() => finish(true))
-      } else {
-        finish(true)
-      }
-    }
-    image.onerror = () => finish(false)
-    image.src = url
-  })
+  orbitImageLoaded.clear()
+  orbitProducts.value = chosen
+  // 记录本轮展示，下一次抽取时排除，保证连续刷新尽量不重样
+  rememberOrbitRecent(chosen.map((p: any) => p.id).filter(Boolean))
+  orbitCache = { products: chosen, at: Date.now() }
 }
 
 /**
@@ -897,23 +956,28 @@ function confirmAddToCart() {
 }
 
 // ========== 生命周期 ==========
-onMounted(async () => {
+onMounted(() => {
   startTypewriter()
-  await loadBanners()
-  await loadCategory()
-  await loadModules()
-  // 商品模块改为滚动到视口附近再加载，避免首屏一次性请求所有分类
-  refreshLazyProductSections()
-  // 轨道图片预加载不阻塞个人信息/购物车等首屏后续请求
-  loadOrbitProducts()
+  setupHeroIdleWatchers()
+  // 首屏各请求互不阻塞：环绕轨道立即启动（骨架环同帧已渲染），Banner / 分类 / 模块并行加载
+  void loadBanners()
+  void loadOrbitProducts()
+  // 模块与分类都就绪后再注册滚动懒加载：回退分区依赖分类树，模块列表依赖接口返回
+  void Promise.all([loadCategory(), loadModules()]).finally(() => refreshLazyProductSections())
   if (userStore.token && !userStore.nickname) {
-    try { await userStore.fetchProfile() } catch (e: any) {}
+    void userStore.fetchProfile().catch(() => {})
   }
-  try { await cartStore.load() } catch (e: any) {}
+  void cartStore.load().catch(() => {})
 })
 
 onUnmounted(() => {
   clearInterval(typewriterTimer)
+  if (heroVisibilityHandler) {
+    document.removeEventListener('visibilitychange', heroVisibilityHandler)
+    heroVisibilityHandler = null
+  }
+  heroObserver?.disconnect()
+  heroObserver = null
   lazyProductObserver?.disconnect()
   lazyProductObserver = null
   lazyProductTargets.clear()
@@ -928,18 +992,18 @@ onUnmounted(() => {
 
 .hero {
   /* 环绕轨道参数：卡片基准尺寸 / 圆形半径 / 一圈时长 / 圆角 */
-  --orbit-card-w: 132px;
-  --orbit-card-h: 150px;
-  --orbit-radius: 260px;
+  --orbit-card-w: 140px;
+  --orbit-card-h: 160px;
+  --orbit-radius: 264px;
   --orbit-duration: 32s;
   --orbit-corner: 32px;
   position: relative;
   background: transparent;
   text-align: center;
-  min-height: 700px;
+  min-height: 720px;
   /* 首屏只展示 Hero：撑满导航下方整个视口，让商品模块从折叠线以下开始 */
-  min-height: max(700px, calc(100vh - 64px));
-  min-height: max(700px, calc(100dvh - 64px));
+  min-height: max(720px, calc(100vh - 64px));
+  min-height: max(720px, calc(100dvh - 64px));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -992,7 +1056,8 @@ onUnmounted(() => {
   margin-left: calc(var(--orbit-card-w) / -2);
   margin-top: calc(var(--orbit-card-h) / -2);
   transform: rotate(var(--slot)) translateY(calc(var(--orbit-radius) * -1));
-  animation: orbit-slot-in 0.4s var(--ease-out) backwards;
+  /* 与标题同拍：首帧即渲染骨架环，入场节奏和 .hero-title 的 0.5s 对齐 */
+  animation: orbit-slot-in 0.5s var(--ease-out) backwards;
 }
 .orbit-card {
   position: relative;
@@ -1007,6 +1072,22 @@ onUnmounted(() => {
   pointer-events: auto;
   text-decoration: none;
   color: inherit;
+}
+/* 骨架卡：商品数据/主图未就绪时先占住槽位，环与标题同时出现，不再等接口和图片。
+   材质沿用全站玻璃体系；shimmer 属恒定运动，用 linear（与 .skeleton 一致）。 */
+.orbit-card--skeleton,
+.orbit-card.is-loading {
+  background: linear-gradient(100deg, var(--glass-bg) 25%, var(--bg-hover) 50%, var(--glass-bg) 75%);
+  background-size: 200% 100%;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10), inset 0 1px 0 var(--glass-highlight);
+  animation: orbit-card-shimmer 1.6s linear infinite;
+}
+.orbit-card--skeleton {
+  pointer-events: none;
+}
+@keyframes orbit-card-shimmer {
+  to { background-position: -200% 0; }
 }
 .orbit-card:focus-visible {
   outline: 2px solid var(--brand-primary);
@@ -1028,6 +1109,12 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* 图片解码完成后逐张淡入：未就绪时露出卡片骨架底，单张慢图不再拖住整圈 */
+  opacity: 0;
+  transition: opacity 0.32s var(--ease-out);
+}
+.orbit-card:not(.is-loading) .orbit-photo img {
+  opacity: 1;
 }
 @keyframes orbit-spin {
   to { transform: rotate(360deg); }
@@ -1042,6 +1129,16 @@ onUnmounted(() => {
 /* 悬停/聚焦任意卡片：环与图片的反向动画同步暂停；移出后继续 */
 .hero-orbit.paused .orbit-ring,
 .hero-orbit.paused .orbit-photo {
+  animation-play-state: paused;
+}
+
+/* 页面切到后台 / 首屏滚出视口时暂停所有持续动画（公转、图片反向转、骨架高光、分类条滚动），
+   避免不可见时仍占用 CPU/GPU；路由切到其他页面时组件会卸载，动画自然停止。 */
+.hero.hero-idle .orbit-ring,
+.hero.hero-idle .orbit-photo,
+.hero.hero-idle .orbit-card--skeleton,
+.hero.hero-idle .orbit-card.is-loading,
+.hero.hero-idle .ticker-track {
   animation-play-state: paused;
 }
 
@@ -1127,9 +1224,9 @@ onUnmounted(() => {
 }
 
 .hero-title {
-  font-family: MiSans, "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
+  font-family: "Smiley Sans Oblique", MiSans, "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
   font-size: clamp(40px, 4.5vw, 64px);
-  font-weight: 650;
+  font-weight: 400;
   margin: 0 0 16px;
   line-height: 1.1;
 }
@@ -1162,7 +1259,7 @@ onUnmounted(() => {
 }
 
 /* Banner */
-.banner, .banner-wrap { background: var(--bg-surface); }
+.banner { background: var(--bg-surface); }
 .banner-caption {
   position: absolute; bottom: 0; left: 0; right: 0;
   padding: 16px 24px;

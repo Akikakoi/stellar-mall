@@ -162,6 +162,23 @@
         LIMIT #{count}
     </select>
 
+    <!-- 首页首屏环绕商品：随机抽取时排除最近展示过的商品 id，减少连续刷新重复 -->
+    <select id="listRandomExcluding" resultMap="SpuMap">
+        SELECT s.*,
+               c1.name AS category_name
+        FROM stellar_spu s
+             LEFT JOIN stellar_category c1 ON c1.id = s.category_id
+        WHERE s.status = 1
+          AND s.main_image IS NOT NULL
+          AND s.main_image != ''
+          AND s.id NOT IN
+        <foreach collection="excludeIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY RAND()
+        LIMIT #{count}
+    </select>
+
     <!-- =========================== count + page =========================== -->
     <!-- 公共查询条件：名称模糊 / 分类 / 状态 / 新品 / 热卖 / 价格区间 -->
     <sql id="spuWhere">

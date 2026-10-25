@@ -32,6 +32,12 @@ public interface SpuMapper {
     /** 随机抽取上架且有主图的 SPU（首页首屏环绕商品用）。 */
     List<Spu> listRandom(@Param("count") int count);
 
+    /**
+     * 随机抽取上架且有主图的 SPU，并排除指定 id（首页环绕商品「近期不重复」用）。
+     * 调用前需保证 excludeIds 非空（空集合会生成非法 SQL）。
+     */
+    List<Spu> listRandomExcluding(@Param("count") int count, @Param("excludeIds") List<Long> excludeIds);
+
     /** 仅用于上下架状态 + 时间戳动态更新。 */
     @AutoFill(OperationType.UPDATE)
     int updateStatusAndTime(Spu spu);

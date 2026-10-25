@@ -13,7 +13,9 @@ import com.stellar.mapper.SkuMapper;
 import com.stellar.mapper.SpuMapper;
 import com.stellar.ragsync.service.RagSyncService;
 import com.stellar.result.PageResult;
+import com.stellar.service.SiteConfigService;
 import com.stellar.service.SpuService;
+import com.stellar.vo.OrbitSpuVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -26,8 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * SPU（标准产品单元）服务实现类。
@@ -42,10 +47,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SpuServiceImpl implements SpuService {
 
+    /** 前端最近展示列表最多排除的商品数（防止超长 IN 列表拖慢随机 SQL） */
+    private static final int MAX_ORBIT_EXCLUDE = 100;
+
     private final SpuMapper spuMapper;
     private final SkuMapper skuMapper;
     private final RagSyncService ragSyncService;
     private final ApplicationEventPublisher eventPublisher;
+    private final SiteConfigService siteConfigService;
 
     // ================= 保存 =================
 
@@ -171,6 +180,114 @@ public class SpuServiceImpl implements SpuService {
         int n = Math.max(1, Math.min(count, 20));
         List<Spu> list = spuMapper.listRandom(n);
         return list == null ? new ArrayList<>() : list;
+    }
+
+    /**
+     * 首页首屏环绕商品：管理端候选池优先，未配置或候选全部失效时随机兜底。
+     * <p>
+     * 合并「读候选池配置 + 拉候选详情 / 随机抽取」为一次调用，并且只返回
+     * id/name/mainImage 三个卡片字段，避免首屏为 8 张卡片发起 2~9 个请求、
+     * 或把 SPU 描述/SKU 列表整包下发。
+     * </p>
+     * <p>
+     * 近期去重：{@code excludeIds} 为前端记录的最近展示过的商品，优先从没出现过的商品里抽；
+     * 候选不足时放宽排除补足，保证环上卡片数量不缩水。
+     * </p>
+     *
+     * @param count      展示数量，内部限制在 1~20
+     * @param excludeIds 最近展示过的商品 id（可为空）
+     * @return 轻量卡片数据（候选池有效商品不足时按实际数量返回）
+     */
+    @Override
+    public List<OrbitSpuVO> listOrbit(int count, List<Long> excludeIds) {
+        int limit = Math.max(1, Math.min(count, 20));
+        List<Long> exclude = sanitizeExcludeIds(excludeIds);
+
+        // 1) 管理端候选池优先：池内优先换新，不够再用池内「近期展示过」的商品补足
+        List<Spu> pool = readConfiguredCandidates(exclude);
+        // 2) 未配置候选池 / 候选全部失效：从全库随机，先排除最近展示过的
+        if (pool.isEmpty()) {
+            pool = pickRandomCandidates(limit, exclude);
+        }
+
+        List<OrbitSpuVO> result = new ArrayList<>(Math.min(limit, pool.size()));
+        for (Spu spu : pool) {
+            if (result.size() >= limit) break;
+            result.add(OrbitSpuVO.builder()
+                    .id(spu.getId())
+                    .name(spu.getName())
+                    .mainImage(spu.getMainImage())
+                    .build());
+        }
+        return result;
+    }
+
+    /**
+     * 排除列表清洗：过滤空值/非正数、去重、限制最大数量，避免超长 IN 列表。
+     */
+    private List<Long> sanitizeExcludeIds(List<Long> excludeIds) {
+        if (excludeIds == null || excludeIds.isEmpty()) return List.of();
+        return excludeIds.stream()
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .limit(MAX_ORBIT_EXCLUDE)
+                .toList();
+    }
+
+    /**
+     * 读管理端候选池并过滤下架/无主图商品；池内最近展示过的商品排到后面，
+     * 保证候选池足够大时每次优先看到新商品。
+     */
+    private List<Spu> readConfiguredCandidates(List<Long> exclude) {
+        List<Long> candidateIds = siteConfigService.getHomeOrbitSpuIds();
+        if (candidateIds == null || candidateIds.isEmpty()) return new ArrayList<>();
+        List<Spu> configured = spuMapper.listByIds(candidateIds);
+        if (configured == null) return new ArrayList<>();
+
+        Set<Long> excludeSet = new HashSet<>(exclude);
+        List<Spu> fresh = new ArrayList<>();
+        List<Spu> recent = new ArrayList<>();
+        for (Spu spu : configured) {
+            // 候选池可能包含已下架/无主图的商品，过滤后再随机，保证每张卡都能出图
+            if (spu == null || !Integer.valueOf(1).equals(spu.getStatus())) continue;
+            if (spu.getMainImage() == null || spu.getMainImage().isBlank()) continue;
+            (excludeSet.contains(spu.getId()) ? recent : fresh).add(spu);
+        }
+        Collections.shuffle(fresh);
+        Collections.shuffle(recent);
+        fresh.addAll(recent);
+        return fresh;
+    }
+
+    /**
+     * 全库随机抽取：先排除最近展示过的商品；排除后候选不足时放宽条件补足，
+     * 避免商品库较小或历史过多时环上卡片变少。
+     */
+    private List<Spu> pickRandomCandidates(int limit, List<Long> exclude) {
+        List<Spu> picked = new ArrayList<>();
+        Set<Long> seen = new HashSet<>();
+        List<Spu> firstBatch = exclude.isEmpty()
+                ? spuMapper.listRandom(limit)
+                : spuMapper.listRandomExcluding(limit, exclude);
+        addUnique(picked, seen, firstBatch, limit);
+
+        for (int attempt = 0; picked.size() < limit && attempt < 3; attempt++) {
+            int ask = Math.max(limit - picked.size(), 1) * (attempt + 2);
+            List<Spu> extra = spuMapper.listRandom(ask);
+            if (extra == null || extra.isEmpty()) break;
+            addUnique(picked, seen, extra, limit);
+        }
+        return picked;
+    }
+
+    /** 按 id 去重地把 source 追加到 target，直到达到 limit。 */
+    private void addUnique(List<Spu> target, Set<Long> seen, List<Spu> source, int limit) {
+        if (source == null) return;
+        for (Spu spu : source) {
+            if (target.size() >= limit) return;
+            if (spu == null || spu.getId() == null) continue;
+            if (seen.add(spu.getId())) target.add(spu);
+        }
     }
 
     /**

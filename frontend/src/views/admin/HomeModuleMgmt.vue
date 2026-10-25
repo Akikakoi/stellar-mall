@@ -21,14 +21,14 @@
           <el-button @click="openOrbit">管理商品</el-button>
         </div>
       </div>
-      <p class="panel-desc">设置首页 Hero 环绕轨道的候选商品，前台每次刷新从中随机抽取 8 个展示；卡片图片、名称与点击链接均跟随商品。留空则从整个商品库随机抽取。</p>
+      <p class="panel-desc">设置首页 Hero 环绕轨道的候选商品，前台每次刷新从中随机抽取 8 个展示（会尽量避开最近展示过的商品）；卡片图片、名称与点击链接均跟随商品。留空则从整个商品库随机抽取。</p>
       <div v-if="orbitProducts.length > 0" class="orbit-preview">
         <div v-for="p in orbitProducts" :key="p.id" class="orbit-preview-item">
           <img :src="p.mainImage || __PH" :alt="p.name" v-placeholder />
           <span class="orbit-preview-name">{{ p.name }}</span>
         </div>
       </div>
-      <div v-else class="orbit-empty">未配置，前台每次刷新会从整个商品库随机抽取 8 个商品</div>
+      <div v-else class="orbit-empty">未配置，前台每次刷新会从整个商品库随机抽取 8 个商品（尽量避开最近展示过的）</div>
     </div>
 
     <!-- 模块列表 -->
@@ -155,7 +155,7 @@
         </el-option>
       </el-select>
       <p class="orbit-tip">
-        已选 {{ orbitFormIds.length }}/20。前台每次刷新会从中随机抽取 8 个展示；保存后刷新商城主页即可看到。
+        已选 {{ orbitFormIds.length }}/20。前台每次刷新会从中随机抽取 8 个展示（会尽量避开最近展示过的商品）；保存后刷新商城主页即可看到。
         清空后保存 = 从整个商品库随机抽取。
       </p>
       <template #footer>

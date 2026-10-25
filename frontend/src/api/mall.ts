@@ -165,6 +165,28 @@ export function getRandomSpus(count = 6): Promise<Spu[]> {
   } as any)
 }
 
+/** 首页首屏环绕商品（后端轻量 VO）：只含卡片需要的字段 */
+export type OrbitSpu = Pick<Spu, 'id' | 'name' | 'mainImage'>
+
+/**
+ * 首页首屏环绕商品：后端合并「候选池 + 随机兜底」，一次请求返回最终卡片数据。
+ * 匿名放行；__silent 静默失败——旧后端没有该接口时前端自动回退到
+ * 配置接口 + 随机接口的旧流程（见 Home.vue loadOrbitProducts）。
+ *
+ * @param count 展示数量
+ * @param excludeIds 最近展示过的商品 id（后端优先从没出现过的商品里抽）
+ */
+export function getOrbitSpus(count = 8, excludeIds: number[] = []): Promise<OrbitSpu[]> {
+  const params: Record<string, unknown> = { count }
+  if (excludeIds.length > 0) params.exclude = excludeIds.join(',')
+  return userRequest({
+    url: '/user/spu/orbit',
+    method: 'get',
+    params,
+    __silent: true
+  } as any)
+}
+
 /** 搜索建议(输入框自动补全) */
 export function suggestSpu(prefix: string): Promise<SearchSuggest> {
   return userRequest({
