@@ -2,6 +2,35 @@
   <div class="home-page">
     <!-- Hero 区域 -->
     <section class="hero">
+      <!-- 环绕轨道：圆形旋转环，矩形卡片底边始终朝向圆心；图片在框内保持直立 -->
+      <div class="hero-orbit" :class="{ paused: orbitPaused }">
+        <div class="orbit-ring">
+          <div
+            v-for="(p, i) in orbitProducts"
+            :key="p.id"
+            class="orbit-slot"
+            :style="{
+              '--slot': `${(i * 360) / orbitProducts.length}deg`
+            }"
+          >
+            <a
+              class="orbit-card"
+              :href="`/spu/${p.id}`"
+              target="_blank"
+              rel="noopener"
+              :aria-label="`查看商品：${p.name}`"
+              @mouseenter="orbitPaused = true"
+              @mouseleave="orbitPaused = false"
+              @focus="orbitPaused = true"
+              @blur="orbitPaused = false"
+            >
+              <span class="orbit-photo">
+                <img :src="p.mainImage || __PH" :alt="p.name" v-placeholder />
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
       <div class="container hero-inner">
         <h1 class="hero-title">星耀商城</h1>
         <p class="hero-subtitle">
@@ -10,10 +39,35 @@
         </p>
         <el-button type="primary" size="large" class="hero-cta" @click="scrollToContent">立即选购</el-button>
       </div>
+
+      <!-- 右侧竖向分类滚动条：两段相同内容循环上移，点击进入对应分类商品页 -->
+      <nav v-if="tickerCategories.length > 0" class="hero-ticker" aria-label="商品分类快捷入口">
+        <div class="ticker-track">
+          <div class="ticker-group">
+            <button
+              v-for="cat in tickerCategories"
+              :key="cat.id"
+              type="button"
+              class="ticker-tag"
+              @click="openShopSearch({ categoryId: cat.id })"
+            >{{ cat.name }}</button>
+          </div>
+          <div class="ticker-group" aria-hidden="true">
+            <button
+              v-for="cat in tickerCategories"
+              :key="`${cat.id}-dup`"
+              type="button"
+              class="ticker-tag"
+              tabindex="-1"
+              @click="openShopSearch({ categoryId: cat.id })"
+            >{{ cat.name }}</button>
+          </div>
+        </div>
+      </nav>
     </section>
 
     <!-- 动态模块区域 -->
-    <div ref="contentRef">
+    <div ref="contentRef" class="home-content">
       <template v-if="!filterMode">
         <template v-for="mod in modules" :key="mod.id">
           <!-- 轮播图 -->
@@ -28,9 +82,14 @@
             </el-carousel>
           </div>
 
-          <!-- 分类展示 -->
+          <!-- 分类展示：滚动到视口附近再加载对应分类商品 -->
           <template v-else-if="mod.type === 'CATEGORY_SHOWCASE'">
-            <section v-if="mod._products.length > 0 || mod._loading" class="container main-content cat-section">
+            <section
+              v-if="mod._loading || !mod._loaded || mod._products.length > 0"
+              :data-product-lazy="`module-${mod.id}`"
+              class="container main-content cat-section"
+              :class="{ 'product-pending': !mod._loaded }"
+            >
               <div class="cat-header">
                 <div class="cat-title">{{ mod.title || getCatName(mod) }}</div>
                 <div class="cat-side">
@@ -66,9 +125,14 @@
             </section>
           </template>
 
-          <!-- 热门推荐 / 新品上市 / 精选商品 -->
+          <!-- 热门推荐 / 新品上市 / 精选商品：同样按滚动位置懒加载 -->
           <template v-else-if="mod.type === 'HOT_PRODUCTS' || mod.type === 'NEW_PRODUCTS' || mod.type === 'PRODUCT_GRID'">
-            <section v-if="mod._products.length > 0 || mod._loading" class="container main-content product-section">
+            <section
+              v-if="mod._loading || !mod._loaded || mod._products.length > 0"
+              :data-product-lazy="`module-${mod.id}`"
+              class="container main-content product-section"
+              :class="{ 'product-pending': !mod._loaded }"
+            >
               <div class="cat-header">
                 <div class="cat-title">{{ mod.title }}</div>
                 <a class="view-more" @click="openShopSearch()">查看更多 <svg class="arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
@@ -127,7 +191,14 @@
           </div>
 
           <main class="container main-content">
-            <section v-for="sec in sections" :key="sec.id" class="cat-section" v-show="sec.loading || sec.products.length > 0">
+            <section
+              v-for="sec in sections"
+              :key="sec.id"
+              v-show="sec.loading || !sec.loaded || sec.products.length > 0"
+              :data-product-lazy="`section-${sec.id}`"
+              class="cat-section"
+              :class="{ 'product-pending': !sec.loaded }"
+            >
               <div class="cat-header">
                 <div class="cat-title">{{ sec.name }}</div>
                 <div class="cat-side">
@@ -153,7 +224,7 @@
                 </div>
               </div>
             </section>
-            <el-empty v-if="!sectionsLoading && sections.every((s: any) => s.products.length === 0)" class="glass-empty" description="暂无商品" />
+            <el-empty v-if="sections.every((s: any) => s.loaded && s.products.length === 0)" class="glass-empty" description="暂无商品" />
           </main>
         </template>
       </template>
@@ -198,12 +269,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
-import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
+import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart, getSiteOrbit, getRandomSpus } from '@/api/mall'
 import { userRequest } from '@/api/request'
 import { track } from '@/utils/tracker'
 import { ElMessage } from 'element-plus'
@@ -227,6 +298,11 @@ const subtitleText = ref('')
 const showCursor = ref(true)
 const fullSubtitle = '精选好物，品质生活'
 let typewriterTimer: any = null
+
+/** Hero 环绕轨道商品（管理端配置候选池；未配置时每次刷新从整个商品库随机抽取） */
+const orbitProducts = ref<any[]>([])
+/** 悬停/聚焦商品卡时暂停整圈公转，避免只剩单卡停转而打乱队形 */
+const orbitPaused = ref(false)
 
 /**
  * 启动 Hero 区域打字机动画效果，逐字显示副标题文本
@@ -319,6 +395,7 @@ async function loadModules() {
         _products: [],
         _total: 0,
         _loading: false,
+        _loaded: false,
         _activeSub: defaultSub,
         _activeSubLabel: ''
       }
@@ -404,6 +481,9 @@ async function loadModuleProducts(mod: any) {
     mod._products = []
   } finally {
     mod._loading = false
+    mod._loaded = true
+    void syncFavoriteState(mod._products)
+    reportProductExposure(mod)
   }
 }
 
@@ -449,28 +529,210 @@ function viewMoreModule(mod: any) {
 }
 
 /**
- * 并发加载所有模块的商品数据，并批量检查收藏状态
+ * 批量检查当前加载商品的收藏状态
  */
-async function loadAllModuleProducts() {
-  await Promise.all(modules.value.map((m: any) => loadModuleProducts(m)))
-  // 批量检查收藏
-  const allIds = modules.value.flatMap((m: any) => m._products.map((p: any) => p.id))
-  if (allIds.length > 0 && userStore.token) {
+async function syncFavoriteState(products: any[]) {
+  const ids = (products || []).map((p: any) => p?.id).filter(Boolean)
+  if (ids.length === 0 || !userStore.token) return
+  try {
+    const res = await batchCheckFavorites(ids)
+    if (Array.isArray(res)) res.forEach((id: any) => favSet.add(id))
+  } catch (e: any) {}
+}
+
+/**
+ * 商品模块加载完成后的曝光埋点
+ */
+function reportProductExposure(mod: any) {
+  const ids = Array.from(new Set((mod._products || []).map((p: any) => p?.id).filter(Boolean)))
+  if (ids.length > 0) {
+    track('view_item_list', {
+      scene: 'home',
+      extra: { moduleType: mod.type, spuIds: ids.slice(0, 50) }
+    })
+  }
+}
+
+// ========== 商品模块滚动懒加载 ==========
+let lazyProductObserver: IntersectionObserver | null = null
+const lazyProductTargets = new Map<string, Element>()
+
+/**
+ * 执行某个商品区块的首次加载；重复进入视口或切换子分类不受影响
+ */
+async function runLazyProductSection(key: string) {
+  if (key.startsWith('module-')) {
+    const mod = modules.value.find((m: any) => `module-${m.id}` === key)
+    if (!mod || mod._loaded || mod._loading) return
+    await loadModuleProducts(mod)
+    return
+  }
+  if (key.startsWith('section-')) {
+    const sec = sections.value.find((s: any) => `section-${s.id}` === key)
+    if (!sec || sec.loaded || sec.loading) return
+    await loadSectionProducts(sec)
+  }
+}
+
+/**
+ * 监听商品区块进入视口附近，再请求对应分类/模块商品。
+ * rootMargin 预留 180px，让用户滚动到标题附近时数据已经开始加载。
+ */
+function ensureLazyProductObserver() {
+  if (lazyProductObserver || typeof IntersectionObserver === 'undefined') return
+  lazyProductObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      const key = entry.target.getAttribute('data-product-lazy')
+      lazyProductObserver?.unobserve(entry.target)
+      if (key) void runLazyProductSection(key)
+    })
+  }, { rootMargin: '180px 0px', threshold: 0.05 })
+}
+
+/**
+ * 扫描当前商品区块并注册滚动监听；DOM 变化后可重复调用
+ */
+function refreshLazyProductSections() {
+  void nextTick(() => {
+    const nodes = Array.from(document.querySelectorAll('[data-product-lazy]'))
+    if (typeof IntersectionObserver === 'undefined') {
+      nodes.forEach((el) => {
+        const key = el.getAttribute('data-product-lazy')
+        if (key) void runLazyProductSection(key)
+      })
+      return
+    }
+    ensureLazyProductObserver()
+    const activeKeys = new Set<string>()
+    nodes.forEach((el) => {
+      const key = el.getAttribute('data-product-lazy')
+      if (!key || !lazyProductObserver) return
+      activeKeys.add(key)
+      const previous = lazyProductTargets.get(key)
+      if (previous !== el) {
+        if (previous) lazyProductObserver.unobserve(previous)
+        lazyProductTargets.set(key, el)
+        lazyProductObserver.observe(el)
+      }
+    })
+    lazyProductTargets.forEach((el, key) => {
+      if (activeKeys.has(key) || !lazyProductObserver) return
+      lazyProductObserver.unobserve(el)
+      lazyProductTargets.delete(key)
+    })
+  })
+}
+
+// ========== 首屏环绕商品 ==========
+/** 每屏环绕展示的商品数量（与参考站一致，8 张） */
+const ORBIT_DISPLAY_COUNT = 8
+
+/**
+ * 加载首屏环绕商品：
+ * 1. 管理端配置了候选池 → 拉取候选商品详情；
+ * 2. 未配置或候选全部失效 → 调用随机接口从整个商品库抽取；
+ * 3. 接口异常 → 回退首页已加载商品。
+ * 最终每次刷新从候选池中随机取 ORBIT_DISPLAY_COUNT 个（不足则全部展示）。
+ */
+async function loadOrbitProducts() {
+  let pool: any[] = []
+  try {
+    const cfg: any = await getSiteOrbit()
+    const ids: number[] = Array.isArray(cfg?.spuIds) ? cfg.spuIds : []
+    if (ids.length > 0) {
+      const results = await Promise.allSettled(
+        ids.map((id: number) => userRequest({ url: `/user/spu/${id}`, method: 'get', __silent: true }))
+      )
+      pool = results
+        .filter((r: any) => r.status === 'fulfilled' && r.value)
+        .map((r: any) => r.value)
+    }
+  } catch (e: any) {}
+  if (pool.length === 0) {
     try {
-      const res = await batchCheckFavorites(allIds)
-      if (Array.isArray(res)) res.forEach((id: any) => favSet.add(id))
+      const list = await getRandomSpus(ORBIT_DISPLAY_COUNT)
+      pool = Array.isArray(list) ? list : []
     } catch (e: any) {}
   }
-  // 埋点：首页曝光（去重后上报，extra 带 spuIds 供后续商品热度分析）
-  const uniqueIds = Array.from(new Set(allIds))
-  if (uniqueIds.length) {
-    track('view_item_list', { scene: 'home', extra: { spuIds: uniqueIds.slice(0, 50) } })
+  if (pool.length === 0) pool = pickDefaultOrbitProducts()
+  const chosen = shuffle(pool).slice(0, ORBIT_DISPLAY_COUNT)
+  if (chosen.length === 0) {
+    orbitProducts.value = []
+    return
   }
+  // 图片全部预加载并解码后再挂载卡片，避免旋转过程中出现空白卡
+  const loaded = await Promise.all(chosen.map((p: any) => preloadOrbitImage(p.mainImage || __PH)))
+  orbitProducts.value = chosen.filter((_: any, i: number) => loaded[i])
+}
+
+/**
+ * 预加载并解码图片：成功返回 true；失败或超时返回 false，
+ * 避免单张慢图长时间拖住整圈渲染。
+ */
+function preloadOrbitImage(url: string, timeout = 3000): Promise<boolean> {
+  if (!url) return Promise.resolve(false)
+  return new Promise((resolve) => {
+    const image = new Image()
+    let settled = false
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const finish = (ok: boolean) => {
+      if (settled) return
+      settled = true
+      if (timer) clearTimeout(timer)
+      resolve(ok)
+    }
+    timer = setTimeout(() => finish(false), timeout)
+    image.onload = () => {
+      // decode 完成后再挂载，避免首帧解码闪白
+      if (typeof image.decode === 'function') {
+        image.decode().then(() => finish(true)).catch(() => finish(true))
+      } else {
+        finish(true)
+      }
+    }
+    image.onerror = () => finish(false)
+    image.src = url
+  })
+}
+
+/**
+ * 随机打乱数组（Fisher-Yates），保证每次刷新抽到不同商品。
+ */
+function shuffle<T>(list: T[]): T[] {
+  const arr = [...list]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const tmp = arr[i]!
+    arr[i] = arr[j]!
+    arr[j] = tmp
+  }
+  return arr
+}
+
+/**
+ * 接口全部失败时的兜底：从首页已加载商品中取有主图的商品。
+ */
+function pickDefaultOrbitProducts() {
+  const pools = [
+    ...modules.value.flatMap((m: any) => m._products || []),
+    ...sections.value.flatMap((s: any) => s.products || [])
+  ]
+  const seen = new Set<number>()
+  const picked: any[] = []
+  for (const p of pools) {
+    if (p?.id && p?.mainImage && !seen.has(p.id)) {
+      seen.add(p.id)
+      picked.push(p)
+    }
+  }
+  return picked
 }
 
 // ========== 回退：分类分区 ==========
 const sections = ref<any[]>([])
-const sectionsLoading = ref(false)
+/** 右侧竖排滚动条内容：取顶部一级分类 */
+const tickerCategories = computed(() => sections.value.map((s: any) => ({ id: s.id, name: s.name })))
 
 /**
  * 根据分类树构建回退分区列表，每个分类对应一个展示区域
@@ -480,7 +742,7 @@ function buildSections(tree: any) {
   sections.value = (tree || []).map((c: any) => ({
     id: c.id, name: c.name,
     subs: Array.isArray(c.children) ? c.children : [],
-    activeSubId: null, products: [], total: 0, loading: false
+    activeSubId: null, products: [], total: 0, loading: false, loaded: false
   }))
   sections.value.sort((a: any, b: any) => a.name === '智能手机' ? -1 : b.name === '智能手机' ? 1 : 0)
 }
@@ -496,15 +758,10 @@ async function loadSectionProducts(sec: any) {
     const res = await listSpu(params)
     sec.products = res?.records || (res as any)?.list || (Array.isArray(res) ? res : [])
     sec.total = res?.total || sec.products.length
-  } catch (e: any) { sec.products = [] } finally { sec.loading = false }
-}
-
-/**
- * 并发加载所有分类分区的商品数据
- */
-async function loadAllSections() {
-  sectionsLoading.value = true
-  try { await Promise.all(sections.value.map((s: any) => loadSectionProducts(s))) } finally { sectionsLoading.value = false }
+  } catch (e: any) { sec.products = [] } finally {
+    sec.loading = false
+    sec.loaded = true
+  }
 }
 
 /**
@@ -657,13 +914,10 @@ onMounted(async () => {
   await loadBanners()
   await loadCategory()
   await loadModules()
-
-  if (modules.value.length > 0) {
-    await loadAllModuleProducts()
-  } else {
-    await loadAllSections()
-  }
-
+  // 商品模块改为滚动到视口附近再加载，避免首屏一次性请求所有分类
+  refreshLazyProductSections()
+  // 轨道图片预加载不阻塞个人信息/购物车等首屏后续请求
+  loadOrbitProducts()
   if (userStore.token && !userStore.nickname) {
     try { await userStore.fetchProfile() } catch (e: any) {}
   }
@@ -672,6 +926,9 @@ onMounted(async () => {
 
 onUnmounted(() => {
   clearInterval(typewriterTimer)
+  lazyProductObserver?.disconnect()
+  lazyProductObserver = null
+  lazyProductTargets.clear()
 })
 </script>
 
@@ -682,18 +939,212 @@ onUnmounted(() => {
 .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 
 .hero {
+  /* 环绕轨道参数：卡片基准尺寸 / 圆形半径 / 一圈时长 / 圆角 */
+  --orbit-card-w: 132px;
+  --orbit-card-h: 150px;
+  --orbit-radius: 260px;
+  --orbit-duration: 32s;
+  --orbit-corner: 32px;
+  position: relative;
   background: transparent;
   text-align: center;
-  padding: var(--space-3xl) 20px;
+  min-height: 700px;
+  /* 首屏只展示 Hero：撑满导航下方整个视口，让商品模块从折叠线以下开始 */
+  min-height: max(700px, calc(100vh - 64px));
+  min-height: max(700px, calc(100dvh - 64px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 40px 0;
 }
 .hero-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 48px;
+  z-index: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding-top: 16px;
-  height: 204px;
+  align-items: flex-start;
+  text-align: left;
+  /* 文案层横跨整个容器，透明区域需放行指针，避免挡住下方旋转卡片 */
+  pointer-events: none;
 }
-.hero-title { margin: 0 0 18px; line-height: 1.2; }
+.hero-inner .hero-cta { pointer-events: auto; }
+
+/* 圆形旋转环：每个槽位先旋转角度、再沿半径外推，使矩形底边始终朝向圆心。
+   外层环整体旋转，框内图片反向旋转抵消环+槽位角度，保持直立；
+   减少动态效果时两个动画一起停在基准状态。 */
+.hero-orbit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.orbit-ring {
+  position: relative;
+  width: calc(var(--orbit-radius) * 2);
+  height: calc(var(--orbit-radius) * 2);
+  flex: none;
+  animation: orbit-spin var(--orbit-duration) linear infinite;
+}
+.orbit-slot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--orbit-card-w);
+  height: var(--orbit-card-h);
+  margin-left: calc(var(--orbit-card-w) / -2);
+  margin-top: calc(var(--orbit-card-h) / -2);
+  transform: rotate(var(--slot)) translateY(calc(var(--orbit-radius) * -1));
+  animation: orbit-slot-in 0.4s var(--ease-out) backwards;
+}
+.orbit-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--orbit-corner);
+  /* 图片未就绪/加载失败时的兜底底色，避免露出透明空洞 */
+  background: var(--bg-hover);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+  overflow: hidden;
+  pointer-events: auto;
+  text-decoration: none;
+  color: inherit;
+}
+.orbit-card:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 4px;
+}
+/* 图片放大到 145% 并反向旋转：卡片框转动时，照片内容保持直立且不露底 */
+.orbit-photo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 145%;
+  height: 145%;
+  margin-left: -72.5%;
+  margin-top: -72.5%;
+  animation: orbit-photo-counter var(--orbit-duration) linear infinite;
+}
+.orbit-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-slot-in {
+  from { opacity: 0; }
+}
+@keyframes orbit-photo-counter {
+  from { transform: rotate(calc(var(--slot) * -1)); }
+  to { transform: rotate(calc(var(--slot) * -1 - 360deg)); }
+}
+/* 悬停/聚焦任意卡片：环与图片的反向动画同步暂停；移出后继续 */
+.hero-orbit.paused .orbit-ring,
+.hero-orbit.paused .orbit-photo {
+  animation-play-state: paused;
+}
+
+/* 右侧竖向分类滚动条：两段相同标签循环上移，上下渐隐 */
+.hero-ticker {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  /* 外框随最宽分类自适应，不再强制所有格子同宽 */
+  width: max-content;
+  min-width: 80px;
+  max-width: calc(100vw - 48px);
+  height: 224px;
+  transform: translateY(-50%);
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: auto;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  animation: ticker-fade-in 0.4s var(--ease-out) backwards;
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  flex-direction: column;
+  align-items: flex-end;
+  animation: ticker-scroll 26s linear infinite;
+}
+.ticker-group {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.ticker-tag {
+  display: block;
+  /* 每个分类格子按文字实际长度收缩/展开 */
+  width: fit-content;
+  min-width: 64px;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  font-family: MiSans, "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--text-primary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  transition: color var(--transition-color), background var(--transition-color), border-color var(--transition-color), transform 160ms var(--ease-out);
+}
+@media (hover: hover) {
+  .ticker-tag:hover {
+    color: var(--brand-primary);
+    border-color: var(--brand-primary-border);
+    background: var(--bg-card);
+    transform: translateX(-3px);
+  }
+}
+/* 悬停/键盘聚焦时暂停滚动，方便点击 */
+.hero-ticker:hover .ticker-track,
+.hero-ticker:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+@keyframes ticker-scroll {
+  to { transform: translateY(-50%); }
+}
+@keyframes ticker-fade-in {
+  from { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track { animation: none; }
+  .hero-ticker { overflow-y: auto; }
+}
+
+.hero-title {
+  font-family: MiSans, "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
+  font-size: clamp(40px, 4.5vw, 64px);
+  font-weight: 650;
+  margin: 0 0 16px;
+  line-height: 1.1;
+}
 .hero-subtitle {
   font-size: 21px;
   color: var(--text-secondary);
@@ -806,7 +1257,7 @@ onUnmounted(() => {
   display: flex; flex-direction: column; align-items: center;
   padding: 22px 16px 18px; cursor: pointer;
   transition: transform var(--transition-base), box-shadow var(--transition-color); overflow: hidden;
-  animation: card-rise 0.32s var(--ease-out) backwards;
+  animation: card-rise 0.48s var(--ease-out) backwards;
 }
 @media (hover: hover) {
   .p-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); }
@@ -853,7 +1304,7 @@ onUnmounted(() => {
   backdrop-filter: var(--backdrop-blur);
   -webkit-backdrop-filter: var(--backdrop-blur);
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
-  animation: card-rise 0.32s var(--ease-out) backwards;
+  animation: card-rise 0.48s var(--ease-out) backwards;
 }
 .spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
 .spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s var(--ease-out); }
@@ -880,9 +1331,17 @@ onUnmounted(() => {
 .spu-price { color: var(--text-primary); font-size: 18px; font-weight: 700; }
 .add-cart-btn { border-radius: 8px; }
 
-/* 商品卡错峰入场：每张比前一张晚 30ms，最多 8 张参与，后面的直接显示 */
+/* 商品卡从下向上浮现：数据滚动加载完成后逐张入场 */
 @keyframes card-rise {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(28px); }
+}
+.product-pending .cat-grid,
+.product-pending .spu-grid { min-height: 260px; }
+.cat-banner {
+  animation: card-rise 0.52s var(--ease-out) backwards;
+}
+.more-card {
+  animation: card-rise 0.48s var(--ease-out) 240ms backwards;
 }
 .cat-grid .p-card:nth-child(2) { animation-delay: 0ms; }
 .cat-grid .p-card:nth-child(3) { animation-delay: 30ms; }
@@ -903,6 +1362,8 @@ onUnmounted(() => {
   .hero-title,
   .hero-subtitle,
   .hero-cta,
+  .cat-banner,
+  .more-card,
   .p-card,
   .spu-card { animation-delay: 0ms !important; }
 }
@@ -933,5 +1394,19 @@ onUnmounted(() => {
 @media (max-width: 1000px) {
   .cat-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: none; }
   .cat-banner { grid-row: auto; min-height: 220px; }
+}
+
+/* 文案与按钮归入左下文案块后，窄屏轨道会与文案重叠，提前隐藏 */
+@media (max-width: 1160px) {
+  .hero-orbit { display: none; }
+}
+@media (max-width: 860px) {
+  .hero {
+    min-height: max(520px, calc(100vh - 64px));
+    min-height: max(520px, calc(100dvh - 64px));
+    padding: var(--space-3xl) 0;
+  }
+  .hero-inner { bottom: 32px; }
+  .hero-ticker { display: none; }
 }
 </style>
