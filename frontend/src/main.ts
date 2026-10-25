@@ -31,6 +31,7 @@ import router from './router'
 import { placeholder } from './utils/imgPlaceholder'
 import './assets/main.scss'
 import './assets/misans-display.css'
+import './assets/smiley-display.css'
 
 const SVG_NO_IMAGE =
   'data:image/svg+xml;utf8,' +
