@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-sidebar">
+  <div class="floating-sidebar" :class="{ 'is-hidden': !showSidebar }">
     <div class="sidebar-inner">
       <div v-for="item in items" :key="item.key" class="sidebar-item" @click="item.action">
         <el-badge :value="item.badge" :hidden="!item.badge" :max="99">
@@ -19,8 +19,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   ShoppingCartFull,
   Star,
@@ -31,12 +31,38 @@ import {
 import { useCartStore } from '@/stores/cart'
 
 const router = useRouter()
+const route = useRoute()
 const cartStore = useCartStore()
 
 const cartCount = computed(() =>
   cartStore.totalCount > 0 && !cartStore.badgeSeen ? cartStore.totalCount : 0
 )
 const showBackTop = ref(false)
+
+/** 首页顶部（Hero 区域）先隐藏快捷栏，等商品模块进入视口后再出现 */
+const isHome = computed(() => route.path === '/')
+const showHomeSidebar = ref(false)
+const showSidebar = computed(() => !isHome.value || showHomeSidebar.value)
+let syncTimer: number | undefined
+
+function updateHomeSidebar() {
+  if (!isHome.value) {
+    showHomeSidebar.value = true
+    return
+  }
+  const content = document.querySelector('.home-content') as HTMLElement | null
+  if (!content) {
+    showHomeSidebar.value = false
+    return
+  }
+  // 商品模块进入视口下 1/4 后，快捷栏再淡入
+  showHomeSidebar.value = content.getBoundingClientRect().top <= window.innerHeight * 0.25
+}
+
+function scheduleSync() {
+  if (syncTimer) clearTimeout(syncTimer)
+  syncTimer = window.setTimeout(updateHomeSidebar, 300)
+}
 
 const items = computed(() => [
   {
@@ -80,14 +106,27 @@ function scrollToTop() {
 
 function onScroll() {
   showBackTop.value = window.scrollY > 400
+  updateHomeSidebar()
 }
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onScroll, { passive: true })
+  onScroll()
+  // 路由懒加载的 Home 可能晚于本组件挂载，延迟补一次同步
+  scheduleSync()
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
+  window.removeEventListener('resize', onScroll)
+  if (syncTimer) clearTimeout(syncTimer)
+})
+
+watch(() => route.path, () => {
+  showHomeSidebar.value = false
+  onScroll()
+  scheduleSync()
 })
 </script>
 
@@ -98,6 +137,13 @@ onUnmounted(() => {
   top: 50%;
   transform: translateY(-50%);
   z-index: 200;
+  transition: opacity 0.24s var(--ease-out), transform 0.24s var(--ease-out), visibility 0.24s;
+}
+.floating-sidebar.is-hidden {
+  opacity: 0;
+  transform: translate(18px, -50%);
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .sidebar-inner {

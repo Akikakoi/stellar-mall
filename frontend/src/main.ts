@@ -30,6 +30,7 @@ import App from './App.vue'
 import router from './router'
 import { placeholder } from './utils/imgPlaceholder'
 import './assets/main.scss'
+import './assets/misans-display.css'
 
 const SVG_NO_IMAGE =
   'data:image/svg+xml;utf8,' +
