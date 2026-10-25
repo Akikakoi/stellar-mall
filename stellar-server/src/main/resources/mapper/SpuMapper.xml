@@ -149,6 +149,19 @@
         </foreach>
     </select>
 
+    <!-- 首页首屏环绕商品：从上架且有主图的商品中随机抽取（数量由 Service 层限制） -->
+    <select id="listRandom" resultMap="SpuMap">
+        SELECT s.*,
+               c1.name AS category_name
+        FROM stellar_spu s
+             LEFT JOIN stellar_category c1 ON c1.id = s.category_id
+        WHERE s.status = 1
+          AND s.main_image IS NOT NULL
+          AND s.main_image != ''
+        ORDER BY RAND()
+        LIMIT #{count}
+    </select>
+
     <!-- =========================== count + page =========================== -->
     <!-- 公共查询条件：名称模糊 / 分类 / 状态 / 新品 / 热卖 / 价格区间 -->
     <sql id="spuWhere">

@@ -12,6 +12,25 @@
       <p class="panel-desc">拖拽模块调整排序，首页按此顺序从上到下展示。配置完成后即时生效。</p>
     </div>
 
+    <!-- 首屏环绕商品：独立于模块排序，控制 Hero 环绕轨道的商品候选池 -->
+    <div class="panel orbit-panel">
+      <div class="panel-head">
+        <span class="panel-title">首屏环绕商品池</span>
+        <div class="panel-actions">
+          <span class="orbit-count">已选 {{ orbitSavedIds.length }}/20</span>
+          <el-button @click="openOrbit">管理商品</el-button>
+        </div>
+      </div>
+      <p class="panel-desc">设置首页 Hero 环绕轨道的候选商品，前台每次刷新从中随机抽取 8 个展示；卡片图片、名称与点击链接均跟随商品。留空则从整个商品库随机抽取。</p>
+      <div v-if="orbitProducts.length > 0" class="orbit-preview">
+        <div v-for="p in orbitProducts" :key="p.id" class="orbit-preview-item">
+          <img :src="p.mainImage || __PH" :alt="p.name" v-placeholder />
+          <span class="orbit-preview-name">{{ p.name }}</span>
+        </div>
+      </div>
+      <div v-else class="orbit-empty">未配置，前台每次刷新会从整个商品库随机抽取 8 个商品</div>
+    </div>
+
     <!-- 模块列表 -->
     <div class="module-list" v-loading="loading">
       <el-empty v-if="!loading && list.length === 0" description="暂无模块，点击上方按钮新增" />
@@ -104,6 +123,49 @@
           <el-button type="primary" :loading="bgSaving" @click="bgSave">保存</el-button>
         </div>
       </div>
+    </el-dialog>
+
+    <!-- 首屏环绕商品池管理弹窗 -->
+    <el-dialog
+      v-model="orbitVisible"
+      title="首屏环绕商品池"
+      width="680px"
+      destroy-on-close
+    >
+      <el-select
+        v-model="orbitFormIds"
+        multiple
+        filterable
+        remote
+        reserve-keyword
+        collapse-tags
+        collapse-tags-tooltip
+        :remote-method="searchOrbitSpu"
+        :loading="orbitSearchLoading"
+        :multiple-limit="20"
+        placeholder="搜索并选择商品（最多 20 个，前台每次随机展示 8 个）"
+        style="width: 100%"
+        @focus="searchOrbitSpu('')"
+      >
+        <el-option
+          v-for="s in orbitOptions"
+          :key="s.id"
+          :label="s.name"
+          :value="s.id"
+        >
+          <span>{{ s.name }}</span>
+          <span class="orbit-option-id">#{{ s.id }}</span>
+        </el-option>
+      </el-select>
+      <p class="orbit-tip">
+        已选 {{ orbitFormIds.length }}/20。前台每次刷新会从中随机抽取 8 个展示；保存后刷新商城主页即可看到。
+        清空后保存 = 从整个商品库随机抽取。
+      </p>
+      <template #footer>
+        <el-button :disabled="orbitFormIds.length === 0" @click="orbitFormIds = []">清空</el-button>
+        <el-button @click="orbitVisible = false">取消</el-button>
+        <el-button type="primary" :loading="orbitSaving" @click="saveOrbit">保存</el-button>
+      </template>
     </el-dialog>
 
     <!-- 新增/编辑弹窗 -->
@@ -232,7 +294,12 @@
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest, userRequest } from '@/api/request'
-import { getSiteBgConfig, saveSiteBgConfig, uploadImages } from '@/api/admin'
+import {
+  getSiteBgConfig, saveSiteBgConfig, uploadImages,
+  getSiteOrbitConfig, saveSiteOrbitConfig, getAdminSpu
+} from '@/api/admin'
+
+const __PH = window.__PH
 
 // ========== 商城主页背景图设置 ==========
 // bgCur：已保存值（打开弹窗时从后端拉取）；bgDraft：本次编辑草稿（'' = 默认背景）。
@@ -290,6 +357,88 @@ async function bgSave() {
     ElMessage.error('保存失败，请重试')
   } finally {
     bgSaving.value = false
+  }
+}
+
+// ========== 首屏环绕商品 ==========
+// 与首页装修模块解耦：环绕轨道属于 Hero，不参与下方模块的拖拽排序。
+const orbitVisible = ref(false)
+const orbitSaving = ref(false)
+const orbitSavedIds = ref<number[]>([])      // 已保存的候选 SPU ID
+const orbitProducts = ref<any[]>([])         // 候选商品详情（用于面板预览）
+const orbitFormIds = ref<number[]>([])       // 弹窗内的草稿选择
+const orbitOptions = ref<any[]>([])
+const orbitSearchLoading = ref(false)
+/** 已见过的商品名缓存：远程搜索结果消失后，已选项仍能显示名称 */
+const orbitNameCache = new Map<number, string>()
+
+/** 加载已保存的首屏环绕商品配置与商品详情 */
+async function loadOrbit() {
+  try {
+    const cfg = await getSiteOrbitConfig()
+    orbitSavedIds.value = Array.isArray(cfg?.spuIds) ? cfg.spuIds : []
+    if (orbitSavedIds.value.length === 0) {
+      orbitProducts.value = []
+      return
+    }
+    const results = await Promise.allSettled(orbitSavedIds.value.map((id: number) => getAdminSpu(id)))
+    orbitProducts.value = results
+      .filter((r: any) => r.status === 'fulfilled' && r.value)
+      .map((r: any) => r.value)
+    orbitProducts.value.forEach((p: any) => orbitNameCache.set(p.id, p.name))
+  } catch {
+    orbitProducts.value = []
+  }
+}
+
+/** 打开管理弹窗：以已保存配置为草稿，并加载默认可选商品 */
+function openOrbit() {
+  orbitFormIds.value = [...orbitSavedIds.value]
+  orbitOptions.value = orbitSavedIds.value.map((id: number) => ({
+    id,
+    name: orbitNameCache.get(id) || `商品 #${id}`
+  }))
+  orbitVisible.value = true
+  searchOrbitSpu('')
+}
+
+/** 远程搜索商品，并把已选项保留在选项列表顶部 */
+async function searchOrbitSpu(query: any) {
+  orbitSearchLoading.value = true
+  try {
+    const params: Record<string, any> = { page: 1, pageSize: 20 }
+    if (query) params.name = query
+    const res: any = await adminRequest({ url: '/admin/spu/page', method: 'get', params })
+    const records = res?.records || res?.list || (res?.data?.records) || []
+    records.forEach((r: any) => orbitNameCache.set(r.id, r.name))
+    const selected = orbitFormIds.value.map((id: number) => ({
+      id,
+      name: orbitNameCache.get(id) || `商品 #${id}`
+    }))
+    const rest = records
+      .filter((r: any) => !orbitFormIds.value.includes(r.id))
+      .map((r: any) => ({ id: r.id, name: r.name }))
+    orbitOptions.value = [...selected, ...rest]
+  } catch (e: any) {
+  } finally {
+    orbitSearchLoading.value = false
+  }
+}
+
+/** 保存环绕商品配置（空 = 恢复默认） */
+async function saveOrbit() {
+  orbitSaving.value = true
+  try {
+    const ids = orbitFormIds.value
+    await saveSiteOrbitConfig(ids.length ? ids : null)
+    orbitSavedIds.value = [...ids]
+    ElMessage.success(ids.length ? '已保存，刷新商城主页即可看到' : '已恢复默认，刷新商城主页即可看到')
+    orbitVisible.value = false
+    await loadOrbit()
+  } catch (e: any) {
+    ElMessage.error('保存失败，请重试')
+  } finally {
+    orbitSaving.value = false
   }
 }
 
@@ -606,6 +755,7 @@ async function toggleStatus(item: any) {
 onMounted(async () => {
   await load()
   loadCategories()
+  loadOrbit()
 })
 </script>
 
@@ -638,6 +788,64 @@ onMounted(async () => {
   color: var(--text-muted);
   font-size: 13px;
   margin: 0;
+}
+
+/* 首屏环绕商品 */
+.orbit-panel .panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.orbit-count {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.orbit-preview {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-top: 14px;
+}
+.orbit-preview-item {
+  flex: 0 0 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.orbit-preview-item img {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-hover);
+}
+.orbit-preview-name {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.orbit-empty {
+  padding-top: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.orbit-tip {
+  margin: 12px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+.orbit-option-id {
+  float: right;
+  margin-left: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .module-list {

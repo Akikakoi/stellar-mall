@@ -396,6 +396,24 @@ export function saveSiteBgConfig(bgImage: string | null): Promise<any> {
   })
 }
 
+// =========================== 站点配置：首屏环绕商品 ===========================
+/** 获取首屏环绕商品配置（spuIds 空 = 使用首页默认商品） */
+export function getSiteOrbitConfig(): Promise<{ spuIds: number[] }> {
+  return adminRequest({
+    url: '/admin/site-config/orbit',
+    method: 'get'
+  })
+}
+
+/** 保存首屏环绕商品（null/空 = 恢复默认） */
+export function saveSiteOrbitConfig(spuIds: number[] | null): Promise<any> {
+  return adminRequest({
+    url: '/admin/site-config/orbit',
+    method: 'put',
+    data: { spuIds }
+  })
+}
+
 // =========================== AI 经营日报 ===========================
 
 /**

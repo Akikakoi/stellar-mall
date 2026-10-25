@@ -15,6 +15,14 @@ public interface SpuService {
 
     Spu getById(Long id);
 
+    /**
+     * 随机抽取上架且有主图的 SPU（首页首屏环绕商品用）。
+     *
+     * @param count 抽取数量，内部限制在 1~20
+     * @return 随机商品列表
+     */
+    List<Spu> listRandom(int count);
+
     /** 更新 SPU（含 SKU 覆盖式同步）。 */
     void updateWithSkus(SpuSaveDTO dto);
 

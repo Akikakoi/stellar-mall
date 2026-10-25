@@ -14,10 +14,13 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * C 端商品 Controller：/user/spu。
  *   - GET /user/spu/page     → 分页搜索（含高亮 + 聚合）
  *   - GET /user/spu/suggest  → 搜索建议（自动补全 + 拼写纠错）
+ *   - GET /user/spu/random   → 随机抽取上架商品（首页首屏环绕商品）
  *   - GET /user/spu/{id}     → SPU 详情（含 skuList）
  */
 @RestController
@@ -43,6 +46,13 @@ public class UserSpuController {
     @ApiOperation("搜索建议：自动补全 + 拼写纠错")
     public Result<SearchSuggestVO> suggest(@RequestParam String prefix) {
         return Result.success(suggestService.suggest(prefix));
+    }
+
+    @RateLimit(key = "spu-random", maxRequests = 60, windowSeconds = 60)
+    @GetMapping("/random")
+    @ApiOperation("随机抽取上架且有主图的商品（首页首屏环绕商品用，最多 20 个）")
+    public Result<List<Spu>> random(@RequestParam(defaultValue = "6") int count) {
+        return Result.success(spuService.listRandom(count));
     }
 
     @GetMapping("/{id}")

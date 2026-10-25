@@ -161,6 +161,19 @@ public class SpuServiceImpl implements SpuService {
     }
 
     /**
+     * 随机抽取上架且有主图的 SPU（首页首屏环绕商品用）。
+     *
+     * @param count 抽取数量，限制在 1~20，避免恶意大数量拖慢 ORDER BY RAND()
+     * @return 随机商品列表
+     */
+    @Override
+    public List<Spu> listRandom(int count) {
+        int n = Math.max(1, Math.min(count, 20));
+        List<Spu> list = spuMapper.listRandom(n);
+        return list == null ? new ArrayList<>() : list;
+    }
+
+    /**
      * 更新 SPU 及其嵌套的 SKU 列表（先删后插覆盖式更新）。
      * <p>
      * 若前端未传 skuList 但传了 price，会自动生成一条默认 SKU 覆盖原有 SKU；

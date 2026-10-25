@@ -50,6 +50,18 @@ export function getSiteBg(): Promise<{ bgImage: string }> {
   } as any)
 }
 
+/**
+ * 获取首屏环绕商品配置（spuIds 空 = 使用首页默认商品）。
+ * 匿名放行；__silent 静默失败——未配置/后端异常时前台回退默认商品。
+ */
+export function getSiteOrbit(): Promise<{ spuIds: number[] }> {
+  return userRequest({
+    url: '/user/site-config/orbit',
+    method: 'get',
+    __silent: true
+  } as any)
+}
+
 /** 获取当前登录用户信息 */
 export function getCurrentUser(): Promise<UserInfo> {
   return userRequest({
@@ -138,6 +150,19 @@ export function getSpu(id: number): Promise<Spu> {
     url: `/user/spu/${id}`,
     method: 'get'
   })
+}
+
+/**
+ * 随机抽取上架且有主图的商品（首页首屏环绕商品用）。
+ * 匿名放行；__silent 静默失败——失败时首页回退已加载商品。
+ */
+export function getRandomSpus(count = 6): Promise<Spu[]> {
+  return userRequest({
+    url: '/user/spu/random',
+    method: 'get',
+    params: { count },
+    __silent: true
+  } as any)
 }
 
 /** 搜索建议(输入框自动补全) */

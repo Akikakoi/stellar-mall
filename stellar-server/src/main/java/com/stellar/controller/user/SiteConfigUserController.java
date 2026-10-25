@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * C 端：站点级配置（当前为商城主页背景图，匿名放行供前台启动时拉取）。
+ * C 端：站点级配置（商城主页背景图、首屏环绕商品，匿名放行供前台启动时拉取）。
  */
 @RestController
 @RequestMapping("/user/site-config")
@@ -26,5 +26,11 @@ public class SiteConfigUserController {
     @ApiOperation("获取商城主页背景配置（bgImage 空串 = 使用默认背景）")
     public Result<Map<String, String>> getBg() {
         return Result.success(Map.of("bgImage", siteConfigService.getBgImage()));
+    }
+
+    @GetMapping("/orbit")
+    @ApiOperation("获取首屏环绕商品候选池（空列表 = 前台从商品库随机抽取）")
+    public Result<Map<String, Object>> getOrbit() {
+        return Result.success(Map.of("spuIds", siteConfigService.getHomeOrbitSpuIds()));
     }
 }

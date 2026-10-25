@@ -29,6 +29,9 @@ public interface SpuMapper {
     /** 批量按 id 列表查询 SPU。 */
     List<Spu> listByIds(@Param("ids") List<Long> ids);
 
+    /** 随机抽取上架且有主图的 SPU（首页首屏环绕商品用）。 */
+    List<Spu> listRandom(@Param("count") int count);
+
     /** 仅用于上下架状态 + 时间戳动态更新。 */
     @AutoFill(OperationType.UPDATE)
     int updateStatusAndTime(Spu spu);
