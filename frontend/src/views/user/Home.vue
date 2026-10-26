@@ -43,12 +43,34 @@
         </div>
       </div>
       <div class="container hero-inner">
+        <p class="hero-eyebrow">今夜 · 星光上新</p>
         <h1 class="hero-title">星耀商城</h1>
         <p class="hero-subtitle">
           <span class="typewriter-text">{{ subtitleText }}</span>
           <span class="typewriter-cursor" :class="{ blink: showCursor }"></span>
         </p>
-        <el-button type="primary" size="large" class="hero-cta" @click="scrollToContent">立即选购</el-button>
+        <p class="hero-desc">
+          全球好物像星星一样缀满货架，指尖轻点，你喜欢的光就会送到门口。
+          安心正品、光速配送——购物，也可以是一场浪漫的摘星。
+        </p>
+        <div class="hero-actions">
+          <el-button type="primary" size="large" class="hero-cta" @click="scrollToContent">即刻，开始摘星</el-button>
+          <el-button size="large" class="hero-cta-ghost" @click="scrollToContent">今日星单</el-button>
+        </div>
+        <dl class="hero-stats">
+          <div class="hero-stat">
+            <dt>100万+</dt>
+            <dd>好物星辰</dd>
+          </div>
+          <div class="hero-stat">
+            <dt>30分钟</dt>
+            <dd>光速到家</dd>
+          </div>
+          <div class="hero-stat">
+            <dt>98%</dt>
+            <dd>好评闪烁</dd>
+          </div>
+        </dl>
       </div>
 
       <!-- 右侧竖向分类滚动条：两段相同内容循环上移，点击进入对应分类商品页 -->
@@ -309,7 +331,7 @@ const loadMore = () => {}
 // Hero
 const subtitleText = ref('')
 const showCursor = ref(true)
-const fullSubtitle = '精选好物，品质生活'
+const fullSubtitle = '把星河，装入购物车'
 let typewriterTimer: any = null
 
 /** 每屏环绕展示的商品数量（与参考站一致，8 张） */
@@ -997,6 +1019,11 @@ onUnmounted(() => {
   --orbit-radius: 264px;
   --orbit-duration: 32s;
   --orbit-corner: 32px;
+  /* 商品在卡内的占位比例（相对 160% 的图片画布）：70% 已超出卡片宽度，左右各裁掉一圈白边。
+     安全上限 ≈ 44% ÷ 商品在照片中的占比；调大更饱满，但填满画面的图转到 45° 附近会被削角 */
+  --orbit-photo-scale: 70%;
+  /* 旋转环整体横向偏移：偏右形成「左文右环」分栏；偏移量需保证环最左侧卡片不扫到文案列 */
+  --orbit-offset-x: clamp(150px, 18vw, 240px);
   position: relative;
   background: transparent;
   text-align: center;
@@ -1014,7 +1041,8 @@ onUnmounted(() => {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 48px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 1;
   width: 100%;
   max-width: 1200px;
@@ -1028,6 +1056,56 @@ onUnmounted(() => {
   pointer-events: none;
 }
 .hero-inner .hero-cta { pointer-events: auto; }
+/* 左文右环分栏：文案列收窄，不延伸到旋转环下方 */
+.hero-inner .hero-subtitle,
+.hero-inner .hero-desc { max-width: 460px; }
+.hero-inner .hero-actions { pointer-events: auto; }
+
+/* 眉标：标题上方的轻量引导标签 */
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--brand-primary);
+  background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-primary) 22%, transparent);
+}
+/* 描述段落：补充卖点，撑起左栏文案量 */
+.hero-desc {
+  margin: 0 0 28px;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+/* 按钮组：主按钮 + 次按钮并排 */
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+.hero-cta-ghost { height: 52px; padding: 0 32px; font-size: 17px; border-radius: 8px; }
+/* 数据点：三列小统计，增强左栏视觉重量与信任感 */
+.hero-stats {
+  display: flex;
+  gap: 44px;
+  margin: 0;
+}
+.hero-stat dt {
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.hero-stat dd {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
 
 /* 圆形旋转环：每个槽位先旋转角度、再沿半径外推，使矩形底边始终朝向圆心。
    外层环整体旋转，框内图片反向旋转抵消环+槽位角度，保持直立；
@@ -1038,6 +1116,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* 整体右移：不影响环自身旋转动画（动画在 .orbit-ring 上） */
+  transform: translateX(var(--orbit-offset-x, 0px));
   pointer-events: none;
 }
 .orbit-ring {
@@ -1065,9 +1145,10 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   border-radius: var(--orbit-corner);
-  /* 图片未就绪/加载失败时的兜底底色，避免露出透明空洞 */
-  background: var(--bg-hover);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+  /* 商品图统一白底：卡片做成白色瓷片，白底图与卡面无缝，商品像是浮在瓷片上。
+     浅色主题下再靠 1px 内描边把瓷片从页面背景里分离出来，避免糊成一片。 */
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14), inset 0 0 0 1px rgba(15, 23, 42, 0.06);
   overflow: hidden;
   pointer-events: auto;
   text-decoration: none;
@@ -1093,22 +1174,28 @@ onUnmounted(() => {
   outline: 2px solid var(--brand-primary);
   outline-offset: 4px;
 }
-/* 图片放大到 145% 并反向旋转：卡片框转动时，照片内容保持直立且不露底 */
+/* 图片放大到 160% 并反向旋转：卡片框转动时，照片内容保持直立且不露底。
+   160% 是「矩形绕中心旋转 45° 的外接框」所需的最小覆盖尺寸，保证任何角度都铺满卡片窗口。 */
 .orbit-photo {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 145%;
-  height: 145%;
-  margin-left: -72.5%;
-  margin-top: -72.5%;
+  width: 160%;
+  height: 160%;
+  margin-left: -80%;
+  margin-top: -80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: orbit-photo-counter var(--orbit-duration) linear infinite;
 }
 .orbit-photo img {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  /* 完整展示商品：缩到卡片内切圆以内，卡片转到任何角度都裁不到商品本体；
+     超出内切圆的只有白底图的空白边角，被窗口裁掉也看不出来。 */
+  width: var(--orbit-photo-scale);
+  height: var(--orbit-photo-scale);
+  object-fit: contain;
   /* 图片解码完成后逐张淡入：未就绪时露出卡片骨架底，单张慢图不再拖住整圈 */
   opacity: 0;
   transition: opacity 0.32s var(--ease-out);
@@ -1250,10 +1337,13 @@ onUnmounted(() => {
 @keyframes cursor-blink { to { opacity: 0; } }
 .hero-cta { height: 52px; padding: 0 36px; font-size: 17px; border-radius: 8px; }
 
-/* 首屏：标题 → 副标题 → 按钮，依次轻轻浮上来（只在进页面时播一次） */
-.hero-title { animation: hero-rise 0.5s var(--ease-out) backwards; }
-.hero-subtitle { animation: hero-rise 0.5s var(--ease-out) 80ms backwards; }
-.hero-cta { animation: hero-rise 0.5s var(--ease-out) 160ms backwards; }
+/* 首屏：眉标 → 标题 → 副标题 → 描述 → 按钮 → 数据点，依次轻轻浮上来（只在进页面时播一次） */
+.hero-eyebrow { animation: hero-rise 0.5s var(--ease-out) backwards; }
+.hero-title { animation: hero-rise 0.5s var(--ease-out) 60ms backwards; }
+.hero-subtitle { animation: hero-rise 0.5s var(--ease-out) 120ms backwards; }
+.hero-desc { animation: hero-rise 0.5s var(--ease-out) 180ms backwards; }
+.hero-actions { animation: hero-rise 0.5s var(--ease-out) 240ms backwards; }
+.hero-stats { animation: hero-rise 0.5s var(--ease-out) 300ms backwards; }
 @keyframes hero-rise {
   from { opacity: 0; transform: translateY(12px); }
 }
@@ -1481,7 +1571,16 @@ onUnmounted(() => {
   .cat-banner { grid-row: auto; min-height: 220px; }
 }
 
-/* 文案与按钮归入左下文案块后，窄屏轨道会与文案重叠，提前隐藏 */
+/* 中窄屏：环略缩小 + 右移余量有限，进一步收紧避免卡片扫到文案列 */
+@media (max-width: 1400px) and (min-width: 1161px) {
+  .hero {
+    --orbit-radius: 230px;
+    --orbit-card-w: 124px;
+    --orbit-card-h: 142px;
+  }
+}
+
+/* 窄屏轨道已隐藏，文案块保持垂直居中，仅收紧留白 */
 @media (max-width: 1160px) {
   .hero-orbit { display: none; }
 }
@@ -1491,7 +1590,6 @@ onUnmounted(() => {
     min-height: max(520px, calc(100dvh - 64px));
     padding: var(--space-3xl) 0;
   }
-  .hero-inner { bottom: 32px; }
   .hero-ticker { display: none; }
 }
 </style>
