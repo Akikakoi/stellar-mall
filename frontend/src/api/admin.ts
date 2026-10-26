@@ -379,7 +379,7 @@ export function uploadImages(files: File | File[], module = 'spu'): Promise<stri
 }
 
 // =========================== 站点配置：商城主页背景图 ===========================
-/** 获取商城主页背景配置（bgImage 空串 = 使用默认背景） */
+/** 获取商城主页背景配置（bgImage 空串 = 默认背景；'__white__' = 纯白背景；其他 = 图片 URL） */
 export function getSiteBgConfig(): Promise<{ bgImage: string }> {
   return adminRequest({
     url: '/admin/site-config/bg',

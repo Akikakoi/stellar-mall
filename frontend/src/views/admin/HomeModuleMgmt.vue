@@ -93,16 +93,18 @@
       @closed="bgDraft = bgCur"
     >
       <div class="bg-setting">
-        <!-- 预览面板：模拟前台 .page-bg 观感（cover 铺图 + 压暗层） -->
+        <!-- 预览面板：模拟前台 .page-bg 观感（cover 铺图 + 压暗层）；纯白模式下展示纯白无压暗 -->
         <div
           class="bg-preview"
-          :style="{ backgroundImage: `url('${bgDraft || DEFAULT_BG_IMG}')` }"
+          :class="{ 'bg-preview--white': isWhiteDraft }"
+          :style="bgPreviewStyle"
         >
-          <div class="bg-preview-dim"></div>
-          <span class="bg-preview-badge">{{ bgDraft ? '自定义背景' : '默认背景' }}</span>
+          <div v-if="!isWhiteDraft" class="bg-preview-dim"></div>
+          <span class="bg-preview-badge">{{ isWhiteDraft ? '纯白背景' : bgDraft ? '自定义背景' : '默认背景' }}</span>
         </div>
         <p class="bg-tip">
-          建议上传 1920×1080 及以上横向图（webp / jpg / png，≤5MB）。前台会自动压暗 45%
+          建议上传 1920×1080 及以上横向图（webp / jpg / png，≤5MB），也可切换为
+          <b>纯白背景</b>（无图、无压暗层，接近浏览器默认白色）。前台会自动压暗 45%
           以保证文字与卡片可读，预览已模拟该效果。保存后前台即时生效；后台与 AI 助手页不受影响。
         </p>
         <div class="bg-actions">
@@ -114,6 +116,7 @@
           >
             <el-button type="primary" :loading="bgUploading">上传新背景</el-button>
           </el-upload>
+          <el-button :disabled="isWhiteDraft" @click="bgDraft = WHITE_BG">纯白背景</el-button>
           <el-button :disabled="!bgDraft" @click="bgDraft = ''">恢复默认</el-button>
           <span class="bg-actions-spacer"></span>
           <el-button @click="bgVisible = false">取消</el-button>
@@ -288,7 +291,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { adminRequest, userRequest } from '@/api/request'
 import {
@@ -299,14 +302,23 @@ import {
 const __PH = window.__PH
 
 // ========== 商城主页背景图设置 ==========
-// bgCur：已保存值（打开弹窗时从后端拉取）；bgDraft：本次编辑草稿（'' = 默认背景）。
-// 交互语义：上传/恢复默认只改草稿并即时刷新预览，点"保存"才落库生效（防误触）。
+// bgCur：已保存值（打开弹窗时从后端拉取）；bgDraft：本次编辑草稿。
+// bgDraft 三态：'' = 默认背景；WHITE_BG 哨兵 = 纯白背景；其他 = 背景图 URL。
+// 交互语义：上传/纯白/恢复默认只改草稿并即时刷新预览，点"保存"才落库生效（防误触）。
 const DEFAULT_BG_IMG = '/images/background-light.webp'
+/** "纯白背景"哨兵值：原样落库到 bgImage，前台 App.vue 识别后渲染纯白而非图片 */
+const WHITE_BG = '__white__'
 const bgVisible = ref(false)
 const bgCur = ref('')
 const bgDraft = ref('')
 const bgUploading = ref(false)
 const bgSaving = ref(false)
+
+const isWhiteDraft = computed(() => bgDraft.value === WHITE_BG)
+/** 预览图源：纯白模式不铺图（由 .bg-preview--white 提供纯白底） */
+const bgPreviewStyle = computed(() =>
+  isWhiteDraft.value ? {} : { backgroundImage: `url('${bgDraft.value || DEFAULT_BG_IMG}')` }
+)
 
 async function openBgSettings() {
   bgVisible.value = true
@@ -348,7 +360,13 @@ async function bgSave() {
   try {
     await saveSiteBgConfig(bgDraft.value || null)
     bgCur.value = bgDraft.value
-    ElMessage.success(bgDraft.value ? '已保存，前台即时生效' : '已恢复默认背景，前台即时生效')
+    ElMessage.success(
+      isWhiteDraft.value
+        ? '已切换为纯白背景，前台即时生效'
+        : bgDraft.value
+          ? '已保存，前台即时生效'
+          : '已恢复默认背景，前台即时生效'
+    )
     bgVisible.value = false
   } catch {
     ElMessage.error('保存失败，请重试')
@@ -956,6 +974,9 @@ onMounted(async () => {
   background-size: cover;
   background-position: center;
   border: 1px solid var(--border-base);
+}
+.bg-preview--white {
+  background: #fff;
 }
 .bg-preview-dim {
   position: absolute;

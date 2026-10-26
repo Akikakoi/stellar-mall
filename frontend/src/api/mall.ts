@@ -39,7 +39,7 @@ export function getCaptcha(): Promise<{ captchaId: string, imageBase64: string }
 
 // =========================== 站点配置（商城主页背景图） ===========================
 /**
- * 获取商城主页背景图配置（bgImage 空串 = 使用默认背景图）。
+ * 获取商城主页背景图配置（bgImage 空串 = 默认背景图；'__white__' = 纯白背景；其他 = 图片 URL）。
  * 匿名放行接口；__silent 静默失败——后端未部署/网络异常时保持默认背景，绝不影响页面。
  */
 export function getSiteBg(): Promise<{ bgImage: string }> {

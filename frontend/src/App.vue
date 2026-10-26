@@ -35,14 +35,25 @@ const showFloatingSidebar = computed(() =>
 // 管理端装修保存后切回前台即可看到新背景。接口匿名放行 + 内部静默，任何异常
 // 保持默认背景（变量未设置即 CSS fallback 默认图），绝不影响页面渲染。
 let lastBgFetch = 0
+// 管理端"纯白背景"选项的哨兵值：后台存进 bgImage，前台识别后渲染纯白而非图片
+const WHITE_BG = '__white__'
 async function applySiteBg() {
   try {
     const cfg = await getSiteBg()
     const url = cfg?.bgImage || ''
-    if (url) {
+    if (url === WHITE_BG) {
+      // 纯白背景：无图、无压暗层、底色纯白（贴近浏览器默认白）
+      document.documentElement.style.setProperty('--page-bg-image', 'none')
+      document.documentElement.style.setProperty('--page-bg-dim', '0')
+      document.documentElement.style.setProperty('--page-bg-base', '#ffffff')
+    } else if (url) {
       document.documentElement.style.setProperty('--page-bg-image', `url("${url}")`)
+      document.documentElement.style.removeProperty('--page-bg-dim')
+      document.documentElement.style.removeProperty('--page-bg-base')
     } else {
       document.documentElement.style.removeProperty('--page-bg-image')
+      document.documentElement.style.removeProperty('--page-bg-dim')
+      document.documentElement.style.removeProperty('--page-bg-base')
     }
   } catch {
     // 静默：后端不可用/接口未部署时保持默认背景
@@ -91,7 +102,8 @@ a {
  * 从根本上避免关闭弹窗瞬间整页闪烁，且视觉上仍是固定背景。 */
 .page-bg {
   min-height: 100vh;
-  background-color: var(--bg-base);
+  /* --page-bg-base 由"纯白背景"选项注入（#fff）；未设置时回落常规底色 */
+  background-color: var(--page-bg-base, var(--bg-base));
   position: relative;
 }
 .page-bg::before,
@@ -112,7 +124,8 @@ a {
 }
 .page-bg::after {
   background: var(--bg-base);
-  opacity: 0.55;
+  /* --page-bg-dim 由"纯白背景"选项注入 0（关闭压暗层）；未设置时 0.55 */
+  opacity: var(--page-bg-dim, 0.55);
 }
 .page-bg > * {
   position: relative;
