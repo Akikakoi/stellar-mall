@@ -85,7 +85,8 @@ watchEffect(() => {
 html, body, #app {
   height: 100%;
   width: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* 与 main.scss body 保持一致：正文首选阿里巴巴普惠体 3.0 */
+  font-family: 'Alibaba PuHuiTi 3.0', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .app-root {

@@ -1238,7 +1238,7 @@ onUnmounted(() => {
   box-sizing: border-box;
   margin-bottom: 16px;
   padding: 8px 12px;
-  font-family: MiSans, "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
+  font-family: MiSans, "Alibaba PuHuiTi 3.0", "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
   font-size: 14px;
   font-weight: 650;
   line-height: 1.2;
@@ -1278,7 +1278,7 @@ onUnmounted(() => {
 }
 
 .hero-title {
-  font-family: "Smiley Sans Oblique", MiSans, "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
+  font-family: "Smiley Sans Oblique", MiSans, "Alibaba PuHuiTi 3.0", "PingFang SC", "DengXian", "Microsoft YaHei", sans-serif;
   font-size: clamp(40px, 4.5vw, 64px);
   font-weight: 400;
   margin: 0 0 16px;
