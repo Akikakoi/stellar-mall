@@ -41,6 +41,8 @@ async function applySiteBg() {
   try {
     const cfg = await getSiteBg()
     const url = cfg?.bgImage || ''
+    // 根节点标记当前是否纯白背景：让首屏旋转卡片等白底元素收起投影，避免和背景拉出分界
+    document.documentElement.classList.toggle('site-bg-white', url === WHITE_BG)
     if (url === WHITE_BG) {
       // 纯白背景：无图、无压暗层、底色纯白（贴近浏览器默认白）
       document.documentElement.style.setProperty('--page-bg-image', 'none')
@@ -122,11 +124,18 @@ a {
   background-position: center;
   background-repeat: no-repeat;
 }
-.page-bg::after {
-  background: var(--bg-base);
-  /* --page-bg-dim 由"纯白背景"选项注入 0（关闭压暗层）；未设置时 0.55 */
-  opacity: var(--page-bg-dim, 0.55);
-}
+  .page-bg::after {
+    background: var(--bg-base);
+    /* --page-bg-dim 由"纯白背景"选项注入 0（关闭压暗层）；未设置时 0.55 */
+    opacity: var(--page-bg-dim, 0.55);
+  }
+  /* 纯白站点背景下：旋转卡片同为白底，投影/描边（含骨架加载态）全部收起，
+     卡片完全隐形，商品像悬浮在页面背景上。
+     规则写在全局样式块：scoped 样式里 ":global(祖先) 后代" 的混合写法会被编译器丢弃。 */
+  html.site-bg-white .hero-orbit .orbit-card {
+    box-shadow: none;
+    border-color: transparent;
+  }
 .page-bg > * {
   position: relative;
   z-index: 1;

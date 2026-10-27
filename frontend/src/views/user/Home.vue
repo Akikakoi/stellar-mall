@@ -55,22 +55,7 @@
         </p>
         <div class="hero-actions">
           <el-button type="primary" size="large" class="hero-cta" @click="scrollToContent">即刻，开始摘星</el-button>
-          <el-button size="large" class="hero-cta-ghost" @click="scrollToContent">今日星单</el-button>
         </div>
-        <dl class="hero-stats">
-          <div class="hero-stat">
-            <dt>100万+</dt>
-            <dd>好物星辰</dd>
-          </div>
-          <div class="hero-stat">
-            <dt>30分钟</dt>
-            <dd>光速到家</dd>
-          </div>
-          <div class="hero-stat">
-            <dt>98%</dt>
-            <dd>好评闪烁</dd>
-          </div>
-        </dl>
       </div>
 
       <!-- 右侧竖向分类滚动条：两段相同内容循环上移，点击进入对应分类商品页 -->
@@ -1081,30 +1066,12 @@ onUnmounted(() => {
   line-height: 1.8;
   color: var(--text-secondary);
 }
-/* 按钮组：主按钮 + 次按钮并排 */
+/* 按钮组：主按钮独占一行 */
 .hero-actions {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 36px;
-}
-.hero-cta-ghost { height: 52px; padding: 0 32px; font-size: 17px; border-radius: 8px; }
-/* 数据点：三列小统计，增强左栏视觉重量与信任感 */
-.hero-stats {
-  display: flex;
-  gap: 44px;
-  margin: 0;
-}
-.hero-stat dt {
-  font-size: 26px;
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--text-primary);
-}
-.hero-stat dd {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: var(--text-secondary);
 }
 
 /* 圆形旋转环：每个槽位先旋转角度、再沿半径外推，使矩形底边始终朝向圆心。
@@ -1337,13 +1304,12 @@ onUnmounted(() => {
 @keyframes cursor-blink { to { opacity: 0; } }
 .hero-cta { height: 52px; padding: 0 36px; font-size: 17px; border-radius: 8px; }
 
-/* 首屏：眉标 → 标题 → 副标题 → 描述 → 按钮 → 数据点，依次轻轻浮上来（只在进页面时播一次） */
+/* 首屏：眉标 → 标题 → 副标题 → 描述 → 按钮，依次轻轻浮上来（只在进页面时播一次） */
 .hero-eyebrow { animation: hero-rise 0.5s var(--ease-out) backwards; }
 .hero-title { animation: hero-rise 0.5s var(--ease-out) 60ms backwards; }
 .hero-subtitle { animation: hero-rise 0.5s var(--ease-out) 120ms backwards; }
 .hero-desc { animation: hero-rise 0.5s var(--ease-out) 180ms backwards; }
 .hero-actions { animation: hero-rise 0.5s var(--ease-out) 240ms backwards; }
-.hero-stats { animation: hero-rise 0.5s var(--ease-out) 300ms backwards; }
 @keyframes hero-rise {
   from { opacity: 0; transform: translateY(12px); }
 }

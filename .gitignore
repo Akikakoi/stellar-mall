@@ -120,3 +120,10 @@ frontend/_tc_*
 frontend/_hints/
 frontend/_test_out.txt
 frontend/typecheck_errors.txt
+
+# ---------- AI 工具缓存与本地数据 ----------
+.playwright-cli/
+.workbuddy-ai/
+
+# ---------- QQ 机器人（独立模块，暂不入库）----------
+qq-bot/
