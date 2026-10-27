@@ -44,6 +44,8 @@ class SpuRagSyncOutboxTest {
     private SkuMapper skuMapper;
     @Mock
     private ApplicationEventPublisher eventPublisher;
+    @Mock
+    private com.stellar.service.SiteConfigService siteConfigService;
 
     /** 记录型 RagSyncService 替身：记录每次 enqueueSpuSync 的 bizId 和 opType。 */
     private static class RecordingRagSyncService implements RagSyncService {
@@ -113,7 +115,7 @@ class SpuRagSyncOutboxTest {
         lenient().when(spuMapper.getById(any())).thenReturn(base);
 
         ragSyncSpy = new RecordingRagSyncService();
-        spuService = new SpuServiceImpl(spuMapper, skuMapper, ragSyncSpy, eventPublisher);
+        spuService = new SpuServiceImpl(spuMapper, skuMapper, ragSyncSpy, eventPublisher, siteConfigService);
     }
 
     // ---- 辅助：最小 SpuSaveDTO ----
