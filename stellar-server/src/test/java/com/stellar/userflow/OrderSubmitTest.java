@@ -9,6 +9,7 @@ import com.stellar.mapper.*;
 import com.stellar.service.PointsFacade;
 import com.stellar.service.SkuStockService;
 import com.stellar.service.impl.OrderServiceImpl;
+import com.stellar.task.expire.OrderExpireEventPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +49,8 @@ class OrderSubmitTest {
     private MallOrderItemMapper mallOrderItemMapper;
     @Mock
     private PointsFacade pointsFacade;
+    @Mock
+    private OrderExpireEventPublisher orderExpireEventPublisher;
 
     @InjectMocks
     private OrderServiceImpl orderService;

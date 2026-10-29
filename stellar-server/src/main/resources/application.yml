@@ -196,3 +196,19 @@ stellar:
       queue-capacity: 50
       keep-alive-seconds: 120
       name-prefix: stellar-report-
+
+  # 订单超时自动取消：延迟消息 + Streams 消费组（事件驱动），对账扫描兜底
+  order:
+    expire:
+      # true=下单登记延迟任务，到期投递 Stream 由消费组取消；false=仅靠低频对账扫描
+      enabled: ${STELLAR_ORDER_EXPIRE_ENABLED:true}
+      # 订单超时时间（分钟）⚠️ 必须与 OrderServiceImpl.ORDER_EXPIRE_MINUTES 保持一致
+      delay-minutes: 15
+      # 对账兜底扫描间隔（毫秒）：事件驱动开启时可放长，关闭时调成 30000 即等价旧轮询方案
+      reconcile-interval-ms: 600000
+      # 到期扫描间隔（毫秒）与单轮批量
+      poll-interval-ms: 1000
+      poll-batch-size: 200
+      # 消费组相关
+      consume-batch-size: 50
+      stream-max-len: 10000

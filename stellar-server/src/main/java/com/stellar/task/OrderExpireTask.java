@@ -9,7 +9,14 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * 订单自动过期定时任务：每 30 秒扫描一次，将超过 15 分钟未支付的订单自动取消。
+ * 过期订单对账兜底任务。
+ *
+ * <p>超时自动取消的主链路已改为延迟消息（见 {@code com.stellar.task.expire} 包：下单登记延迟任务
+ * → 到期投递到 Stream → 消费组执行取消）。本任务退居为<b>低频对账</b>：兜住延迟消息丢失的情况
+ * （Redis 抖动导致入队失败、消息被 Stream 裁剪、消费端异常等），重新扫出仍未支付的过期订单。</p>
+ *
+ * <p>扫描周期由 {@code stellar.order.expire.reconcile-interval-ms} 控制，默认 10 分钟。若把事件驱动
+ * 开关 {@code stellar.order.expire.enabled} 关掉，并把该周期调回 30 秒，即等价于旧的纯轮询方案。</p>
  */
 @Slf4j
 @Component
@@ -30,11 +37,11 @@ public class OrderExpireTask {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     /**
-     * 每 30 秒执行一次。
-     * <p>用 fixedDelay 而非 fixedRate：fixedRate 是「按固定频率发起」，单轮耗时超过 30 秒时
-     * 会连续补跑、任务不断叠加；fixedDelay 是「上一轮结束后再等 30 秒」，永不叠加。</p>
+     * 低频对账扫描。
+     * <p>用 fixedDelay 而非 fixedRate：fixedRate 是「按固定频率发起」，单轮耗时超过周期时
+     * 会连续补跑、任务不断叠加；fixedDelay 是「上一轮结束后再等一个周期」，永不叠加。</p>
      */
-    @Scheduled(fixedDelay = 30_000)
+    @Scheduled(fixedDelayString = "${stellar.order.expire.reconcile-interval-ms:600000}")
     public void cancelExpiredOrders() {
         if (!running.compareAndSet(false, true)) {
             log.warn("[OrderExpireTask] 上一轮尚未结束，跳过本轮");
@@ -43,7 +50,7 @@ public class OrderExpireTask {
         try {
             int count = orderService.cancelExpiredOrders(MAX_BATCH);
             if (count > 0) {
-                log.info("[OrderExpireTask] 本轮自动取消 {} 笔过期订单", count);
+                log.info("[OrderExpireTask] 对账扫描自动取消 {} 笔过期订单", count);
             }
         } catch (Exception e) {
             log.error("[OrderExpireTask] 执行失败", e);

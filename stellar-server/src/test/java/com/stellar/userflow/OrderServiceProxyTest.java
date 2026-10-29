@@ -9,6 +9,7 @@ import com.stellar.mapper.*;
 import com.stellar.result.PageResult;
 import com.stellar.service.*;
 import com.stellar.service.impl.OrderServiceImpl;
+import com.stellar.task.expire.OrderExpireEventPublisher;
 import com.stellar.vo.MallOrderVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,6 +73,7 @@ class OrderServiceProxyTest {
     @Mock private PointsService pointsService;
     @Mock private PointsFacade pointsFacade;
     @Mock private OrderCancelService orderCancelService;
+    @Mock private OrderExpireEventPublisher orderExpireEventPublisher;
 
     @InjectMocks
     private OrderServiceImpl orderService;

@@ -63,6 +63,8 @@ public class OrderServiceImpl implements OrderService {
     private final com.stellar.service.PointsFacade pointsFacade;
     /** 过期订单逐笔取消（独立 REQUIRES_NEW 事务），避免批量取消中一笔失败影响其他笔。 */
     private final OrderCancelService orderCancelService;
+    /** 下单后登记超时取消的延迟任务（事件驱动链路，开关见 stellar.order.expire.enabled）。 */
+    private final com.stellar.task.expire.OrderExpireEventPublisher orderExpireEventPublisher;
 
     // -------- 提交订单 --------
 
@@ -341,6 +343,9 @@ public class OrderServiceImpl implements OrderService {
                 .pointsAmount(BigDecimal.ZERO)
                 .build();
         mallOrderMapper.insert(order);
+
+        // 登记超时自动取消：事务提交后进入延迟队列（回滚不入队），到期由消费组处理
+        orderExpireEventPublisher.publishOrderCreated(order.getId());
 
         // ---- 积分抵扣：订单创建后再冻结积分（需要真实的 orderId） ----
         Integer pointsDeducted = 0;
