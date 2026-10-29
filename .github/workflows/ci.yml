@@ -7,7 +7,9 @@ on:
     branches: [main, master]
 
 jobs:
-  # ── 后端：纯单元测试（Mockito，无数据库依赖） ──
+  # ── 后端：单元测试 + 集成测试 ──
+  # 集成测试用 H2 内存库 + 内嵌 Redis（见 stellar-server/src/test/resources），
+  # 不依赖 application-dev.yml，可在 CI 上独立启动上下文。
   backend-test:
     runs-on: ubuntu-latest
     steps:
@@ -20,8 +22,8 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build & unit test
-        run: mvn test -pl stellar-server -am -Punit-only --batch-mode
+      - name: Build & test
+        run: mvn test -pl stellar-server -am --batch-mode
 
   # ── 前端：vitest 单测 ──
   frontend-test:
