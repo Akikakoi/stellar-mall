@@ -5,7 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -36,6 +38,11 @@ class RedisLockUtilTest {
 
     @Autowired
     private RedisLockUtil redisLockUtil;
+
+    /** ES 关闭后 ElasticsearchConfig 不再创建 ElasticsearchOperations，
+     *  用 Mock 满足 SpuEsSyncService 等的构造注入，确保测试不触碰真实 ES。 */
+    @MockBean
+    private ElasticsearchOperations elasticsearchOperations;
 
     @Test
     @DisplayName("互斥：A 持锁时 B 获取失败，A 释放后 B 成功")

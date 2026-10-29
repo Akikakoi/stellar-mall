@@ -7,7 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.method.HandlerMethod;
@@ -44,6 +46,11 @@ class RateLimitInterceptorTest {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    /** ES 关闭后 ElasticsearchConfig 不再创建 ElasticsearchOperations，
+     *  用 Mock 满足 SpuEsSyncService 等的构造注入，确保测试不触碰真实 ES。 */
+    @MockBean
+    private ElasticsearchOperations elasticsearchOperations;
 
     /** 测试用最小控制器：不同测试用不同 key，互不串桶。 */
     static class DummyController {

@@ -11,7 +11,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -60,6 +62,11 @@ class AsyncWiringIntegrationTest {
 
     @Autowired(required = false)
     private NotificationService notificationService;
+
+    /** ES 关闭后 ElasticsearchConfig 不再创建 ElasticsearchOperations，
+     *  用 Mock 满足 SpuEsSyncService 等的构造注入，确保测试不触碰真实 ES。 */
+    @MockBean
+    private ElasticsearchOperations elasticsearchOperations;
 
     @Autowired(required = false)
     private PlatformTransactionManager txManager;

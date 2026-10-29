@@ -8,6 +8,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -32,6 +34,11 @@ class SkuStockServiceTest {
     private SkuStockService skuStockService;
     @Autowired(required = false)
     private SkuService skuService;
+
+    /** ES 关闭后 ElasticsearchConfig 不再创建 ElasticsearchOperations，
+     *  用 Mock 满足 SpuEsSyncService 等的构造注入，确保测试不触碰真实 ES。 */
+    @MockBean
+    private ElasticsearchOperations elasticsearchOperations;
 
     /**
      * 本测试写入真实 H2，spu_id 是硬编码的虚拟值 1L。
