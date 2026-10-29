@@ -5,127 +5,161 @@ import com.stellar.mapper.MallOrderMapper;
 import com.stellar.service.OrderCancelService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Range;
 import org.springframework.data.redis.connection.stream.Consumer;
 import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.PendingMessage;
+import org.springframework.data.redis.connection.stream.PendingMessages;
+import org.springframework.data.redis.connection.stream.PendingMessagesSummary;
 import org.springframework.data.redis.connection.stream.ReadOffset;
+import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-/**
- * 订单过期消费者：从消费组读取到期订单并执行取消。
- *
- * <p>取消动作直接复用 {@link OrderCancelService#cancelExpiredOrder}——「CAS 占状态 → 回滚库存 →
- * 解冻积分 → 退券」在同一 REQUIRES_NEW 事务里完成，与轮询路径行为完全一致。</p>
- *
- * <p><b>失败语义</b>：处理抛异常时记 ERROR 并照样 ACK，不做流内重试。原因是取消动作本身幂等，
- * 且低频对账扫描（{@code OrderExpireTask}）会重新捞起仍未支付的过期订单——用对账兜底换取
- * 消费端不引入重试计数与毒消息治理。若后续要求秒级重试，再引入 PEL 重投即可。</p>
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class OrderExpireConsumer {
 
+    // 此 Stream 专属于一个消费组，只删除已确认记录，不能按长度裁掉未处理消息。
+    private static final DefaultRedisScript<Long> ACK_AND_DELETE_SCRIPT = new DefaultRedisScript<>(
+            "local acked = redis.call('XACK', KEYS[1], ARGV[1], ARGV[2]) "
+                    + "if acked == 1 then redis.call('XDEL', KEYS[1], ARGV[2]) end "
+                    + "return acked", Long.class);
+
     private final StringRedisTemplate redis;
-
     private final OrderExpireProperties properties;
-
     private final OrderExpireDelayQueue delayQueue;
-
     private final MallOrderMapper mallOrderMapper;
-
     private final OrderCancelService orderCancelService;
+    private final String consumerName = UUID.randomUUID().toString();
 
-    /** 消费组是否已就绪（只在本实例内做一次性判断，避免每轮都发 XGROUP CREATE）。 */
-    private volatile boolean groupReady = false;
+    private boolean groupReady;
+    private String pendingCursor;
+    private String pendingUpperBound;
 
     @Scheduled(fixedDelayString = "${stellar.order.expire.poll-interval-ms:1000}")
     public void scheduledConsume() {
         if (!properties.isEnabled()) {
             return;
         }
+        consumeOnce();
+    }
+
+    public synchronized int consumeOnce() {
         try {
-            consumeOnce();
+            ensureGroup();
+            int fetched = reclaimPending();
+            List<MapRecord<String, Object, Object>> records = redis.opsForStream().read(
+                    Consumer.from(properties.getGroup(), consumerName),
+                    StreamReadOptions.empty().count(properties.getConsumeBatchSize()),
+                    StreamOffset.create(properties.getStreamKey(), ReadOffset.lastConsumed()));
+            if (records != null) {
+                for (MapRecord<String, Object, Object> record : records) {
+                    processOne(record);
+                }
+                fetched += records.size();
+            }
+            return fetched;
         } catch (Exception e) {
-            log.error("[OrderExpireConsumer] 消费异常", e);
+            resetGroupIfMissing(e);
+            log.error("[OrderExpireConsumer] 消费异常，下一轮重试", e);
+            return 0;
         }
     }
 
-    /**
-     * 读取一批到期消息并处理。
-     *
-     * @return 本批实际取到的消息条数
-     */
-    public int consumeOnce() {
-        ensureGroup();
-        List<MapRecord<String, Object, Object>> records;
-        try {
-            records = redis.opsForStream().read(
-                    Consumer.from(properties.getGroup(), consumerName()),
-                    StreamReadOptions.empty().count(properties.getConsumeBatchSize()),
-                    // lastConsumed() = XREADGROUP 的 '>'：只取从未投递过的新消息
-                    StreamOffset.create(properties.getStreamKey(), ReadOffset.lastConsumed()));
-        } catch (Exception e) {
-            log.warn("[OrderExpireConsumer] 读取消息失败（消费组可能尚未就绪），下一轮重试: {}", e.getMessage());
+    private int reclaimPending() {
+        if (pendingUpperBound == null) {
+            PendingMessagesSummary summary = redis.opsForStream()
+                    .pending(properties.getStreamKey(), properties.getGroup());
+            if (summary.getTotalPendingMessages() == 0) {
+                return 0;
+            }
+            // 固定本轮扫描上界，持续流入的新消息不能阻止游标绕回旧消息。
+            pendingUpperBound = summary.maxMessageId();
+        }
+        Range<String> range = Range.closed(pendingCursor == null ? "-" : pendingCursor, pendingUpperBound);
+        // Redis 5 不支持 XPENDING 排他下界，多取一条并跳过已扫描的边界记录。
+        PendingMessages pending = redis.opsForStream().pending(properties.getStreamKey(),
+                properties.getGroup(), range, (long) properties.getConsumeBatchSize() + 1);
+        Duration minIdle = Duration.ofMillis(properties.getClaimMinIdleMs());
+        List<RecordId> ids = new ArrayList<>();
+        String lastScanned = null;
+        int scanned = 0;
+        for (PendingMessage message : pending) {
+            if (message.getIdAsString().equals(pendingCursor)) {
+                continue;
+            }
+            if (scanned == properties.getConsumeBatchSize()) {
+                break;
+            }
+            lastScanned = message.getIdAsString();
+            scanned++;
+            if (message.getElapsedTimeSinceLastDelivery().compareTo(minIdle) >= 0) {
+                ids.add(message.getId());
+            }
+        }
+        if (scanned < properties.getConsumeBatchSize() || pendingUpperBound.equals(lastScanned)) {
+            pendingCursor = null;
+            pendingUpperBound = null;
+        } else {
+            pendingCursor = lastScanned;
+        }
+        if (ids.isEmpty()) {
             return 0;
         }
-        if (records == null || records.isEmpty()) {
+        List<MapRecord<String, Object, Object>> claimed = redis.opsForStream().claim(
+                properties.getStreamKey(), properties.getGroup(), consumerName, minIdle,
+                ids.toArray(RecordId[]::new));
+        if (claimed == null) {
             return 0;
         }
-        for (MapRecord<String, Object, Object> record : records) {
+        for (MapRecord<String, Object, Object> record : claimed) {
             processOne(record);
         }
-        return records.size();
+        return claimed.size();
     }
 
     private void processOne(MapRecord<String, Object, Object> record) {
         Object rawOrderId = record.getValue().get("orderId");
         Long orderId = rawOrderId == null ? null : parseOrderId(String.valueOf(rawOrderId));
-        if (orderId == null) {
-            log.warn("[OrderExpireConsumer] 消息缺少合法 orderId，丢弃: id={}, body={}",
-                    record.getId(), record.getValue());
-            ack(record);
-            return;
-        }
         try {
-            MallOrder order = mallOrderMapper.getById(orderId);
-            if (order == null) {
-                log.warn("[OrderExpireConsumer] 订单不存在，丢弃延迟消息: orderId={}", orderId);
-                ack(record);
-                return;
+            if (orderId == null) {
+                log.warn("[OrderExpireConsumer] 消息缺少合法 orderId，丢弃: id={}", record.getId());
+            } else {
+                MallOrder order = mallOrderMapper.getById(orderId);
+                if (order == null) {
+                    log.warn("[OrderExpireConsumer] 订单不存在，丢弃延迟消息: orderId={}", orderId);
+                } else if (!isExpired(order)) {
+                    delayQueue.scheduleAtOrThrow(orderId, expireAtMillis(order));
+                } else if (orderCancelService.cancelExpiredOrder(order)) {
+                    log.info("[OrderExpireConsumer] 已按延迟消息取消过期订单: orderId={}", orderId);
+                }
             }
-            // 到期校验：延迟消息可能因配置调整提前送达，绝不能提前取消未到期订单
-            if (!isExpired(order)) {
-                delayQueue.scheduleAt(orderId, expireAtMillis(order));
-                log.warn("[OrderExpireConsumer] 订单尚未到期，重新入队: orderId={}, createTime={}",
-                        orderId, order.getCreateTime());
-                ack(record);
-                return;
-            }
-            // 状态守卫在 cancelExpiredOrder 内部（非 PENDING 直接跳过，不动库存/券/积分）
-            boolean cancelled = orderCancelService.cancelExpiredOrder(order);
-            if (cancelled) {
-                log.info("[OrderExpireConsumer] 已按延迟消息取消过期订单: orderId={}", orderId);
-            }
+            redis.execute(ACK_AND_DELETE_SCRIPT, List.of(properties.getStreamKey()),
+                    properties.getGroup(), record.getId().getValue());
         } catch (Exception e) {
-            log.error("[OrderExpireConsumer] 处理失败，交由对账扫描兜底: orderId={}", orderId, e);
-        } finally {
-            ack(record);
+            resetGroupIfMissing(e);
+            log.error("[OrderExpireConsumer] 处理失败，保留待确认消息重试: orderId={}, messageId={}",
+                    orderId, record.getId(), e);
         }
     }
 
     private boolean isExpired(MallOrder order) {
         if (order.getCreateTime() == null) {
-            // 没有创建时间无从判断，交给 cancelExpiredOrder 的状态守卫兜底
             return true;
         }
         return !order.getCreateTime().plusMinutes(properties.getDelayMinutes()).isAfter(LocalDateTime.now());
@@ -137,9 +171,6 @@ public class OrderExpireConsumer {
     }
 
     private Long parseOrderId(String raw) {
-        if (raw == null || raw.isEmpty()) {
-            return null;
-        }
         try {
             return Long.valueOf(raw);
         } catch (NumberFormatException e) {
@@ -147,50 +178,39 @@ public class OrderExpireConsumer {
         }
     }
 
-    private void ack(MapRecord<String, Object, Object> record) {
-        try {
-            redis.opsForStream().acknowledge(properties.getStreamKey(), properties.getGroup(), record.getId());
-        } catch (Exception e) {
-            log.error("[OrderExpireConsumer] ACK 失败: id={}", record.getId(), e);
-        }
-    }
-
-    /**
-     * 确保消费组存在。
-     * <p>用底层 xGroupCreate(mkStream=true)：Stream 还没被投递过时一并创建，
-     * 不依赖「先有订单写过 Stream」这个时序。已存在时 Redis 返回 BUSYGROUP，属正常路径。</p>
-     */
     private void ensureGroup() {
         if (groupReady) {
             return;
         }
-        synchronized (this) {
-            if (groupReady) {
-                return;
+        try {
+            redis.execute((RedisCallback<Void>) connection -> {
+                connection.streamCommands().xGroupCreate(
+                        properties.getStreamKey().getBytes(StandardCharsets.UTF_8),
+                        properties.getGroup(), ReadOffset.from("0"), true);
+                return null;
+            });
+        } catch (Exception e) {
+            if (!hasRedisError(e, "BUSYGROUP")) {
+                throw e;
             }
-            try {
-                redis.execute((RedisCallback<Void>) connection -> {
-                    connection.streamCommands().xGroupCreate(
-                            properties.getStreamKey().getBytes(StandardCharsets.UTF_8),
-                            properties.getGroup(), ReadOffset.from("0"), true);
-                    return null;
-                });
-                groupReady = true;
-                log.info("[OrderExpireConsumer] 消费组已就绪: stream={}, group={}",
-                        properties.getStreamKey(), properties.getGroup());
-            } catch (Exception e) {
-                String msg = String.valueOf(e.getMessage());
-                if (msg.contains("BUSYGROUP")) {
-                    groupReady = true;
-                } else {
-                    log.warn("[OrderExpireConsumer] 消费组初始化失败，下一轮重试: {}", msg);
-                }
-            }
+        }
+        groupReady = true;
+    }
+
+    private void resetGroupIfMissing(Exception error) {
+        if (hasRedisError(error, "NOGROUP")) {
+            groupReady = false;
+            pendingCursor = null;
+            pendingUpperBound = null;
         }
     }
 
-    /** 消费者名：实例级唯一，便于用 XPENDING 区分各实例的待确认消息。 */
-    private String consumerName() {
-        return properties.getGroup() + "-" + Integer.toHexString(System.identityHashCode(this));
+    private boolean hasRedisError(Throwable error, String code) {
+        for (Throwable cause = error; cause != null; cause = cause.getCause()) {
+            if (cause.getMessage() != null && cause.getMessage().contains(code)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

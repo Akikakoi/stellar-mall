@@ -145,7 +145,7 @@
                 <artifactId>hutool-captcha</artifactId>
                 <version>${hutool}</version>
             </dependency>
-            <!-- Elasticsearch: Spring Boot 3.x 自带管理版本, 代码待迁移到新 client API -->
+            <!-- ES 7.17 的 RestHighLevelClient 与旧查询 API 需要 Spring Data ES 4.4.x。 -->
             <dependency>
                 <groupId>org.springframework.data</groupId>
                 <artifactId>spring-data-elasticsearch</artifactId>

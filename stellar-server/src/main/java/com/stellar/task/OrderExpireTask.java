@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>超时自动取消的主链路已改为延迟消息（见 {@code com.stellar.task.expire} 包：下单登记延迟任务
  * → 到期投递到 Stream → 消费组执行取消）。本任务退居为<b>低频对账</b>：兜住延迟消息丢失的情况
- * （Redis 抖动导致入队失败、消息被 Stream 裁剪、消费端异常等），重新扫出仍未支付的过期订单。</p>
+ * （事务提交后 Redis 入队失败、Redis 数据丢失等），重新扫出仍未支付的过期订单。</p>
  *
  * <p>扫描周期由 {@code stellar.order.expire.reconcile-interval-ms} 控制，默认 10 分钟。若把事件驱动
  * 开关 {@code stellar.order.expire.enabled} 关掉，并把该周期调回 30 秒，即等价于旧的纯轮询方案。</p>

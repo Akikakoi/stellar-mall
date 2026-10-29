@@ -27,8 +27,8 @@ public class OrderExpireProperties {
     /** 消费组名。 */
     private String group = "order-expire-group";
 
-    /** Stream 近似保留上限，防止无界增长。 */
-    private long streamMaxLen = 10000;
+    // 应大于正常整批处理耗时，避免接管仍在执行的消息；重复执行仍由订单 CAS 保护。
+    private long claimMinIdleMs = 60_000;
 
     /** 到期扫描间隔（毫秒）。 */
     private long pollIntervalMs = 1000;

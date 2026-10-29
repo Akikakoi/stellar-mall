@@ -211,4 +211,5 @@ stellar:
       poll-batch-size: 200
       # 消费组相关
       consume-batch-size: 50
-      stream-max-len: 10000
+      # 应大于正常整批处理耗时，避免过早接管正在执行的消息
+      claim-min-idle-ms: 60000

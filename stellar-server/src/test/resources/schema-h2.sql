@@ -98,11 +98,12 @@ DROP TABLE IF EXISTS stellar_mall_order_item;
 CREATE TABLE stellar_mall_order_item (
     id BIGINT NOT NULL AUTO_INCREMENT, order_id BIGINT NOT NULL,
     spu_id BIGINT NOT NULL, sku_id BIGINT NOT NULL,
-    spu_name VARCHAR(200), sku_name VARCHAR(200), image VARCHAR(500),
-    price DECIMAL(10,2) NOT NULL DEFAULT 0, qty INT NOT NULL DEFAULT 1,
-    service_fee DECIMAL(10,2) DEFAULT 0,
-    create_time DATETIME NOT NULL, create_user BIGINT NOT NULL,
-    update_time DATETIME NOT NULL, update_user BIGINT NOT NULL, PRIMARY KEY (id)
+    spu_name VARCHAR(255) NOT NULL, sku_specs VARCHAR(500) DEFAULT NULL,
+    price DECIMAL(10,2) NOT NULL, qty INT NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    extra_amount DECIMAL(12,2) DEFAULT NULL,
+    service_info VARCHAR(1000) DEFAULT NULL,
+    PRIMARY KEY (id)
 );
 
 DROP TABLE IF EXISTS stellar_cart;
@@ -174,4 +175,29 @@ CREATE TABLE stellar_points_payment (
     points INT NOT NULL, amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     type TINYINT NOT NULL, biz_desc VARCHAR(200) DEFAULT NULL,
     create_time DATETIME NOT NULL, PRIMARY KEY (id)
+);
+
+-- ============================================================
+-- 通知与用户消息：发货/收货/券到期通知要写这两张表
+-- 列名/类型对齐生产：V8__notification.sql 的 stellar_notification_log、
+-- stellar_mall_ddl.sql 的 stellar_user_message
+-- ============================================================
+DROP TABLE IF EXISTS stellar_notification_log;
+CREATE TABLE stellar_notification_log (
+    id BIGINT NOT NULL AUTO_INCREMENT, user_id BIGINT,
+    phone VARCHAR(20), email VARCHAR(100),
+    channel VARCHAR(20) NOT NULL DEFAULT 'SMS', type VARCHAR(30) NOT NULL,
+    title VARCHAR(200), content CLOB NOT NULL,
+    status TINYINT NOT NULL DEFAULT 0, error_msg VARCHAR(500),
+    send_time DATETIME, create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS stellar_user_message;
+CREATE TABLE stellar_user_message (
+    id BIGINT NOT NULL AUTO_INCREMENT, user_id BIGINT NOT NULL,
+    type VARCHAR(32) NOT NULL, title VARCHAR(200) NOT NULL,
+    content VARCHAR(1000) DEFAULT '', ref_id BIGINT DEFAULT NULL,
+    is_read TINYINT NOT NULL DEFAULT 0, create_time DATETIME NOT NULL,
+    PRIMARY KEY (id)
 );

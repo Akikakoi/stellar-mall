@@ -190,10 +190,10 @@ class OrderExpireCancelTest {
 
     private void insertOrderItem(long orderId, long skuId, int qty) {
         jdbcTemplate.update("INSERT INTO stellar_mall_order_item "
-                        + "(order_id, spu_id, sku_id, price, qty, create_time, create_user, update_time, update_user) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                orderId, TEST_SPU_ID, skuId, new BigDecimal("1.00"), qty,
-                LocalDateTime.now(), 0L, LocalDateTime.now(), 0L);
+                        + "(order_id, spu_id, sku_id, spu_name, price, qty, subtotal) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                orderId, TEST_SPU_ID, skuId, "超时取消用例SPU快照", new BigDecimal("1.00"), qty,
+                new BigDecimal("1.00").multiply(BigDecimal.valueOf(qty)));
     }
 
     /** 插入券模板，usedCount 为本用例已核销数。 */
