@@ -86,7 +86,7 @@ CREATE TABLE stellar_mall_order (
     id BIGINT NOT NULL AUTO_INCREMENT, order_no VARCHAR(64) NOT NULL,
     user_id BIGINT NOT NULL, address_id BIGINT,
     total_amount DECIMAL(10,2) NOT NULL DEFAULT 0, pay_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
-    pay_method TINYINT, status TINYINT NOT NULL DEFAULT 1,
+    pay_method TINYINT, status VARCHAR(16) NOT NULL DEFAULT 'PENDING',
     address VARCHAR(500), consignee VARCHAR(50) NOT NULL DEFAULT '', phone VARCHAR(20) NOT NULL DEFAULT '',
     cancel_reason VARCHAR(500), pay_time DATETIME,
     create_time DATETIME NOT NULL, create_user BIGINT NOT NULL,
@@ -94,12 +94,12 @@ CREATE TABLE stellar_mall_order (
     PRIMARY KEY (id), CONSTRAINT uk_order_no UNIQUE (order_no)
 );
 
-DROP TABLE IF EXISTS stellar_order_item;
-CREATE TABLE stellar_order_item (
+DROP TABLE IF EXISTS stellar_mall_order_item;
+CREATE TABLE stellar_mall_order_item (
     id BIGINT NOT NULL AUTO_INCREMENT, order_id BIGINT NOT NULL,
     spu_id BIGINT NOT NULL, sku_id BIGINT NOT NULL,
     spu_name VARCHAR(200), sku_name VARCHAR(200), image VARCHAR(500),
-    price DECIMAL(10,2) NOT NULL DEFAULT 0, quantity INT NOT NULL DEFAULT 1,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0, qty INT NOT NULL DEFAULT 1,
     service_fee DECIMAL(10,2) DEFAULT 0,
     create_time DATETIME NOT NULL, create_user BIGINT NOT NULL,
     update_time DATETIME NOT NULL, update_user BIGINT NOT NULL, PRIMARY KEY (id)
@@ -124,4 +124,54 @@ CREATE TABLE stellar_rag_sync_outbox (
     payload_json CLOB,
     create_time DATETIME NOT NULL, create_user BIGINT NOT NULL,
     update_time DATETIME NOT NULL, update_user BIGINT NOT NULL, PRIMARY KEY (id)
+);
+
+-- ============================================================
+-- 优惠券：取消订单链路要「退还优惠券」（CouponService.returnCouponByOrderId）
+-- 列名/类型对齐生产：stellar_mall_ddl.sql 的 stellar_coupon / stellar_user_coupon
+-- ============================================================
+DROP TABLE IF EXISTS stellar_coupon;
+CREATE TABLE stellar_coupon (
+    id BIGINT NOT NULL AUTO_INCREMENT, name VARCHAR(100) NOT NULL,
+    type TINYINT NOT NULL DEFAULT 1,
+    condition_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    total_count INT NOT NULL, received_count INT NOT NULL DEFAULT 0,
+    used_count INT NOT NULL DEFAULT 0, per_user_limit INT NOT NULL DEFAULT 1,
+    start_time DATETIME NOT NULL, end_time DATETIME NOT NULL,
+    status TINYINT NOT NULL DEFAULT 1,
+    create_time DATETIME NOT NULL, create_user BIGINT NOT NULL DEFAULT 0,
+    update_time DATETIME NOT NULL, update_user BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS stellar_user_coupon;
+CREATE TABLE stellar_user_coupon (
+    id BIGINT NOT NULL AUTO_INCREMENT, user_id BIGINT NOT NULL, coupon_id BIGINT NOT NULL,
+    status TINYINT NOT NULL DEFAULT 1, order_id BIGINT DEFAULT NULL, used_time DATETIME DEFAULT NULL,
+    create_time DATETIME NOT NULL, create_user BIGINT NOT NULL DEFAULT 0,
+    update_time DATETIME NOT NULL, update_user BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (id)
+);
+
+-- ============================================================
+-- 积分：取消订单链路要「解冻积分」（PointsService.unfreezePointsForOrder）
+-- 列名/类型对齐生产：V11__points_system.sql / V12__points_payment.sql
+-- ============================================================
+DROP TABLE IF EXISTS stellar_user_points;
+CREATE TABLE stellar_user_points (
+    id BIGINT NOT NULL AUTO_INCREMENT, user_id BIGINT NOT NULL,
+    total_points INT NOT NULL DEFAULT 0, available_points INT NOT NULL DEFAULT 0,
+    frozen_points INT NOT NULL DEFAULT 0, total_earned INT NOT NULL DEFAULT 0,
+    total_spent INT NOT NULL DEFAULT 0, version INT NOT NULL DEFAULT 0,
+    create_time DATETIME NOT NULL, update_time DATETIME NOT NULL,
+    PRIMARY KEY (id), CONSTRAINT uk_user_points_user UNIQUE (user_id)
+);
+
+DROP TABLE IF EXISTS stellar_points_payment;
+CREATE TABLE stellar_points_payment (
+    id BIGINT NOT NULL AUTO_INCREMENT, order_id BIGINT NOT NULL, user_id BIGINT NOT NULL,
+    points INT NOT NULL, amount DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    type TINYINT NOT NULL, biz_desc VARCHAR(200) DEFAULT NULL,
+    create_time DATETIME NOT NULL, PRIMARY KEY (id)
 );
