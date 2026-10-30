@@ -33,10 +33,17 @@ def _clean_product_name(doc_name: str) -> str:
 def kb_search_tool(query: str, top_k: int = 5, tags_filter: Optional[List[str]] = None) -> dict:
     """知识库检索工具，用于查询商品信息、售后政策、使用说明等静态知识。"""
     try:
-        recalled = hybrid_retrieve(query, top_k=settings.RETRIEVER_TOP_K, tags_filter=tags_filter)
+        # 召回数取 max(精排数, 配置召回数)：top_k=20 的单产品属性查询若只召回
+        # RETRIEVER_TOP_K=12 条，精排窗口反而大于召回窗口，候选不足
+        recalled = hybrid_retrieve(query, top_k=max(top_k, settings.RETRIEVER_TOP_K),
+                                   tags_filter=tags_filter)
         ranked = rerank(query, recalled, top_k=top_k)
         return _ranked_to_result(query, ranked)
     except Exception as e:
+        # 检索基础设施异常（ES 挂了等）必须如实报错：success=False 让上层
+        # _build_tool_context 走「操作未成功」提示，且不落入 L2/FAQ 缓存；
+        # 此前静默返回空结果会被 LLM 当成「知识库没查到」并缓存错误答案
+        logger.warning(f"[kb_search_tool] 检索失败: {e}")
         return {"success": False, "query": query, "sources": [], "count": 0, "error": str(e)}
 
 

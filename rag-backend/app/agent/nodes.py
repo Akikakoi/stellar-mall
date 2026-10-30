@@ -1085,24 +1085,32 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                         logger.warning(f"[FAQ] Agent 侧写入失败: {e}")
 
             # === 异步写入缓存 ===
-            try:
-                # 提取商品 ID
-                product_ids = _extract_product_ids(tool_result)
-                put_cache_sync(
-                    query=query,
-                    model=settings.LLM_MODEL_NAME,
-                    temperature=settings.LLM_TEMPERATURE,
-                    system_prompt_hash=AGENT_PROMPT_HASH,
-                    context_hash=context_hash,
-                    answer=full_answer,
-                    sources=state.get("sources", []),
-                    intent=intent,
-                    tokens_used=len(full_answer),
-                    product_ids=product_ids,
-                    cache_type="answer",
-                )
-            except Exception:
-                pass
+            # 防缓存污染：kb_search「成功但 0 条 sources」的空结果不写缓存。
+            # 空结果上下文的答案（如"没查到 XX"）一旦入缓存，后续同问即使
+            # 检索已恢复也会被 best_score=1.0 命中，持续返回过期错误答案。
+            allow_cache = True
+            if (state.get("current_tool") == "kb_search"
+                    and not tool_result.get("sources")):
+                allow_cache = False
+            if allow_cache:
+                try:
+                    # 提取商品 ID
+                    product_ids = _extract_product_ids(tool_result)
+                    put_cache_sync(
+                        query=query,
+                        model=settings.LLM_MODEL_NAME,
+                        temperature=settings.LLM_TEMPERATURE,
+                        system_prompt_hash=AGENT_PROMPT_HASH,
+                        context_hash=context_hash,
+                        answer=full_answer,
+                        sources=state.get("sources", []),
+                        intent=intent,
+                        tokens_used=len(full_answer),
+                        product_ids=product_ids,
+                        cache_type="answer",
+                    )
+                except Exception:
+                    pass
 
             return {
                 "final_answer": full_answer,

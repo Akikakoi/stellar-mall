@@ -111,50 +111,49 @@ def hybrid_retrieve(query: str, top_k: int | None = None, tags_filter: Optional[
     - 融合用标准 RRF：score(d)=Σ 1/(RRF_K+rank_i(d))。注：ES 的 rank.rrf 需要
       白金 license（Basic 报 403 non-compliant），故由 Python 融合，查询本身
       两路各一次，数据量级下开销可忽略；
-    - BM25 零命中时自然退化为纯向量排序，无附加逻辑。
+    - BM25 零命中时自然退化为纯向量排序，无附加逻辑；
+    - ES 异常直接上抛：调用方（chains/kb_tool）各自有兜底；此前内部吞异常
+      返回 []，导致「检索基础设施故障」伪装成「知识库没查到」，LLM 据此生成
+      错误答案并被 L2 缓存放大（P2 验收发现的 Agent 链路 bug 根因）。
     """
     top_k = top_k or settings.RETRIEVER_TOP_K
     from langchain_core.documents import Document
 
-    try:
-        es = get_es()
-        q_emb = get_embeddings().embed_query(query)
-        tag_flt = es_tags_filter(tags_filter)
-        src_excl = {"excludes": ["vec"]}
+    es = get_es()
+    q_emb = get_embeddings().embed_query(query)
+    tag_flt = es_tags_filter(tags_filter)
+    src_excl = {"excludes": ["vec"]}
 
-        # 两路查询：kNN 语义 + BM25 关键词
-        knn_res = es.search(
-            index=KB_ES_INDEX,
-            knn={"field": "vec", "query_vector": q_emb, "k": top_k,
-                 "num_candidates": max(top_k * 5, 50), "filter": tag_flt},
-            size=top_k, _source=src_excl,
-        )
-        bm25_res = es.search(
-            index=KB_ES_INDEX,
-            query={"bool": {"must": [{"match": {"content": {"query": query}}}],
-                            "filter": tag_flt}},
-            size=top_k, _source=src_excl,
-        )
+    # 两路查询：kNN 语义 + BM25 关键词
+    knn_res = es.search(
+        index=KB_ES_INDEX,
+        knn={"field": "vec", "query_vector": q_emb, "k": top_k,
+             "num_candidates": max(top_k * 5, 50), "filter": tag_flt},
+        size=top_k, _source=src_excl,
+    )
+    bm25_res = es.search(
+        index=KB_ES_INDEX,
+        query={"bool": {"must": [{"match": {"content": {"query": query}}}],
+                        "filter": tag_flt}},
+        size=top_k, _source=src_excl,
+    )
 
-        # Python RRF 融合：按 hit 顺序取 rank，score = Σ 1/(K + rank)
-        rrf_k = 60
-        scores: dict = {}   # id -> rrf 分
-        docs_by_id: dict = {}
-        for res in (knn_res, bm25_res):
-            for rank, hit in enumerate(res["hits"]["hits"]):
-                hid = hit["_id"]
-                scores[hid] = scores.get(hid, 0.0) + 1.0 / (rrf_k + rank + 1)
-                if hid not in docs_by_id:
-                    src = hit["_source"]
-                    docs_by_id[hid] = Document(
-                        page_content=src.get("content", ""),
-                        metadata={k: v for k, v in src.items() if k != "content"},
-                    )
-        ranked_ids = sorted(scores, key=lambda i: scores[i], reverse=True)[:top_k]
-        return [docs_by_id[i] for i in ranked_ids]
-    except Exception as e:  # noqa
-        logger.warning(f"[Hybrid] ES 混合检索失败: {e}")
-        return []
+    # Python RRF 融合：按 hit 顺序取 rank，score = Σ 1/(K + rank)
+    rrf_k = 60
+    scores: dict = {}   # id -> rrf 分
+    docs_by_id: dict = {}
+    for res in (knn_res, bm25_res):
+        for rank, hit in enumerate(res["hits"]["hits"]):
+            hid = hit["_id"]
+            scores[hid] = scores.get(hid, 0.0) + 1.0 / (rrf_k + rank + 1)
+            if hid not in docs_by_id:
+                src = hit["_source"]
+                docs_by_id[hid] = Document(
+                    page_content=src.get("content", ""),
+                    metadata={k: v for k, v in src.items() if k != "content"},
+                )
+    ranked_ids = sorted(scores, key=lambda i: scores[i], reverse=True)[:top_k]
+    return [docs_by_id[i] for i in ranked_ids]
 
 
 # =====================================================

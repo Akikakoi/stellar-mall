@@ -113,5 +113,6 @@ def run_agent(query: str, user_id: int = None, mall_token: str = None,
         "tool_results": result.get("tool_results", {}),
         "missing_params": result.get("missing_params", []),
         "current_tool": result.get("current_tool"),
+        "required_params": result.get("required_params", {}),
         "uses_react": result.get("uses_react", False),
     }
