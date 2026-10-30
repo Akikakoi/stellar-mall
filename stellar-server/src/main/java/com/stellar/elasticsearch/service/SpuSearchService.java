@@ -382,12 +382,19 @@ public class SpuSearchService {
     private static final int KNN_NUM_CANDIDATES = 500;
     /** RRF 常数 k（越大越平滑）。 */
     private static final int RRF_K = 60;
-    /** 纯语义候选最低分：ES 8 的 kNN 在 similarity=cosine 下 _score = (1+cos)/2 ∈ [0,1]，
-     *  0.60 即 cos >= 0.20 才算相关（参与 RRF）。
+    /** 纯语义兜底最低分（BM25 零命中时）：ES 8 的 kNN 在 similarity=cosine 下
+     *  _score = (1+cos)/2 ∈ [0,1]，0.60 即 cos >= 0.20 才算相关（参与 RRF）。
      *  text-embedding-v2 下「口语 query vs 短商品名」的相似度普遍只有 0.2~0.5，
      *  阈值不宜过高（曾用 cos 0.30 导致语义召回被整体误杀，2026-09-03 实测调低）；
      *  同时作为「中文 query 纯语义兜底」的整体门槛（非中文 query 不做语义兜底）。 */
     private static final double VEC_MIN_SCORE = 0.60;
+    /** BM25 有命中时的向量补充门槛（双层门槛，2026-10-30 实测引入）：
+     *  BM25 命中说明词面已相关，向量路只是「补充语义相关但词面不命中」的商品，
+     *  此时应从严——实测「降噪耳机」混入空调 cos 0.270，与弱相关商品
+     *  （「给老人用的手机」cos 0.260）分数重叠，单一 0.60（cos 0.20）无法区分；
+     *  收紧到 cos >= 0.40（score >= 0.70）后跨品类噪声被剔除。
+     *  BM25 零命中时向量路是唯一来源，维持 VEC_MIN_SCORE 宽门槛兜底。 */
+    private static final double VEC_MIN_SCORE_WITH_BM25 = 0.70;
 
     /**
      * 关键词搜索：BM25 文本召回 + kNN 语义召回 双路独立查询，RRF 融合排序。
@@ -440,6 +447,8 @@ public class SpuSearchService {
         Map<Long, Double> vecScores = new HashMap<>(); // id -> kNN 分 ((1+cos)/2)，供纯语义整体门槛用
         if (queryVec != null) {
             try {
+                // 双层门槛：BM25 命中时向量补充从严（防跨品类噪声），零命中时维持宽门槛兜底
+                double minScore = bmIds.isEmpty() ? VEC_MIN_SCORE : VEC_MIN_SCORE_WITH_BM25;
                 List<Float> qv = toFloatArray(queryVec);
                 // knn 搜索节：k 显式取 100，filter 在图遍历阶段预过滤
                 SearchResponse<Void> vecResp = esClient.search(s -> s
@@ -452,12 +461,13 @@ public class SpuSearchService {
                         Void.class);
                 for (Hit<Void> hit : vecResp.hits().hits()) {
                     Double score = hit.score();
-                    if (score == null || score < VEC_MIN_SCORE) continue; // cos < 0.20 视为无关
+                    if (score == null || score < minScore) continue; // 低于当前层门槛视为无关
                     Long id = Long.valueOf(hit.id());
                     vecIds.add(id);
                     vecScores.put(id, score);
                 }
-                log.debug("Vector recall: {} hits for '{}'", vecIds.size(), keyword);
+                log.debug("Vector recall: {} hits for '{}' (bm25Hits={}, minScore={})",
+                        vecIds.size(), keyword, bmIds.size(), minScore);
             } catch (Exception e) {
                 log.warn("Vector recall failed (BM25-only): {}", e.getMessage());
             }
