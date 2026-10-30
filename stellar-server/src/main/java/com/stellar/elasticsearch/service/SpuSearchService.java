@@ -535,10 +535,15 @@ public class SpuSearchService {
             b.should(s -> s.term(t -> t.field("name.keyword").value(keyword).boost(100.0f)));
             // ② 精确短语匹配：次高优先级
             b.should(s -> s.matchPhrase(mp -> mp.field("name").query(keyword).boost(20.0f)));
-            // ③ 分词匹配（无模糊）：原词 best_fields，AND 语义要求所有分词都命中同一字段，
-            //    避免 ik 把多字词切成单字后 OR 语义导致的单字误匹配（如搜"钢化膜"命中"模块化拼接"的"化"）
+            // ③ 分词匹配（无模糊）：cross_fields 跨字段 AND——要求所有分词在 name/subTitle
+            //    组合内命中，而非 BestFields 的「同一字段内全命中」。修复场景：商品名
+            //    "逸彩 VividPods Pro 真无线耳机"（含"耳机"）+ 副标题"主动降噪 · 空间音频"
+            //    （含"降噪"），搜"降噪耳机"时 BestFields+AND 两字段各自缺一个分词均不命中，
+            //    商品只能依赖向量补充，又被双层门槛的从严线拦截；卖点写在副标题本就是
+            //    副标题的职责，cross_fields 让跨字段组合即可命中。
+            //    前提：name/subTitle 索引分词器一致（均 ik），满足 cross_fields 的 analyzer 组要求。
             b.should(s -> s.multiMatch(mm -> mm.query(keyword)
-                    .type(TextQueryType.BestFields)
+                    .type(TextQueryType.CrossFields)
                     .operator(Operator.And)
                     .fields("name^3", "subTitle")));
             // 同义词扩展：权重低于原词。用 match_phrase（短语匹配）而非 multi_match：ik 分词器
