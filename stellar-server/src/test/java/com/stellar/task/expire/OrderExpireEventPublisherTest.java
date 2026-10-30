@@ -39,6 +39,9 @@ class OrderExpireEventPublisherTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     private boolean originalEnabled;
 
     @org.junit.jupiter.api.BeforeEach

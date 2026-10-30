@@ -40,6 +40,9 @@ class SkuStockServiceTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     /**
      * 本测试写入真实 H2，spu_id 是硬编码的虚拟值 1L。
      * H2 是测试间共享的（DB_CLOSE_DELAY=-1），若不清理会污染后续按 spu_id 聚合的用例

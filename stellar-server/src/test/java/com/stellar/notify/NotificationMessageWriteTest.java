@@ -38,6 +38,9 @@ class NotificationMessageWriteTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     @AfterEach
     void cleanUp() {
         jdbcTemplate.update("DELETE FROM stellar_user_message WHERE user_id = ?", USER_ID);

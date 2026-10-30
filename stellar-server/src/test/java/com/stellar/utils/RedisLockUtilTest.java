@@ -44,6 +44,9 @@ class RedisLockUtilTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     @Test
     @DisplayName("互斥：A 持锁时 B 获取失败，A 释放后 B 成功")
     void mutualExclusion() throws Exception {

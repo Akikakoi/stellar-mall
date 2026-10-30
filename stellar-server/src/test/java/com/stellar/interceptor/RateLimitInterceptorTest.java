@@ -52,6 +52,9 @@ class RateLimitInterceptorTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     /** 测试用最小控制器：不同测试用不同 key，互不串桶。 */
     static class DummyController {
         @RateLimit(key = "test-cap", maxRequests = 3, windowSeconds = 60)

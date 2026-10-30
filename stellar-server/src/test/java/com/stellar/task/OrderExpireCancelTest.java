@@ -56,6 +56,9 @@ class OrderExpireCancelTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     private final List<Long> createdSkuIds = new ArrayList<>();
     private final List<Long> createdOrderIds = new ArrayList<>();
     private final List<Long> createdCouponIds = new ArrayList<>();

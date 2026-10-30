@@ -54,6 +54,9 @@ class InventoryBatchStockTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     private final List<Long> createdSkuIds = new ArrayList<>();
 
     @AfterEach

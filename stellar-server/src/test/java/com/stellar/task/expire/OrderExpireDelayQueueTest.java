@@ -70,6 +70,9 @@ class OrderExpireDelayQueueTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     private String originalDelayKey;
     private String originalStreamKey;
     private int originalPollBatchSize;

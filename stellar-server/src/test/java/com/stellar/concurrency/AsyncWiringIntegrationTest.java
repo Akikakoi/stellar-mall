@@ -68,6 +68,9 @@ class AsyncWiringIntegrationTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     @Autowired(required = false)
     private PlatformTransactionManager txManager;
 
