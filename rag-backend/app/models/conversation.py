@@ -7,10 +7,10 @@ from app.core.database import Base
 
 
 class Conversation(Base):
-    __tablename__ = "conversations"
+    __tablename__ = "stellar_rag_conversations"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("stellar_rag_users.id", ondelete="CASCADE"), nullable=False, index=True)
     title = Column(String(128), default="新的对话", nullable=False)
     summary = Column(String(512), nullable=True)
     pinned = Column(Boolean, default=False, nullable=False)

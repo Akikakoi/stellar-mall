@@ -14,11 +14,11 @@ class MessageRole(str, enum.Enum):
 
 
 class Message(Base):
-    __tablename__ = "messages"
+    __tablename__ = "stellar_rag_messages"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    conversation_id = Column(Integer, ForeignKey("stellar_rag_conversations.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("stellar_rag_users.id", ondelete="CASCADE"), nullable=False, index=True)
     role = Column(SAEnum(MessageRole), nullable=False)
     content = Column(Text, nullable=False)
     # RAG 引用来源列表，存 JSON

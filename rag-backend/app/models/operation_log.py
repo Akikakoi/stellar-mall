@@ -6,7 +6,7 @@ from app.core.database import Base
 
 
 class OperationLog(Base):
-    __tablename__ = "operation_logs"
+    __tablename__ = "stellar_rag_operation_logs"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(Integer, index=True, nullable=True)

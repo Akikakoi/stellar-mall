@@ -77,8 +77,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # 数据库
-    DATABASE_URL: str = "sqlite:///./data/sqlite/app.db"
+    # 数据库（P3-2：SQLite 退役，与会城共用本机 MySQL stellar_mall 库，表名 stellar_rag_ 前缀）
+    DATABASE_URL: str = "mysql+pymysql://stellar:123456@127.0.0.1:3306/stellar_mall?charset=utf8mb4"
 
     # 通义千问 DashScope（仅用于 Embedding：DeepSeek 不提供 Embedding API）
     DASHSCOPE_API_KEY: str = ""

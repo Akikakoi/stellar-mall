@@ -12,7 +12,7 @@ class UserRole(str, enum.Enum):
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "stellar_rag_users"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String(64), unique=True, index=True, nullable=False)

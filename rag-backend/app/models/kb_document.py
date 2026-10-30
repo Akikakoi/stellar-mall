@@ -6,7 +6,7 @@ from app.core.database import Base
 
 
 class KbDocument(Base):
-    __tablename__ = "kb_documents"
+    __tablename__ = "stellar_rag_kb_documents"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     # 文件名（原始）

@@ -49,6 +49,9 @@ mcp[cli]>=1.0.0
 # Redis (LLM Cache + Mall Bridge)
 redis[hiredis]>=5.0.0,<6.0.0
 
+# MySQL (P3-2：RAG 自有表迁入商城 MySQL，stellar_rag_ 前缀)
+pymysql>=1.1.0
+
 # Utils
 python-dateutil==2.9.0.post0
 tiktoken==0.7.0
