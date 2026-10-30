@@ -212,4 +212,41 @@ onMounted(async () => {
 .total-text { color: var(--text-secondary); font-size: 15px; }
 .total-text .amount { font-size: 24px; margin-left: 6px; }
 .btn-checkout { min-width: 140px; }
+
+/* ===== 移动端：六列表格重排为两行卡片布局 ===== */
+@media (max-width: 768px) {
+  .cart-page { padding-bottom: 170px; }
+  .container { padding: 0 12px; }
+  .main-content { padding: 16px 12px 24px; }
+  /* 表头在移动端无意义，隐藏；行改为 「勾选+商品 / 数量+小计」 两行 */
+  .row.header { display: none; }
+  .row {
+    grid-template-columns: 36px 1fr auto;
+    grid-template-areas:
+      'check product op'
+      'check qty     subtotal';
+    gap: 8px 10px;
+    padding: 14px 12px;
+  }
+  .col-check { grid-area: check; }
+  .col-product { grid-area: product; }
+  .col-qty { grid-area: qty; justify-content: flex-start; }
+  .col-subtotal { grid-area: subtotal; justify-self: end; }
+  .col-op { grid-area: op; align-self: start; }
+  /* 单价与小计重复，移动端隐藏单价列 */
+  .col-price { display: none; }
+  .thumb { width: 64px; height: 64px; }
+  /* 结算底栏抬高，避开底部快捷条 */
+  body.has-mobile-dock .footer-bar { bottom: 58px; }
+}
+
+@media (max-width: 480px) {
+  .footer-bar { height: 64px; }
+  .footer-bar .left, .footer-bar .right { padding: 0 12px; }
+  .footer-bar .right { gap: 10px; }
+  .count-text { display: none; }
+  .total-text { font-size: 13px; }
+  .total-text .amount { font-size: 20px; }
+  .btn-checkout { min-width: 104px; padding: 0 16px; }
+}
 </style>

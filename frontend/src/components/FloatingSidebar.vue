@@ -112,6 +112,8 @@ function onScroll() {
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onScroll, { passive: true })
+  // 移动端底部横条占据高度，通知页面留出底部空间
+  document.body.classList.add('has-mobile-dock')
   onScroll()
   // 路由懒加载的 Home 可能晚于本组件挂载，延迟补一次同步
   scheduleSync()
@@ -120,6 +122,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onScroll)
+  document.body.classList.remove('has-mobile-dock')
   if (syncTimer) clearTimeout(syncTimer)
 })
 
@@ -187,5 +190,42 @@ watch(() => route.path, () => {
   height: 1px;
   background: var(--glass-border);
   margin: 4px 8px;
+}
+
+/* ===== 移动端：右侧悬浮栏改为底部横条，不遮挡竖向内容 ===== */
+@media (max-width: 768px) {
+  .floating-sidebar {
+    right: 0;
+    left: 0;
+    top: auto;
+    bottom: 0;
+    transform: translateY(0);
+  }
+  .floating-sidebar.is-hidden {
+    transform: translateY(100%);
+  }
+  .sidebar-inner {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 var(--glass-highlight);
+  }
+  .sidebar-item {
+    flex: 1;
+    flex-direction: row;
+    gap: 6px;
+    padding: 8px 4px;
+    min-width: 0;
+  }
+  .sidebar-label {
+    font-size: 12px;
+  }
+  .sidebar-divider {
+    width: 1px;
+    height: auto;
+    margin: 8px 4px;
+  }
 }
 </style>

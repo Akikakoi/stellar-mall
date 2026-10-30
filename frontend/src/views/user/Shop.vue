@@ -1107,7 +1107,25 @@ html.theme-dark .history-panel {
   .filter-item { font-size: 12px; padding: 5px 6px; }
   .price-input-row { flex-wrap: nowrap; }
   .price-input { min-width: 50px; }
-  .spu-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  /* 列数由内联 :style 绑定，必须 !important 才能压过内联样式 */
+  .spu-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+  /* 「每行显示」列数切换在手机上无意义，隐藏 */
+  .col-toggle { display: none; }
+  .spu-info { padding: 12px 14px 16px; }
+  .spu-name { font-size: 14px; min-height: auto; }
+  .spu-price { font-size: 16px; }
+  .result-bar { padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
+  .result-bar strong { font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+  .shop-page { padding-top: 24px; }
+  .shop-search-bar { padding: 0 14px 22px; }
+  .container { padding: 0 14px 56px; }
+  .filter-sidebar { gap: 10px; }
+  .filter-section { min-width: 108px; }
+  .search-submit-btn span { display: none; }
+  .search-submit-btn { padding: 0 12px; }
 }
 
 /* ===== 骨架屏 ===== */

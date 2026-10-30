@@ -100,8 +100,50 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        <button
+          type="button"
+          class="menu-toggle"
+          :class="{ open: mobileOpen }"
+          :aria-expanded="mobileOpen"
+          aria-label="打开菜单"
+          @click="mobileOpen = !mobileOpen"
+        >
+          <el-icon :size="22"><component :is="mobileOpen ? Close : MenuIcon" /></el-icon>
+        </button>
       </div>
     </div>
+    <!-- 移动端下拉菜单：≤768px 显示，含主导航与「我的」高频入口 -->
+    <transition name="mobile-menu">
+      <div class="mobile-menu" v-if="mobileOpen">
+        <router-link
+          v-for="item in navItems"
+          :key="item.to"
+          :to="item.to"
+          class="mobile-menu-item"
+          active-class="active"
+        >
+          <component :is="item.icon" class="mobile-menu-icon" />
+          <span>{{ item.label }}</span>
+        </router-link>
+        <div class="mobile-menu-divider"></div>
+        <a class="mobile-menu-item" @click.prevent="handleCommand('cart')">
+          <el-icon class="mobile-menu-icon"><ShoppingCartFull /></el-icon>
+          <span>购物车</span>
+        </a>
+        <a class="mobile-menu-item" @click.prevent="handleCommand('profile')">
+          <el-icon class="mobile-menu-icon"><User /></el-icon>
+          <span>个人中心</span>
+        </a>
+        <a class="mobile-menu-item" @click.prevent="handleCommand('points')">
+          <el-icon class="mobile-menu-icon"><Present /></el-icon>
+          <span>积分商城</span>
+        </a>
+        <a class="mobile-menu-item" @click.prevent="handleCommand('logout')">
+          <el-icon class="mobile-menu-icon"><SwitchButton /></el-icon>
+          <span>退出登录</span>
+        </a>
+      </div>
+    </transition>
   </header>
 </template>
 
@@ -115,7 +157,13 @@ import {
   ChatDotRound,
   Bell,
   List as ListIcon,
-  Search
+  Search,
+  Menu as MenuIcon,
+  Close,
+  ShoppingCartFull,
+  User,
+  Present,
+  SwitchButton
 } from '@element-plus/icons-vue'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
@@ -237,6 +285,10 @@ const cartStore = useCartStore()
 const userStore = useUserStore()
 const { count: unreadCount } = useUnreadBadge()
 const searchKeyword = ref('')
+
+// ===== 移动端汉堡菜单 =====
+const mobileOpen = ref(false)
+watch(() => route.path, () => { mobileOpen.value = false })
 
 // ===== 搜索历史 / 搜索建议（历史与商城搜索页共享同一份数据，按用户隔离） =====
 const { searchHistory, addToHistory, clearHistory } = useSearchHistory()
@@ -660,6 +712,128 @@ html.theme-dark .nav-history-panel {
   color: var(--text-muted);
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* ===== 汉堡按钮 / 移动端菜单：桌面端不渲染 ===== */
+.menu-toggle {
+  display: none;
+}
+.mobile-menu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .top-bar .container {
+    padding: 0 14px;
+    height: 56px;
+    gap: 8px;
+  }
+  .logo {
+    font-size: 19px;
+    margin-right: 0;
+    flex-shrink: 0;
+  }
+  /* 横向导航让位给汉堡菜单 */
+  .nav-links {
+    display: none;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+  }
+  .nav-search {
+    width: 100%;
+  }
+  .nickname {
+    display: none;
+  }
+  .user-menu-btn {
+    display: none;
+  }
+  .user-area {
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background var(--transition-color);
+  }
+  .menu-toggle:hover,
+  .menu-toggle.open {
+    background: var(--glass-hover, rgba(0, 0, 0, 0.05));
+    color: var(--brand-primary);
+  }
+  /* 下拉菜单面板：跟随 sticky 顶栏，玻璃材质与全站一致 */
+  .mobile-menu {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 14px 14px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
+    -webkit-backdrop-filter: var(--backdrop-blur);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+  .mobile-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 10px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--transition-color), color var(--transition-color);
+  }
+  .mobile-menu-item:hover,
+  .mobile-menu-item.active {
+    background: var(--glass-hover, rgba(0, 0, 0, 0.05));
+    color: var(--brand-primary);
+  }
+  .mobile-menu-icon {
+    width: 18px;
+    height: 18px;
+  }
+  .mobile-menu-divider {
+    height: 1px;
+    margin: 6px 10px;
+    background: var(--glass-border);
+  }
+}
+
+.mobile-menu-enter-active,
+.mobile-menu-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.mobile-menu-enter-from,
+.mobile-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+@media (max-width: 480px) {
+  .top-bar .container {
+    padding: 0 10px;
+    height: 52px;
+  }
+  .logo {
+    font-size: 17px;
+  }
+  .search-box :deep(.el-input__wrapper) {
+    padding: 0 8px;
+  }
 }
 </style>
 

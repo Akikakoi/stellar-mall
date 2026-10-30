@@ -176,6 +176,7 @@ import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { track } from '@/utils/tracker'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
+import { ArrowLeft } from '@element-plus/icons-vue'
 
 const __PH = window.__PH
 
@@ -960,5 +961,25 @@ onMounted(() => { loadDetail(); loadReviews() })
     height: 40px;
   }
   .zoom-counter { bottom: 90px; }
+}
+
+/* 小屏手机（≤480px）：进一步压缩轮播高度与操作按钮 */
+@media (max-width: 480px) {
+  .container { padding: 0 12px; }
+  .main-content { padding: 16px 12px 40px; }
+  .detail-wrap { padding: 12px; gap: 18px; border-radius: var(--radius-lg); }
+  .carousel-wrap :deep(.el-carousel__container) {
+    height: 280px !important;
+  }
+  .name { font-size: 18px; }
+  .subtitle { margin-bottom: 14px; }
+  .price-block .price { font-size: 24px; }
+  .sku-selector { margin: 16px 0 18px; }
+  /* 三个按钮窄屏改两行：主按钮并排占满，收藏按钮换行 */
+  .action-row { flex-wrap: wrap; gap: 10px; }
+  .btn-cart, .btn-buy { flex: 1 1 calc(50% - 5px); }
+  .btn-fav { min-width: 0; width: 100%; }
+  .review-item { padding: 12px 14px; }
+  .comment-input-row { flex-wrap: nowrap; }
 }
 </style>

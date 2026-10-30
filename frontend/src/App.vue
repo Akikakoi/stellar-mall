@@ -142,9 +142,26 @@ a {
   z-index: 1;
 }
 
-/* AI 助手页面：NavHeader 64px + 布局区 = 100vh，避免底部空白 */
+/* AI 助手页面：NavHeader + 布局区 = 视口高，避免底部空白。
+   高度用 RagChat 注入的 --rag-layout-height（按实际顶栏高 + 软键盘可视高计算），
+   未注入时回落 calc(100vh - 64px) */
 .page-bg--rag {
   min-height: auto;
-  height: calc(100vh - 64px);
+  height: var(--rag-layout-height, calc(100vh - 64px));
+}
+
+/* 移动端：底部快捷条（FloatingSidebar）占据高度，页面底部预留空间避免内容被遮挡。
+   仅在快捷条实际显示的页面生效（body.has-mobile-dock 由组件挂载时切换） */
+@media (max-width: 768px) {
+  body.has-mobile-dock .page-bg {
+    padding-bottom: 76px;
+  }
+}
+
+/* 移动端：固定 px 宽度的 el-dialog 在小屏会横向溢出，统一钳制在视口内 */
+@media (max-width: 600px) {
+  body .el-dialog {
+    max-width: calc(100vw - 24px) !important;
+  }
 }
 </style>

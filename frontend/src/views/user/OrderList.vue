@@ -466,4 +466,34 @@ onUnmounted(stopCountdown)
 .pay-method-group { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
 .pay-method-radio { padding: 12px 16px; border: 1px solid var(--border-base); border-radius: var(--radius-md); width: 100%; }
 .pay-method-radio:hover { border-color: var(--brand-primary); }
+
+/* ===== 移动端 ===== */
+@media (max-width: 768px) {
+  .container { padding: 0 12px; }
+  .main-content { padding: 16px 12px 40px; }
+  .order-tabs { padding: 0 8px; margin-bottom: 14px; }
+  /* 订单头信息允许换行，避免长单号把状态标签挤出去 */
+  .order-head { flex-wrap: wrap; gap: 8px 12px; padding: 12px 14px; }
+  .order-head .info { font-size: 13px; min-width: 0; }
+  .order-no { word-break: break-all; }
+  .status-tag { margin-left: auto; }
+  .order-body { padding: 10px 14px; }
+  /* 商品行：缩略图缩小，价格/数量列宽自适应 */
+  .item-row { grid-template-columns: 56px 1fr auto auto; gap: 8px; }
+  .thumb { width: 48px; height: 48px; }
+  .item-name { font-size: 13px; }
+  .item-price { font-size: 13px; }
+  .item-qty { font-size: 12px; }
+  /* 底部改为上下两行：合计在上，按钮换行排布 */
+  .order-foot { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 14px; }
+  .order-foot .amount { font-size: 17px; }
+  .actions { flex-wrap: wrap; gap: 8px; width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .order-head { padding: 10px 12px; }
+  .order-head .label { display: none; }  /* 「订单号：」「下单时间：」前缀省略，靠内容自解释 */
+  .order-body { padding: 8px 12px; }
+  .order-foot { padding: 10px 12px; }
+}
 </style>

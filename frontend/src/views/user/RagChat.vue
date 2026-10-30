@@ -1,7 +1,11 @@
 <template>
   <div class="layout">
+    <!-- 移动端抽屉遮罩 -->
+    <transition name="mask-fade">
+      <div v-if="sidebarOpen" class="sidebar-mask" @click="sidebarOpen = false"></div>
+    </transition>
 
-    <aside class="sidebar">
+    <aside class="sidebar" :class="{ open: sidebarOpen }">
       <div class="sb-head">
         <div class="brand" @click="goHome">
           <div class="brand-icon">
@@ -80,6 +84,14 @@
     <main class="chat-main">
       <header class="topbar">
         <div class="topbar-left">
+          <button
+            type="button"
+            class="sb-toggle"
+            aria-label="打开会话列表"
+            @click="sidebarOpen = true"
+          >
+            <el-icon :size="20"><Expand /></el-icon>
+          </button>
           <div class="conv-title">
             <el-icon v-if="currentConvTitle"><ChatDotRound /></el-icon>
             <span v-if="currentConvTitle">{{ currentConvTitle }}</span>
@@ -211,7 +223,7 @@ import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import {
   Plus, Edit, Delete, ChatDotRound, DataAnalysis, User, SwitchButton,
   ArrowDown, ArrowLeft, Collection, Promotion, ArrowUp, Loading, Warning,
-  ArrowRight, ChatLineRound,
+  ArrowRight, ChatLineRound, Expand,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
@@ -233,6 +245,8 @@ const msgsRef = ref<any>(null)
 const loadingList = ref(false)
 const loadingMsgs = ref(false)
 const inputFocused = ref(false)
+// 移动端会话抽屉开关（≤768px 侧栏变为 off-canvas 抽屉）
+const sidebarOpen = ref(false)
 const lastAssistantStreaming = computed(() =>
   chatStore.messages.some((m: any) => m.streaming)
 )
@@ -386,16 +400,28 @@ document.body.style.overflow = 'hidden'
 /**
  * 根据窗口高度动态计算并设置布局 CSS 变量
  * 用于响应窗口大小变化，保持聊天界面正确的高度
+ *
+ * 移动端软键盘：iOS/Android 默认 resizes-visual —— 键盘弹出时 window.innerHeight
+ * 不变，布局若不收缩，浏览器会平移可视区，输入框会被顶到屏幕上方或被键盘遮挡。
+ * 因此取 window.innerHeight 与 visualViewport.height 的较小值：键盘弹出时
+ * visualViewport.height 收缩 → 布局随之收缩，输入框始终贴在键盘上方。
  */
 function updateLayoutHeight() {
-  const headerHeight = 64
-  document.documentElement.style.setProperty('--rag-layout-height', `${window.innerHeight - headerHeight}px`)
+  // 以实际顶栏高度计算（移动端顶栏为 56/52px，固定 64 会在底部留白）
+  const headerEl = document.querySelector('.top-bar') as HTMLElement | null
+  const headerHeight = headerEl?.offsetHeight || 64
+  const vv = window.visualViewport
+  const availableH = vv ? Math.min(window.innerHeight, vv.height) : window.innerHeight
+  document.documentElement.style.setProperty('--rag-layout-height', `${availableH - headerHeight}px`)
 }
 
 onMounted(async () => {
   leaving = false
   updateLayoutHeight()
   window.addEventListener('resize', updateLayoutHeight)
+  // visualViewport 的 resize/scroll：软键盘弹出收起、iOS 视口平移时触发
+  window.visualViewport?.addEventListener('resize', updateLayoutHeight)
+  window.visualViewport?.addEventListener('scroll', updateLayoutHeight)
   loadPrompts()
   try {
     await fetchConvs()
@@ -428,6 +454,8 @@ onUnmounted(() => {
 onBeforeUnmount(() => {
   leaving = true
   window.removeEventListener('resize', updateLayoutHeight)
+  window.visualViewport?.removeEventListener('resize', updateLayoutHeight)
+  window.visualViewport?.removeEventListener('scroll', updateLayoutHeight)
   // 不再中止 SSE，让后台流式传输自然完成
   document.body.style.overflow = ''
 })
@@ -452,6 +480,7 @@ watch(() => chatStore.activeId, () => {
  * 创建新的对话会话
  */
 async function startNew() {
+  sidebarOpen.value = false
   await chatStore.createConversation('新的对话')
   input.value = ''
   loadPrompts()
@@ -463,6 +492,7 @@ async function startNew() {
  * @param {string} id - 会话 ID
  */
 async function switchConv(id: any) {
+  sidebarOpen.value = false
   if (id === chatStore.activeId) return
   chatStore.setActive(id)
   input.value = ''
@@ -1379,6 +1409,137 @@ function parseEvent(block: any) {
 
   .el-icon {
     font-size: 14px;
+  }
+}
+
+/* ===== 触屏：会话操作按钮常显（无 hover） ===== */
+@media (hover: none) {
+  .conv-item .ci-ops {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* ===== 移动端：侧栏改抽屉，聊天区占满 ===== */
+.sb-toggle {
+  display: none;
+}
+.sidebar-mask {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* 顶栏切换按钮 */
+  .sb-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-right: 8px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:active {
+      background: var(--bg-hover);
+    }
+  }
+
+  /* 会话列表：off-canvas 抽屉 */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(78vw, 300px);
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 0.26s var(--ease-out, ease-out);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.18);
+  }
+  .sidebar-mask {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 140;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .mask-fade-enter-active,
+  .mask-fade-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .mask-fade-enter-from,
+  .mask-fade-leave-to {
+    opacity: 0;
+  }
+
+  .topbar {
+    height: 54px;
+    padding: 0 14px;
+  }
+  .user-name {
+    display: none;
+  }
+  .msgs {
+    padding: 12px;
+  }
+
+  /* 欢迎页：单列提示卡片 */
+  .prompts {
+    grid-template-columns: 1fr;
+  }
+  .hero-title {
+    font-size: 24px;
+  }
+  .hero-desc {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  .wl-icon-inner {
+    width: 60px;
+    height: 60px;
+    font-size: 26px;
+  }
+
+  /* 输入区：收紧并放大字号避免 iOS 聚焦缩放 */
+  .input-area {
+    padding: 10px 12px 12px;
+  }
+  .input-bar {
+    padding: 8px 10px 8px 12px;
+    gap: 8px;
+
+    :deep(.el-textarea__inner) {
+      font-size: 16px;
+    }
+  }
+  .tip {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    padding: 0 10px;
+  }
+  .role-tag {
+    display: none;
+  }
+  .sb-head {
+    padding: 14px 12px 12px;
   }
 }
 </style>

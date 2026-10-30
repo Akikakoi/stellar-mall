@@ -466,14 +466,6 @@ function goSpu(spuId: any) {
 }
 
 /**
- * 返回上一页，若历史记录为空则跳转到订单列表
- */
-function goBack() {
-  if (window.history.length > 1) router.back()
-  else router.push('/order/list')
-}
-
-/**
  * 跳转到售后申请页面，带上当前订单ID
  */
 function onApplyAfterSale() {
@@ -633,4 +625,33 @@ watch(() => route.params.id, load)
 .amount { color: var(--text-secondary); }
 .amount-num { color: var(--text-primary); font-size: 22px; font-weight: 700; margin-left: 4px; }
 .actions { display: flex; gap: 10px; }
+
+/* ===== 移动端 ===== */
+@media (max-width: 768px) {
+  .order-detail-page { padding-bottom: 170px; }
+  .container { padding: 0 12px; }
+  .main-content { padding: 16px 12px 40px; }
+  .status-card { flex-direction: column; align-items: flex-start; gap: 14px; padding: 16px 14px; }
+  .status-actions { flex-wrap: wrap; gap: 8px; }
+  .panel { padding: 14px; }
+  .item-main { gap: 12px; align-items: flex-start; }
+  .thumb { width: 56px; height: 56px; }
+  /* 信息与金额改为上下两行，金额列收窄 */
+  .item-detail { flex-direction: column; align-items: stretch; }
+  .item-meta { justify-content: flex-end; gap: 10px; }
+  .item-price { width: auto; }
+  .item-qty { width: auto; }
+  .item-subtotal { width: auto; }
+  /* 底部操作栏抬高避开底部快捷条 */
+  body.has-mobile-dock .bottom-bar { bottom: 58px; }
+}
+
+@media (max-width: 480px) {
+  .status-card { padding: 12px; }
+  .amount-num { font-size: 19px; }
+  .bottom-inner { height: 58px; }
+  .panel-head .panel-title { font-size: 15px; }
+  /* 订单信息表格标签列收窄 */
+  :deep(.el-descriptions__label) { width: 88px; }
+}
 </style>

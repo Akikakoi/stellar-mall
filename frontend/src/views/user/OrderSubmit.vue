@@ -740,6 +740,50 @@ onMounted(async () => {
 .address-fade-leave-to {
   opacity: 0;
 }
+
+/* ===== 移动端：表单纵向堆叠 + 商品清单重排 + 结算栏抬高 ===== */
+@media (max-width: 768px) {
+  .order-submit-page { padding-bottom: 180px; }
+  .container { padding: 0 12px; }
+  .main-content { padding: 16px 12px 24px; }
+  .card { padding: 16px 14px; }
+  /* 手动收货信息三个内联定宽输入框改全宽堆叠 */
+  .address-form { flex-direction: column; align-items: stretch; }
+  .address-form .el-input {
+    width: 100% !important;
+    margin-right: 0 !important;
+  }
+  .addr-switch { flex-wrap: wrap; gap: 8px; }
+  .coupon-select { flex-wrap: wrap; }
+  .coupon-select .el-select { width: 100% !important; }
+  .points-toggle { flex-wrap: wrap; row-gap: 6px; }
+  /* 商品清单：表头隐藏，商品行两行排布 */
+  .row.header { display: none; }
+  .row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'product product'
+      'qty     subtotal';
+    gap: 6px 12px;
+  }
+  .col-product { grid-area: product; }
+  .col-qty { grid-area: qty; text-align: left; }
+  .col-subtotal { grid-area: subtotal; text-align: right; }
+  /* 单价与小计重复，移动端隐藏单价列 */
+  .col-price { display: none; }
+  .thumb { width: 56px; height: 56px; }
+  /* 结算栏：抬高避开底部快捷条，收窄内边距 */
+  body.has-mobile-dock .summary-bar { bottom: 58px; height: 76px; padding: 0 16px; }
+  .summary-info { gap: 14px; flex-wrap: wrap; }
+  .summary-info .amount { font-size: 22px; }
+}
+
+@media (max-width: 480px) {
+  .summary-bar { height: 70px; padding: 0 12px; }
+  .summary-info .line { font-size: 12px; }
+  .summary-info .amount { font-size: 20px; }
+  .card-title { font-size: 15px; margin-bottom: 12px; }
+}
 </style>
 
 <style>

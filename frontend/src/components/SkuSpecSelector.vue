@@ -629,4 +629,15 @@ onMounted(() => {
   color: var(--spec-active, var(--brand-primary));
   font-weight: 500;
 }
+
+/* ===== 移动端：收紧间距，库存提示允许换行 ===== */
+@media (max-width: 480px) {
+  .sku-spec-selector { gap: 14px; }
+  .spec-options { gap: 8px; }
+  .spec-option { padding: 7px 12px; font-size: 13px; }
+  .qty-input { width: 48px; }
+  .stock-hint { margin-left: 8px; font-size: 12px; display: inline-block; max-width: calc(100% - 160px); vertical-align: middle; }
+  .qty-row .qty-control { flex-wrap: wrap; row-gap: 6px; }
+  .service-option { width: 100%; box-sizing: border-box; }
+}
 </style>

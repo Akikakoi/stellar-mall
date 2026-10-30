@@ -485,4 +485,15 @@ onMounted(loadProfile)
 .code-row { display: flex; gap: 12px; width: 100%; }
 .code-row .el-input { flex: 1; }
 .email-tip { margin: 0; padding: 0 8px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+/* ===== 移动端 ===== */
+@media (max-width: 768px) {
+  .container { padding: 0 12px; }
+  .main-content { padding: 16px 12px 40px; }
+  .card { padding: 16px 14px; }
+  .user-card { gap: 16px; }
+  .avatar { width: 64px; height: 64px; font-size: 26px; }
+  .nickname { font-size: 19px; }
+  .profile-tabs { padding: 4px 12px 18px; }
+}
 </style>

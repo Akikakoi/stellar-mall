@@ -1558,4 +1558,41 @@ onUnmounted(() => {
   }
   .hero-ticker { display: none; }
 }
+
+/* 手机端（≤768px）：收紧留白，商品网格降为两列 */
+@media (max-width: 768px) {
+  .container { padding: 0 16px; }
+  .hero-inner { padding: 0 16px; }
+  .main-content { padding: 26px 16px 48px; }
+  .hero-eyebrow { margin-bottom: 14px; }
+  .hero-subtitle { font-size: 18px; margin-bottom: 22px; }
+  .hero-desc { font-size: 15px; margin-bottom: 22px; }
+  .hero-cta { height: 48px; padding: 0 30px; font-size: 16px; }
+  .cat-section { margin-bottom: 30px; }
+  .cat-header { flex-wrap: wrap; gap: 10px; }
+  .cat-title { font-size: 20px; }
+  /* 两列网格下大图横幅不再跨行（内联 style 的 gridRow 用 !important 压掉） */
+  .cat-banner { grid-row: auto !important; min-height: 180px; }
+  .cat-grid { gap: 10px; grid-auto-rows: auto; }
+  .p-card { padding: 14px 10px 12px; }
+  .p-card img { width: 100%; max-width: 150px; height: auto; aspect-ratio: 1; }
+  .spu-grid { gap: 12px; grid-template-columns: repeat(2, 1fr); }
+  .spu-card { border-radius: 16px; }
+  .spu-info { padding: 12px 12px 14px; }
+  .spu-name { font-size: 14px; min-height: auto; -webkit-line-clamp: 2; }
+  .spu-price { font-size: 16px; }
+  .add-cart-btn { transform: scale(0.92); transform-origin: right center; }
+  .coupon-entry-inner { padding: 20px; gap: 14px; }
+}
+
+/* 小屏手机（≤480px）：进一步压缩字号与卡片内边距 */
+@media (max-width: 480px) {
+  .hero-eyebrow { font-size: 12px; padding: 5px 12px; }
+  .hero-subtitle { font-size: 16px; }
+  .hero-cta { height: 46px; padding: 0 26px; font-size: 15px; }
+  .sub-tabs { gap: 14px; }
+  .sub-tab { font-size: 13px; }
+  .p-card img { max-width: 118px; }
+  .banner-caption { font-size: 15px; padding: 12px 16px; }
+}
 </style>
