@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.config import settings
-from app.rag.vector_store import ChromaVectorStore, get_vector_store
+from app.rag.vector_store import EsVectorStore, get_vector_store
 
 router = APIRouter()
 
@@ -205,7 +205,7 @@ def sync_spu(
 
     chunk_count = 0
     if chunks:
-        mgr: ChromaVectorStore = get_vector_store()
+        mgr: EsVectorStore = get_vector_store()
         try:
             # 先按 biz_type+biz_id 删除旧分块（幂等），再重新写入
             mgr.delete_by_metadata_filter(
@@ -230,12 +230,12 @@ def sync_spu(
     except Exception:
         pass  # 缓存失效异常不影响主流程
 
-    # === 失效 BM25 索引缓存 ===
+    # === 失效 kb_tool 全量文档缓存 ===
     # 本接口是「先删旧分块再写新分块」，总条数可能不变，
     # 仅靠 count 校验无法发现内容已更新，必须显式置空。
     try:
-        from app.rag.retriever import invalidate_bm25_cache
-        invalidate_bm25_cache()
+        from app.rag.retriever import invalidate_docs_cache
+        invalidate_docs_cache()
     except Exception:
         pass
 
@@ -275,7 +275,7 @@ def sync_doc(
 
     chunk_count = 0
     if chunks:
-        mgr: ChromaVectorStore = get_vector_store()
+        mgr: EsVectorStore = get_vector_store()
         try:
             mgr.delete_by_metadata_filter(
                 {"source": "mall_doc", "biz_id": biz_id, "biz_type": metadata_base["biz_type"]}
@@ -291,10 +291,10 @@ def sync_doc(
                 detail=f"Vector store failed: {e}",
             ) from e
 
-    # === 失效 BM25 索引缓存（先删后写，总数可能不变，需显式置空） ===
+    # === 失效 kb_tool 全量文档缓存（先删后写，总数可能不变，需显式置空） ===
     try:
-        from app.rag.retriever import invalidate_bm25_cache
-        invalidate_bm25_cache()
+        from app.rag.retriever import invalidate_docs_cache
+        invalidate_docs_cache()
     except Exception:
         pass
 

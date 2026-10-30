@@ -107,9 +107,8 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = 1024
     DASHSCOPE_EMBEDDING_MODEL: str = "text-embedding-v2"
 
-    # Chroma
-    CHROMA_PERSIST_DIR: str = "./data/chroma"
-    CHROMA_COLLECTION_NAME: str = "ecommerce_knowledge_base"
+    # Elasticsearch（P2：知识库检索 + L2 语义缓存，与商城搜索共用同一 ES 实例）
+    ES_URL: str = "http://127.0.0.1:9200"
 
     # 上传
     UPLOAD_DIR: str = "./data/uploads"

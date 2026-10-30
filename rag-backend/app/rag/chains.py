@@ -11,8 +11,15 @@ from app.rag.retriever import hybrid_retrieve, rerank
 from app.rag.llm_cache import get_llm_cache, RAG_PROMPT_HASH, REWRITE_PROMPT_HASH
 
 
-def _fix_garbled_tags(text: str) -> str:
-    """修复 ChromaDB 中可能存在的 GBK→Latin-1 编码错乱。"""
+def _fix_garbled_tags(text) -> str:
+    """修复历史数据中可能存在的 GBK→Latin-1 编码错乱。
+
+    P2 后 ES 里 tags 是数组（list[str]），这里统一 join 回逗号字符串，
+    保持对外输出与 Chroma 时代的格式一致。
+    """
+    if isinstance(text, (list, tuple)):
+        text = ",".join(str(t) for t in text)
+    text = str(text or "")
     if not text or all(ord(c) < 128 or '\u4e00' <= c <= '\u9fff' or c.isspace() for c in text):
         return text
     try:

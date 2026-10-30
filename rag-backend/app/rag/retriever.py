@@ -1,4 +1,12 @@
-"""检索器：向量召回 + BM25 混合 + Rerank 精排 + 缓存。"""
+"""检索器：ES 原生 RRF 混合召回（kNN + BM25）+ Rerank 精排 + 缓存。
+
+P2 迁移说明：
+  原 Chroma 时代 BM25 在 Python 内存里从全量文档重建（进程级缓存缓解），
+  tags 过滤靠先取 top_k 再 Python 后过滤（有召回损失）。
+  迁 ES 后，kNN 与 BM25 由 ES 单请求融合（rank.rrf），tags 过滤下推为
+  filter context（wildcard 子串语义，见 es_client.es_tags_filter），
+  全量重建与后过滤召回损失问题一并消失。
+"""
 from __future__ import annotations
 import threading
 from typing import List, Optional, Tuple
@@ -6,7 +14,7 @@ from typing import List, Optional, Tuple
 from app.config import settings
 from app.core.logger import logger
 from app.rag.embeddings import get_embeddings
-from app.rag.vector_store import get_vector_store
+from app.rag.es_client import KB_ES_INDEX, es_tags_filter, get_es
 
 # BGE Reranker 单例（懒加载）
 _reranker_instance = None
@@ -14,133 +22,139 @@ _reranker_load_attempted = False
 
 
 # =====================================================
-# BM25 索引缓存（进程级单例 + 失效重建）
+# 全量文档缓存（进程级单例，kb_tool 全库打分工具用）
 # =====================================================
-# 背景：原实现每次 hybrid_retrieve() 都从 Chroma 全量拉取并重新分词建 BM25 倒排，
-# 数据量越大越慢，且与请求数成线性关系。这里改为进程级缓存：
-#   - 缓存全量 Document 列表（未过滤 tags），过滤在每次查询时轻量进行；
+# ES 时代 BM25 倒排由 ES 维护，不再需要全量重建缓存；但 kb_tool 的
+# kb_spec_compare / kb_specs_for_products 仍是「全库拉取 + Python 打分」
+# 模式，这里保留进程级缓存避免每次工具调用都全量 IO。
 #   - 按 doc 数量做失效校验，知识库增删后 count 变化即自动重建；
-#   - 知识库变更方也可显式调用 invalidate_bm25_cache() 立即置空。
-_bm25_docs_cache: Optional[List] = None
-_bm25_docs_count: int = -1
-_bm25_lock = threading.Lock()
+#   - 内容更新但 count 不变的场景（SPU 同步）由 invalidate_docs_cache() 显式置空。
+_docs_cache: Optional[List] = None
+_docs_cache_count: int = -1
+_docs_lock = threading.Lock()
 
 
-def invalidate_bm25_cache() -> None:
-    """置空 BM25 文档缓存，下次查询时重建。知识库增删文档后调用。"""
-    global _bm25_docs_cache, _bm25_docs_count
-    with _bm25_lock:
-        _bm25_docs_cache = None
-        _bm25_docs_count = -1
-    logger.info("[BM25] 索引缓存已失效，下次检索将重建")
+def invalidate_docs_cache() -> None:
+    """置空全量文档缓存，下次查询时重建。知识库增删改文档后调用。"""
+    global _docs_cache, _docs_cache_count
+    with _docs_lock:
+        _docs_cache = None
+        _docs_cache_count = -1
+    logger.info("[DocsCache] 全量文档缓存已失效，下次检索将重建")
+
+
+def _matches_tag_filter(metadata: dict, tags_filter: List[str]) -> bool:
+    """检查 metadata 的 tags 字段是否包含 tags_filter 中任一值（子串语义）。
+
+    ES 检索路径的 tags 过滤已下推（wildcard），此函数仅供 kb_tool 的
+    全库 Python 打分路径使用。tags 现为 list（逗号字符串已拆分），
+    对任一元素做子串判断，与原逗号字符串 in 判断等价。
+    """
+    tags = metadata.get("tags", "")
+    if isinstance(tags, list):
+        tag_str = ",".join(str(t) for t in tags)
+    else:
+        tag_str = str(tags or "")
+    if not tag_str:
+        return False
+    return any(t in tag_str for t in tags_filter)
 
 
 def _get_all_docs_cached() -> List:
     """获取知识库全量 Document（进程级缓存）。count 变化时自动重建。"""
-    global _bm25_docs_cache, _bm25_docs_count
+    global _docs_cache, _docs_cache_count
     from langchain_core.documents import Document
 
+    from app.rag.vector_store import get_vector_store
     vs = get_vector_store()
     try:
         current_count = vs.count()
     except Exception:
         current_count = -1
 
-    with _bm25_lock:
-        if _bm25_docs_cache is not None and _bm25_docs_count == current_count:
-            return _bm25_docs_cache
+    with _docs_lock:
+        if _docs_cache is not None and _docs_cache_count == current_count:
+            return _docs_cache
         try:
-            col = vs.lc._collection
-            batch = col.get(include=["documents", "metadatas"])
+            es = get_es()
+            res = es.search(
+                index=KB_ES_INDEX,
+                query={"match_all": {}},
+                size=10000,
+                _source={"excludes": ["vec"]},
+            )
+            hits = res["hits"]["hits"]
+            all_docs = [
+                Document(
+                    page_content=h["_source"].get("content", ""),
+                    metadata={k: v for k, v in h["_source"].items() if k != "content"},
+                )
+                for h in hits
+            ]
         except Exception as e:  # noqa
-            logger.warning(f"从 Chroma 取全量失败: {e}")
-            return _bm25_docs_cache if _bm25_docs_cache is not None else []
-        docs = batch.get("documents") or []
-        metas = batch.get("metadatas") or []
-        all_docs = [Document(page_content=d, metadata=m or {}) for d, m in zip(docs, metas)]
-        _bm25_docs_cache = all_docs
-        _bm25_docs_count = current_count if current_count >= 0 else len(all_docs)
-        logger.info(f"[BM25] 全量文档缓存已重建: {len(all_docs)} 条")
+            logger.warning(f"从 ES 取全量失败: {e}")
+            return _docs_cache if _docs_cache is not None else []
+        _docs_cache = all_docs
+        _docs_cache_count = current_count if current_count >= 0 else len(all_docs)
+        logger.info(f"[DocsCache] 全量文档缓存已重建: {len(all_docs)} 条")
         return all_docs
 
 
 # =====================================================
-# 1) 混合检索：EnsembleRetriever
+# 1) 混合检索：kNN + BM25 双查询 → Python RRF 融合
 # =====================================================
-def _matches_tag_filter(metadata: dict, tags_filter: List[str]) -> bool:
-    """检查 metadata 的 tags 字段是否包含 tags_filter 中任一值。
-    
-    ChromaDB 1.5.x 移除了对 string 字段的 $contains 子串匹配（仅保留 list 字段的 $contains），
-    导致之前用 ChromaDB where 做 tags_filter 在 1.x 下静默返回 0 条。
-    改为 Python 后过滤，兼容 0.x / 1.x 所有版本。
-    """
-    tags = str(metadata.get("tags", "") or "")
-    if not tags:
-        return False
-    return any(t in tags for t in tags_filter)
-
-
-def _build_bm25_retriever_from_chroma(top_k: int, tags_filter: Optional[List[str]]):
-    """从缓存的 Chroma 全量 docs 构建 BM25（索引常驻，避免每次请求重建）。
-
-    优化点：全量拉取 + 分词建索引已下沉到 _get_all_docs_cached()，
-    仅在知识库 count 变化时重建；此处只做 tags 过滤与 BM25 对象构建。
-    注：BM25 对象本身仍按查询构建（涉及 tags_filter 不同），但省掉了最重的
-    全量 IO 与分词；如需进一步优化可对 BM25 也做 (top_k, tags) 维度缓存。
-    """
-    try:
-        from langchain_community.retrievers import BM25Retriever
-    except Exception as e:  # noqa
-        logger.warning(f"BM25Retriever 不可用: {e}")
-        return None
-    all_docs = _get_all_docs_cached()
-    if not all_docs:
-        return None
-    # tags 过滤在缓存的 doc 列表上做（浅拷贝列表，Document 对象复用）
-    if tags_filter:
-        all_docs = [d for d in all_docs if _matches_tag_filter(d.metadata, tags_filter)]
-    if not all_docs:
-        return None
-    bm25 = BM25Retriever.from_documents(all_docs)
-    bm25.k = top_k
-    return bm25
-
-
 def hybrid_retrieve(query: str, top_k: int | None = None, tags_filter: Optional[List[str]] = None):
-    """混合召回：向量 + BM25（若可用）；若 EnsembleRetriever 不可用则只走向量。"""
+    """混合召回：ES kNN（语义）+ match（BM25 关键词）两路查询，Python 层 RRF 融合。
+
+    - tags_filter 下推为 filter context（knn.filter + bool.filter 双路同时过滤），
+      避免「先取 top_k 再后过滤」的召回损失；
+    - 融合用标准 RRF：score(d)=Σ 1/(RRF_K+rank_i(d))。注：ES 的 rank.rrf 需要
+      白金 license（Basic 报 403 non-compliant），故由 Python 融合，查询本身
+      两路各一次，数据量级下开销可忽略；
+    - BM25 零命中时自然退化为纯向量排序，无附加逻辑。
+    """
     top_k = top_k or settings.RETRIEVER_TOP_K
-    vs = get_vector_store()
-    vs.k = top_k  # type: ignore
-    # 不再用 ChromaDB where 做 tags_filter，改为 Python 后过滤
-    vector_ret = vs.as_retriever(top_k=top_k)
-    bm25 = _build_bm25_retriever_from_chroma(top_k, tags_filter)
-    if bm25 is None:
-        docs = vector_ret.invoke(query)
-        # Python 后过滤
-        if tags_filter:
-            docs = [d for d in docs if _matches_tag_filter(d.metadata, tags_filter)]
-        return docs
+    from langchain_core.documents import Document
+
     try:
-        try:
-            from langchain_classic.retrievers import EnsembleRetriever  # langchain 1.x 新路径
-        except Exception:
-            try:
-                from langchain_community.retrievers import EnsembleRetriever  # langchain 0.3.x 路径
-            except Exception:
-                from langchain.retrievers import EnsembleRetriever  # langchain 0.2 最旧路径
-        ensemble = EnsembleRetriever(retrievers=[bm25, vector_ret], weights=[0.4, 0.6])
-        # EnsembleRetriever 不直接支持 top_k，由各内部 retriever 控制
-        docs = ensemble.invoke(query)
-        # Python 后过滤（vector_ret 结果可能还没过滤）
-        if tags_filter:
-            docs = [d for d in docs if _matches_tag_filter(d.metadata, tags_filter)]
-        return docs[:top_k]
+        es = get_es()
+        q_emb = get_embeddings().embed_query(query)
+        tag_flt = es_tags_filter(tags_filter)
+        src_excl = {"excludes": ["vec"]}
+
+        # 两路查询：kNN 语义 + BM25 关键词
+        knn_res = es.search(
+            index=KB_ES_INDEX,
+            knn={"field": "vec", "query_vector": q_emb, "k": top_k,
+                 "num_candidates": max(top_k * 5, 50), "filter": tag_flt},
+            size=top_k, _source=src_excl,
+        )
+        bm25_res = es.search(
+            index=KB_ES_INDEX,
+            query={"bool": {"must": [{"match": {"content": {"query": query}}}],
+                            "filter": tag_flt}},
+            size=top_k, _source=src_excl,
+        )
+
+        # Python RRF 融合：按 hit 顺序取 rank，score = Σ 1/(K + rank)
+        rrf_k = 60
+        scores: dict = {}   # id -> rrf 分
+        docs_by_id: dict = {}
+        for res in (knn_res, bm25_res):
+            for rank, hit in enumerate(res["hits"]["hits"]):
+                hid = hit["_id"]
+                scores[hid] = scores.get(hid, 0.0) + 1.0 / (rrf_k + rank + 1)
+                if hid not in docs_by_id:
+                    src = hit["_source"]
+                    docs_by_id[hid] = Document(
+                        page_content=src.get("content", ""),
+                        metadata={k: v for k, v in src.items() if k != "content"},
+                    )
+        ranked_ids = sorted(scores, key=lambda i: scores[i], reverse=True)[:top_k]
+        return [docs_by_id[i] for i in ranked_ids]
     except Exception as e:  # noqa
-        logger.warning(f"EnsembleRetriever 不可用: {e}")
-        docs = vector_ret.invoke(query)
-        if tags_filter:
-            docs = [d for d in docs if _matches_tag_filter(d.metadata, tags_filter)]
-        return docs
+        logger.warning(f"[Hybrid] ES 混合检索失败: {e}")
+        return []
 
 
 # =====================================================

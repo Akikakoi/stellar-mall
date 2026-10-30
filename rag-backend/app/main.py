@@ -91,7 +91,7 @@ def _seed_admin_once() -> None:
 
 def _ensure_dirs() -> None:
     from pathlib import Path
-    for d in [settings.UPLOAD_DIR, settings.CHROMA_PERSIST_DIR, settings.SAMPLE_DATA_DIR]:
+    for d in [settings.UPLOAD_DIR, settings.SAMPLE_DATA_DIR]:
         Path(d).mkdir(parents=True, exist_ok=True)
 
 

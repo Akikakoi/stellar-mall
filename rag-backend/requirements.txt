@@ -20,11 +20,10 @@ langchain==1.3.13
 langchain-core==1.4.9
 langchain-community==0.4.1
 langchain-classic==1.0.4
-langchain-chroma==1.1.0
 langchain-text-splitters==1.1.2
 
-# Vector DB
-chromadb==1.5.8
+# Vector Store（P2：Chroma 退场，知识库检索 + L2 语义缓存迁 ES）
+elasticsearch>=8.13,<9
 
 # Embeddings (BGE local + DashScope API compatible)
 sentence-transformers==3.1.1
@@ -36,9 +35,6 @@ pypdf==5.0.0
 python-docx==1.1.2
 unstructured>=0.16.19
 markdown==3.7
-
-# BM25 for hybrid retrieval
-rank-bm25==0.2.2
 
 # Rerank
 FlagEmbedding==1.2.11

@@ -522,12 +522,10 @@ def _redis_put_sync(
 
 
 # ==============================================
-# L2: Chroma 语义缓存
+# L2: ES 语义缓存
 # ==============================================
 _semantic_collection: Any = None
 _semantic_available = False
-
-_SEMANTIC_COLLECTION_NAME = "llm_semantic_cache"
 
 # L2 容量淘汰节流：全表扫描淘汰是重操作，两次淘汰间隔不低于此秒数
 _L2_EVICT_MIN_INTERVAL = 300.0
@@ -535,7 +533,7 @@ _l2_evict_last = [0.0]  # 上次淘汰时间戳（list 包装以便函数内直�
 
 
 def _get_semantic_collection():
-    """获取或初始化 Chroma 语义缓存 collection。"""
+    """获取或初始化 ES 语义缓存 collection（P2：Chroma → ES，接口保持 Chroma 同构）。"""
     global _semantic_collection, _semantic_available
     if _semantic_collection is not None:
         return _semantic_collection if _semantic_available else None
@@ -543,26 +541,15 @@ def _get_semantic_collection():
         logger.info("[LLMCache] L2 语义缓存已关闭")
         return None
     try:
-        import chromadb
-        from app.rag.vector_store import get_vector_store
-        vs = get_vector_store()
-        client = vs._client
-        try:
-            _semantic_collection = client.get_collection(_SEMANTIC_COLLECTION_NAME)
-            logger.info(f"[LLMCache] L2 Chroma collection '{_SEMANTIC_COLLECTION_NAME}' 已存在, "
-                        f"count={_semantic_collection.count()}")
-        except Exception:
-            # collection 不存在，新建
-            _semantic_collection = client.create_collection(
-                name=_SEMANTIC_COLLECTION_NAME,
-                metadata={"hnsw:space": "cosine"},
-            )
-            logger.info(f"[LLMCache] L2 Chroma collection '{_SEMANTIC_COLLECTION_NAME}' 新建成功")
+        from app.rag.es_client import ESCacheCollection
+        _semantic_collection = ESCacheCollection()
+        logger.info(f"[LLMCache] L2 ES 语义缓存索引已就绪 "
+                    f"count={_semantic_collection.count()}")
         _semantic_available = True
         return _semantic_collection
     except Exception as e:
         _semantic_available = False
-        logger.warning(f"[LLMCache] L2 Chroma 语义缓存不可用 ({e})")
+        logger.warning(f"[LLMCache] L2 ES 语义缓存不可用 ({e})")
         return None
 
 

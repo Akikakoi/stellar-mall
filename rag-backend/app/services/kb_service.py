@@ -17,7 +17,7 @@ from app.core.logger import logger
 from app.core.utils import escape_sql_like
 from app.models import KbDocument, User
 from app.rag.llm_cache import invalidate_llm_cache_nowait
-from app.rag.retriever import get_query_cache, invalidate_bm25_cache
+from app.rag.retriever import get_query_cache, invalidate_docs_cache
 from app.schemas import KbDocInfo, KbDocUpdateReq, KbPreviewResp
 from app.services.operation_log_service import log_operation
 
@@ -32,7 +32,7 @@ class KbService:
     def _clear_query_cache() -> None:
         """知识库内容发生变更后清空 FAQ 查询缓存 + 三层 LLM 缓存，避免返回过期答案。
 
-        LLM 缓存（L1 Redis 精确 / L2 Chroma 语义）里的答案引用了 KB 内容，
+        LLM 缓存（L1 Redis 精确 / L2 ES 语义）里的答案引用了 KB 内容，
         KB 变更无法按商品维度精准失效，走全量清空（KB 变更是低频管理操作，可接受）。
         """
         try:
@@ -40,11 +40,11 @@ class KbService:
             logger.info("知识库变更，已清空查询缓存")
         except Exception as e:  # noqa
             logger.warning(f"清空查询缓存失败: {e}")
-        # BM25 索引常驻缓存：KB 增删后必须失效，否则新文档检索不到 / 旧文档仍命中
+        # kb_tool 全量文档缓存：KB 增删后必须失效，否则新文档检索不到 / 旧文档仍命中
         try:
-            invalidate_bm25_cache()
+            invalidate_docs_cache()
         except Exception as e:  # noqa
-            logger.warning(f"清空 BM25 缓存失败: {e}")
+            logger.warning(f"清空全量文档缓存失败: {e}")
         invalidate_llm_cache_nowait()
 
     # ---------- 列表 ----------
@@ -277,9 +277,7 @@ class KbService:
         try:
             from app.rag.vector_store import get_vector_store
             vs = get_vector_store()
-            col = vs.lc._collection
-            where = {"doc_id": int(doc_id)}
-            res = col.get(where=where, include=["documents", "metadatas"])
+            res = vs.get_by_doc_id(doc_id)
             ids = res.get("ids", [])
             docs = res.get("documents", [])
             metas = res.get("metadatas", [])

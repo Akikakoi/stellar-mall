@@ -9,12 +9,12 @@ from app.models import KbDocument, User, UserRole
 
 
 def load_sample_data_if_empty() -> None:
-    """仅当 Chroma 为空 + 样例数据目录有文件时，自动入库（创建一个内置 admin 上传记录）。"""
+    """仅当 ES 知识库索引为空 + 样例数据目录有文件时，自动入库（创建一个内置 admin 上传记录）。"""
     from app.rag.vector_store import get_vector_store
 
     vs = get_vector_store()
     if not vs.collection_empty():
-        logger.info("[SampleData] Chroma 已有数据，跳过样例导入")
+        logger.info("[SampleData] 知识库已有数据，跳过样例导入")
         return
     sample_dir = Path(settings.BASE_DIR) / settings.SAMPLE_DATA_DIR
     files = [p for p in sample_dir.glob("*") if p.suffix.lower() in settings.ALLOWED_EXT_LIST]
