@@ -3,18 +3,14 @@ package com.stellar.elasticsearch.service;
 import com.stellar.elasticsearch.doc.SpuDocument;
 import com.stellar.vo.SearchSuggestVO;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 搜索建议服务 — 提供自动补全 + 拼写纠错。
@@ -46,11 +42,9 @@ public class SearchSuggestService {
         SearchSuggestVO vo = new SearchSuggestVO();
 
         // --- 自动补全：match_phrase_prefix ---
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.matchPhrasePrefixQuery("name", kw));
-
-        NativeSearchQuery query = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q.bool(b -> b
+                        .must(m -> m.matchPhrasePrefix(mpp -> mpp.field("name").query(kw)))))
                 .withPageable(PageRequest.of(0, MAX_SUGGESTIONS))
                 .withFields("name")
                 .build();
@@ -87,12 +81,12 @@ public class SearchSuggestService {
         String kw = keyword.trim();
         if (kw.length() < 3) return null;
 
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
-                .must(QueryBuilders.multiMatchQuery(kw, "name", "subTitle")
-                        .fuzziness("AUTO"));
-
-        NativeSearchQuery query = new NativeSearchQueryBuilder()
-                .withQuery(boolQuery)
+        NativeQuery query = NativeQuery.builder()
+                .withQuery(q -> q.bool(b -> b
+                        .must(m -> m.multiMatch(mm -> mm
+                                .query(kw)
+                                .fields("name", "subTitle")
+                                .fuzziness("AUTO")))))
                 .withPageable(PageRequest.of(0, 3))
                 .withFields("name")
                 .build();

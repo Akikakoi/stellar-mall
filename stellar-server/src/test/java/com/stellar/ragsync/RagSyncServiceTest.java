@@ -52,6 +52,9 @@ class RagSyncServiceTest {
     @MockBean
     private org.springframework.data.elasticsearch.core.ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     @BeforeEach
     void resetMocks() {
         Mockito.reset(ragSyncClient);

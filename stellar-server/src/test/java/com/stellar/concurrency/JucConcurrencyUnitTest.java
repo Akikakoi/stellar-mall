@@ -1,5 +1,6 @@
 package com.stellar.concurrency;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.stellar.config.AsyncExecutorConfig;
 import com.stellar.config.BaseContextTaskDecorator;
@@ -154,6 +155,7 @@ class JucConcurrencyUnitTest {
     void searchCachesUseCaffeinePolicies() throws Exception {
         SpuSearchService service = new SpuSearchService(
                 mock(ElasticsearchOperations.class),
+                mock(ElasticsearchClient.class),
                 mock(SpuMapper.class),
                 mock(SynonymEngine.class));
 

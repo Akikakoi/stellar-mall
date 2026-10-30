@@ -145,12 +145,6 @@
                 <artifactId>hutool-captcha</artifactId>
                 <version>${hutool}</version>
             </dependency>
-            <!-- ES 7.17 的 RestHighLevelClient 与旧查询 API 需要 Spring Data ES 4.4.x。 -->
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-elasticsearch</artifactId>
-                <version>4.4.18</version>
-            </dependency>
             <!-- 三模块互相依赖声明（子模块自己写 version 时自动继承父 POM） -->
             <dependency>
                 <groupId>com.stellar</groupId>

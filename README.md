@@ -88,11 +88,11 @@ stellar-mall/
 docker compose up -d
 ```
 
-启动 MySQL（3307）、Redis（6379）、Elasticsearch（9200）。
+启动 Redis（6380）、Elasticsearch（9200）。MySQL 不在 compose 内，需本机自行安装（默认 `127.0.0.1:3306`）。
 
 ### 2. 初始化数据库
 
-在 MySQL 中创建 `stellar_mall` 数据库，首次建库先执行基础表结构与初始化数据（各一次）：
+在本机 MySQL（默认 `127.0.0.1:3306`）中创建 `stellar_mall` 数据库，首次建库先执行基础表结构与初始化数据（各一次）：
 `stellar-server/src/main/resources/sql/stellar_mall_ddl.sql`、`stellar_mall_init_data.sql`。
 后续增量迁移由 Flyway 在应用启动时自动执行（`db/migration/` 下 V2 起的脚本），无需手工操作。
 

@@ -139,6 +139,9 @@ class CategoryServiceTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     private Long createSpuForTest(Long catId) {
         assertNotNull(spuService, "需要 SpuService 来创建关联商品");
         SpuSaveDTO s = new SpuSaveDTO();

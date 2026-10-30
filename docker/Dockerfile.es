@@ -1,9 +1,9 @@
-FROM elasticsearch:7.17.25
+FROM elasticsearch:8.13.4
 
-# 安装 IK 中文分词器（版本与 ES 严格对齐）
+# 安装 IK 中文分词器（版本与 ES 严格对齐，官方发布源 release.infinilabs.com）
 RUN elasticsearch-plugin install --batch \
-    https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.17.25/elasticsearch-analysis-ik-7.17.25.zip
+    https://release.infinilabs.com/analysis-ik/stable/elasticsearch-analysis-ik-8.13.4.zip
 
 # 安装拼音分词器（可选，用于拼音搜索）
 # RUN elasticsearch-plugin install --batch \
-#     https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v7.17.25/elasticsearch-analysis-pinyin-7.17.25.zip
+#     https://release.infinilabs.com/analysis-pinyin/stable/elasticsearch-analysis-pinyin-8.13.4.zip

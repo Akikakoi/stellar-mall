@@ -47,6 +47,9 @@ class SpuSkuServiceTest {
     @MockBean
     private ElasticsearchOperations elasticsearchOperations;
 
+    @MockBean
+    private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
     private static String uid(String prefix) {
         return prefix + "-UT-" + Integer.toHexString(
                 (int) ((System.nanoTime() ^ System.identityHashCode(Thread.currentThread())) & 0xffff));
