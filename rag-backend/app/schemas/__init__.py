@@ -91,10 +91,8 @@ class ChatReq(BaseModel):
     conversation_id: Optional[int] = Field(None, description="会话ID，不传则新建会话")
     query: str = Field(..., min_length=1, max_length=2000, description="用户问题")
     stream: bool = Field(True, description="是否流式输出")
-    use_rewrite: Optional[bool] = Field(None)
-    top_k: Optional[int] = Field(None, ge=1, le=50)
-    tags_filter: Optional[List[str]] = Field(None, description="按文档标签过滤")
-    use_agent: Optional[bool] = Field(None, description="是否使用智能体模式，不填则用系统默认配置")
+    # 注意：不要加 use_agent / use_rewrite 之类的模式切换字段——/api/chat 已固定走 Agent 链路，
+    # 旧字段从未被任何代码读取（唯一消费者 RAG 直连链路已删除），纯属误导性装饰字段
 
 
 class SourceRef(BaseModel):

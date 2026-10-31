@@ -134,11 +134,6 @@ class Settings(BaseSettings):
     RERANKER_BATCH_SIZE: int = 16
     CHUNK_SIZE: int = 1024
     CHUNK_OVERLAP: int = 200
-    QUERY_REWRITE_ENABLED: bool = True
-    # 改写条件化的长度阈值：无指代词且长度 >= 该值 → 视为自足问句，跳过改写（省一次 LLM 往返）。
-    # 设得越大越保守（越多问句走改写）。中文完整问句通常 6 字起（如"保修政策是什么"=7 字），
-    # 故取 6：既接住完整短问，又让"多少钱""怎么样"这类语义不完整的超短问句走改写。
-    QUERY_REWRITE_MIN_LEN: int = 6
 
     # 缓存（旧版 _QueryCache，逐步弃用）
     QUERY_CACHE_MAXSIZE: int = 128
@@ -156,7 +151,6 @@ class Settings(BaseSettings):
     LLM_CACHE_REDIS_URL: str = "redis://127.0.0.1:6379/11"
     LLM_CACHE_REDIS_TTL_ANSWER: int = 7200       # 答案缓存 TTL（秒）
     LLM_CACHE_REDIS_TTL_INTENT: int = 3600       # 意图缓存 TTL（秒）
-    LLM_CACHE_REDIS_TTL_REWRITE: int = 1800      # 改写缓存 TTL（秒）
     # L2 Chroma 语义缓存
     LLM_CACHE_SEMANTIC_ENABLED: bool = True
     LLM_CACHE_SEMANTIC_MAXSIZE: int = 5000        # 最大条目数

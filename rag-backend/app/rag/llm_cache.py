@@ -105,13 +105,11 @@ def _sha256(text: str) -> str:
 # 这些 hash 在 import 时计算一次，变化时重启生效
 INTENT_PROMPT_HASH = ""  # 延迟计算，避免循环 import
 AGENT_PROMPT_HASH = ""
-RAG_PROMPT_HASH = ""
-REWRITE_PROMPT_HASH = ""
 
 
 def _init_prompt_hashes() -> None:
     """延迟计算 Prompt Hash（避免循环 import）。"""
-    global INTENT_PROMPT_HASH, AGENT_PROMPT_HASH, RAG_PROMPT_HASH, REWRITE_PROMPT_HASH
+    global INTENT_PROMPT_HASH, AGENT_PROMPT_HASH
     try:
         from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT
         INTENT_PROMPT_HASH = _sha256(INTENT_CLASSIFICATION_PROMPT)
@@ -119,13 +117,6 @@ def _init_prompt_hashes() -> None:
     except Exception:
         INTENT_PROMPT_HASH = _sha256("intent_fallback")
         AGENT_PROMPT_HASH = _sha256("agent_fallback")
-    try:
-        from app.rag.chains import SYSTEM_PROMPT, REWRITE_PROMPT
-        RAG_PROMPT_HASH = _sha256(SYSTEM_PROMPT)
-        REWRITE_PROMPT_HASH = _sha256(REWRITE_PROMPT)
-    except Exception:
-        RAG_PROMPT_HASH = _sha256("rag_fallback")
-        REWRITE_PROMPT_HASH = _sha256("rewrite_fallback")
 
 
 # ==============================================
@@ -941,9 +932,11 @@ class LLMCache:
         # L2: Chroma 语义缓存
         result = await _semantic_search(query, model, temperature, system_prompt_hash, cache_type, context_hash)
         if result:
-            # 语义命中后，顺便回写 L1（不阻塞）
+            # 语义命中后，顺便回写 L1（不阻塞）。
+            # 必须透传调用方的 context_hash：L1 key 由 (query, ..., context_hash) 共同决定，
+            # 回写用 None 会生成一个永不匹配的 key（纯浪费一次 Redis 写 + 污染布隆过滤器）。
             asyncio.create_task(_redis_put(
-                query, model, temperature, system_prompt_hash, None,
+                query, model, temperature, system_prompt_hash, context_hash,
                 result, settings.LLM_CACHE_REDIS_TTL_ANSWER, cache_type,
             ))
             return result
@@ -1023,9 +1016,9 @@ class LLMCache:
             query, model, temperature, system_prompt_hash, cache_type, context_hash, query_emb
         )
         if result:
-            # 语义命中后回写 L1（同步）
+            # 语义命中后回写 L1（同步）。透传 context_hash，保证回写 key 与后续读取 key 一致。
             ttl = settings.LLM_CACHE_REDIS_TTL_ANSWER if cache_type == "answer" else settings.LLM_CACHE_REDIS_TTL_INTENT
-            _redis_put_sync(query, model, temperature, system_prompt_hash, None, result, ttl, cache_type)
+            _redis_put_sync(query, model, temperature, system_prompt_hash, context_hash, result, ttl, cache_type)
             return result
 
         _metrics.incr("misses")

@@ -51,7 +51,6 @@ class AdminService:
             "similarity_threshold": settings.SIMILARITY_THRESHOLD,
             "chunk_size": settings.CHUNK_SIZE,
             "chunk_overlap": settings.CHUNK_OVERLAP,
-            "query_rewrite_enabled": settings.QUERY_REWRITE_ENABLED,
             "agent_enabled": settings.AGENT_ENABLED,
         }
 
