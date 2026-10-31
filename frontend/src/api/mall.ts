@@ -70,14 +70,6 @@ export function getCurrentUser(): Promise<UserInfo> {
   })
 }
 
-/** 获取用户个人资料 */
-export function getUserProfile(): Promise<UserInfo> {
-  return userRequest({
-    url: '/user/user/profile',
-    method: 'get'
-  })
-}
-
 /** 更新用户个人资料 */
 export function updateUserProfile(data: any): Promise<any> {
   return userRequest({
@@ -288,7 +280,7 @@ export function getOrder(id: number): Promise<Order> {
 /**
  * 支付订单
  * @param id 订单 ID
- * @param payMethod 支付方式:1-微信 2-支付宝 4-钱包
+ * @param payMethod 支付方式:1-微信 2-支付宝 3-银行卡 4-钱包（C 端下单页仅提供 1/2/4）
  */
 export function payOrder(id: number, payMethod: number): Promise<any> {
   return userRequest({
@@ -560,14 +552,6 @@ export function listWalletTransactions(params: PageParams): Promise<PageResult<W
 export function listAddresses(): Promise<Address[]> {
   return userRequest({
     url: '/user/address/list',
-    method: 'get'
-  })
-}
-
-/** 查询单个地址 */
-export function getAddress(id: number): Promise<Address> {
-  return userRequest({
-    url: `/user/address/${id}`,
     method: 'get'
   })
 }

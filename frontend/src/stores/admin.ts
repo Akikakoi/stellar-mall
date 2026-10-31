@@ -61,9 +61,7 @@ export const useAdminStore = defineStore('admin', {
 
   getters: {
     /** 是否已登录 */
-    isLoggedIn: (state) => !!state.token,
-    /** 是否超级管理员 */
-    isSuperAdmin: (state) => state.role === 1
+    isLoggedIn: (state) => !!state.token
   },
 
   actions: {
@@ -126,31 +124,6 @@ export const useAdminStore = defineStore('admin', {
     setRefreshToken(refreshToken: string) {
       this.refreshToken = refreshToken || ''
       safeSet(REFRESH_TOKEN_KEY, this.refreshToken)
-    },
-
-    /** 手动设置管理员信息(用于跨页面同步) */
-    setAdminInfo(info: any) {
-      if (!info) return
-      if (info.empId || info.id || info.EMP_ID) {
-        this.empId = info.empId || info.id || info.EMP_ID
-        safeSet(EMPID_KEY, this.empId)
-      }
-      if (info.username) {
-        this.username = info.username
-        safeSet(USERNAME_KEY, this.username)
-      }
-      if (info.name || info.NAME) {
-        this.name = info.name || info.NAME
-        safeSet(NAME_KEY, this.name)
-      }
-      if (info.token) {
-        this.token = info.token
-        safeSet(TOKEN_KEY, this.token)
-      }
-      if (info.role != null) {
-        this.role = Number(info.role)
-        safeSet(ROLE_KEY, this.role)
-      }
     },
 
     /**

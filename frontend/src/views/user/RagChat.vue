@@ -598,7 +598,6 @@ async function send(text: any) {
         conversation_id: chatStore.activeId,
         query,
         stream: true,
-        use_agent: true,
       }),
       signal: controller.signal,
     })

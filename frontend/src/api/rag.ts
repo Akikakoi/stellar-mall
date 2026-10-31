@@ -14,14 +14,6 @@ import type {
 
 // =========================== 认证 ===========================
 
-/** 获取当前 RAG 用户身份 */
-export function apiAuthMe(): Promise<RagResponse<any>> {
-  return ragRequest({
-    url: '/ragapi/api/auth/me',
-    method: 'get'
-  })
-}
-
 // =========================== 对话管理 ===========================
 
 /** 获取对话列表 */
@@ -191,11 +183,6 @@ export function apiKbReindex(id: number): Promise<RagResponse<any>> {
   })
 }
 
-/** 获取文档下载 URL */
-export function apiKbDownloadUrl(id: number): string {
-  return `/api/kb/documents/${id}/download`
-}
-
 /** 下载文档(返回 Blob,responseType: 'blob' 时拦截器不包 envelope) */
 export function apiKbDownload(id: number): Promise<Blob> {
   return ragRequest({
@@ -215,14 +202,6 @@ export function apiKbChunks(id: number, limit = 100): Promise<RagResponse<any>> 
 }
 
 // =========================== 管理员后台 ===========================
-
-/** 获取管理后台仪表盘数据 */
-export function apiAdminDashboard(): Promise<RagResponse<any>> {
-  return ragRequest({
-    url: '/ragapi/api/admin/dashboard',
-    method: 'get'
-  })
-}
 
 /** 获取系统设置 */
 export function apiAdminSettingsGet(): Promise<RagResponse<any>> {

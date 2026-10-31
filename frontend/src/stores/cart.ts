@@ -28,8 +28,6 @@ function safeRemove() {
 interface CartState {
   /** 购物车商品列表(归一化后的条目,运行时仍携带原始行字段以便兼容兜底) */
   items: Array<CartItem & Partial<CartRowVO>>
-  /** 加载状态标识 */
-  loading: boolean
   /** 购车角标是否已被查看(点击购物车按钮后置 true,加购时重置为 false) */
   badgeSeen: boolean
 }
@@ -78,7 +76,6 @@ function parseServices(it: any): any[] {
 export const useCartStore = defineStore('cart', {
   state: (): CartState => ({
     items: safeGet(),
-    loading: false,
     badgeSeen: storage.local.getObject<boolean>(BADGE_SEEN_KEY, false)
   }),
 
@@ -125,7 +122,6 @@ export const useCartStore = defineStore('cart', {
      * 服务端是唯一数据源:无论返回空还是有数据,都以服务端为准。
      */
     async load() {
-      this.loading = true
       try {
         const res = await listCart()
         if (Array.isArray(res)) {
@@ -141,8 +137,6 @@ export const useCartStore = defineStore('cart', {
       } catch (e) {
         // 请求失败:保留本地数据作占位,但不 persist 覆盖
         console.warn('[cart] load failed, keep local snapshot:', e)
-      } finally {
-        this.loading = false
       }
     },
 
@@ -210,17 +204,6 @@ export const useCartStore = defineStore('cart', {
     clearChecked() {
       this.items = this.items.filter((it) => it.checked === false)
       this.persist()
-    },
-
-    /** 清空购物车并同步后端(下单后调用) */
-    async clearCheckedAndSync() {
-      try {
-        await apiClearCart()
-      } catch (e) {
-        // 后端已清除也没关系
-      }
-      this.items = []
-      safeRemove()
     },
 
     /** 标记购物车角标为已查看(点击购物车按钮后调用) */

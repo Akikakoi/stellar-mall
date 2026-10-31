@@ -14,19 +14,6 @@ export const ORDER_STATUS = {
   PARTIAL_REFUNDED: 8  // 部分退款(仅部分商品已退款)
 } as const
 
-/** 订单状态对应的中文文本映射 */
-export const ORDER_STATUS_TEXT: Record<number, string> = {
-  [ORDER_STATUS.CANCELLED]: '已取消',
-  [ORDER_STATUS.PENDING]: '待付款',
-  [ORDER_STATUS.PAID]: '待发货',
-  [ORDER_STATUS.SHIPPED]: '待收货',
-  [ORDER_STATUS.REVIEWABLE]: '待评价',
-  [ORDER_STATUS.COMPLETED]: '已完成',
-  [ORDER_STATUS.REFUNDING]: '退款中',
-  [ORDER_STATUS.REFUNDED]: '已退款',
-  [ORDER_STATUS.PARTIAL_REFUNDED]: '部分退款'
-}
-
 /** 售后状态枚举 */
 export const AFTER_SALE_STATUS = {
   APPLIED: 1,     // 申请中

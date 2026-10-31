@@ -446,7 +446,7 @@ onUnmounted(() => {
 
 /**
  * 处理用户下拉菜单命令
- * 支持跳转到个人中心、消息、订单、售后、钱包、地址、收藏、优惠券、积分商城、AI 助手等页面，以及退出登录
+ * 支持跳转到个人中心、消息、订单、售后、钱包、地址、收藏、积分商城、AI 助手等页面，以及退出登录
  * @param {string} cmd - 菜单命令标识
  */
 function handleCommand(cmd: string) {
@@ -455,7 +455,6 @@ function handleCommand(cmd: string) {
   else if (cmd === 'messages') window.open('/me/messages', '_blank')
   else if (cmd === 'aftersale') window.open('/aftersale/list', '_blank')
   else if (cmd === 'wallet') window.open('/wallet', '_blank')
-  else if (cmd === 'coupons') router.push('/coupons')
   else if (cmd === 'points') window.open('/points', '_blank')
   else if (cmd === 'address') router.push('/address')
   else if (cmd === 'favorites') router.push('/favorites')

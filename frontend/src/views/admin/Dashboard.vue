@@ -127,7 +127,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getDashboardStats, generateDailyReport } from '@/api/admin'
+import { generateDailyReport } from '@/api/admin'
 import { adminRequest } from '@/api/request'
 import { Goods, Menu, Refresh, User, Tickets, Box, Discount, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -177,11 +177,8 @@ let salesChart: any = null
 /** 加载仪表盘全部数据：核心统计、增强统计 */
 async function load() {
   try {
-    try {
-      const res = await getDashboardStats()
-      const d: any = res || {}
-      stats.spuTotal = d.spuTotal || d.spuCount || 0
-    } catch (e: any) {}
+    // 模板消费的统计全部来自 /admin/dashboard/enhanced；
+    // 原 getDashboardStats() 请求结果无人渲染，属无效请求，已移除
     try {
       const res: any = await adminRequest({ url: '/admin/dashboard/enhanced', method: 'get' })
       const d: any = (res as any)?.data || res || {}

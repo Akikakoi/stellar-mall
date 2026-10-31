@@ -528,12 +528,10 @@ async function loadSpu(append = false) {
         }
         // 聚合：首次加载时保存全量聚合数据，后续不再更新
         const isFirstLoad = initialAggCategories.value.length === 0 && aggCategories.value.length === 0
-        console.log('[Shop] aggregations:', JSON.stringify(res.aggregations), 'isFirstLoad:', isFirstLoad)
         if (res.aggregations && !append && isFirstLoad) {
           if (res.aggregations.categories && res.aggregations.categories.length > 0) {
             aggCategories.value = res.aggregations.categories
             initialAggCategories.value = res.aggregations.categories
-            console.log('[Shop] categories saved:', res.aggregations.categories.length, 'buckets')
           } else {
             console.warn('[Shop] categories is null/empty in response')
           }
