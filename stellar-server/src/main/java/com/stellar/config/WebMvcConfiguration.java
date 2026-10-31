@@ -116,10 +116,12 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     @Override
     protected void addInterceptors(InterceptorRegistry registry) {
         // 幂等性由 IdempotentAspect（AOP @Around）实现，不再用拦截器
-        // 限流拦截器
+        // 限流拦截器：只放行 refresh 端点与文档资源。
+        // 注意：/user/user/login、/user/user/email-login 不能加进排除名单——
+        // 两个登录方法上有 @RateLimit，一旦排除（order 0 先于注解解析）限流将被静默短路。
         registry.addInterceptor(rateLimitInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/admin/login", "/user/login/**", "/user/user/login", "/user/user/register", "/admin/employee/refresh", "/user/user/refresh", "/captcha/**", "/doc.html", "/swagger-ui/**", "/v3/api-docs/**")
+                .excludePathPatterns("/admin/employee/refresh", "/user/user/refresh", "/captcha/**", "/doc.html", "/swagger-ui/**", "/v3/api-docs/**")
                 .order(0);
 
         registry.addInterceptor(adminInterceptor)
@@ -144,7 +146,6 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
                         "/user/email-code/**",
                         "/user/spu/page",
                         "/user/spu/**",
-                        "/user/banner/list",
                         "/user/category/list",
                         "/user/home-module/list",
                         "/user/site-config/**",

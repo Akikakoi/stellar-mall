@@ -58,7 +58,7 @@ public class PointsAdminController {
     @PostMapping("/adjust")
     @ApiOperation("管理员调整用户积分")
     @RequireRole({1, 2})
-    public Result<String> adjustPoints(@RequestBody PointsAdjustDTO dto) {
+    public Result<String> adjustPoints(@RequestBody @Valid PointsAdjustDTO dto) {
         pointsService.adjustPoints(dto);
         return Result.success();
     }
