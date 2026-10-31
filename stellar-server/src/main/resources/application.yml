@@ -136,17 +136,6 @@ stellar:
     access-key-id: ${STELLAR_OSS_ACCESS_KEY_ID:}
     access-key-secret: ${STELLAR_OSS_ACCESS_KEY_SECRET:}
     bucket-name: ${STELLAR_OSS_BUCKET:}
-  # 微信支付（P0 模拟支付，暂不用真证书；先把占位符留好）
-  wechat:
-    appid: ${STELLAR_WX_APPID:}
-    secret: ${STELLAR_WX_SECRET:}
-    mchid: ${STELLAR_WX_MCHID:0000000000}
-    mch-serial-no: ${STELLAR_WX_MCH_SERIAL_NO:}
-    private-key-file-path: ${STELLAR_WX_PRIVATE_KEY_PATH:}
-    api-v3-key: ${STELLAR_WX_APIV3_KEY:}
-    cert-file-path: ${STELLAR_WX_CERT_PATH:}
-    notify-url: ${STELLAR_WX_NOTIFY_URL:http://127.0.0.1:8082/notify/paySuccess}
-    refund-notify-url: ${STELLAR_WX_REFUND_NOTIFY_URL:http://127.0.0.1:8082/notify/refundSuccess}
   # RAG 同步配置（Java → RAG 内部接口共享密钥）
   rag:
     base-url: ${STELLAR_RAG_BASE_URL:http://127.0.0.1:8000}
@@ -171,31 +160,6 @@ stellar:
     # 1536 = DashScope text-embedding-v2（云端优先）；本地 bge-large-zh-v1.5 为 1024。
     # 注意 dense_vector 建好后 dims 不可改，切换模型需删索引后重建（管理端 /admin/es/rebuild 前先删索引）。
     vector-dim: 1536
-  # 4 个隔离线程池参数（对齐 sky）
-  thread-pool:
-    core-size: 10
-    max-size: 20
-    queue-capacity: 200
-    keep-alive-seconds: 60
-    name-prefix: stellar-common-
-    websocket:
-      core-size: 5
-      max-size: 10
-      queue-capacity: 100
-      keep-alive-seconds: 60
-      name-prefix: stellar-ws-
-    order:
-      core-size: 10
-      max-size: 30
-      queue-capacity: 500
-      keep-alive-seconds: 60
-      name-prefix: stellar-order-
-    report:
-      core-size: 2
-      max-size: 5
-      queue-capacity: 50
-      keep-alive-seconds: 120
-      name-prefix: stellar-report-
 
   # 订单超时自动取消：延迟消息 + Streams 消费组（事件驱动），对账扫描兜底
   order:
