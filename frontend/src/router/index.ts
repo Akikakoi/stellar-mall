@@ -247,12 +247,6 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '库存管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       },
       {
-        path: 'banner',
-        name: 'AdminBannerMgmt',
-        component: () => import('@/views/admin/BannerMgmt.vue'),
-        meta: { title: '轮播图管理', requiresAdminAuth: true, requiresRole: [1, 2] }
-      },
-      {
         path: 'aftersale',
         name: 'AdminAfterSaleMgmt',
         component: () => import('@/views/admin/AfterSaleMgmt.vue'),
@@ -269,6 +263,12 @@ const routes: RouteRecordRaw[] = [
         name: 'AdminHomeModuleMgmt',
         component: () => import('@/views/admin/HomeModuleMgmt.vue'),
         meta: { title: '首页装修', requiresAdminAuth: true, requiresRole: [1, 2] }
+      },
+      {
+        path: 'service',
+        name: 'AdminServiceMgmt',
+        component: () => import('@/views/admin/ServiceMgmt.vue'),
+        meta: { title: '保障服务管理', requiresAdminAuth: true, requiresRole: [1, 2] }
       }
     ]
   },

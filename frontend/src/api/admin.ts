@@ -191,14 +191,6 @@ export function updateEmployee(data: any): Promise<any> {
   })
 }
 
-/** 查询员工详情 */
-export function getEmployee(id: number): Promise<Employee> {
-  return adminRequest({
-    url: `/admin/employee/${id}`,
-    method: 'get'
-  })
-}
-
 /** 启用/禁用员工 */
 export function setEmployeeStatus(id: number, status: number): Promise<any> {
   return adminRequest({
@@ -254,14 +246,6 @@ export function pageAfterSale(params: PageParams): Promise<PageResult<AfterSale>
     url: '/admin/aftersale/page',
     method: 'get',
     params
-  })
-}
-
-/** 查询售后详情 */
-export function getAdminAfterSale(id: number): Promise<AfterSale> {
-  return adminRequest({
-    url: `/admin/aftersale/${id}`,
-    method: 'get'
   })
 }
 
@@ -324,14 +308,6 @@ export function pagePointsProducts(params: PageParams): Promise<PageResult<Point
     url: '/admin/points/products',
     method: 'get',
     params
-  })
-}
-
-/** 查询积分商品详情 */
-export function getAdminPointsProduct(id: number): Promise<PointsProduct> {
-  return adminRequest({
-    url: `/admin/points/products/${id}`,
-    method: 'get'
   })
 }
 
@@ -438,5 +414,40 @@ export function chatBiQuery(question: string): Promise<ChatBiResult> {
     method: 'post',
     data: { question },
     timeout: 180000
+  })
+}
+
+// ===== 保障服务管理 =====
+
+/** 保障服务列表（全量，含停用） */
+export function listServices(): Promise<any[]> {
+  return adminRequest({
+    url: '/admin/service/list',
+    method: 'get'
+  })
+}
+
+/** 启用中的保障服务（商品编辑下拉用） */
+export function listEnabledServices(): Promise<any[]> {
+  return adminRequest({
+    url: '/admin/service/enabled',
+    method: 'get'
+  })
+}
+
+/** 新增/更新保障服务 */
+export function saveService(data: any): Promise<any> {
+  return adminRequest({
+    url: '/admin/service',
+    method: 'post',
+    data
+  })
+}
+
+/** 删除保障服务 */
+export function deleteService(id: number): Promise<any> {
+  return adminRequest({
+    url: `/admin/service/${id}`,
+    method: 'delete'
   })
 }

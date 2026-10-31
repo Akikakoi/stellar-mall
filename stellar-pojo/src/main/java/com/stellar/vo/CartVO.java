@@ -55,4 +55,7 @@ public class CartVO implements Serializable {
 
     @ApiModelProperty("保障服务信息（JSON 数组）")
     private String serviceInfo;
+
+    @ApiModelProperty("每人限购数量，0=不限购（来自 SPU，前端用于限制数量输入）")
+    private Integer perUserLimit;
 }

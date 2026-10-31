@@ -276,4 +276,79 @@ class OrderSubmitTest {
         verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
         verify(mallOrderMapper, never()).insert(any());
     }
+
+    // ========== 每人限购 ==========
+
+    @Test
+    void submitOrder_whenPerUserLimitExceeded_throwsAndDoesNotDeduct() {
+        Cart c = buildCartChecked(10L, 1L, 2);
+        when(cartMapper.listCheckedByUserId(USER_ID)).thenReturn(Collections.singletonList(c));
+        when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(buildSku(10L, 1L, "S1", "默认", BigDecimal.valueOf(100))));
+
+        Spu spu1 = buildSpu(1L, "限购商品");
+        spu1.setPerUserLimit(5);
+        when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu1));
+        // 历史已购 4 件，本次再买 2 件 = 6 > 5，必须拒绝
+        when(mallOrderItemMapper.sumQtyByUserAndSpu(USER_ID, 1L)).thenReturn(4);
+
+        BaseException ex = assertThrows(BaseException.class,
+                () -> orderService.submit(USER_ID, buildSubmitDto("地址", 1, null)),
+                "超过每人限购数必须抛异常");
+        assertTrue(ex.getMessage().contains("限购"), "提示文案应包含限购信息");
+
+        // 不允许扣库存、不允许写订单
+        verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
+        verify(mallOrderMapper, never()).insert(any());
+    }
+
+    @Test
+    void submitOrder_withinPerUserLimit_succeeds() {
+        Cart c = buildCartChecked(10L, 1L, 2);
+        when(cartMapper.listCheckedByUserId(USER_ID)).thenReturn(Collections.singletonList(c));
+        when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(buildSku(10L, 1L, "S1", "默认", BigDecimal.valueOf(100))));
+
+        Spu spu1 = buildSpu(1L, "限购商品");
+        spu1.setPerUserLimit(5);
+        when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu1));
+        // 历史已购 3 件，本次再买 2 件 = 5 ≤ 5，放行
+        when(mallOrderItemMapper.sumQtyByUserAndSpu(USER_ID, 1L)).thenReturn(3);
+
+        doNothing().when(skuStockService).deduct(eq(10L), eq(2), any());
+        when(mallOrderMapper.insert(any(MallOrder.class))).thenAnswer(inv -> {
+            MallOrder mo = inv.getArgument(0);
+            mo.setId(1000L);
+            return 1;
+        });
+        when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
+        when(cartMapper.deleteByIds(anyList())).thenReturn(1);
+
+        MallOrder result = orderService.submit(USER_ID, buildSubmitDto("地址", 1, null));
+        assertNotNull(result);
+        verify(mallOrderMapper, times(1)).insert(any(MallOrder.class));
+        verify(skuStockService, times(1)).deduct(eq(10L), eq(2), any());
+    }
+
+    @Test
+    void submitOrder_noPerUserLimit_doesNotQueryPurchasedQty() {
+        Cart c = buildCartChecked(10L, 1L, 2);
+        when(cartMapper.listCheckedByUserId(USER_ID)).thenReturn(Collections.singletonList(c));
+        when(skuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(buildSku(10L, 1L, "S1", "默认", BigDecimal.valueOf(100))));
+
+        // 不设置 perUserLimit（null = 不限购）
+        when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(buildSpu(1L, "普通商品")));
+
+        doNothing().when(skuStockService).deduct(eq(10L), eq(2), any());
+        when(mallOrderMapper.insert(any(MallOrder.class))).thenAnswer(inv -> {
+            MallOrder mo = inv.getArgument(0);
+            mo.setId(1000L);
+            return 1;
+        });
+        when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
+        when(cartMapper.deleteByIds(anyList())).thenReturn(1);
+
+        MallOrder result = orderService.submit(USER_ID, buildSubmitDto("地址", 1, null));
+        assertNotNull(result);
+        // 不限购时不应触发已购件数查询
+        verify(mallOrderItemMapper, never()).sumQtyByUserAndSpu(anyLong(), anyLong());
+    }
 }

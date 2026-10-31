@@ -27,12 +27,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * 订单服务实现类。
@@ -53,6 +57,7 @@ public class OrderServiceImpl implements OrderService {
     private final SkuStockService skuStockService;
     private final MallOrderMapper mallOrderMapper;
     private final MallOrderItemMapper mallOrderItemMapper;
+    private final com.stellar.mapper.SpuServiceMapper spuServiceMapper;
     private final AfterSaleMapper afterSaleMapper;
     private final CouponService couponService;
     private final UserMessageService userMessageService;
@@ -65,6 +70,9 @@ public class OrderServiceImpl implements OrderService {
     private final OrderCancelService orderCancelService;
     /** 下单后登记超时取消的延迟任务（事件驱动链路，开关见 stellar.order.expire.enabled）。 */
     private final com.stellar.task.expire.OrderExpireEventPublisher orderExpireEventPublisher;
+
+    /** serviceInfo JSON 快照的序列化/反序列化（结构简单，线程安全复用） */
+    private static final ObjectMapper SERVICE_INFO_MAPPER = new ObjectMapper();
 
     // -------- 提交订单 --------
 
@@ -89,6 +97,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         List<OrderLine> lines = buildLinesFromCarts(carts);
+        checkPerUserLimit(uid, lines);
         // 先生成订单号再扣库存，出入库日志可关联业务单号
         String orderNo = generateOrderNo();
         deductStock(lines, orderNo);
@@ -125,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         List<OrderLine> lines = buildLinesFromItems(dto.getItems());
+        checkPerUserLimit(uid, lines);
         // 先生成订单号再扣库存，出入库日志可关联业务单号
         String orderNo = generateOrderNo();
         deductStock(lines, orderNo);
@@ -176,13 +186,11 @@ public class OrderServiceImpl implements OrderService {
             }
             checkStock(sku, qty);
             Spu spu = c.getSpuId() == null ? null : spuMap.get(c.getSpuId());
-            // 保障服务费（购物车存的是单个商品口径，订单行需要乘数量）；服务信息 JSON 原样快照
-            BigDecimal extraAmount = c.getExtraAmount() == null ? BigDecimal.ZERO : c.getExtraAmount();
-            if (extraAmount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（额外费用不能为负数）");
-            }
-            BigDecimal lineExtra = extraAmount.multiply(BigDecimal.valueOf(qty));
-            lines.add(buildLine(c, sku, spu, qty, lineExtra, c.getServiceInfo()));
+            // 保障服务费权威重算：以服务表价格为准（不信任前端金额），快照 JSON 用库内数据重建；
+            // 购物车 extraAmount 为单价口径，行金额 = 单价 × 数量
+            ServiceResolved svc = resolveServices(sku.getSpuId(), c.getServiceInfo());
+            BigDecimal lineExtra = svc.unitExtra().multiply(BigDecimal.valueOf(qty));
+            lines.add(buildLine(c, sku, spu, qty, lineExtra, svc.snapshotJson()));
         }
         return lines;
     }
@@ -211,13 +219,12 @@ public class OrderServiceImpl implements OrderService {
                 throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（购买数量必须大于 0）");
             }
             checkStock(sku, qty);
-            // 额外费用（保障服务等）必须非负，否则前端可传负值压低订单总价
-            BigDecimal extraAmount = item.getExtraAmount() == null ? BigDecimal.ZERO : item.getExtraAmount();
-            if (extraAmount.compareTo(BigDecimal.ZERO) < 0) {
-                throw new BaseException(MessageConstant.ILLEGAL_PARAMETER + "（额外费用不能为负数）");
-            }
+            // 保障服务费权威重算：以服务表价格为准（不信任前端 extraAmount），行金额 = 单价 × 数量；
+            // 前端直购链路传的 extraAmount 已乘过数量，此处忽略并按单价口径重算
             Spu spu = sku.getSpuId() == null ? null : spuMap.get(sku.getSpuId());
-            lines.add(buildLine(null, sku, spu, qty, extraAmount, item.getServiceInfo()));
+            ServiceResolved svc = resolveServices(sku.getSpuId(), item.getServiceInfo());
+            BigDecimal lineExtra = svc.unitExtra().multiply(BigDecimal.valueOf(qty));
+            lines.add(buildLine(null, sku, spu, qty, lineExtra, svc.snapshotJson()));
         }
         return lines;
     }
@@ -243,6 +250,111 @@ public class OrderServiceImpl implements OrderService {
         if (stock < qty) {
             throw new BaseException(MessageConstant.STOCK_NOT_ENOUGH
                     + " (skuId=" + sku.getId() + ", stock=" + stock + ", need=" + qty + ")");
+        }
+    }
+
+    /** 保障服务重算结果：unitExtra=单件商品的服务费合计（未乘数量）；snapshotJson=用库内数据重建的快照 */
+    private record ServiceResolved(BigDecimal unitExtra, String snapshotJson) {
+        static final ServiceResolved EMPTY = new ServiceResolved(BigDecimal.ZERO, null);
+    }
+
+    /**
+     * 保障服务费权威重算（不信任前端金额）。
+     * <p>解析 serviceInfo JSON 中的服务标识（id = stellar_service_item.code），逐项校验：</p>
+     * <ul>
+     *   <li>服务存在且启用；</li>
+     *   <li>服务确实配置在该 SPU 下（spu_service 关联），防止拿别商品的服务组合下单；</li>
+     * </ul>
+     * <p>单价合计从服务表取权威值，快照 JSON 用库内标题/价格重建，保证订单明细与结算一致。</p>
+     *
+     * @param spuId           商品 SPU id（可为 null，null 时视为无关联服务，任何服务声明都会被拒绝）
+     * @param serviceInfoJson 前端传入的服务 JSON 数组，如 [{"id":"screen_insurance","title":"碎屏险 · 1年","price":99}]
+     * @return 重算结果；JSON 为空/空数组返回 EMPTY
+     */
+    private ServiceResolved resolveServices(Long spuId, String serviceInfoJson) {
+        if (serviceInfoJson == null || serviceInfoJson.isBlank()) {
+            return ServiceResolved.EMPTY;
+        }
+        List<Map<String, Object>> declared;
+        try {
+            declared = SERVICE_INFO_MAPPER.readValue(serviceInfoJson,
+                    new TypeReference<List<Map<String, Object>>>() {});
+        } catch (Exception e) {
+            log.warn("[OrderService] serviceInfo 解析失败: {}", serviceInfoJson, e);
+            throw new BaseException("保障服务信息有误，请重新选择");
+        }
+        if (declared == null || declared.isEmpty()) {
+            return ServiceResolved.EMPTY;
+        }
+
+        // 该 SPU 实际配置且启用的服务（按单个商品配置的服务组合），一个订单行只查一次
+        List<com.stellar.entity.ServiceItem> allowed = spuId == null
+                ? List.of() : spuServiceMapper.listEnabledBySpuId(spuId);
+        Map<String, com.stellar.entity.ServiceItem> byCode = allowed.stream()
+                .collect(Collectors.toMap(com.stellar.entity.ServiceItem::getCode, s -> s, (a, b) -> a));
+
+        BigDecimal unit = BigDecimal.ZERO;
+        List<Map<String, Object>> snapshot = new ArrayList<>();
+        for (Map<String, Object> d : declared) {
+            Object idVal = d.get("id");
+            String code = idVal == null ? "" : String.valueOf(idVal);
+            com.stellar.entity.ServiceItem svc = byCode.get(code);
+            if (svc == null) {
+                String title = d.get("title") == null ? code : String.valueOf(d.get("title"));
+                throw new BaseException("保障服务「" + title + "」不存在、已下架或该商品未配置，请重新选择");
+            }
+            if (svc.getPrice() != null) unit = unit.add(svc.getPrice());
+            Map<String, Object> snap = new LinkedHashMap<>();
+            snap.put("id", svc.getCode());
+            snap.put("title", svc.getTitle());
+            snap.put("price", svc.getPrice());
+            snapshot.add(snap);
+        }
+        try {
+            String json = snapshot.isEmpty() ? null
+                    : SERVICE_INFO_MAPPER.writeValueAsString(snapshot);
+            return new ServiceResolved(unit, json);
+        } catch (Exception e) {
+            log.error("[OrderService] 保障服务快照序列化失败", e);
+            throw new BaseException("保障服务信息处理失败，请重试");
+        }
+    }
+
+    /**
+     * 每人限购校验（方案 B：真实限购）。
+     * <p>对本次订单行按 SPU 聚合数量（同一 SPU 多个 SKU/多行合并计算），加上该用户的历史
+     * 累计购买件数（排除 PENDING/CANCELLED/REFUNDED），超过 SPU 的 per_user_limit 则拒绝下单。
+     * per_user_limit 为 0/null 表示不限购，直接跳过。</p>
+     *
+     * @param userId 用户 ID
+     * @param lines  本次订单行
+     */
+    private void checkPerUserLimit(Long userId, List<OrderLine> lines) {
+        // 同一 SPU 在本次订单内可能有多个 SKU/多行，先聚合
+        Map<Long, Integer> qtyBySpu = new LinkedHashMap<>();
+        Map<Long, Spu> spuById = new LinkedHashMap<>();
+        for (OrderLine line : lines) {
+            Spu spu = line.spu;
+            if (spu == null || spu.getId() == null) continue;
+            int limit = spu.getPerUserLimit() == null ? 0 : spu.getPerUserLimit();
+            if (limit <= 0) continue; // 不限购
+            qtyBySpu.merge(spu.getId(), line.qty, Integer::sum);
+            spuById.putIfAbsent(spu.getId(), spu);
+        }
+        if (qtyBySpu.isEmpty()) return;
+
+        for (Map.Entry<Long, Integer> e : qtyBySpu.entrySet()) {
+            Long spuId = e.getKey();
+            int orderQty = e.getValue();
+            Spu spu = spuById.get(spuId);
+            int limit = spu.getPerUserLimit();
+            int purchased = mallOrderItemMapper.sumQtyByUserAndSpu(userId, spuId);
+            if (purchased + orderQty > limit) {
+                int canBuy = Math.max(limit - purchased, 0);
+                throw new BaseException("商品「" + spu.getName() + "」每人限购 " + limit
+                        + " 件，您已购买 " + purchased + " 件"
+                        + (canBuy > 0 ? "，本次最多可再购 " + canBuy + " 件" : "，无法再次购买"));
+            }
         }
     }
 

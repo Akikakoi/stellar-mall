@@ -41,6 +41,7 @@
               <el-input-number
                 :model-value="item.quantity"
                 :min="1"
+                :max="itemMaxQty(item)"
                 size="small"
                 @update:model-value="(v: any) => cartStore.updateQty(item.id || item.skuId, v)"
               />
@@ -83,6 +84,14 @@ const __PH = window.__PH
 const router = useRouter()
 const cartStore = useCartStore()
 const loading = ref(false)
+
+/**
+ * 单件商品的数量上限：设了每人限购则取限购数，否则不设上限
+ */
+function itemMaxQty(item: any) {
+  const limit = Number(item?.perUserLimit) || 0
+  return limit > 0 ? limit : undefined
+}
 
 /**
  * 删除购物车商品前弹出确认框

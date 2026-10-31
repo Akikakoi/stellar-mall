@@ -265,6 +265,20 @@
         <el-form-item label="状态">
           <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
         </el-form-item>
+        <el-form-item label="每人限购">
+          <el-input-number v-model="form.perUserLimit" :min="0" :max="9999" />
+          <span class="form-hint" style="margin-left: 8px; color: var(--text-muted, #999); font-size: 12px;">0 表示不限购；按用户对同一商品的累计购买件数（含未完成退款订单）校验</span>
+        </el-form-item>
+        <el-form-item label="保障服务">
+          <el-select v-model="form.serviceIds" multiple collapse-tags collapse-tags-tooltip clearable
+                     placeholder="选择该商品可选购的保障服务（不选=不提供）" style="width: 100%;">
+            <el-option v-for="s in serviceOptions" :key="s.id" :value="s.id"
+                       :label="`${s.title}（¥${Number(s.price || 0).toFixed(2)}）`" />
+          </el-select>
+          <div class="form-hint" style="width: 100%; color: var(--text-muted, #999); font-size: 12px;">
+            服务名称与价格在「保障服务管理」维护；结算时后端按服务表价格权威重算
+          </div>
+        </el-form-item>
 
         <!-- ===== 规格组定义 ===== -->
         <el-form-item>
@@ -458,7 +472,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batchSetSpuStatus, listAdminCategory, uploadImages } from '@/api/admin'
+import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batchSetSpuStatus, listAdminCategory, uploadImages, listEnabledServices } from '@/api/admin'
 import { adminRequest } from '@/api/request'
 import { apiKbUploadWithChunks, apiKbPreview, apiKbGet } from '@/api/rag'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -521,7 +535,18 @@ function onQueryClick() {
 const dialogVisible = ref(false)
 const dialogMode = ref('create')
 const formRef = ref<any>(null)
-const form = reactive<any>({ id: null, name: '', categoryId: null, price: 0, image: '', mainImage: '', subImages: '', description: '', status: 1, skuList: [] })
+const form = reactive<any>({ id: null, name: '', categoryId: null, price: 0, image: '', mainImage: '', subImages: '', description: '', status: 1, perUserLimit: 0, serviceIds: [], skuList: [] })
+
+/** 可选保障服务（启用中的服务字典，打开弹窗时加载） */
+const serviceOptions = ref<any[]>([])
+
+async function loadServiceOptions() {
+  try {
+    serviceOptions.value = (await listEnabledServices()) || []
+  } catch {
+    serviceOptions.value = []
+  }
+}
 const formRules: Record<string, any> = {
   name: [{ required: true, message: '请输入商品名称', trigger: 'blur' }],
   categoryId: [{ required: true, message: '请选择分类', trigger: 'change' }],
@@ -796,8 +821,9 @@ async function openDialog(mode: any, row?: any) {
   kbExistingDoc.value = null
   kbExistingDocId.value = null
   if (mode === 'create') {
-    Object.assign(form, { id: null, name: '', categoryId: null, price: 0, image: '', mainImage: '', subImages: '', description: '', status: 1, skuList: [] })
+    Object.assign(form, { id: null, name: '', categoryId: null, price: 0, image: '', mainImage: '', subImages: '', description: '', status: 1, perUserLimit: 0, serviceIds: [], skuList: [] })
     uploadedImages.value = []
+    loadServiceOptions()
     addManualSku()
     dialogVisible.value = true
   } else {
@@ -823,8 +849,12 @@ async function openDialog(mode: any, row?: any) {
         mainImage: detail.mainImage || detail.image || detail.pic || '',
         subImages: detail.subImages || '',
         description: detail.description || cleanDescription,
-        status: detail.status ?? 1, skuList: []
+        status: detail.status ?? 1,
+        perUserLimit: Number(detail.perUserLimit ?? 0) || 0,
+        serviceIds: (detail.services || []).map((s: any) => s.id),
+        skuList: []
       })
+      loadServiceOptions()
       initUploadedImages()
       const skus = detail.skuList || detail.skus || []
       if (skus.length) {
@@ -865,6 +895,8 @@ function buildPayload() {
   return {
     id: form.id ?? undefined, name: form.name, categoryId: form.categoryId,
     status: form.status ?? 1, sort: form.sort ?? 0,
+    perUserLimit: Number(form.perUserLimit ?? 0) || 0,
+    serviceIds: (form.serviceIds || []).map(Number),
     subtitle: form.subtitle ?? '', image: imageStr, mainImage: imageStr,
     subImages: subImagesStr, description: descStr, descriptionMd: descStr,
     price: isNaN(priceNum) ? null : priceNum,

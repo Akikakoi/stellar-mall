@@ -76,6 +76,8 @@ export interface Spu {
   sort?: number
   /** 1 上架 0 下架 */
   status?: number
+  /** 每人限购数量，0=不限购 */
+  perUserLimit?: number
   onShelfTime?: string
   offShelfTime?: string
   createTime?: string

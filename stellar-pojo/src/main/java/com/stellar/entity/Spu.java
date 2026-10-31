@@ -40,6 +40,7 @@ public class Spu implements Serializable {
     private Integer isHot;
     private Integer sort;
     private Integer status;          // 1 上架 0 下架
+    private Integer perUserLimit;    // 每人限购数量，0=不限购
     private LocalDateTime onShelfTime;
     private LocalDateTime offShelfTime;
     private LocalDateTime createTime;
@@ -55,4 +56,6 @@ public class Spu implements Serializable {
     private String brandName;
     /** 非 DB 字段：分类名。 */
     private String categoryName;
+    /** 非 DB 字段：该商品可选购的保障服务（按 spu_service 关联 + 启用状态过滤，详情接口返回）。 */
+    private List<ServiceItem> services;
 }

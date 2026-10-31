@@ -61,7 +61,7 @@
         <button class="qty-btn" :disabled="quantity >= maxQty" @click="increaseQty">+</button>
         <span class="stock-hint">
           <template v-if="selectedSku">
-            {{ selectedSku.stock > 0 ? `有货(限购${maxQty}件)` : '暂时缺货' }}
+            {{ stockHint }}
           </template>
           <template v-else>请选择完整规格</template>
         </span>
@@ -262,7 +262,19 @@ const selectedSku = computed(() => {
  * @returns {number}
  */
 const maxQty = computed(() => {
-  return (selectedSku.value?.stock as number) > 0 ? Math.min(selectedSku.value!.stock!, 999) : 999
+  const stock = (selectedSku.value?.stock as number) || 0
+  if (stock <= 0) return 999
+  // 每人限购（SPU.perUserLimit，0=不限购）：上限取 min(限购数, 库存)
+  const limit = Number(props.spu?.perUserLimit) || 0
+  return limit > 0 ? Math.min(limit, stock) : stock
+})
+
+/** 库存/限购提示文案：设了限购展示真实限购数，否则只报库存 */
+const stockHint = computed(() => {
+  const sku = selectedSku.value
+  if (!sku || !sku.stock || sku.stock <= 0) return '暂时缺货'
+  const limit = Number(props.spu?.perUserLimit) || 0
+  return limit > 0 ? `有货(限购${maxQty.value}件)` : '有货'
 })
 
 /**

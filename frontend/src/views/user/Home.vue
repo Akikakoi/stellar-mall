@@ -185,17 +185,6 @@
 
         <!-- 无模块或加载失败回退 -->
         <template v-if="!modulesLoaded || modules.length === 0">
-          <div class="banner" v-if="banners.length > 0">
-            <el-carousel :interval="4000" height="320px" indicator-position="outside">
-              <el-carousel-item v-for="b in banners" :key="b.id">
-                <a :href="b.linkUrl || 'javascript:;'" :target="b.linkUrl ? '_blank' : '_self'">
-                  <img :src="b.imageUrl" :alt="b.title" loading="lazy" style="width:100%;height:100%;object-fit:cover;" />
-                  <div class="banner-caption">{{ b.title }}</div>
-                </a>
-              </el-carousel-item>
-            </el-carousel>
-          </div>
-
           <main class="container main-content">
             <section
               v-for="sec in sections"
@@ -389,7 +378,6 @@ function scrollToContent() { contentRef.value?.scrollIntoView({ behavior: 'smoot
 // ========== 动态模块 ==========
 const modules = ref<any[]>([])
 const modulesLoaded = ref(false)
-const banners = ref<any[]>([])
 const flatCategories = ref<any[]>([])
 const favSet = reactive(new Set())
 
@@ -878,16 +866,6 @@ const page = ref(1)
 const pageSize = ref(20)
 const hasMore = computed(() => spus.value.length < total.value)
 
-/**
- * 加载首页 Banner 轮播图数据
- */
-async function loadBanners() {
-  try {
-    const res: any = await userRequest({ url: '/user/banner/list', method: 'get', __silent: true })
-    banners.value = Array.isArray(res) ? res : (res?.data || [])
-  } catch (e: any) {}
-}
-
 // ========== 通用方法 ==========
 /**
  * 在新标签页打开商品详情页
@@ -966,8 +944,7 @@ function confirmAddToCart() {
 onMounted(() => {
   startTypewriter()
   setupHeroIdleWatchers()
-  // 首屏各请求互不阻塞：环绕轨道立即启动（骨架环同帧已渲染），Banner / 分类 / 模块并行加载
-  void loadBanners()
+  // 首屏各请求互不阻塞：环绕轨道立即启动（骨架环同帧已渲染），分类 / 模块并行加载
   void loadOrbitProducts()
   // 模块与分类都就绪后再注册滚动懒加载：回退分区依赖分类树，模块列表依赖接口返回
   void Promise.all([loadCategory(), loadModules()]).finally(() => refreshLazyProductSections())
@@ -1314,15 +1291,6 @@ onUnmounted(() => {
   from { opacity: 0; transform: translateY(12px); }
 }
 
-/* Banner */
-.banner { background: var(--bg-surface); }
-.banner-caption {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 16px 24px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.45));
-  color: #fff; font-size: 18px; font-weight: 600;
-}
-
 .main-content { padding: 48px 20px 80px; }
 
 /* ===== 分类分区展示 ===== */
@@ -1593,6 +1561,5 @@ onUnmounted(() => {
   .sub-tabs { gap: 14px; }
   .sub-tab { font-size: 13px; }
   .p-card img { max-width: 118px; }
-  .banner-caption { font-size: 15px; padding: 12px 16px; }
 }
 </style>

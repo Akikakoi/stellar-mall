@@ -5,12 +5,15 @@ import com.github.pagehelper.PageHelper;
 import com.stellar.constant.MessageConstant;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.dto.SpuSaveDTO;
+import com.stellar.entity.ServiceItem;
 import com.stellar.entity.Sku;
 import com.stellar.entity.Spu;
 import com.stellar.exception.BaseException;
 import com.stellar.elasticsearch.event.SpuChangedEvent;
+import com.stellar.mapper.ServiceItemMapper;
 import com.stellar.mapper.SkuMapper;
 import com.stellar.mapper.SpuMapper;
+import com.stellar.mapper.SpuServiceMapper;
 import com.stellar.ragsync.service.RagSyncService;
 import com.stellar.result.PageResult;
 import com.stellar.service.SiteConfigService;
@@ -24,6 +27,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,6 +38,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * SPU（标准产品单元）服务实现类。
@@ -52,9 +58,12 @@ public class SpuServiceImpl implements SpuService {
 
     private final SpuMapper spuMapper;
     private final SkuMapper skuMapper;
+    private final SpuServiceMapper spuServiceMapper;
+    private final ServiceItemMapper serviceItemMapper;
     private final RagSyncService ragSyncService;
     private final ApplicationEventPublisher eventPublisher;
     private final SiteConfigService siteConfigService;
+    private final org.springframework.cache.CacheManager cacheManager;
 
     // ================= 保存 =================
 
@@ -70,7 +79,6 @@ public class SpuServiceImpl implements SpuService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "spu:detail", key = "#result")
     public Long saveWithSkus(SpuSaveDTO dto) {
         if (dto == null) throw new BaseException(MessageConstant.ILLEGAL_PARAMETER);
         if (dto.getCategoryId() == null) {
@@ -100,12 +108,16 @@ public class SpuServiceImpl implements SpuService {
         if (spu.getSkuCount() == null) spu.setSkuCount(0);
         if (spu.getMinPrice() == null) spu.setMinPrice(BigDecimal.ZERO);
         if (spu.getMaxPrice() == null) spu.setMaxPrice(BigDecimal.ZERO);
+        if (spu.getPerUserLimit() == null) spu.setPerUserLimit(0);
         if (spu.getStatus() == 1) {
             spu.setOnShelfTime(LocalDateTime.now());
         }
 
         spuMapper.insert(spu);
         Long spuId = spu.getId();
+
+        // 保存保障服务关联（按单个商品配置服务组合）
+        saveSpuServices(spuId, dto.getServiceIds());
 
         // ===== 前端简易表单兼容：skuList 为空但 price 非空 → 自动生成 1 条默认 SKU =====
         List<Sku> skuList = dto.getSkuList();
@@ -165,6 +177,8 @@ public class SpuServiceImpl implements SpuService {
             }
             s.setSkuList(skus);
             s.setSkus(skus);
+            // 该商品可选购的保障服务（关联表 + 启用状态过滤；C 端据此渲染服务选项）
+            s.setServices(spuServiceMapper.listEnabledBySpuId(id));
         }
         return s;
     }
@@ -325,6 +339,11 @@ public class SpuServiceImpl implements SpuService {
 
         spuMapper.update(update);
 
+        // 保障服务关联：serviceIds 非 null 时全量覆盖（null=本次未涉及，保留原关联）
+        if (dto.getServiceIds() != null) {
+            saveSpuServices(dto.getId(), dto.getServiceIds());
+        }
+
         // ===== 前端简易表单兼容：skuList 为空但 price 非空 → 生成 1 条默认 SKU 并覆盖原 SKU =====
         List<Sku> skuList = dto.getSkuList();
         boolean hasExplicitSkus = skuList != null && !skuList.isEmpty();
@@ -377,6 +396,7 @@ public class SpuServiceImpl implements SpuService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "spu:detail", key = "#id")
     public void onOffShelf(Long id, Integer status) {
         if (id == null || status == null || (status != 0 && status != 1)) {
             throw new BaseException(MessageConstant.ILLEGAL_PARAMETER);
@@ -426,6 +446,20 @@ public class SpuServiceImpl implements SpuService {
         if (toChange.isEmpty()) return;
 
         spuMapper.updateStatusBatch(toChange, status);
+
+        // 批量路径不走 @CacheEvict（注解无法按集合逐条驱逐），手动逐条清除详情缓存，
+        // 与单条 onOffShelf 的 @CacheEvict(key="#id") 保持一致的缓存语义；
+        // 注册到事务提交后执行，避免"驱逐后、提交前"被并发请求回填旧值
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                org.springframework.cache.Cache detailCache = cacheManager.getCache("spu:detail");
+                if (detailCache != null) {
+                    toChange.forEach(detailCache::evict);
+                }
+            }
+        });
+
         String syncType = status == 1 ? "ONSHELF" : "OFFSHELF";
         for (Long id : toChange) {
             // ===== [RAG] 变更入 Outbox（同事务） =====
@@ -508,6 +542,33 @@ public class SpuServiceImpl implements SpuService {
     }
 
     // ================= 内部：聚合 SKU 回写 SPU =================
+
+    /**
+     * 全量覆盖 SPU 的保障服务关联。
+     * <p>空列表 = 清空（该商品不提供任何服务）；先校验服务 id 均存在且启用，再删旧插新。</p>
+     *
+     * @param spuId      商品 ID
+     * @param serviceIds 服务 id 列表（null 由调用方决定是否跳过；去重后保存）
+     */
+    private void saveSpuServices(Long spuId, List<Long> serviceIds) {
+        if (serviceIds == null) return;
+        List<Long> distinctIds = serviceIds.stream().filter(java.util.Objects::nonNull).distinct().collect(Collectors.toList());
+        spuServiceMapper.deleteBySpuId(spuId);
+        if (distinctIds.isEmpty()) return;
+
+        // 校验服务均存在，防止挂入不存在/已停用的服务（停用服务在下单时也会被拒绝，这里提前兜底）
+        List<ServiceItem> items = serviceItemMapper.listByIds(distinctIds);
+        if (items == null || items.size() != distinctIds.size()) {
+            throw new BaseException("保障服务不存在，请刷新后重试");
+        }
+        for (ServiceItem item : items) {
+            if (item.getStatus() == null || item.getStatus() != 1) {
+                throw new BaseException("保障服务「" + item.getTitle() + "」已停用，无法关联");
+            }
+        }
+        spuServiceMapper.insertBatch(spuId, distinctIds);
+    }
+
     private void refreshAggregates(Long spuId) {
         List<Sku> skus = skuMapper.listBySpuId(spuId);
         if (skus == null || skus.isEmpty()) {

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stellar.mapper.SpuServiceMapper">
+
+    <resultMap id="ServiceItemMap" type="com.stellar.entity.ServiceItem">
+        <id     property="id"          column="id"/>
+        <result property="code"        column="code"/>
+        <result property="title"       column="title"/>
+        <result property="price"       column="price"/>
+        <result property="description" column="description"/>
+        <result property="status"      column="status"/>
+        <result property="createTime"  column="create_time"/>
+        <result property="updateTime"  column="update_time"/>
+    </resultMap>
+
+    <!-- 某 SPU 已关联且启用的服务 -->
+    <select id="listEnabledBySpuId" resultMap="ServiceItemMap">
+        SELECT si.*
+        FROM stellar_spu_service ss
+        JOIN stellar_service_item si ON si.id = ss.service_id
+        WHERE ss.spu_id = #{spuId}
+          AND si.status = 1
+        ORDER BY si.id
+    </select>
+
+    <!-- 某 SPU 已关联的全部服务（含停用，编辑回填用） -->
+    <select id="listBySpuId" resultMap="ServiceItemMap">
+        SELECT si.*
+        FROM stellar_spu_service ss
+        JOIN stellar_service_item si ON si.id = ss.service_id
+        WHERE ss.spu_id = #{spuId}
+        ORDER BY si.id
+    </select>
+
+    <delete id="deleteBySpuId">
+        DELETE FROM stellar_spu_service WHERE spu_id = #{spuId}
+    </delete>
+
+    <insert id="insertBatch">
+        INSERT INTO stellar_spu_service (spu_id, service_id) VALUES
+        <foreach collection="serviceIds" item="serviceId" separator=",">
+            (#{spuId}, #{serviceId})
+        </foreach>
+    </insert>
+
+    <select id="countByServiceId" resultType="int">
+        SELECT COUNT(*) FROM stellar_spu_service WHERE service_id = #{serviceId}
+    </select>
+
+</mapper>

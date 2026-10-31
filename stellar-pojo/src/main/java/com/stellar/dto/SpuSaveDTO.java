@@ -63,6 +63,12 @@ public class SpuSaveDTO implements Serializable {
     @ApiModelProperty("1 上架 0 下架（新增不传默认上架）")
     private Integer status;
 
+    @ApiModelProperty("每人限购数量，0 或不传=不限购")
+    private Integer perUserLimit;
+
+    @ApiModelProperty("可选购的保障服务 id 列表（全量覆盖；null=不修改关联，空列表=清空）")
+    private List<Long> serviceIds;
+
     // ========= 价格：SKU 聚合优先；前端简单表单可直接传 price 生成默认 SKU =========
     @ApiModelProperty("最低 SKU 价格（可传可不传，不传则按 SKU / price 自动计算）")
     private BigDecimal minPrice;

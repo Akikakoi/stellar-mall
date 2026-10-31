@@ -62,6 +62,7 @@ class OrderServiceProxyTest {
     @Mock private CartMapper cartMapper;
     @Mock private SkuMapper skuMapper;
     @Mock private SpuMapper spuMapper;
+    @Mock private SpuServiceMapper spuServiceMapper;
     @Mock private SkuStockService skuStockService;
     @Mock private MallOrderMapper mallOrderMapper;
     @Mock private MallOrderItemMapper mallOrderItemMapper;
@@ -397,31 +398,12 @@ class OrderServiceProxyTest {
             verify(mallOrderMapper, never()).insert(any());
         }
 
-        @Test @DisplayName("直购额外费用为负 → 抛 BaseException，不扣库存不写订单")
+        @Test @DisplayName("直购伪造负数服务费 → 前端 extraAmount 被忽略，无服务声明则服务费为 0，订单正常成立")
         void negativeExtraAmount_throwsBaseException() {
             OrderSubmitDTO.OrderItemDTO item = new OrderSubmitDTO.OrderItemDTO();
             item.setSkuId(10L); item.setQuantity(1);
             item.setPrice(BigDecimal.valueOf(100));
             item.setExtraAmount(BigDecimal.valueOf(-50));
-
-            OrderSubmitDTO dto = submitDto("地址", 1);
-            dto.setItems(Collections.singletonList(item));
-
-            when(skuMapper.listByIds(anyList())).thenReturn(
-                    Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
-            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
-
-            assertThrows(BaseException.class, () -> orderService.submitDirect(USER_ID, dto));
-            verify(skuStockService, never()).deduct(anyLong(), anyInt(), any());
-            verify(mallOrderMapper, never()).insert(any());
-        }
-
-        @Test @DisplayName("直购正常附加保障服务费 → 订单总额含服务费")
-        void directWithExtraAmount_totalIncludesFee() {
-            OrderSubmitDTO.OrderItemDTO item = new OrderSubmitDTO.OrderItemDTO();
-            item.setSkuId(10L); item.setQuantity(2);
-            item.setPrice(BigDecimal.valueOf(100));
-            item.setExtraAmount(BigDecimal.valueOf(10));
 
             OrderSubmitDTO dto = submitDto("地址", 1);
             dto.setItems(Collections.singletonList(item));
@@ -435,11 +417,43 @@ class OrderServiceProxyTest {
             stubOrderInsert();
             when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
 
+            // 金额以服务表权威重算为准：未声明任何服务 → 服务费 0，负数金额无效
+            MallOrder result = orderService.submitDirect(USER_ID, dto);
+            assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(100)));
+        }
+
+        @Test @DisplayName("直购携带保障服务 → 服务费按服务表价格权威重算（忽略前端伪造金额）")
+        void directWithExtraAmount_totalIncludesFee() {
+            OrderSubmitDTO.OrderItemDTO item = new OrderSubmitDTO.OrderItemDTO();
+            item.setSkuId(10L); item.setQuantity(2);
+            item.setPrice(BigDecimal.valueOf(100));
+            // 前端伪造：单价 999 元（真实价 10 元）
+            item.setExtraAmount(BigDecimal.valueOf(999));
+            // 声明服务 screen_insurance（该 SPU 已配置，库内单价 10 元）
+            item.setServiceInfo("[{\"id\":\"screen_insurance\",\"title\":\"碎屏险\",\"price\":1}]");
+
+            OrderSubmitDTO dto = submitDto("地址", 1);
+            dto.setItems(Collections.singletonList(item));
+            dto.setClearCart(false);
+
+            when(skuMapper.listByIds(anyList())).thenReturn(
+                    Collections.singletonList(sku(10L, 1L, "SKU", "默认", BigDecimal.valueOf(100))));
+            when(spuMapper.listByIds(anyList())).thenReturn(Collections.singletonList(spu(1L, "SPU")));
+
+            com.stellar.entity.ServiceItem svc = com.stellar.entity.ServiceItem.builder()
+                    .id(1L).code("screen_insurance").title("碎屏险")
+                    .price(BigDecimal.TEN).status(1).build();
+            when(spuServiceMapper.listEnabledBySpuId(1L)).thenReturn(Collections.singletonList(svc));
+
+            doNothing().when(skuStockService).deduct(anyLong(), anyInt(), any());
+            stubOrderInsert();
+            when(mallOrderItemMapper.insertBatch(anyList())).thenReturn(1);
+
             MallOrder result = orderService.submitDirect(USER_ID, dto);
 
-            // 100×2 + 10 = 210
-            assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(210)));
-            assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(210)));
+            // 100×2 + 10(服务表价)×2 = 220；既不是伪造的 999，也不是伪造快照里的 1
+            assertEquals(0, result.getTotalAmount().compareTo(BigDecimal.valueOf(220)));
+            assertEquals(0, result.getPayAmount().compareTo(BigDecimal.valueOf(220)));
         }
 
         @Test @DisplayName("直购前端篡改价格（URL 传 1 元，库表价 100）→ 按库表价计价，防 0 元下单")

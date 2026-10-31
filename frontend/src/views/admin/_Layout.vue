@@ -65,13 +65,13 @@
           <el-icon><User /></el-icon>
           <template #title>员工管理</template>
         </el-menu-item>
-        <el-menu-item index="/admin/banner">
-          <el-icon><Picture /></el-icon>
-          <template #title>轮播图管理</template>
-        </el-menu-item>
         <el-menu-item index="/admin/home-module">
           <el-icon><Stamp /></el-icon>
           <template #title>首页装修</template>
+        </el-menu-item>
+        <el-menu-item index="/admin/service">
+          <el-icon><Umbrella /></el-icon>
+          <template #title>保障服务</template>
         </el-menu-item>
         <!-- ===== 工具类 ===== -->
         <el-menu-item index="/admin/settings">
@@ -135,7 +135,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   DataBoard, Goods, Menu, User,
   Fold, Expand, ArrowDown, Document, Setting, Tickets,
-  Discount, ChatLineSquare, Picture, Warning, Sunny, Moon, Stamp, Star, TrendCharts, Box
+  Discount, ChatLineSquare, Warning, Sunny, Moon, Stamp, Star, TrendCharts, Box, Umbrella
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -159,8 +159,8 @@ const TITLE_MAP: Record<string, string> = {
   '/admin/points': '积分管理',
   '/admin/review': '评价管理',
   '/admin/employee': '员工管理',
-  '/admin/banner': '轮播图管理',
   '/admin/home-module': '首页装修',
+  '/admin/service': '保障服务管理',
   '/admin/settings': '系统设置'
 }
 const currentPageTitle = computed(() => TITLE_MAP[route.path] || '')

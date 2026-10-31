@@ -29,4 +29,11 @@ public interface MallOrderItemMapper {
      * 返回 &gt; 0 表示购买过，用于评价提交前的资格校验。
      */
     int countBoughtByUser(@Param("userId") Long userId, @Param("spuId") Long spuId);
+
+    /**
+     * 统计用户对指定 SPU 的累计购买件数（用于限购校验）。
+     * 口径：排除 PENDING 待付款 / CANCELLED 已取消 / REFUNDED 已整单退款；
+     * REFUNDING / PARTIAL_REFUNDED 仍计入（退款未完成不释放限购资格）。
+     */
+    int sumQtyByUserAndSpu(@Param("userId") Long userId, @Param("spuId") Long spuId);
 }

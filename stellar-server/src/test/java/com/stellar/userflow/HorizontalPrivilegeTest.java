@@ -9,6 +9,8 @@ import com.stellar.service.PointsService;
 import com.stellar.service.UserMessageService;
 import com.stellar.service.impl.PointsServiceImpl;
 import com.stellar.service.impl.ReviewServiceImpl;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationEventPublisher;
 import com.stellar.service.impl.UserMessageServiceImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,7 +73,10 @@ class HorizontalPrivilegeTest {
         SpuMapper spuMapper = mock(SpuMapper.class);
         PointsService pointsService = mock(PointsService.class);
         MallOrderItemMapper orderItemMapper = mock(MallOrderItemMapper.class);
-        ReviewServiceImpl service = new ReviewServiceImpl(reviewMapper, spuMapper, pointsService, orderItemMapper);
+        CacheManager cacheManager = mock(CacheManager.class);
+        ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+        ReviewServiceImpl service = new ReviewServiceImpl(reviewMapper, spuMapper, pointsService, orderItemMapper,
+                cacheManager, eventPublisher);
 
         BaseContext.setCurrentId(USER_ID);
         when(orderItemMapper.countBoughtByUser(USER_ID, 1L)).thenReturn(0);
@@ -90,7 +95,10 @@ class HorizontalPrivilegeTest {
         SpuMapper spuMapper = mock(SpuMapper.class);
         PointsService pointsService = mock(PointsService.class);
         MallOrderItemMapper orderItemMapper = mock(MallOrderItemMapper.class);
-        ReviewServiceImpl service = new ReviewServiceImpl(reviewMapper, spuMapper, pointsService, orderItemMapper);
+        CacheManager cacheManager = mock(CacheManager.class);
+        ApplicationEventPublisher eventPublisher = mock(ApplicationEventPublisher.class);
+        ReviewServiceImpl service = new ReviewServiceImpl(reviewMapper, spuMapper, pointsService, orderItemMapper,
+                cacheManager, eventPublisher);
 
         BaseContext.setCurrentId(USER_ID);
         when(orderItemMapper.countBoughtByUser(USER_ID, 1L)).thenReturn(1);

@@ -1,6 +1,7 @@
 package com.stellar.service.impl;
 
 import com.stellar.context.BaseContext;
+import com.stellar.elasticsearch.event.SpuChangedEvent;
 import com.stellar.entity.Review;
 import com.stellar.exception.BaseException;
 import com.stellar.mapper.MallOrderItemMapper;
@@ -11,6 +12,9 @@ import com.stellar.service.PointsService;
 import com.stellar.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +39,24 @@ public class ReviewServiceImpl implements ReviewService {
     private final SpuMapper spuMapper;
     private final PointsService pointsService;
     private final MallOrderItemMapper mallOrderItemMapper;
+    private final CacheManager cacheManager;
+    private final ApplicationEventPublisher eventPublisher;
+
+    /**
+     * 评价数变动后刷新派生数据：
+     * 1. 清除 spu:detail 缓存（详情页"评论：X 条"否则会一直读到旧值）；
+     * 2. 发布 ES 同步事件（列表页/搜索结果的评论数来自 ES 文档）。
+     *
+     * @param spuId SPU ID
+     */
+    private void refreshSpuCounters(Long spuId) {
+        if (spuId == null) return;
+        Cache cache = cacheManager.getCache("spu:detail");
+        if (cache != null) {
+            cache.evict(spuId);
+        }
+        eventPublisher.publishEvent(SpuChangedEvent.saved(spuId));
+    }
 
     /**
      * 提交评价。
@@ -68,6 +90,7 @@ public class ReviewServiceImpl implements ReviewService {
         // 维护 SPU 评价数（可见评价 +1）
         if (review.getSpuId() != null) {
             spuMapper.incrCommentCount(review.getSpuId(), 1);
+            refreshSpuCounters(review.getSpuId());
         }
         // 评价获得积分（不影响评价主流程）
         try {
@@ -104,6 +127,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (r.getStatus() != null && r.getStatus() == 1) {
             reviewMapper.updateStatus(id, 0);
             spuMapper.incrCommentCount(r.getSpuId(), -1);
+            refreshSpuCounters(r.getSpuId());
         }
     }
 
@@ -120,6 +144,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (r.getStatus() != null && r.getStatus() == 0) {
             reviewMapper.updateStatus(id, 1);
             spuMapper.incrCommentCount(r.getSpuId(), 1);
+            refreshSpuCounters(r.getSpuId());
         }
     }
 

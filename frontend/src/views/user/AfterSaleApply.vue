@@ -50,6 +50,7 @@
             <span class="refund-amount">¥{{ refundAmount.toFixed(2) }}</span>
             <span class="hint">
               （商品 ¥{{ Number(selectedItem?.price || 0).toFixed(2) }} x {{ selectedItem?.qty || 1 }}
+              <template v-if="Number(selectedItem?.extraAmount || 0) > 0">，保障服务费 ¥{{ Number(selectedItem.extraAmount).toFixed(2) }}</template>
               <template v-if="hasCouponDiscount">，已按优惠券比例折算</template>）
             </span>
           </el-form-item>
@@ -106,11 +107,13 @@ const form = ref<any>({
 })
 
 /**
- * 计算退款金额，若订单有优惠券折扣则按比例折算
+ * 计算退款金额，口径与后端 AfterSaleServiceImpl 一致：
+ * 商品小计 + 保障服务费（extraAmount），若订单有优惠券折扣则按比例折算
  */
 const refundAmount = computed(() => {
   if (!selectedItem.value) return 0
   const itemAmount = Number(selectedItem.value.price || 0) * (selectedItem.value.qty || 1)
+    + Number(selectedItem.value.extraAmount || 0)
   const total = Number(selectedOrder.value?.totalAmount || itemAmount)
   const paid = Number(selectedOrder.value?.payAmount || itemAmount)
   if (total > 0 && paid < total) {

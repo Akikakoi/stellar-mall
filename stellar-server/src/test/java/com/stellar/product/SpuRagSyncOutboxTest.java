@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
@@ -42,6 +43,10 @@ class SpuRagSyncOutboxTest {
     private SpuMapper spuMapper;
     @Mock
     private SkuMapper skuMapper;
+    @Mock
+    private com.stellar.mapper.SpuServiceMapper spuServiceMapper;
+    @Mock
+    private com.stellar.mapper.ServiceItemMapper serviceItemMapper;
     @Mock
     private ApplicationEventPublisher eventPublisher;
     @Mock
@@ -115,7 +120,11 @@ class SpuRagSyncOutboxTest {
         lenient().when(spuMapper.getById(any())).thenReturn(base);
 
         ragSyncSpy = new RecordingRagSyncService();
-        spuService = new SpuServiceImpl(spuMapper, skuMapper, ragSyncSpy, eventPublisher, siteConfigService);
+        // 服务关联：默认无已启用服务；saveSpuServices 在 serviceIds 为空列表时仅执行 deleteBySpuId
+        lenient().when(spuServiceMapper.deleteBySpuId(any())).thenReturn(0);
+        lenient().when(serviceItemMapper.listByIds(anyList())).thenReturn(new ArrayList<>());
+        spuService = new SpuServiceImpl(spuMapper, skuMapper, spuServiceMapper, serviceItemMapper, ragSyncSpy, eventPublisher, siteConfigService,
+                mock(CacheManager.class));
     }
 
     // ---- 辅助：最小 SpuSaveDTO ----

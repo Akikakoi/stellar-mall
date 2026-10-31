@@ -355,7 +355,8 @@ function statusTag(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info
 
 function payMethodText(m: any) {
   if (m == null) return '—'
-  const map: Record<string, any> = { 1: '微信支付', 2: '支付宝', 4: '银行卡' }
+  // 与后端 OrderServiceImpl.pay 对齐：1-微信 2-支付宝 3-银行卡 4-钱包
+  const map: Record<string, any> = { 1: '微信支付', 2: '支付宝', 3: '银行卡', 4: '钱包支付' }
   return map[m] || `方式${m}`
 }
 

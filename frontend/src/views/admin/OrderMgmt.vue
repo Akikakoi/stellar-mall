@@ -67,7 +67,7 @@
         </el-table-column>
         <el-table-column prop="address" label="收货地址" min-width="160" show-overflow-tooltip />
         <el-table-column label="支付方式" width="90">
-          <template #default="{ row }">{{ row.payMethod === 1 ? '微信' : row.payMethod === 2 ? '支付宝' : '-' }}</template>
+          <template #default="{ row }">{{ payMethodLabel(row.payMethod) }}</template>
         </el-table-column>
         <el-table-column prop="createTime" label="下单时间" width="170" />
         <el-table-column label="操作" width="180" fixed="right">
@@ -152,6 +152,12 @@ const STATUS_MAP: Record<string, any> = {
 }
 
 /** 获取订单状态的中文标签 */
+/** 支付方式文案，与后端 OrderServiceImpl.pay 对齐：1-微信 2-支付宝 3-银行卡 4-钱包 */
+function payMethodLabel(m: any) {
+  const map: Record<number, string> = { 1: '微信', 2: '支付宝', 3: '银行卡', 4: '钱包' }
+  return map[m] || '-'
+}
+
 function statusLabel(s: any) {
   return STATUS_MAP[s] || s || '-'
 }

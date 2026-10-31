@@ -29,6 +29,7 @@
         <result property="isHot"         column="is_hot"/>
         <result property="sort"          column="sort"/>
         <result property="status"        column="status"/>
+        <result property="perUserLimit"  column="per_user_limit"/>
         <result property="onShelfTime"   column="on_shelf_time"/>
         <result property="offShelfTime"  column="off_shelf_time"/>
         <result property="createTime"    column="create_time"/>
@@ -46,6 +47,7 @@
             description, description_md, main_image, sub_images,
             sale_count, comment_count, total_stock, sku_count,
             min_price, max_price, is_new, is_hot, sort, status,
+            per_user_limit,
             on_shelf_time, off_shelf_time,
             create_time, create_user, update_time, update_user
         ) VALUES (
@@ -53,6 +55,7 @@
             #{description}, #{descriptionMd}, #{mainImage}, #{subImages},
             #{saleCount}, #{commentCount}, #{totalStock}, #{skuCount},
             #{minPrice}, #{maxPrice}, #{isNew}, #{isHot}, #{sort}, #{status},
+            #{perUserLimit},
             #{onShelfTime}, #{offShelfTime},
             #{createTime}, #{createUser}, #{updateTime}, #{updateUser}
         )
@@ -77,6 +80,7 @@
             <if test="isHot != null">is_hot = #{isHot},</if>
             <if test="sort != null">sort = #{sort},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="perUserLimit != null">per_user_limit = #{perUserLimit},</if>
             <if test="onShelfTime != null">on_shelf_time = #{onShelfTime},</if>
             <if test="offShelfTime != null">off_shelf_time = #{offShelfTime},</if>
             update_time = #{updateTime},

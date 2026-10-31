@@ -194,12 +194,15 @@ const qty = ref(1)
 const isFav = ref(false)
 const selectedServices = ref<any[]>([])
 
-// 演示：保障服务数据，后续可替换为后端接口
-const skuServices = ref([
-  { id: 'screen_insurance', title: '碎屏险 · 1年', price: 99 },
-  { id: 'extend_warranty', title: '延长保修 · 2年', price: 159 },
-  { id: 'battery_insurance', title: '电池换新险', price: 49 }
-])
+// 保障服务：来自后端（管理端按单个商品配置，详情接口按 SPU 关联返回）。
+// 字段映射：id 用服务的 code（稳定标识，购物车/订单快照中的服务 id 即 code）
+const skuServices = computed(() => {
+  return (spu.value?.services || []).map((s: any) => ({
+    id: s.code || String(s.id),
+    title: s.title,
+    price: Number(s.price || 0)
+  }))
+})
 
 const serviceFee = computed(() => {
   return selectedServices.value.reduce((sum: any, id: any) => {

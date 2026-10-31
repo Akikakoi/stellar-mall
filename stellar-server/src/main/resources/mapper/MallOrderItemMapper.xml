@@ -79,4 +79,15 @@
           AND o.status NOT IN ('PENDING', 'CANCELLED')
     </select>
 
+    <!-- 统计用户对指定 SPU 的累计购买件数（限购校验用）。
+         排除 PENDING/CANCELLED/REFUNDED；REFUNDING/PARTIAL_REFUNDED 仍计入（退款未完成不释放限购资格） -->
+    <select id="sumQtyByUserAndSpu" resultType="int">
+        SELECT COALESCE(SUM(oi.qty), 0)
+        FROM stellar_mall_order_item oi
+        JOIN stellar_mall_order o ON o.id = oi.order_id
+        WHERE oi.spu_id = #{spuId}
+          AND o.user_id = #{userId}
+          AND o.status NOT IN ('PENDING', 'CANCELLED', 'REFUNDED')
+    </select>
+
 </mapper>

@@ -70,6 +70,17 @@
           兑换后剩余: <strong>{{ points.availablePoints - redeemTarget.pointsPrice }}</strong> 积分
         </div>
         <div v-else class="redeem-warn">积分不足，无法兑换</div>
+
+        <!-- 实物类商品需选择收货地址 -->
+        <div class="redeem-address" v-if="isPhysical">
+          <div class="addr-label">收货地址</div>
+          <el-select v-model="redeemAddressId" placeholder="请选择收货地址" style="width: 100%">
+            <el-option v-for="a in addresses" :key="a.id" :value="a.id" :label="addrLabel(a)" />
+          </el-select>
+          <div class="addr-tip" v-if="!addresses.length">
+            暂无收货地址，<router-link to="/address" class="link">去添加</router-link>
+          </div>
+        </div>
       </div>
       <template #footer>
         <el-button @click="redeemVisible = false">取消</el-button>
@@ -83,7 +94,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getUserPoints, checkin, getCheckinDates, listPointsProducts, redeemPoints } from '@/api/mall'
+import { getUserPoints, checkin, getCheckinDates, listPointsProducts, redeemPoints, listAddresses } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
@@ -96,13 +107,28 @@ const checkingIn = ref(false)
 const redeemVisible = ref(false)
 const redeemTarget = ref<any>(null)
 const redeeming = ref(false)
+const addresses = ref<any[]>([])
+const redeemAddressId = ref<any>(null)
+
+/** 是否实物类商品（需要收货地址） */
+const isPhysical = computed(() => !!redeemTarget.value && redeemTarget.value.productType !== 'COUPON')
 
 /**
- * 是否可兑换 - 当前积分是否足够兑换选中的商品
+ * 地址下拉展示文案
+ */
+function addrLabel(a: any) {
+  const region = `${a.province || ''}${a.city || ''}${a.district || ''}`
+  return `${a.consignee} ${a.phone} ${region}${a.detail}`
+}
+
+/**
+ * 是否可兑换 - 积分足够，且实物商品已选择收货地址
  */
 const canRedeem = computed(() => {
   if (!redeemTarget.value || !points.value) return false
-  return points.value.availablePoints >= redeemTarget.value.pointsPrice
+  if (points.value.availablePoints < redeemTarget.value.pointsPrice) return false
+  if (isPhysical.value && !redeemAddressId.value) return false
+  return true
 })
 
 /**
@@ -169,22 +195,38 @@ async function doCheckin() {
 }
 
 /**
- * 打开兑换确认弹窗
+ * 打开兑换确认弹窗；实物商品需加载收货地址并默认选中默认地址
  * @param {Object} p - 要兑换的商品对象
  */
-function openRedeem(p: any) {
+async function openRedeem(p: any) {
   redeemTarget.value = p
+  redeemAddressId.value = null
+  if (p.productType !== 'COUPON') {
+    try {
+      addresses.value = (await listAddresses()) || []
+      const def = addresses.value.find((a: any) => a.isDefault === 1)
+      redeemAddressId.value = def?.id ?? addresses.value[0]?.id ?? null
+    } catch {
+      addresses.value = []
+    }
+  }
   redeemVisible.value = true
 }
 
 /**
- * 执行积分兑换，扣减积分并兑换商品
+ * 执行积分兑换，扣减积分并兑换商品（实物商品携带收货地址）
  */
 async function doRedeem() {
   if (!canRedeem.value) return
+  if (isPhysical.value && !redeemAddressId.value) {
+    ElMessage.warning('请选择收货地址')
+    return
+  }
   redeeming.value = true
   try {
-    const res = await redeemPoints({ productId: redeemTarget.value.id })
+    const payload: any = { productId: redeemTarget.value.id }
+    if (isPhysical.value) payload.addressId = redeemAddressId.value
+    const res = await redeemPoints(payload)
     ElMessage.success(`兑换成功！消耗 ${res.pointsCost} 积分`)
     redeemVisible.value = false
     await loadData()
@@ -308,4 +350,9 @@ onMounted(() => loadData())
 .redeem-detail { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
 .redeem-remain { font-size: 13px; color: var(--text-muted); margin-top: 12px; }
 .redeem-warn { font-size: 14px; color: #e33; margin-top: 12px; }
+
+.redeem-address { margin-top: 16px; text-align: left; }
+.addr-label { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.addr-tip { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+.addr-tip .link { color: var(--color-primary, #409eff); }
 </style>

@@ -53,9 +53,31 @@ CREATE TABLE stellar_spu (
     min_price DECIMAL(10,2) DEFAULT 0, max_price DECIMAL(10,2) DEFAULT 0,
     is_new TINYINT DEFAULT 0, is_hot TINYINT DEFAULT 0,
     sort INT DEFAULT 0, status TINYINT NOT NULL DEFAULT 1,
+    per_user_limit INT NOT NULL DEFAULT 0,
     on_shelf_time DATETIME, off_shelf_time DATETIME,
     create_time DATETIME NOT NULL, create_user BIGINT NOT NULL,
     update_time DATETIME NOT NULL, update_user BIGINT NOT NULL, PRIMARY KEY (id)
+);
+
+DROP TABLE IF EXISTS stellar_service_item;
+CREATE TABLE stellar_service_item (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    code VARCHAR(64) NOT NULL,
+    title VARCHAR(128) NOT NULL,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0,
+    description VARCHAR(255),
+    status TINYINT NOT NULL DEFAULT 1,
+    create_time DATETIME NOT NULL,
+    update_time DATETIME NOT NULL, PRIMARY KEY (id),
+    CONSTRAINT uk_service_code UNIQUE (code)
+);
+
+DROP TABLE IF EXISTS stellar_spu_service;
+CREATE TABLE stellar_spu_service (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    spu_id BIGINT NOT NULL,
+    service_id BIGINT NOT NULL, PRIMARY KEY (id),
+    CONSTRAINT uk_spu_service UNIQUE (spu_id, service_id)
 );
 
 DROP TABLE IF EXISTS stellar_sku;
