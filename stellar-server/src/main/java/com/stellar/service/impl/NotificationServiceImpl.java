@@ -131,7 +131,9 @@ public class NotificationServiceImpl implements NotificationService {
                 order.getOrderNo());
         log.info("[发货通知] 订单:{} 用户:{}", order.getOrderNo(), order.getUserId());
 
-        logNotification(order.getUserId(), null, null, "SMS", "ORDER_SHIPPED",
+        // 实际触达渠道是站内信（sendUserMessage），日志按真实渠道记录。
+        // 项目未接入任何短信网关，禁止再记 channel=SMS + status=1 的假发送记录。
+        logNotification(order.getUserId(), null, null, "INBOX", "ORDER_SHIPPED",
                 "订单已发货", content, 1, null);
 
         // 同时写消息表
@@ -150,8 +152,12 @@ public class NotificationServiceImpl implements NotificationService {
                 order.getOrderNo());
         log.info("[收货通知] 订单:{} 用户:{}", order.getOrderNo(), order.getUserId());
 
-        logNotification(order.getUserId(), null, null, "SMS", "ORDER_RECEIVED",
-                "已确认收货", content, 1, null);
+        // 此前只写了一条 channel=SMS 的假发送日志，用户实际收不到任何通知；
+        // 现在补写站内信，让确认收货通知真实触达。
+        String title = "已确认收货";
+        logNotification(order.getUserId(), null, null, "INBOX", "ORDER_RECEIVED",
+                title, content, 1, null);
+        sendUserMessage(order.getUserId(), title, content, "ORDER_NOTICE", order.getId());
     }
 
     /**
@@ -174,19 +180,24 @@ public class NotificationServiceImpl implements NotificationService {
         String content = sb.toString().trim();
         log.info("[优惠券过期提醒] 用户:{} 过期券数:{}", userId, coupons.size());
 
-        logNotification(userId, null, null, "SMS", "COUPON_EXPIRE",
+        // 实际触达渠道是站内信，日志按真实渠道记录
+        logNotification(userId, null, null, "INBOX", "COUPON_EXPIRE",
                 "优惠券到期提醒", content, 1, null);
 
         sendUserMessage(userId, "优惠券通知", content, "COUPON_NOTICE", null);
     }
 
     /**
-     * 异步记录通知日志到数据库。
+     * 记录通知日志到数据库。
+     *
+     * <p>注意：本方法不加 @Async——目前唯一的调用方（发货/收货/优惠券提醒）本身已在
+     * notificationExecutor 上异步执行，同类自调用的 @Async 不经过代理、静默失效，
+     * 留着只会误导后续维护者以为这里有异步语义。</p>
      *
      * @param userId   用户 ID（可为 null）
      * @param phone    手机号（可为 null）
      * @param email    邮箱（可为 null）
-     * @param channel  通知渠道（如 SMS、EMAIL）
+     * @param channel  通知渠道（INBOX=站内信、EMAIL=邮件；SMS 需接入短信网关后才有意义）
      * @param type     通知类型（如 VERIFY_CODE、ORDER_SHIPPED）
      * @param title    通知标题
      * @param content  通知内容
@@ -194,7 +205,6 @@ public class NotificationServiceImpl implements NotificationService {
      * @param errorMsg 错误信息（可为 null）
      */
     @Override
-    @Async(AsyncExecutorConfig.NOTIFICATION_EXECUTOR)
     public void logNotification(Long userId, String phone, String email, String channel,
                                  String type, String title, String content, int status, String errorMsg) {
         NotificationLog logEntry = NotificationLog.builder()

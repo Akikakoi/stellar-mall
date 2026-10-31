@@ -76,11 +76,12 @@ class NotificationMessageWriteTest {
                 "SELECT content FROM stellar_user_message WHERE user_id = ?", String.class, USER_ID);
         assertTrue(content != null && content.contains(ORDER_NO), "消息正文应带上订单号，实际: " + content);
 
-        // 通知日志：渠道与类型是短信通知的约定值
+        // 通知日志：类型/状态对约定值；渠道为 INBOX——项目未接入短信网关，
+        // 发货通知实际触达渠道是站内信（user_message），日志按真实渠道记录
         assertEquals("ORDER_SHIPPED",
                 jdbcTemplate.queryForObject(
                         "SELECT type FROM stellar_notification_log WHERE user_id = ?", String.class, USER_ID));
-        assertEquals("SMS",
+        assertEquals("INBOX",
                 jdbcTemplate.queryForObject(
                         "SELECT channel FROM stellar_notification_log WHERE user_id = ?", String.class, USER_ID));
         assertEquals(1,
