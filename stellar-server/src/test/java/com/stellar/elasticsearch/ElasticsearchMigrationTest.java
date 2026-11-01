@@ -98,15 +98,18 @@ class ElasticsearchMigrationTest {
         NativeQuery query = capturedTextQuery();
         var bool = query.getQuery().bool();
         assertEquals("1", bool.minimumShouldMatch());
-        assertEquals(5, bool.should().size());
+        assertEquals(6, bool.should().size());
         var exact = bool.should().get(0).term();
         assertEquals("name.keyword", exact.field());
         assertEquals("手机膜", exact.value().stringValue());
         assertEquals(100.0f, exact.boost());
         var multiMatch = bool.should().get(2).multiMatch();
-        assertEquals(List.of("name^3", "subTitle"), multiMatch.fields());
+        assertEquals(List.of("name^3", "subTitle", "categoryName.text^2"), multiMatch.fields());
         assertEquals("and", multiMatch.operator().jsonValue());
         assertEquals("钢化膜", bool.should().get(3).matchPhrase().query());
+        // 同义词短语匹配覆盖 name/subTitle/categoryName.text 三字段
+        assertEquals("categoryName.text", bool.should().get(5).matchPhrase().field());
+        assertEquals("钢化膜", bool.should().get(5).matchPhrase().query());
         assertNotNull(query.getHighlightQuery());
     }
 
@@ -202,9 +205,11 @@ class ElasticsearchMigrationTest {
 
         config.ensureIndex(null);
 
+        // 3 次请求：① PUT 建索引（含 nameVec/name.keyword）② PUT _mapping 追加 categoryName.text
+        // ③ POST _update_by_query 原地回填存量文档的子字段
         ArgumentCaptor<org.elasticsearch.client.Request> requests =
                 ArgumentCaptor.forClass(org.elasticsearch.client.Request.class);
-        verify(restClient, times(2)).performRequest(requests.capture());
+        verify(restClient, times(3)).performRequest(requests.capture());
         var create = requests.getAllValues().get(0);
         assertEquals("/stellar_spu", create.getEndpoint());
         assertEquals("PUT", create.getMethod());
@@ -215,6 +220,17 @@ class ElasticsearchMigrationTest {
         assertEquals(1536, properties.path("nameVec").path("dims").asInt());
         assertTrue(properties.path("nameVec").path("index").asBoolean());
         assertEquals("cosine", properties.path("nameVec").path("similarity").asText());
+        var mapping = requests.getAllValues().get(1);
+        assertEquals("/stellar_spu/_mapping", mapping.getEndpoint());
+        var mappingProps = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+                org.apache.http.util.EntityUtils.toString(mapping.getEntity())).path("properties");
+        assertEquals("keyword", mappingProps.path("categoryName").path("type").asText());
+        assertEquals("text", mappingProps.path("categoryName").path("fields").path("text").path("type").asText());
+        assertEquals("ik_max_word", mappingProps.path("categoryName").path("fields").path("text").path("analyzer").asText());
+        assertEquals("ik_smart", mappingProps.path("categoryName").path("fields").path("text").path("search_analyzer").asText());
+        var reindex = requests.getAllValues().get(2);
+        assertEquals("/stellar_spu/_update_by_query?conflicts=proceed", reindex.getEndpoint());
+        assertEquals("POST", reindex.getMethod());
     }
 
     @Test
@@ -227,15 +243,26 @@ class ElasticsearchMigrationTest {
 
         config.ensureIndex(null);
 
+        // 存量索引：① PUT _mapping 只追加 categoryName.text（不重发 name/nameVec，
+        // ES 对已有字段参数不可变，重发出入即 400）② POST _update_by_query 回填
         ArgumentCaptor<org.elasticsearch.client.Request> requests =
                 ArgumentCaptor.forClass(org.elasticsearch.client.Request.class);
-        verify(restClient).performRequest(requests.capture());
+        verify(restClient, times(2)).performRequest(requests.capture());
         verify(index, never()).createMapping(any(Class.class));
-        assertEquals("/stellar_spu/_mapping", requests.getValue().getEndpoint());
+        var mapping = requests.getAllValues().get(0);
+        assertEquals("/stellar_spu/_mapping", mapping.getEndpoint());
         var properties = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
-                org.apache.http.util.EntityUtils.toString(requests.getValue().getEntity())).path("properties");
-        assertEquals("keyword", properties.path("name").path("fields").path("keyword").path("type").asText());
-        assertTrue(properties.path("nameVec").path("index").asBoolean());
+                org.apache.http.util.EntityUtils.toString(mapping.getEntity())).path("properties");
+        // 最小化 PUT：只含 categoryName，不重发 name/nameVec
+        assertFalse(properties.has("name"));
+        assertFalse(properties.has("nameVec"));
+        assertEquals("keyword", properties.path("categoryName").path("type").asText());
+        assertEquals("text", properties.path("categoryName").path("fields").path("text").path("type").asText());
+        assertEquals("ik_max_word", properties.path("categoryName").path("fields").path("text").path("analyzer").asText());
+        assertEquals("ik_smart", properties.path("categoryName").path("fields").path("text").path("search_analyzer").asText());
+        var reindex = requests.getAllValues().get(1);
+        assertEquals("/stellar_spu/_update_by_query?conflicts=proceed", reindex.getEndpoint());
+        assertEquals("POST", reindex.getMethod());
     }
 
     @SuppressWarnings("unchecked")
