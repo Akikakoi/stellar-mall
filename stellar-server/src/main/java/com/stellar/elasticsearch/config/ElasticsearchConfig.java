@@ -169,21 +169,30 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
     private void putSearchMapping() {
         try {
+            // 只追加 categoryName 的 text 子字段（multi-field 对已有 keyword 字段可运行时追加），
+            // 供品类词文本召回（"手机"命中 categoryName="智能家居" 的商品）。
+            // 不重发 name/nameVec：ES 对已有字段的参数（如 analyzer/dense_vector）不可变，
+            // 重发一旦与存量 mapping 有任何出入就会 400 连累新字段一并失败。
             Request request = new Request("PUT", "/" + spuIndexName() + "/_mapping");
             request.setJsonEntity("{"
                     + "\"properties\":{"
-                    + "\"name\":{\"type\":\"text\",\"fields\":{\"keyword\":{\"type\":\"keyword\",\"ignore_above\":256}}},"
-                    + "\"nameVec\":{\"type\":\"dense_vector\",\"dims\":" + vectorDim
-                    + ",\"index\":true,\"similarity\":\"cosine\"}"
+                    + "\"categoryName\":{\"type\":\"keyword\",\"fields\":{"
+                    + "\"text\":{\"type\":\"text\",\"analyzer\":\"ik_max_word\",\"search_analyzer\":\"ik_smart\"}}}"
                     + "}}");
             restClient.performRequest(request);
-            log.info("Search mapping updated for {} (dims={}, index=hnsw, name.keyword)", spuIndexName(), vectorDim);
+            log.info("Search mapping updated for {} (categoryName.text subfield added)", spuIndexName());
+
+            // 多字段子字段只对"之后写入"的文档生效，存量文档需原地重建才能填充
+            // categoryName.text（_update_by_query 不动 nameVec，无重 embedding 成本）。
+            // 幂等：已填充时仅消耗一次轻量全表扫描。
+            Request reindex = new Request("POST", "/" + spuIndexName() + "/_update_by_query?conflicts=proceed");
+            reindex.setJsonEntity("{\"query\":{\"match_all\":{}}}");
+            restClient.performRequest(reindex);
+            log.info("SPU docs reindexed in place to populate categoryName.text subfield");
         } catch (Exception e) {
             // 索引已存在且参数与配置不一致时 ES 会拒绝修改（dense_vector 参数不可变）。
             // 属预期告警：需删索引后重启重建，或调整配置与现有索引一致。
-            log.warn("Failed to add dense_vector mapping to {}: {} (dims={}；若为参数冲突，"
-                    + "请删除索引 {} 后重启，确保 nameVec 带 index:true 重建)",
-                    spuIndexName(), e.getMessage(), vectorDim, spuIndexName());
+            log.warn("Failed to update mapping of {}: {}", spuIndexName(), e.getMessage());
         }
     }
 }

@@ -423,6 +423,7 @@ public class SpuSearchService {
 
         List<Long> bmIds = new ArrayList<>();
         Map<Long, List<String>> highlightMap = new HashMap<>();
+        boolean esError = false; // 任一路 ES 调用失败即标记，供"两路全挂"时上抛触发 MySQL 兜底
         try {
             SearchHits<SpuDocument> bmHits = esOps.search(bmQuery, SpuDocument.class);
             for (SearchHit<SpuDocument> hit : bmHits) {
@@ -439,6 +440,7 @@ public class SpuSearchService {
             }
             log.debug("BM25 recall: {} hits for '{}'", bmIds.size(), keyword);
         } catch (Exception e) {
+            esError = true;
             log.warn("BM25 recall failed (semantic-only): {}", e.getMessage());
         }
 
@@ -469,6 +471,7 @@ public class SpuSearchService {
                 log.debug("Vector recall: {} hits for '{}' (bm25Hits={}, minScore={})",
                         vecIds.size(), keyword, bmIds.size(), minScore);
             } catch (Exception e) {
+                esError = true;
                 log.warn("Vector recall failed (BM25-only): {}", e.getMessage());
             }
         }
@@ -489,6 +492,11 @@ public class SpuSearchService {
         }
 
         // ---------- RRF 融合 + 内存分页 ----------
+        // 两路召回都因 ES 异常颗粒无收 → 上抛，让外层 searchWithHighlight 降级 MySQL。
+        // 注意只认"发生 ES 异常"而非"结果为空"：正常零命中（如冷门词双路都无召回）必须原样返回空。
+        if (esError && bmIds.isEmpty() && vecIds.isEmpty()) {
+            throw new IllegalStateException("ES 两路召回均失败，触发 MySQL 降级");
+        }
         List<Long> merged = rrfMerge(bmIds, vecIds);
         int total = merged.size();
         int from = Math.min((page - 1) * size, total);
@@ -545,7 +553,10 @@ public class SpuSearchService {
             b.should(s -> s.multiMatch(mm -> mm.query(keyword)
                     .type(TextQueryType.CrossFields)
                     .operator(Operator.And)
-                    .fields("name^3", "subTitle")));
+                    // categoryName.text：品类名 ik 文本子字段。商品名普遍是"品牌+型号"风格
+                    // （星耀 X100 青春版），品类词"手机"只出现在 categoryName，参与相关性后
+                    // 品类查询才能召回整类商品；权重低于 name，避免压过标题精确匹配。
+                    .fields("name^3", "subTitle", "categoryName.text^2")));
             // 同义词扩展：权重低于原词。用 match_phrase（短语匹配）而非 multi_match：ik 分词器
             // 会把多字同义词（如"钢化膜"）切成单字（钢/化/膜），multi_match 的 OR 语义让任意单字都能命中，
             // 导致搜"手机膜"时同义词"钢化膜"的单字"化"误命中副标题含"模块化拼接"的无关商品；
@@ -554,6 +565,8 @@ public class SpuSearchService {
                 String syn = expandedTerms.get(i);
                 b.should(s -> s.matchPhrase(mp -> mp.field("name").query(syn).boost(1.5f)));
                 b.should(s -> s.matchPhrase(mp -> mp.field("subTitle").query(syn).boost(0.5f)));
+                // 品类名同步义词：搜"电话"（同义"手机"）也要靠 categoryName="智能手机" 召回整类
+                b.should(s -> s.matchPhrase(mp -> mp.field("categoryName.text").query(syn).boost(1.0f)));
             }
             b.minimumShouldMatch("1");
             b.filter(filters);

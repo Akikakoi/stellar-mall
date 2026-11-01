@@ -8,6 +8,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -39,8 +41,13 @@ public class SpuDocument {
     @Field(type = FieldType.Long)
     private Long categoryId;
 
-    /** 分类名（冗余展示） */
-    @Field(type = FieldType.Keyword)
+    /** 分类名（冗余展示）。keyword 主字段供聚合/过滤，text 子字段供品类词文本召回：
+     *  手机类商品名普遍不含"手机"二字（如"星耀 X100 青春版"），品类名参与相关性后
+     *  搜"手机"可通过 categoryName.text 命中全部手机类商品。 */
+    @MultiField(mainField = @Field(type = FieldType.Keyword),
+            otherFields = @InnerField(
+                    suffix = "text", type = FieldType.Text,
+                    analyzer = "ik_max_word", searchAnalyzer = "ik_smart"))
     private String categoryName;
 
     /** 主图 */
