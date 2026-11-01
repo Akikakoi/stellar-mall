@@ -18,7 +18,7 @@
         <el-button type="primary" @click="loadPage">查询</el-button>
       </div>
 
-      <el-table :data="records" v-loading="loading" stripe style="width: 100%;">
+      <el-table :data="records" v-loading="loading" style="width: 100%;">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="username" label="用户名" width="140" />
         <el-table-column prop="name" label="姓名" width="140" />
@@ -159,6 +159,9 @@ async function submitForm() {
 async function toggleStatus(row: any, val: any) {
   try {
     await setEmployeeStatus(row.id, val ? 1 : 0)
+    // 单向绑定（:model-value）下必须回写行状态，否则 prop 不变，
+    // 开关动画播完会弹回原位，看起来像"没切换、要刷新才生效"
+    row.status = val ? 1 : 0
     ElMessage.success(val ? '已启用' : '已禁用')
   } catch (e: any) { loadPage() }
 }

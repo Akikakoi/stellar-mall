@@ -26,7 +26,7 @@
         <el-button type="primary" :disabled="loading" @click="onQueryClick">查询</el-button>
       </div>
 
-      <el-table :data="records" v-loading="loading" stripe empty-text="暂无数据" style="width: 100%;">
+      <el-table :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;">
         
         <el-table-column min-width="200">
           <template #header>
@@ -229,6 +229,9 @@ async function submitForm() {
 async function toggleStatus(row: any, val: any) {
   try {
     await setCategoryStatus(row.id, val ? 1 : 0)
+    // 单向绑定（:model-value）下必须回写行状态，否则 prop 不变，
+    // 开关动画播完会弹回原位，看起来像"没切换、要刷新才生效"
+    row.status = val ? 1 : 0
     ElMessage.success(val ? '已启用' : '已禁用')
   } catch (e: any) { loadPage() }
 }
