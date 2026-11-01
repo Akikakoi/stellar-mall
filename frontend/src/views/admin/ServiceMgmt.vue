@@ -5,7 +5,7 @@
       <span class="tip">保障服务按「单个商品」配置组合：在商品编辑中选择该商品可选购的服务；服务价格以此处为准，结算时后端按服务表权威重算。</span>
     </div>
 
-    <el-table :data="services" v-loading="loading" stripe>
+    <el-table :data="services" v-loading="loading">
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column prop="code" label="标识（code）" min-width="150" show-overflow-tooltip />
       <el-table-column prop="title" label="名称" min-width="160" />

@@ -13,7 +13,7 @@
         </el-select>
       </div>
 
-      <el-table :data="list" v-loading="loading" stripe>
+      <el-table :data="list" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column prop="name" label="名称" min-width="160" />
       <el-table-column label="类型" width="100">

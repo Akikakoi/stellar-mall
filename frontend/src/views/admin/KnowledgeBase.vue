@@ -35,7 +35,7 @@
           <el-statistic title="失败待处理" :value="countError" />
         </div>
 
-        <el-table :data="items" v-loading="loading" stripe style="margin-top:12px">
+        <el-table :data="items" v-loading="loading" style="margin-top:12px">
           <el-table-column prop="id" label="ID" width="60" />
           <el-table-column label="文件名" min-width="260">
             <template #default="{row}">

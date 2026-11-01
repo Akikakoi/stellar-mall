@@ -1,77 +1,109 @@
 <template>
   <div class="dashboard-page">
-    <div class="stat-row">
-      <div class="stat-card accent-blue clickable" @click="goOrders('PAID')">
+    <div class="stat-strip">
+      <div class="stat-cell clickable" @click="goOrders('PAID')">
         <div class="stat-label">待处理订单</div>
         <div class="stat-value">{{ stats.pendingOrders || 0 }}</div>
+        <div class="stat-hint">{{ (stats.pendingOrders || 0) > 0 ? '待发货' : '暂无积压' }}</div>
       </div>
-      <div class="stat-card accent-gray clickable" @click="goOrdersToday()">
+      <div class="stat-cell clickable" @click="goOrdersToday()">
         <div class="stat-label">今日订单</div>
         <div class="stat-value">{{ stats.todayOrders || 0 }}</div>
+        <div class="stat-hint">查看今日明细</div>
       </div>
-      <div class="stat-card accent-green">
+      <div class="stat-cell">
         <div class="stat-label">今日销售额</div>
-        <div class="stat-value">¥{{ Number(stats.todaySales || 0).toFixed(0) }}</div>
+        <div class="stat-value">¥{{ Number(stats.todaySales || 0).toLocaleString() }}</div>
+        <div class="stat-hint">实时统计</div>
       </div>
-      <div class="stat-card accent-orange clickable" @click="router.push('/admin/inventory')">
+      <div class="stat-cell clickable" @click="router.push('/admin/inventory')">
         <div class="stat-label">低库存预警</div>
-        <div class="stat-value">{{ stats.lowStockCount || 0 }}</div>
+        <div class="stat-value" :class="{ 'value-warn': (stats.lowStockCount || 0) > 0 }">{{ stats.lowStockCount || 0 }}</div>
+        <div class="stat-hint">{{ (stats.lowStockCount || 0) > 0 ? '需要补货' : '库存健康' }}</div>
       </div>
     </div>
 
     <div class="grid-row">
       <div class="panel chart-panel">
         <div class="panel-head"><span class="panel-title">近7天有效订单量</span></div>
-        <div ref="orderChartRef" v-show="orderTrendHasData" style="height: 260px;"></div>
+        <div ref="orderChartRef" v-show="orderTrendHasData" style="height: 240px;"></div>
         <el-empty v-if="!orderTrendHasData" description="暂无订单数据" :image-size="80" />
       </div>
       <div class="panel chart-panel">
         <div class="panel-head"><span class="panel-title">近7天销售额趋势</span></div>
-        <div ref="salesChartRef" v-show="salesTrendHasData" style="height: 260px;"></div>
+        <div ref="salesChartRef" v-show="salesTrendHasData" style="height: 240px;"></div>
         <el-empty v-if="!salesTrendHasData" description="暂无销售数据" :image-size="80" />
       </div>
     </div>
 
-    <div class="grid-row">
-      <div class="panel">
-        <div class="panel-head">
-          <span class="panel-title">待处理订单</span>
-          <el-button type="primary" link size="small" @click="router.push({ path: '/admin/orders', query: { status: 'PAID' } })">查看全部 →</el-button>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">待处理事项</span>
+        <span class="panel-sub">按优先级排列，点击直达处理页</span>
+      </div>
+      <div v-if="taskCount > 0" class="task-list">
+        <div v-if="(stats.pendingOrders || 0) > 0" class="task-row clickable" @click="router.push({ path: '/admin/orders', query: { status: 'PAID' } })">
+          <div class="task-main">
+            <span class="task-dot dot-danger"></span>
+            <span class="task-title">{{ stats.pendingOrders }} 笔订单待发货</span>
+          </div>
+          <div class="task-right">
+            <span class="task-meta">订单管理</span>
+            <span class="task-action">去处理 →</span>
+          </div>
         </div>
-        <div class="panel-stat">
-          <div class="panel-stat-num">{{ stats.pendingOrders }}</div>
-          <div class="panel-stat-label">笔订单待发货</div>
+        <div v-if="(stats.pendingAfterSaleCount || 0) > 0" class="task-row clickable" @click="router.push('/admin/aftersale')">
+          <div class="task-main">
+            <span class="task-dot dot-warn"></span>
+            <span class="task-title">{{ stats.pendingAfterSaleCount }} 条售后待审核</span>
+          </div>
+          <div class="task-right">
+            <span class="task-meta">售后管理</span>
+            <span class="task-action">去处理 →</span>
+          </div>
+        </div>
+        <div v-if="(stats.lowStockCount || 0) > 0" class="task-row clickable" @click="router.push('/admin/inventory')">
+          <div class="task-main">
+            <span class="task-dot dot-warn"></span>
+            <span class="task-title">{{ stats.lowStockCount }} 个 SKU 库存低于阈值</span>
+          </div>
+          <div class="task-right">
+            <span class="task-meta">出入库日志</span>
+            <span class="task-action">去处理 →</span>
+          </div>
         </div>
       </div>
+      <div v-else class="task-empty">暂无待处理事项，一切正常</div>
+    </div>
+
+    <div class="grid-row">
       <div class="panel">
-        <div class="panel-head">
-          <span class="panel-title">售后待处理</span>
-          <el-button type="primary" link size="small" @click="router.push('/admin/aftersale')">查看全部 →</el-button>
+        <div class="panel-head"><span class="panel-title">快捷操作</span></div>
+        <div class="quick-actions">
+          <div class="action-item" @click="router.push('/admin/spu')">
+            <el-icon :size="20"><Goods /></el-icon><span>商品管理</span>
+          </div>
+          <div class="action-item" @click="router.push('/admin/orders')">
+            <el-icon :size="20"><Tickets /></el-icon><span>订单管理</span>
+          </div>
+          <div class="action-item" @click="router.push('/admin/inventory')">
+            <el-icon :size="20"><Box /></el-icon><span>库存管理</span>
+          </div>
+          <div class="action-item" @click="router.push('/admin/coupon')">
+            <el-icon :size="20"><Discount /></el-icon><span>优惠券</span>
+          </div>
         </div>
-        <div class="panel-stat">
-          <div class="panel-stat-num">{{ stats.pendingAfterSaleCount }}</div>
-          <div class="panel-stat-label">条售后待处理</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">数据导出</span></div>
+        <div class="export-actions">
+          <el-button @click="handleExport('orders')" :loading="exporting === 'orders'">导出订单</el-button>
+          <el-button @click="handleExport('users')" :loading="exporting === 'users'">导出用户</el-button>
+          <el-button @click="handleExport('finance')" :loading="exporting === 'finance'">导出报表</el-button>
         </div>
       </div>
     </div>
-
-    <div class="panel">
-      <div class="panel-head"><span class="panel-title">快捷操作</span></div>
-      <div class="quick-actions">
-          <div class="action-item action-blue" @click="router.push('/admin/spu')">
-            <el-icon :size="28"><Goods /></el-icon><span>商品管理</span>
-          </div>
-          <div class="action-item action-red" @click="router.push('/admin/orders')">
-            <el-icon :size="28"><Tickets /></el-icon><span>订单管理</span>
-          </div>
-          <div class="action-item action-orange" @click="router.push('/admin/inventory')">
-            <el-icon :size="28"><Box /></el-icon><span>库存管理</span>
-          </div>
-          <div class="action-item action-green" @click="router.push('/admin/coupon')">
-            <el-icon :size="28"><Discount /></el-icon><span>优惠券</span>
-          </div>
-        </div>
-      </div>
 
     <div class="panel">
       <div class="panel-head">
@@ -98,15 +130,6 @@
           :key="i"
           :class="{ 'report-heading': isReportHeading(line) }"
         >{{ line }}</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><span class="panel-title">数据导出</span></div>
-      <div class="export-actions">
-        <el-button @click="handleExport('orders')" :loading="exporting === 'orders'">导出订单</el-button>
-        <el-button @click="handleExport('users')" :loading="exporting === 'users'">导出用户</el-button>
-        <el-button @click="handleExport('finance')" :loading="exporting === 'finance'">导出报表</el-button>
       </div>
     </div>
 
@@ -151,6 +174,13 @@ const salesTrendData = ref<any[]>([])
 
 const orderTrendHasData = computed(() => orderTrendData.value.some((d: any) => (d.count || 0) > 0))
 const salesTrendHasData = computed(() => salesTrendData.value.some((d: any) => (d.amount || 0) > 0))
+
+/** 待处理事项总数：三个待办源任一大于 0 就渲染任务流 */
+const taskCount = computed(() =>
+  (Number(stats.pendingOrders) || 0) +
+  (Number(stats.pendingAfterSaleCount) || 0) +
+  (Number(stats.lowStockCount) || 0)
+)
 
 /** 获取今天的日期字符串，格式为 YYYY-MM-DD */
 function todayStr() {
@@ -315,95 +345,116 @@ async function handleExport(type: any) {
 </script>
 
 <style scoped>
-.dashboard-page { display: flex; flex-direction: column; gap: 16px; }
-.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.stat-card {
-  padding: 22px 24px;
-  border-radius: var(--radius-xl);
+/* ===== 方案 D：高密度极简仪表盘 =====
+ * 扁平实底卡片 + 发丝线边框，无投影无渐变；
+ * 圆角/投影令牌已在 _Layout.vue 的 .admin-layout 子树覆写（radius≤12 / shadow=none）。 */
+.dashboard-page { display: flex; flex-direction: column; gap: 14px; }
+
+/* 统计条：一个容器切四格，发丝线分隔，替代原来的四张独立大卡 */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   background: var(--bg-card);
   border: 1px solid var(--border-base);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-sm);
-  position: relative;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
 }
+.stat-cell {
+  padding: 14px 18px 12px;
+  min-width: 0;
+}
+.stat-cell + .stat-cell { border-left: 1px solid var(--border-base); }
+.stat-cell.clickable { cursor: pointer; transition: background var(--transition-color); }
 @media (hover: hover) {
-  .stat-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md); }
+  .stat-cell.clickable:hover { background: var(--bg-hover); }
 }
-.stat-card.clickable { cursor: pointer; }
-.stat-card.clickable:hover .stat-label { color: var(--brand-primary); }
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-}
-.accent-blue::before { background: #0071e3; }
-.accent-gray::before { background: #86868b; }
-.accent-green::before { background: #34c759; }
-.accent-orange::before { background: #ff9500; }
-.stat-label { color: var(--text-secondary); font-size: 14px; margin-bottom: 10px; position: relative; z-index: 1; }
-.stat-value { font-size: 32px; font-weight: 700; color: var(--text-primary); position: relative; z-index: 1; }
-.grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.stat-label { color: var(--text-secondary); font-size: 12px; margin-bottom: 6px; }
+.stat-value { font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+.stat-value.value-warn { color: var(--el-color-danger, #d5304f); }
+.stat-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+.grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-base);
-  border-radius: var(--radius-xl);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
 }
-.panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.panel-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
-.panel-stat { padding: 20px 0 16px; text-align: center; }
-.panel-stat-num {
-  font-size: 44px;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--brand-primary);
+.panel-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.panel-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.panel-sub { font-size: 12px; color: var(--text-muted); }
+
+/* 待处理事项流：发丝线分行，左状态点右动作，高信息密度 */
+.task-list { display: flex; flex-direction: column; }
+.task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 2px;
+  border-top: 1px solid var(--border-base);
+  font-size: 13px;
 }
-.panel-stat-label { color: var(--text-muted); font-size: 14px; margin-top: 6px; }
-.quick-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.task-row:first-child { border-top: none; }
+.task-row.clickable { cursor: pointer; }
+@media (hover: hover) {
+  .task-row.clickable:hover { background: var(--bg-hover); }
+}
+.task-main { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.task-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-danger { background: var(--el-color-danger, #d5304f); }
+.dot-warn { background: var(--el-color-warning, #e6a23c); }
+.task-title { color: var(--text-primary); }
+.task-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.task-meta { font-size: 12px; color: var(--text-muted); }
+.task-action { font-size: 12px; color: var(--brand-primary); }
+.task-empty {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* 快捷操作：发丝线小格子，中性 hover，不再按色系染色 */
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .action-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 18px 8px;
+  gap: 6px;
+  padding: 14px 8px;
   border-radius: var(--radius-md);
-  background: var(--bg-hover);
+  border: 1px solid var(--border-base);
   cursor: pointer;
-  transition: background var(--transition-color), border-color var(--transition-color), transform var(--transition-base);
-  border: 1px solid transparent;
+  transition: background var(--transition-color);
 }
 @media (hover: hover) {
-  .action-item:hover { background: var(--brand-primary-soft); border-color: var(--brand-primary-border); transform: var(--hover-lift); }
+  .action-item:hover { background: var(--bg-hover); }
 }
-.action-item span { color: var(--text-secondary); font-size: 13px; transition: color var(--transition-base); }
-.action-item:hover span { color: var(--brand-primary); }
-.action-item .el-icon { color: var(--text-secondary); transition: color var(--transition-base); }
-.action-blue:hover .el-icon { color: #0071e3; }
-.action-red:hover .el-icon { color: #ff3b30; }
-.action-orange:hover .el-icon { color: #ff9500; }
-.action-green:hover .el-icon { color: #34c759; }
-.action-gray:hover .el-icon { color: #86868b; }
-.report-head-right { display: flex; align-items: center; gap: 12px; }
+.action-item span { color: var(--text-secondary); font-size: 12px; }
+.action-item .el-icon { color: var(--text-secondary); }
+@media (hover: hover) {
+  .action-item:hover span, .action-item:hover .el-icon { color: var(--text-primary); }
+}
+
+.export-actions { display: flex; gap: 10px; padding-top: 2px; }
+
+.report-head-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 .report-meta { color: var(--text-secondary); font-size: 12px; }
 .report-loading {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 36px 0;
+  padding: 32px 0;
   color: var(--text-secondary);
   font-size: 14px;
 }
-.report-body { line-height: 2; font-size: 14px; color: var(--text-primary); }
+.report-body { line-height: 1.9; font-size: 13px; color: var(--text-primary); }
 .report-heading {
   font-weight: 600;
-  font-size: 15px;
-  color: var(--brand-primary);
-  margin-top: 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-top: 12px;
 }
 .report-body .report-heading:first-child { margin-top: 0; }
 </style>

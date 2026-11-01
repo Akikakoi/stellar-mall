@@ -7,7 +7,7 @@
           <div class="panel-head">
             <span class="panel-title">积分规则</span>
           </div>
-          <el-table :data="rules" v-loading="rulesLoading" stripe>
+          <el-table :data="rules" v-loading="rulesLoading">
             <el-table-column prop="id" label="ID" width="60" />
             <el-table-column label="规则类型" width="100">
               <template #default="{ row }">
@@ -127,7 +127,7 @@
               <el-option label="下架" :value="0" />
             </el-select>
           </div>
-          <el-table :data="prodList" v-loading="prodLoading" stripe>
+          <el-table :data="prodList" v-loading="prodLoading">
             <el-table-column prop="id" label="ID" width="60" />
             <el-table-column prop="name" label="名称" min-width="160" show-overflow-tooltip />
             <el-table-column label="类型" width="80">

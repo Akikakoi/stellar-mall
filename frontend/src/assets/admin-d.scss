@@ -1,0 +1,138 @@
+/* ============================================================
+ * 管理端方案 D 全局覆盖层（Linear/Vercel 极简工程风）
+ * ------------------------------------------------------------
+ * 背景：各管理子页（SpuMgmt/OrderMgmt/CouponMgmt 等十余个）
+ * 在 scoped 样式里各自重复定义了 .panel / .panel-title /
+ * .filter-bar 等卡片类，逐页修改成本高且易漏。
+ * 这里用「body.area-admin + .admin-layout」前缀的全局选择器
+ * 统一覆盖：
+ *   - 选择器特异性 (0,3,0) > 页面 scoped 的 .panel[data-v] (0,2,0)
+ *   - body.area-admin 仅在 /admin 路由存在（App.vue 注入），
+ *     C 端商城不受任何影响
+ *   - 弹窗/MessageBox teleport 到 body，也在 body.area-admin
+ *     作用域内，跟随 D 风格令牌
+ * 令牌（圆角/投影）已在 _Layout.vue 覆写，此处只管结构性样式。
+ * ============================================================ */
+
+/* ===== 设计令牌提升到 body 级：让 teleport 出去的弹窗也吃 D 风格 ===== */
+body.area-admin {
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --shadow-sm: none;
+  --shadow-md: none;
+}
+
+/* ===== 页面骨架与卡片 ===== */
+body.area-admin .admin-layout .mgmt-page,
+body.area-admin .admin-layout .inventory-page,
+body.area-admin .admin-layout .chatbi-page,
+body.area-admin .admin-layout .coupon-mgmt,
+body.area-admin .admin-layout .points-mgmt,
+body.area-admin .admin-layout .review-mgmt,
+body.area-admin .admin-layout .home-module-mgmt,
+body.area-admin .admin-layout .service-mgmt,
+body.area-admin .admin-layout .kb {
+  gap: 14px;
+}
+
+body.area-admin .admin-layout .panel {
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+}
+
+body.area-admin .admin-layout .panel-head {
+  margin-bottom: 12px;
+}
+
+/* 页面标题从 18px/600 收到 14px/500：D 风格里"位置感"靠布局而非字重 */
+body.area-admin .admin-layout .panel-title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+body.area-admin .admin-layout .filter-bar {
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--radius-md);
+}
+
+/* 批量操作条：品牌色只留淡底 + 半透明描边，不再用实色边框 */
+body.area-admin .admin-layout .batch-toolbar {
+  border-color: var(--brand-primary-border);
+}
+
+body.area-admin .admin-layout .pagination-wrap {
+  margin-top: 14px;
+}
+
+/* ===== el-table 密度与配色 =====
+ * 行展示：卡片行方案 —— 表体改 border-collapse:separate 拉出行间距，
+ * 每行通过 td 描边 + 首尾圆角渲染成独立卡片；表头保持普通表头 +
+ * 底部分区线；hover 中性灰作用于整行卡片。 */
+body.area-admin .admin-layout .el-table {
+  --el-table-border-color: var(--border-base);
+  --el-table-header-bg-color: var(--bg-card);
+  --el-table-header-text-color: var(--text-secondary);
+  --el-table-row-hover-bg-color: var(--bg-hover);
+  --el-table-text-color: var(--text-primary);
+  font-size: 13px;
+}
+
+body.area-admin .admin-layout .el-table th.el-table__cell {
+  font-weight: 500;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-secondary, var(--border-base)) !important;
+}
+
+/* 表体：行间 8px 空隙，行内单元格上下 12px 内边距 */
+body.area-admin .admin-layout .el-table .el-table__body {
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+/* EP 布局恒预留约 30px 纵向滚动条 gutter，导致表格右缘与容器之间留白，
+ * 卡片描边让这条空带显形。仅在无横向滚动（is-scrolling-none，EP 动态维护）
+ * 时把表头/表体拉满容器宽，多余宽度由 fixed 布局按列宽分摊；
+ * 真正需要横向滚动的表格不受影响。 */
+body.area-admin .admin-layout .el-table.is-scrolling-none .el-table__header-wrapper table,
+body.area-admin .admin-layout .el-table.is-scrolling-none table.el-table__body,
+body.area-admin .admin-layout .el-table.is-scrolling-none table.el-table__footer {
+  width: 100% !important;
+}
+
+body.area-admin .admin-layout .el-table td.el-table__cell {
+  padding: 12px 0;
+  border: 1px solid var(--border-base);
+  border-left: none;
+  border-right: none;
+  background: var(--bg-card);
+}
+
+/* 首尾单元格补侧边描边并收圆角，拼出整行卡片轮廓 */
+body.area-admin .admin-layout .el-table td.el-table__cell:first-child {
+  border-left: 1px solid var(--border-base);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+body.area-admin .admin-layout .el-table td.el-table__cell:last-child {
+  border-right: 1px solid var(--border-base);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* 悬停态 + 选中态：卡片切品牌色淡底 + 品牌色描边。
+ * 悬停用 :hover、选中用 :has(.el-checkbox.is-checked)，均无需改页面代码；
+ * 两条规则特异性都高于 EP 的 hover 默认（中性灰）规则，悬停已选卡片样式不跳变 */
+body.area-admin .admin-layout .el-table .el-table__row:hover td.el-table__cell,
+body.area-admin .admin-layout .el-table .el-table__row:has(.el-checkbox.is-checked) td.el-table__cell {
+  background: var(--brand-primary-soft);
+  border-color: var(--brand-primary-border);
+}
+
+/* ===== 弹窗 =====
+ * 令牌已随 body.area-admin 生效（radius≤12 / shadow 无），
+ * 这里只把标题字号对齐 panel-title 的层级。 */
+body.area-admin .el-dialog .el-dialog__title {
+  font-size: 15px;
+  font-weight: 500;
+}

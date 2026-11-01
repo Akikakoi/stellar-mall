@@ -44,7 +44,7 @@
         </div>
       </Transition>
 
-      <el-table :data="records" v-loading="loading" stripe empty-text="暂无数据" style="width: 100%;"
+      <el-table :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;"
         @selection-change="handleSelectionChange" :row-class-name="tableRowClassName">
         
         <el-table-column type="selection" width="45" />
@@ -374,7 +374,7 @@
       <template #header>
         <span>库存管理<template v-if="stockSpuName"> — {{ stockSpuName }}</template></span>
       </template>
-      <el-table :data="stockSkuList" v-loading="stockLoading" stripe size="small">
+      <el-table :data="stockSkuList" v-loading="stockLoading" size="small">
         <el-table-column label="SKU" min-width="180">
           <template #default="{ row }">{{ row.name }}</template>
         </el-table-column>

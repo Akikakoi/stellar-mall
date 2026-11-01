@@ -1,9 +1,9 @@
 <template>
   <el-container class="admin-layout">
-    <el-aside :width="collapsed ? '64px' : '220px'" class="sidebar">
+    <el-aside :width="collapsed ? '64px' : '208px'" class="sidebar">
       <div class="brand" @click="router.push('/admin/dashboard')">
         <div class="brand-logo">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="#fff">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
           </div>
@@ -79,13 +79,19 @@
           <template #title>系统设置</template>
         </el-menu-item>
       </el-menu>
+      <!-- ⌘K 搜索入口：贴底、发丝线顶部分隔，折叠时只剩图标 -->
+      <div class="side-search" :class="{ collapsed }" @click="paletteVisible = true">
+        <el-icon :size="14"><Search /></el-icon>
+        <span v-if="!collapsed" class="side-search-text">搜索</span>
+        <span v-if="!collapsed" class="kbd">{{ isMac ? '⌘' : 'Ctrl' }} K</span>
+      </div>
     </el-aside>
 
     <el-container>
       <el-header class="topbar">
         <div class="left">
           <el-button text @click="collapsed = !collapsed" style="font-size: 18px;">
-            <el-icon :size="20"><Fold v-if="!collapsed" /><Expand v-else /></el-icon>
+            <el-icon :size="18"><Fold v-if="!collapsed" /><Expand v-else /></el-icon>
           </el-button>
           <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/admin/dashboard' }">首页</el-breadcrumb-item>
@@ -94,11 +100,11 @@
         </div>
         <div class="right">
           <el-button class="theme-btn" @click="toggleTheme" :title="isDark ? '切换亮色' : '切换暗色'">
-            <el-icon :size="18"><Sunny v-if="isDark" /><Moon v-else /></el-icon>
+            <el-icon :size="16"><Sunny v-if="isDark" /><Moon v-else /></el-icon>
           </el-button>
           <el-dropdown @command="handleCommand">
             <span class="user-info">
-              <el-avatar :size="32" style="background: var(--brand-primary); color: #fff; margin-right: 8px;">
+              <el-avatar :size="28" style="background: var(--brand-primary); color: #fff; margin-right: 8px;">
                 {{ (adminStore.username || 'A').charAt(0).toUpperCase() }}
               </el-avatar>
               <span class="username">{{ adminStore.name || adminStore.username || '管理员' }}</span>
@@ -122,6 +128,11 @@
         </router-view>
       </el-main>
     </el-container>
+
+    <AdminCommandPalette
+      :items="paletteItems"
+      v-model:visible="paletteVisible"
+    />
   </el-container>
 </template>
 
@@ -132,6 +143,10 @@ import { useAdminStore } from '@/stores/admin'
 import { useSiteTitle } from '@/composables/useSiteTitle'
 import { useTheme } from '@/composables/useTheme'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
+import AdminCommandPalette from '@/components/AdminCommandPalette.vue'
+// 方案 D 全局覆盖层：统一压平各管理子页的卡片/表格（详见 admin-d.scss 头注释）
+import '@/assets/admin-d.scss'
 import {
   DataBoard, Goods, Menu, User,
   Fold, Expand, ArrowDown, Document, Setting, Tickets,
@@ -145,7 +160,9 @@ const { siteTitle } = useSiteTitle()
 const { isDark, toggleTheme } = useTheme()
 
 const collapsed = ref(false)
+const paletteVisible = ref(false)
 const activeMenu = computed(() => route.path)
+const isMac = /Mac|iPhone|iPad/.test(navigator.platform || '')
 
 const TITLE_MAP: Record<string, string> = {
   '/admin/dashboard': '控制台',
@@ -164,6 +181,9 @@ const TITLE_MAP: Record<string, string> = {
   '/admin/settings': '系统设置'
 }
 const currentPageTitle = computed(() => TITLE_MAP[route.path] || '')
+
+/** 命令面板数据源：与 TITLE_MAP 同源，保证新增菜单只改一处 */
+const paletteItems = Object.entries(TITLE_MAP).map(([path, title]) => ({ path, title }))
 
 async function handleCommand(cmd: string) {
   if (cmd === 'profile') {
@@ -186,24 +206,39 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.admin-layout { height: 100vh; }
+/* ===== 方案 D：Linear/Vercel 极简工程风 =====
+ * 仅在 .admin-layout 子树内覆写设计令牌（CSS 变量沿 DOM 继承，子组件全部生效），
+ * 不动 main.scss 全局值 —— C 端商城不受影响。
+ * 圆角整体收小、投影全部拍平（弹窗 teleport 到 body 之外，不受影响）。 */
+.admin-layout {
+  height: 100vh;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --shadow-sm: none;
+  --shadow-md: none;
+}
 .sidebar {
-  background: var(--bg-sidebar);
+  background: var(--bg-card);
   border-right: 1px solid var(--border-base);
+  display: flex;
+  flex-direction: column;
   /* 折叠是结构性切换：宽度瞬切，避免 200ms 内反复重排右侧表格/图表 */
   overflow: hidden;
 }
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 18px;
-  height: 60px;
+  gap: 8px;
+  padding: 0 14px;
+  height: 48px;
   border-bottom: 1px solid var(--border-base);
   cursor: pointer;
+  flex-shrink: 0;
 }
 .brand-logo {
-  width: 36px; height: 36px;
+  width: 26px; height: 26px;
   background: var(--brand-primary);
   color: #fff;
   font-weight: 700;
@@ -211,44 +246,77 @@ onMounted(async () => {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.brand-text { color: var(--text-primary); font-size: 16px; font-weight: 600; white-space: nowrap; }
+.brand-text { color: var(--text-primary); font-size: 14px; font-weight: 600; white-space: nowrap; }
 .side-menu {
   border-right: none;
-  height: calc(100vh - 60px);
+  flex: 1;
+  overflow-y: auto;
   background: transparent;
 }
 :deep(.el-menu) {
   border-right: none;
   background: transparent;
+  padding: 6px;
 }
 :deep(.el-menu-item) {
   color: var(--text-secondary);
-  border-radius: var(--radius-md);
-  margin: 4px 10px;
-  height: 44px;
-  line-height: 44px;
+  border-radius: var(--radius-sm);
+  margin: 1px 0;
+  height: 34px;
+  line-height: 34px;
+  font-size: 13px;
 }
+:deep(.el-menu-item .el-icon) { font-size: 15px; }
 :deep(.el-menu-item:hover) {
   background: var(--bg-hover);
   color: var(--text-primary);
 }
+/* 激活态用中性灰高亮而非品牌色铺底：Linear 风格的"位置感"靠灰阶，
+ * 品牌色只留给操作按钮和数据 */
 :deep(.el-menu-item.is-active) {
-  background: var(--brand-primary-soft);
-  color: var(--brand-primary);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* 侧栏底部 ⌘K 搜索入口 */
+.side-search {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--transition-color), color var(--transition-color);
+}
+.side-search:hover { background: var(--bg-hover); color: var(--text-primary); }
+.side-search.collapsed { justify-content: center; padding: 7px 0; }
+.side-search-text { flex: 1; }
+.kbd {
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 5px;
+  border: 1px solid var(--border-base);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
 }
 
 .topbar {
-  background: var(--glass-bg);
-  backdrop-filter: var(--backdrop-blur);
-  -webkit-backdrop-filter: var(--backdrop-blur);
-  border-bottom: 1px solid var(--glass-border);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-base);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  height: 60px;
+  padding: 0 16px;
+  height: 48px;
 }
-.left { display: flex; align-items: center; gap: 18px; }
+.left { display: flex; align-items: center; gap: 12px; }
 .user-info {
   display: flex;
   align-items: center;
@@ -256,29 +324,30 @@ onMounted(async () => {
   padding: 0 6px;
   color: var(--text-primary);
 }
-.username { font-size: 14px; color: var(--text-primary); font-weight: 500; }
+.username { font-size: 13px; color: var(--text-primary); font-weight: 500; }
 
 .theme-btn {
-  width: 34px; height: 34px; padding: 0;
+  width: 30px; height: 30px; padding: 0;
   border: 1px solid var(--border-base);
-  border-radius: 8px;
-  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--text-secondary);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 .theme-btn:hover {
-  border-color: var(--brand-primary);
-  color: var(--brand-primary);
+  border-color: var(--border-secondary, var(--border-base));
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .main-content {
   background: var(--bg-base);
-  padding: 28px;
+  padding: 20px 24px;
   overflow: auto;
 }
 
 .fade-enter-active, .fade-leave-active {
-  transition: opacity 0.18s ease;
+  transition: opacity 0.15s ease;
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;

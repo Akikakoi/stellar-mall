@@ -29,7 +29,7 @@
         <el-button type="primary" :disabled="loading" @click="onQueryClick">查询</el-button>
       </div>
 
-      <el-table :data="records" v-loading="loading" stripe empty-text="暂无数据" style="width: 100%;">
+      <el-table :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;">
         <el-table-column prop="orderNo" label="订单号" width="200" show-overflow-tooltip />
         <el-table-column label="订单金额" width="120">
           <template #default="{ row }">¥{{ Number(row.payAmount ?? 0).toFixed(2) }}</template>

@@ -16,7 +16,7 @@
         <el-button :disabled="loading" @click="reset">重置</el-button>
       </div>
 
-      <el-table :data="tableData" v-loading="loading" stripe empty-text="暂无数据" style="width: 100%;">
+      <el-table :data="tableData" v-loading="loading" empty-text="暂无数据" style="width: 100%;">
         <el-table-column prop="id" label="售后单号" width="120">
           <template #default="{ row }">AS{{ row.id }}</template>
         </el-table-column>

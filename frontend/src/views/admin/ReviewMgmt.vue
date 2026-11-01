@@ -12,7 +12,7 @@
         </el-select>
       </div>
 
-      <el-table :data="list" v-loading="loading" stripe>
+      <el-table :data="list" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column label="商品" min-width="160" show-overflow-tooltip>
         <template #default="{ row }">
