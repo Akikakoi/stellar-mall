@@ -8,13 +8,13 @@
 |------|----------|----------|
 | ![首页](docs/screenshots/home.png) | ![商品搜索](docs/screenshots/search.png) | ![商品详情](docs/screenshots/product.png) |
 
-| 购物车 | 我的收藏 | 个人中心 |
-|--------|----------|----------|
-| ![购物车](docs/screenshots/cart.png) | ![我的收藏](docs/screenshots/favorites.png) | ![个人中心](docs/screenshots/me.png) |
+| 购物车 | 我的收藏 | AI 智能问答 |
+|--------|----------|-------------|
+| ![购物车](docs/screenshots/cart.png) | ![我的收藏](docs/screenshots/favorites.png) | ![AI 智能问答](docs/screenshots/rag.png) |
 
-| AI 智能问答 | 管理后台（BI 控制台） |
-|-------------|----------------------|
-| ![AI 智能问答](docs/screenshots/rag.png) | ![管理后台](docs/screenshots/admin-dashboard.png) |
+| 管理后台（BI 控制台） |
+|----------------------|
+| ![管理后台](docs/screenshots/admin-dashboard.png) |
 
 ## 技术栈
 

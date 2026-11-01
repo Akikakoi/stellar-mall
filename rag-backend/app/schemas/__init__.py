@@ -1,7 +1,8 @@
 """Pydantic 校验 schemas（请求/响应 DTO）。"""
+import json
 from datetime import datetime
 from typing import Optional, List, Any
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 
 
 # ================ 通用 ================
@@ -80,6 +81,18 @@ class MessageInfo(BaseModel):
     sources: Optional[List[Any]]
     feedback: int
     created_at: datetime
+
+    @field_validator("sources", mode="before")
+    @classmethod
+    def _coerce_sources(cls, v: Any) -> Any:
+        """兼容历史脏数据：JSON 列里被双重编码成字符串的行（如 '[]' / 'null'），
+        读出来是 str，直接校验会 500。这里统一解析，解析失败按 None 处理。"""
+        if isinstance(v, str):
+            try:
+                v = json.loads(v)
+            except (json.JSONDecodeError, ValueError):
+                return None
+        return v
 
 
 class ConversationDetail(ConversationInfo):
