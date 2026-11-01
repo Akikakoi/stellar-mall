@@ -105,18 +105,23 @@ def _sha256(text: str) -> str:
 # 这些 hash 在 import 时计算一次，变化时重启生效
 INTENT_PROMPT_HASH = ""  # 延迟计算，避免循环 import
 AGENT_PROMPT_HASH = ""
+REWRITE_PROMPT_HASH = ""
 
 
 def _init_prompt_hashes() -> None:
     """延迟计算 Prompt Hash（避免循环 import）。"""
-    global INTENT_PROMPT_HASH, AGENT_PROMPT_HASH
+    global INTENT_PROMPT_HASH, AGENT_PROMPT_HASH, REWRITE_PROMPT_HASH
     try:
-        from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT
+        from app.agent.prompts import (
+            INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, CONTEXT_REWRITE_PROMPT,
+        )
         INTENT_PROMPT_HASH = _sha256(INTENT_CLASSIFICATION_PROMPT)
         AGENT_PROMPT_HASH = _sha256(AGENT_SYSTEM_PROMPT)
+        REWRITE_PROMPT_HASH = _sha256(CONTEXT_REWRITE_PROMPT)
     except Exception:
         INTENT_PROMPT_HASH = _sha256("intent_fallback")
         AGENT_PROMPT_HASH = _sha256("agent_fallback")
+        REWRITE_PROMPT_HASH = _sha256("rewrite_fallback")
 
 
 # ==============================================

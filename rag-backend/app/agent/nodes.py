@@ -10,10 +10,10 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, Tool
 from app.config import settings
 from app.core.logger import logger
 from app.rag.llm import get_langchain_chat
-from app.rag.llm_cache import get_cache_sync, put_cache_sync, single_flight_sync, INTENT_PROMPT_HASH, AGENT_PROMPT_HASH
+from app.rag.llm_cache import get_cache_sync, put_cache_sync, single_flight_sync, INTENT_PROMPT_HASH, AGENT_PROMPT_HASH, REWRITE_PROMPT_HASH
 from app.rag.retriever import get_query_cache
 from app.agent.state import AgentState
-from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT
+from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT, CONTEXT_REWRITE_PROMPT
 from app.agent.tools import (
     kb_search_tool, kb_spec_compare, query_order_tool, apply_after_sales_tool,
     query_cart_tool, clear_cart_tool, delete_cart_item_tool, update_cart_item_tool,
@@ -382,6 +382,16 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
     if not tool_name or tool_name not in TOOL_REQUIRED_PARAMS:
         return {"missing_params": [], "current_tool": tool_name}
 
+    # 指代消解：查询含"它/他/她/该款"等回指词且存在对话历史时，结合历史改写为自包含查询
+    # （追问场景："它的拍照怎么样" -> "星耀 X200 5G 影像旗舰的拍照怎么样"）
+    if tool_name in ("kb_search", "product_search") and state.get("messages"):
+        history_text = _format_recent_history(state.get("messages", []), max_turns=6)
+        if history_text and history_text != "（无）" and re.search(r"(?<![其这那])它|(?<![其])他的|她的|该款|此款", query):
+            rewritten = _resolve_pronoun(query, history_text)
+            if rewritten and rewritten != query:
+                logger.info(f"[CheckParams] 指代消解: {query!r} -> {rewritten!r}")
+                query = rewritten
+
     required_params = TOOL_REQUIRED_PARAMS[tool_name]["required"]
     collected = state.get("required_params", {})
 
@@ -432,8 +442,35 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
                     missing.append(param)
             elif param == "cart_item_id":
                 extracted = _extract_cart_item_id(query, state.get("messages", []))
+                m_nth = re.search(r"第\s*(\d+)\s*个", query or "")
+                listing = (state.get("cart_listing")
+                           or _cart_listing_from_history(state.get("messages", []))
+                           or [])
+                if extracted and m_nth:
+                    # "第N个"只有在存在清单参照时才能映射为真实条目 ID，
+                    # 否则 N 只是序号，直接当 ID 用会改错商品
+                    if listing and 1 <= int(m_nth.group(1)) <= len(listing):
+                        extracted = str(listing[int(m_nth.group(1)) - 1])
+                    else:
+                        extracted = None
                 if extracted:
                     collected["cart_item_id"] = extracted
+                elif intent in ("cart_update", "cart_delete"):
+                    # 写操作先查后改：自动查购物车定位用户提到的商品，
+                    # 唯一命中直接填 ID；不唯一/未命中带清单反问，不让用户猜内部编号
+                    res = _auto_resolve_cart_item(state)
+                    if res["status"] == "resolved":
+                        collected["cart_item_id"] = res["cart_item_id"]
+                    elif res["status"] in ("ask", "empty"):
+                        return {
+                            "missing_params": [],
+                            "required_params": collected,
+                            "current_tool": None,
+                            "final_answer": res["message"],
+                            "cart_listing": state.get("cart_listing"),
+                        }
+                    else:
+                        missing.append(param)
                 else:
                     missing.append(param)
             elif param == "sku_id":
@@ -465,6 +502,21 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
             else:
                 missing.append(param)
 
+    # cart_update 的可选参数 qty/checked 同样要从查询中提取：
+    # required 循环只处理必选参数，漏提会让工具以 qty=None 调用 → 商城端空更新"成功"，
+    # AI 却宣称已改数量（静默 no-op 谎报）
+    if intent == "cart_update":
+        if collected.get("qty") is None:
+            q = _extract_qty(query)
+            if q is not None:
+                collected["qty"] = q
+        if collected.get("checked") is None:
+            c = _extract_checked(query)
+            if c is not None:
+                collected["checked"] = c
+        if collected.get("qty") is None and collected.get("checked") is None:
+            missing.append("qty")
+
     return {
         "missing_params": missing,
         "required_params": collected,
@@ -472,6 +524,31 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
         "intent": "product_consult" if kb_override else intent,
         "kb_tags_filter": kb_tags_filter,
     }
+
+
+def _extract_qty(query: str) -> int | None:
+    """从用户消息中提取目标数量（"改成 3"、"调整为2件"、"数量 5"）。"""
+    patterns = [
+        r"(?:数量|件数)[^0-9]{0,6}?([0-9]+)",
+        r"(?:改成?|改为|调整为|设为|设置成?|变成)\s*([0-9]+)",
+        r"([0-9]+)\s*件",
+    ]
+    for pat in patterns:
+        m = re.search(pat, query or "")
+        if m:
+            n = int(m.group(1))
+            if 1 <= n <= 999:
+                return n
+    return None
+
+
+def _extract_checked(query: str) -> int | None:
+    """从用户消息中提取勾选状态（"取消勾选"→0，"勾选/选中"→1）。"""
+    if re.search(r"取消勾选|取消选择|不勾选", query or ""):
+        return 0
+    if re.search(r"勾选|选中|打勾", query or ""):
+        return 1
+    return None
 
 
 def _extract_order_id(query: str, messages: list) -> str | None:
@@ -514,6 +591,139 @@ def _extract_reason(query: str) -> str | None:
                           or "不合适" in query or "不想要" in query or "色差" in query):
         return query[:100]
     return None
+
+
+def _cart_listing_from_history(messages: list) -> list[str]:
+    """从最近一轮客服清单消息（"1. XX ×2（编号 56）…"）恢复购物车条目 ID 顺序。
+    state["cart_listing"] 只活在单次图执行内，跨轮次要靠历史消息重建。"""
+    for msg in reversed(messages):
+        if isinstance(msg, AIMessage):
+            content = msg.content if isinstance(msg.content, str) else ""
+            if "编号" in content:
+                ids = re.findall(r"编号[:：]?\s*(\d+)", content)
+                if ids:
+                    return ids
+    return []
+
+
+def _auto_resolve_cart_item(state: AgentState) -> dict:
+    """写操作（改数量/删除）缺 cart_item_id 时先查购物车自动定位：
+    用户提到的商品名唯一命中 -> 直接填充 ID；不唯一/未命中 -> 带清单反问；
+    空车 -> 友好告知。避免反问用户不可能知道的内部编号。
+
+    Returns:
+        {"status": "resolved"|"ask"|"empty"|"error", "cart_item_id"?, "message"?}
+        ask/empty 时已把清单顺序写入 state["cart_listing"]（供"第N个"回指映射）。
+    """
+    import difflib
+
+    query = _get_last_user_query(state)
+    try:
+        result = query_cart_tool.invoke({"mall_token": state.get("mall_token")})
+    except Exception as e:
+        logger.warning(f"[auto_resolve_cart] 查询购物车失败: {e}")
+        return {"status": "error", "message": ""}
+    if not result.get("success"):
+        return {"status": "error", "message": ""}
+    items = result.get("data") or []
+    state["cart_listing"] = [str(it.get("id")) for it in items]
+    if not items:
+        return {"status": "empty",
+                "message": "您的购物车现在是空的，没有可修改的商品哦～要不先逛逛，看点什么？"}
+
+    matched = []
+    for it in items:
+        name = (it.get("spu_name") or "").strip()
+        if not name:
+            continue
+        specs = (it.get("sku_specs") or "").strip()
+        full = f"{name} {specs}".strip()
+        core = re.sub(r"^(星耀|清逸|逸彩|极净|御风|遥看|苍穹|玉米|小米)\s*", "", name)
+        hit = False
+        if core:
+            # 名称去品牌后的核心前段出现在 query 中即认为用户指的是它
+            probe = core[:max(4, int(len(core) * 0.6))]
+            if probe and probe.lower() in query.lower():
+                hit = True
+        if not hit and difflib.SequenceMatcher(None, query.lower(), full.lower()).ratio() >= 0.4:
+            hit = True
+        if hit:
+            matched.append(it)
+
+    if len(matched) == 1:
+        it = matched[0]
+        return {"status": "resolved", "cart_item_id": str(it.get("id")),
+                "item_name": it.get("spu_name")}
+
+    lines = []
+    for i, it in enumerate(items, 1):
+        spec = f"（{it.get('sku_specs')}）" if it.get("sku_specs") else ""
+        lines.append(f"{i}. {it.get('spu_name')}{spec} ×{it.get('qty', 1)}（编号 {it.get('id')}）")
+    listing_text = "\n".join(lines)
+    if len(matched) > 1:
+        message = (f"您提到的商品在购物车里有多件匹配，请确认要操作哪一件：\n"
+                   f"{listing_text}\n回复编号或\"第N个\"就可以啦～")
+    else:
+        message = (f"好的～您的购物车里有这些商品：\n{listing_text}\n"
+                   f"请问要修改哪一件呢？回复编号或\"第N个\"就行～")
+    return {"status": "ask", "message": message}
+
+
+def _resolve_pronoun(query: str, history_text: str) -> str:
+    """指代消解：结合对话历史把"它/他/她/该款"等回指词改写为具体实体。
+    带三层缓存（与意图识别同机制，key 含历史 hash）；失败或不确定时原样返回。"""
+    def _produce() -> str:
+        llm = get_langchain_chat()
+        prompt = CONTEXT_REWRITE_PROMPT.format(history=history_text, query=query)
+        resp = llm.invoke([SystemMessage(content="你是严格的查询改写助手。"),
+                           HumanMessage(content=prompt)])
+        out = (resp.content if hasattr(resp, "content") else str(resp)).strip()
+        # 剥掉可能的代码块包裹
+        if out.startswith("```"):
+            out = out[3:]
+            if out.lstrip().startswith("json"):
+                out = out.lstrip()[4:]
+            out = out.strip()
+        return out.strip()
+
+    try:
+        from app.rag.llm_cache import _sha256
+        ctx_hash = _sha256(history_text)
+        cached = get_cache_sync(
+            query=query,
+            model=settings.LLM_MODEL_NAME,
+            temperature=settings.LLM_TEMPERATURE,
+            system_prompt_hash=REWRITE_PROMPT_HASH,
+            context_hash=ctx_hash,
+            cache_type="rewrite",
+        )
+        if cached:
+            out = cached.get("answer") if isinstance(cached, dict) else cached
+            return (out or query).strip() or query
+
+        result = single_flight_sync(f"llm:sf:rewrite|{ctx_hash}|{query}", _produce)
+        result = (result or "").strip()
+        if result and result != query:
+            try:
+                put_cache_sync(
+                    query=query,
+                    model=settings.LLM_MODEL_NAME,
+                    temperature=settings.LLM_TEMPERATURE,
+                    system_prompt_hash=REWRITE_PROMPT_HASH,
+                    context_hash=ctx_hash,
+                    answer=result,
+                    sources=[],
+                    intent=None,
+                    tokens_used=0,
+                    cache_type="rewrite",
+                )
+            except Exception:
+                pass
+        # 改写结果为空/未变化时用原查询，绝不猜
+        return result if result else query
+    except Exception as e:
+        logger.warning(f"指代消解失败，用原查询: {e}")
+        return query
 
 
 def _extract_cart_item_id(query: str, messages: list) -> str | None:
@@ -676,6 +886,8 @@ def ask_params_node(state: AgentState) -> Dict[str, Any]:
             missing_desc.append("查询内容")
         elif p == "cart_item_id":
             missing_desc.append("购物车商品编号（先查看购物车获取编号）")
+        elif p == "qty":
+            missing_desc.append("要修改成几件，或者是否勾选/取消勾选")
         else:
             missing_desc.append(p)
 
