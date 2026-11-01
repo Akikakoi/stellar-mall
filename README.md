@@ -2,6 +2,20 @@
 
 全栈电商平台，集成 AI 智能问答与 Agent 能力。
 
+## 界面预览
+
+| 首页 | 商品搜索 | 商品详情 |
+|------|----------|----------|
+| ![首页](docs/screenshots/home.png) | ![商品搜索](docs/screenshots/search.png) | ![商品详情](docs/screenshots/product.png) |
+
+| 购物车 | 我的收藏 | 个人中心 |
+|--------|----------|----------|
+| ![购物车](docs/screenshots/cart.png) | ![我的收藏](docs/screenshots/favorites.png) | ![个人中心](docs/screenshots/me.png) |
+
+| AI 智能问答 | 管理后台（BI 控制台） |
+|-------------|----------------------|
+| ![AI 智能问答](docs/screenshots/rag.png) | ![管理后台](docs/screenshots/admin-dashboard.png) |
+
 ## 技术栈
 
 | 层级 | 技术 |
