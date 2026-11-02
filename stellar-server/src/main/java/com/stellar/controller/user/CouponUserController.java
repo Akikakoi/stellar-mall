@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/user/coupon")
@@ -39,14 +38,5 @@ public class CouponUserController {
     @ApiOperation("我的优惠券")
     public Result<List<UserCoupon>> myCoupons(@RequestParam(required = false) Integer status) {
         return Result.success(couponService.listUserCoupons(BaseContext.getCurrentId(), status));
-    }
-
-    @PostMapping("/use")
-    @ApiOperation("使用优惠券")
-    public Result<String> useCoupon(@RequestBody Map<String, Object> body) {
-        Long userCouponId = Long.valueOf(body.get("userCouponId").toString());
-        Long orderId = body.get("orderId") != null ? Long.valueOf(body.get("orderId").toString()) : null;
-        couponService.useCoupon(userCouponId, orderId);
-        return Result.success();
     }
 }

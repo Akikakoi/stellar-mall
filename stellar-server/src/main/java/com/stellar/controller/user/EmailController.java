@@ -48,15 +48,6 @@ public class EmailController {
         return Result.success(data);
     }
 
-    @PostMapping("/verify")
-    @ApiOperation("校验邮箱验证码")
-    public Result<Map<String, Boolean>> verifyCode(@RequestBody @Valid EmailVerifyDTO dto) {
-        boolean ok = notificationService.verifyEmailCode(dto.getEmail(), dto.getType(), dto.getCode());
-        Map<String, Boolean> data = new HashMap<>();
-        data.put("valid", ok);
-        return Result.success(data);
-    }
-
     @Data
     public static class EmailSendDTO {
         @NotBlank @Email(message = "邮箱格式不正确")
@@ -65,13 +56,4 @@ public class EmailController {
         private String type; // LOGIN / REGISTER
     }
 
-    @Data
-    public static class EmailVerifyDTO {
-        @NotBlank @Email(message = "邮箱格式不正确")
-        private String email;
-        @NotBlank
-        private String type;
-        @NotBlank
-        private String code;
-    }
 }
