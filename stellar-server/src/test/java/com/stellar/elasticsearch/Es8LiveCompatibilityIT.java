@@ -68,6 +68,10 @@ class Es8LiveCompatibilityIT {
         assertTrue(properties.path("nameVec").path("index").asBoolean(), "dense_vector 必须 index:true");
         assertEquals("cosine", properties.path("nameVec").path("similarity").asText());
         assertEquals("ik_max_word", properties.path("name").path("analyzer").asText());
+        assertEquals("text", properties.path("name").path("fields").path("edge").path("type").asText(),
+                "name.edge 子字段必须随索引创建注入（单字召回依赖）");
+        assertEquals("ik_edge", properties.path("name").path("fields").path("edge").path("analyzer").asText(),
+                "edge ngram 分析器必须随索引 settings 创建");
 
         esOps.save(List.of(
                 doc(101L, "iPhone 15 手机", "大屏手机", 1L, "5000", vector(1)),

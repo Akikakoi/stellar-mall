@@ -808,6 +808,11 @@ async function uploadKbDoc() {
   }
 }
 
+/** 去除描述中的知识库文档标记（兼容历史脏数据：可能出现多个重复标记） */
+function stripKbMarkers(text: any) {
+  return String(text || '').replace(/\s*\[KB_DOC_ID:\d+\]/g, '').trim()
+}
+
 /** 打开新增/编辑商品对话框，create 模式初始化空表单，edit 模式加载详情 */
 async function openDialog(mode: any, row?: any) {
   dialogMode.value = mode
@@ -841,14 +846,14 @@ async function openDialog(mode: any, row?: any) {
           kbExistingDocId.value = null
         }
       }
-      const cleanDescription = mdText.replace(/\n*\[KB_DOC_ID:\d+\]\n*$/g, '').trim()
+      const cleanDescription = stripKbMarkers(mdText)
       Object.assign(form, {
         id: detail.id, name: detail.name, categoryId: detail.categoryId,
         price: Number(detail.minPrice ?? detail.price ?? 0),
         image: detail.mainImage || detail.image || detail.pic || '',
         mainImage: detail.mainImage || detail.image || detail.pic || '',
         subImages: detail.subImages || '',
-        description: detail.description || cleanDescription,
+        description: stripKbMarkers(detail.description) || cleanDescription,
         status: detail.status ?? 1,
         perUserLimit: Number(detail.perUserLimit ?? 0) || 0,
         serviceIds: (detail.services || []).map((s: any) => s.id),

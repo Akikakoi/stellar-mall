@@ -568,6 +568,13 @@ public class SpuSearchService {
                 // 品类名同步义词：搜"电话"（同义"手机"）也要靠 categoryName="智能手机" 召回整类
                 b.should(s -> s.matchPhrase(mp -> mp.field("categoryName.text").query(syn).boost(1.0f)));
             }
+            // ④ 单字 CJK 查询启用 edge ngram 前缀召回：IK 把"冰箱"当整词，搜"冰"时词面
+            //    完全无法命中；name.edge 索引侧对每个 IK 词生成 1..20 前缀，查询侧仍走 ik_smart。
+            //    仅限中文单字：多字查询已有精确/短语/跨字段召回，拉丁单字母（p/x）放开会让
+            //    "Pro"/"X100" 等前缀把无关商品全部召回。权重低于主查询，只补召回不抢排序。
+            if (keyword.codePointCount(0, keyword.length()) == 1 && containsCjk(keyword)) {
+                b.should(s -> s.match(m -> m.field("name.edge").query(keyword).boost(1.0f)));
+            }
             b.minimumShouldMatch("1");
             b.filter(filters);
             return b;

@@ -114,6 +114,36 @@ class ElasticsearchMigrationTest {
     }
 
     @Test
+    void singleCjkCharQueryAddsEdgeNgramClause() throws Exception {
+        SpuPageQueryDTO dto = keyword("冰");
+        stubVectors();
+
+        service.searchWithHighlight(dto);
+
+        // 中文单字：在精确/短语/跨字段之外追加 name.edge 前缀召回（IK 把"冰箱"当整词）
+        var bool = capturedTextQuery().getQuery().bool();
+        assertEquals(4, bool.should().size());
+        var edge = bool.should().get(3).match();
+        assertEquals("name.edge", edge.field());
+        assertEquals("冰", edge.query().stringValue());
+        assertEquals(1.0f, edge.boost());
+    }
+
+    @Test
+    void latinSingleCharDoesNotUseEdgeNgram() throws Exception {
+        SpuPageQueryDTO dto = keyword("p");
+        stubVectors();
+
+        service.searchWithHighlight(dto);
+
+        // 拉丁单字母不做 edge 召回，避免 "Pro"/"X100" 前缀把无关商品全部召回
+        var bool = capturedTextQuery().getQuery().bool();
+        assertEquals(3, bool.should().size());
+        assertFalse(bool.should().stream()
+                .anyMatch(q -> q.isMatch() && "name.edge".equals(q.match().field())));
+    }
+
+    @Test
     void latinNoiseDoesNotReceiveSemanticOnlyResults() throws Exception {
         SpuPageQueryDTO dto = keyword("qwertyuiop");
         stubVectors(0.95);
@@ -205,30 +235,28 @@ class ElasticsearchMigrationTest {
 
         config.ensureIndex(null);
 
-        // 3 次请求：① PUT 建索引（含 nameVec/name.keyword）② PUT _mapping 追加 categoryName.text
-        // ③ POST _update_by_query 原地回填存量文档的子字段
+        // 2 次请求：① PUT 建索引（含 settings/nameVec/name.keyword/name.edge）② POST _update_by_query
         ArgumentCaptor<org.elasticsearch.client.Request> requests =
                 ArgumentCaptor.forClass(org.elasticsearch.client.Request.class);
-        verify(restClient, times(3)).performRequest(requests.capture());
+        verify(restClient, times(2)).performRequest(requests.capture());
         var create = requests.getAllValues().get(0);
         assertEquals("/stellar_spu", create.getEndpoint());
         assertEquals("PUT", create.getMethod());
-        var properties = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
-                org.apache.http.util.EntityUtils.toString(create.getEntity())).path("mappings").path("properties");
+        var createBody = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+                org.apache.http.util.EntityUtils.toString(create.getEntity()));
+        var properties = createBody.path("mappings").path("properties");
         assertEquals("ik_max_word", properties.path("name").path("analyzer").asText());
         assertEquals("keyword", properties.path("name").path("fields").path("keyword").path("type").asText());
+        assertEquals("text", properties.path("name").path("fields").path("edge").path("type").asText());
+        assertEquals("ik_edge", properties.path("name").path("fields").path("edge").path("analyzer").asText());
         assertEquals(1536, properties.path("nameVec").path("dims").asInt());
         assertTrue(properties.path("nameVec").path("index").asBoolean());
         assertEquals("cosine", properties.path("nameVec").path("similarity").asText());
-        var mapping = requests.getAllValues().get(1);
-        assertEquals("/stellar_spu/_mapping", mapping.getEndpoint());
-        var mappingProps = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
-                org.apache.http.util.EntityUtils.toString(mapping.getEntity())).path("properties");
-        assertEquals("keyword", mappingProps.path("categoryName").path("type").asText());
-        assertEquals("text", mappingProps.path("categoryName").path("fields").path("text").path("type").asText());
-        assertEquals("ik_max_word", mappingProps.path("categoryName").path("fields").path("text").path("analyzer").asText());
-        assertEquals("ik_smart", mappingProps.path("categoryName").path("fields").path("text").path("search_analyzer").asText());
-        var reindex = requests.getAllValues().get(2);
+        // edge ngram 分析器必须随索引 settings 一起创建，否则 mapping 引用会报 analyzer 不存在
+        assertEquals(20, createBody.path("settings").path("max_ngram_diff").asInt());
+        assertEquals("ik_max_word", createBody.path("settings").path("analysis").path("analyzer")
+                .path("ik_edge").path("tokenizer").asText());
+        var reindex = requests.getAllValues().get(1);
         assertEquals("/stellar_spu/_update_by_query?conflicts=proceed", reindex.getEndpoint());
         assertEquals("POST", reindex.getMethod());
     }
@@ -243,24 +271,29 @@ class ElasticsearchMigrationTest {
 
         config.ensureIndex(null);
 
-        // 存量索引：① PUT _mapping 只追加 categoryName.text（不重发 name/nameVec，
-        // ES 对已有字段参数不可变，重发出入即 400）② POST _update_by_query 回填
+        // 存量索引（hasEdgeField 读取失败按未就绪处理）：
+        // ① GET _mapping 探测 ② PUT _settings?reopen=true 补分析器
+        // ③ PUT _mapping 补 name.edge/categoryName.text ④ POST _update_by_query 回填
         ArgumentCaptor<org.elasticsearch.client.Request> requests =
                 ArgumentCaptor.forClass(org.elasticsearch.client.Request.class);
-        verify(restClient, times(2)).performRequest(requests.capture());
+        verify(restClient, times(4)).performRequest(requests.capture());
         verify(index, never()).createMapping(any(Class.class));
-        var mapping = requests.getAllValues().get(0);
+        assertEquals("/stellar_spu/_mapping", requests.getAllValues().get(0).getEndpoint());
+        assertEquals("GET", requests.getAllValues().get(0).getMethod());
+        var settings = requests.getAllValues().get(1);
+        assertEquals("/stellar_spu/_settings?reopen=true", settings.getEndpoint());
+        assertTrue(org.apache.http.util.EntityUtils.toString(settings.getEntity()).contains("\"ik_edge\""));
+        var mapping = requests.getAllValues().get(2);
         assertEquals("/stellar_spu/_mapping", mapping.getEndpoint());
         var properties = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
                 org.apache.http.util.EntityUtils.toString(mapping.getEntity())).path("properties");
-        // 最小化 PUT：只含 categoryName，不重发 name/nameVec
-        assertFalse(properties.has("name"));
-        assertFalse(properties.has("nameVec"));
+        assertEquals("text", properties.path("name").path("fields").path("edge").path("type").asText());
+        assertEquals("ik_edge", properties.path("name").path("fields").path("edge").path("analyzer").asText());
         assertEquals("keyword", properties.path("categoryName").path("type").asText());
         assertEquals("text", properties.path("categoryName").path("fields").path("text").path("type").asText());
         assertEquals("ik_max_word", properties.path("categoryName").path("fields").path("text").path("analyzer").asText());
         assertEquals("ik_smart", properties.path("categoryName").path("fields").path("text").path("search_analyzer").asText());
-        var reindex = requests.getAllValues().get(1);
+        var reindex = requests.getAllValues().get(3);
         assertEquals("/stellar_spu/_update_by_query?conflicts=proceed", reindex.getEndpoint());
         assertEquals("POST", reindex.getMethod());
     }

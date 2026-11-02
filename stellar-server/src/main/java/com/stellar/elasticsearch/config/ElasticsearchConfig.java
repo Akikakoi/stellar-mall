@@ -37,6 +37,19 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     private static final long DEFAULT_SOCKET_TIMEOUT = 60000L;
     private static final String DEFAULT_INDEX_PREFIX = "stellar";
 
+    /** edge ngram 分析器：IK 分词后对每个词生成 1..20 前缀。
+     *  解决单字查询召回（IK 把"冰箱"当整词，搜"冰"时词面完全无法命中）。 */
+    private static final String EDGE_ANALYZER = "ik_edge";
+    /** 创建/更新索引 settings 用：analysis 为非动态配置，存量索引需 reopen 才能生效。 */
+    private static final String ANALYSIS_SETTINGS_JSON = "{"
+            + "\"index\":{"
+            + "\"max_ngram_diff\":20,"
+            + "\"analysis\":{"
+            + "\"filter\":{\"edge_ngram_1_20\":{\"type\":\"edge_ngram\",\"min_gram\":1,\"max_gram\":20}},"
+            + "\"analyzer\":{\"" + EDGE_ANALYZER + "\":{\"type\":\"custom\",\"tokenizer\":\"ik_max_word\","
+            + "\"filter\":[\"edge_ngram_1_20\",\"lowercase\"]}}"
+            + "}}}";
+
     @Value("${stellar.elasticsearch.uris:http://127.0.0.1:9200}")
     private String uris;
 
@@ -107,32 +120,122 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     public void ensureIndex(ApplicationReadyEvent event) {
         try {
             IndexOperations idxOps = elasticsearchOperations.indexOps(SpuDocument.class);
+            boolean created = false;
             if (!idxOps.exists()) {
                 // ⚠️ 不能用 idxOps.create()+putMapping：Spring Data 会自动把无 @Field 的
                 // nameVec(double[]) 也写进 mapping，此时它没有 index 参数；而 dense_vector
                 // 的 index/similarity 一旦建立就不可改，之后再 PUT 补参数会被 ES 忽略（仅 299
                 // 告警），语义向量在 doc values 中缺失 → 语义检索恒为 0（2026-09-03 实测定案）。
-                // 索引创建必须一次到位：补 nameVec 与 name.keyword 子字段后手动 PUT。
+                // 索引创建必须一次到位：补 settings(edge ngram)、nameVec、name.keyword/name.edge 后手动 PUT。
                 Document mapping = idxOps.createMapping(SpuDocument.class);
                 createIndexWithDenseOptions(mapping);
-                log.info("ES index {} created with nameVec(dims={}, index=hnsw, cosine) and name.keyword",
-                        spuIndexName(), vectorDim);
+                created = true;
+                log.info("ES index {} created with nameVec(dims={}, index=hnsw, cosine), "
+                        + "name.keyword and name.edge(ik_edge)", spuIndexName(), vectorDim);
             } else {
                 log.info("ES index {} already exists", spuIndexName());
             }
 
-            // 新增的 keyword 子字段需要调用 rebuild 重写已有文档后才可检索。
-            putSearchMapping();
+            ensureSearchFields(created);
         } catch (Exception e) {
             log.error("Failed to ensure ES index {}: {}", spuIndexName(), e.getMessage(), e);
         }
     }
 
+    /** 确保存量索引具备 name.edge（edge ngram 前缀召回）与 categoryName.text 子字段。
+     *  <p>analysis 设置是非动态的：存量索引需带 {@code reopen=true} 更新 settings；
+     *  新子字段只对之后写入的文档生效，故最后统一 {@code _update_by_query} 原地回填。
+     *  <p>幂等：name.edge 已存在时只追加 categoryName.text，不重发 name/nameVec——
+     *  ES 对已有字段参数（如 analyzer/dense_vector）不可变，重发出入即 400。</p>
+     */
+    private void ensureSearchFields(boolean created) {
+        try {
+            boolean edgeReady = created || hasEdgeField();
+            if (!edgeReady) {
+                updateAnalysisSettings();
+                putMapping(true);
+                log.info("Search mapping updated for {} (name.edge / {} analyzer installed)", spuIndexName(), EDGE_ANALYZER);
+            } else if (!created) {
+                putMapping(false);
+                log.info("Search mapping updated for {} (categoryName.text subfield ensured)", spuIndexName());
+            }
+            reindexInPlace();
+        } catch (Exception e) {
+            // 索引已存在且参数与配置不一致时 ES 会拒绝修改（dense_vector 参数不可变）。
+            // 属预期告警：需删索引后重启重建，或调整配置与现有索引一致。
+            log.warn("Failed to update mapping of {}: {}", spuIndexName(), e.getMessage());
+        }
+    }
+
+    /** 存量索引是否已含 name.edge 子字段（读取失败按"未就绪"处理，走完整补丁流程）。 */
+    private boolean hasEdgeField() {
+        try {
+            Request request = new Request("GET", "/" + spuIndexName() + "/_mapping");
+            org.elasticsearch.client.Response response = restClient.performRequest(request);
+            if (response == null || response.getEntity() == null) return false;
+            ObjectMapper om = new ObjectMapper();
+            return om.readTree(response.getEntity().getContent())
+                    .path(spuIndexName()).path("mappings").path("properties")
+                    .path("name").path("fields").path("edge").has("type");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** 存量索引追加 analysis 设置：ES 要求非动态设置先 close，reopen=true 由服务端完成开关。 */
+    private void updateAnalysisSettings() throws Exception {
+        Request request = new Request("PUT", "/" + spuIndexName() + "/_settings?reopen=true");
+        request.setJsonEntity(ANALYSIS_SETTINGS_JSON);
+        restClient.performRequest(request);
+    }
+
+    /** 追加子字段映射。includeEdge=true 时一并补 name（含 keyword/edge 子字段），
+     *  仅在 edge 分析器刚安装完成时调用；否则只发 categoryName.text。 */
+    private void putMapping(boolean includeEdge) throws Exception {
+        ObjectMapper om = new ObjectMapper();
+        ObjectNode properties = om.createObjectNode();
+        ObjectNode category = properties.putObject("categoryName");
+        category.put("type", "keyword");
+        ObjectNode categoryText = category.putObject("fields").putObject("text");
+        categoryText.put("type", "text");
+        categoryText.put("analyzer", "ik_max_word");
+        categoryText.put("search_analyzer", "ik_smart");
+
+        if (includeEdge) {
+            ObjectNode name = properties.putObject("name");
+            name.put("type", "text");
+            name.put("analyzer", "ik_max_word");
+            name.put("search_analyzer", "ik_smart");
+            ObjectNode fields = name.putObject("fields");
+            ObjectNode keyword = fields.putObject("keyword");
+            keyword.put("type", "keyword");
+            keyword.put("ignore_above", 256);
+            ObjectNode edge = fields.putObject("edge");
+            edge.put("type", "text");
+            edge.put("analyzer", EDGE_ANALYZER);
+            edge.put("search_analyzer", "ik_smart");
+        }
+
+        ObjectNode body = om.createObjectNode();
+        body.set("properties", properties);
+        Request request = new Request("PUT", "/" + spuIndexName() + "/_mapping");
+        request.setJsonEntity(om.writeValueAsString(body));
+        restClient.performRequest(request);
+    }
+
+    /** 原地重建存量文档以填充新增子字段（不动 nameVec，无重 embedding 成本）。 */
+    private void reindexInPlace() throws Exception {
+        Request reindex = new Request("POST", "/" + spuIndexName() + "/_update_by_query?conflicts=proceed");
+        reindex.setJsonEntity("{\"query\":{\"match_all\":{}}}");
+        restClient.performRequest(reindex);
+        log.info("SPU docs reindexed in place to populate search subfields");
+    }
+
     /** 手动创建索引：Spring Data 生成的 mapping 中 nameVec 替换为带 index:true 的 dense_vector、
-     *  name 补 keyword 子字段后，用低层客户端一次 PUT 建索引。
+     *  name 补 keyword/edge 子字段，并带上 edge ngram 分析器 settings，用低层客户端一次 PUT 建索引。
      *  <p>为什么必须这样：dense_vector 的 dims/index/similarity 建后不可变，Spring Data
      *  的 create()+putMapping 流程会让 nameVec 以「无 index」形态落库，后续无法补救；
-     *  buildTextQuery 的 termQuery("name.keyword") 也依赖该子字段。</p>
+     *  buildTextQuery 的 termQuery("name.keyword") 与单字召回依赖 name.edge 子字段。</p>
      */
     private void createIndexWithDenseOptions(Document mapping) throws Exception {
         Object propsObj = mapping.get("properties");
@@ -149,50 +252,36 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
             if (props.get("name") instanceof Map) {
                 @SuppressWarnings("unchecked")
                 Map<String, Object> nameProps = (Map<String, Object>) props.get("name");
-                if (!nameProps.containsKey("fields")) {
-                    Map<String, Object> keyword = new LinkedHashMap<>();
-                    keyword.put("type", "keyword");
-                    keyword.put("ignore_above", 256);
-                    nameProps.put("fields", Map.of("keyword", keyword));
+                Map<String, Object> fields;
+                if (nameProps.get("fields") instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> existing = (Map<String, Object>) nameProps.get("fields");
+                    fields = existing;
+                } else {
+                    fields = new LinkedHashMap<>();
+                    nameProps.put("fields", fields);
                 }
+                Map<String, Object> keyword = new LinkedHashMap<>();
+                keyword.put("type", "keyword");
+                keyword.put("ignore_above", 256);
+                fields.putIfAbsent("keyword", keyword);
+
+                Map<String, Object> edge = new LinkedHashMap<>();
+                edge.put("type", "text");
+                edge.put("analyzer", EDGE_ANALYZER);
+                edge.put("search_analyzer", "ik_smart");
+                fields.put("edge", edge);
             }
         }
         // mapping Document 顶层即 properties（供 PUT /_mapping 用）；
-        // 建索引 PUT /{index} 的 body 需要 {"mappings": {...}} 包裹一层
+        // 建索引 PUT /{index} 的 body 需要 {"mappings": {...}} 包裹一层，
+        // settings 需带 edge ngram 分析器（否则 mapping 里引用 ik_edge 会报 analyzer 不存在）
         ObjectMapper om = new ObjectMapper();
         ObjectNode body = om.createObjectNode();
+        body.set("settings", om.readTree(ANALYSIS_SETTINGS_JSON).path("index"));
         body.set("mappings", om.readTree(mapping.toJson()));
         Request request = new Request("PUT", "/" + spuIndexName());
         request.setJsonEntity(om.writeValueAsString(body));
         restClient.performRequest(request);
-    }
-
-    private void putSearchMapping() {
-        try {
-            // 只追加 categoryName 的 text 子字段（multi-field 对已有 keyword 字段可运行时追加），
-            // 供品类词文本召回（"手机"命中 categoryName="智能家居" 的商品）。
-            // 不重发 name/nameVec：ES 对已有字段的参数（如 analyzer/dense_vector）不可变，
-            // 重发一旦与存量 mapping 有任何出入就会 400 连累新字段一并失败。
-            Request request = new Request("PUT", "/" + spuIndexName() + "/_mapping");
-            request.setJsonEntity("{"
-                    + "\"properties\":{"
-                    + "\"categoryName\":{\"type\":\"keyword\",\"fields\":{"
-                    + "\"text\":{\"type\":\"text\",\"analyzer\":\"ik_max_word\",\"search_analyzer\":\"ik_smart\"}}}"
-                    + "}}");
-            restClient.performRequest(request);
-            log.info("Search mapping updated for {} (categoryName.text subfield added)", spuIndexName());
-
-            // 多字段子字段只对"之后写入"的文档生效，存量文档需原地重建才能填充
-            // categoryName.text（_update_by_query 不动 nameVec，无重 embedding 成本）。
-            // 幂等：已填充时仅消耗一次轻量全表扫描。
-            Request reindex = new Request("POST", "/" + spuIndexName() + "/_update_by_query?conflicts=proceed");
-            reindex.setJsonEntity("{\"query\":{\"match_all\":{}}}");
-            restClient.performRequest(reindex);
-            log.info("SPU docs reindexed in place to populate categoryName.text subfield");
-        } catch (Exception e) {
-            // 索引已存在且参数与配置不一致时 ES 会拒绝修改（dense_vector 参数不可变）。
-            // 属预期告警：需删索引后重启重建，或调整配置与现有索引一致。
-            log.warn("Failed to update mapping of {}: {}", spuIndexName(), e.getMessage());
-        }
     }
 }

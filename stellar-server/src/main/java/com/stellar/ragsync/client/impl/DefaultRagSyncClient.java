@@ -184,8 +184,9 @@ public class DefaultRagSyncClient implements RagSyncClient {
         m.put("min_price", spu.getMinPrice());
         m.put("main_image", nvl(spu.getMainImage()));
 
-        // description_md 不能为空字符串（Python pydantic min_length=1），兜底文本
-        String descMd = nvl(spu.getDescriptionMd());
+        // description_md 不能为空字符串（Python pydantic min_length=1），兜底文本。
+        // [KB_DOC_ID:n] 只是 SPU↔知识库文档的管理元数据，不应进入 RAG chunk 正文。
+        String descMd = stripKbDocMarker(nvl(spu.getDescriptionMd()));
         m.put("description_md", descMd.isEmpty() ? "（暂无商品详情描述）" : descMd);
 
         // spec_table_markdown: 从 SKU 列表构建规格参数表格
@@ -262,5 +263,11 @@ public class DefaultRagSyncClient implements RagSyncClient {
 
     private static String nvl(String s) {
         return StringUtils.hasText(s) ? s : "";
+    }
+
+    /** 去掉 description_md 中的知识库文档标记（[KB_DOC_ID:n]）。
+     *  该标记供管理端关联知识库文档，属于内部元数据，不应写入商品正文/RAG chunk。 */
+    private static String stripKbDocMarker(String text) {
+        return text == null ? "" : text.replaceAll("\\s*\\[KB_DOC_ID:\\d+\\]", "").trim();
     }
 }

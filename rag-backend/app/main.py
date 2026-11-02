@@ -96,12 +96,62 @@ def _ensure_dirs() -> None:
 
 
 def _warmup_and_seed() -> None:
-    """后台线程：预热 RAG 组件 + 加载样例数据，避免阻塞 HTTP 服务监听。"""
+    """后台线程：预热 RAG 组件 + 加载样例数据，避免阻塞 HTTP 服务监听。
+
+    首问 29s 的根因是 Embedding 客户端、BGE Reranker、ES 客户端、Agent 图都在
+    首次请求时才懒加载。这里启动后主动完成单例初始化（加载后常驻），把冷启动
+    成本从用户首问挪到后台线程；任一步失败只告警，不影响首次请求自行重试。
+    """
+    import time
+    started = time.time()
     try:
         from app.rag import vector_store, embeddings, llm, chains  # noqa
         logger.info("✅ RAG 组件预热完成 (background)")
     except Exception as e:  # noqa
         logger.warning(f"RAG 组件预热异常(首次问答会重试): {e}")
+
+    # 1) Embedding：初始化客户端并发起一次真实请求（同时校验 Key / 维度）
+    try:
+        from app.rag.embeddings import get_embeddings
+        get_embeddings().embed_query("预热")
+        logger.info("✅ Embedding 预热完成")
+    except Exception as e:  # noqa
+        logger.warning(f"Embedding 预热跳过: {e}")
+
+    # 2) Reranker：模型加载 + 一次小推理（首问最慢的环节，加载后常驻）
+    try:
+        from app.rag.retriever import _get_reranker
+        reranker = _get_reranker()
+        if reranker is not None:
+            try:
+                reranker.compute_score([["预热查询", "预热文档"]], batch_size=1)
+            except TypeError:
+                reranker.compute_score([["预热查询", "预热文档"]])
+            logger.info("✅ Reranker 预热完成")
+        else:
+            logger.info("Reranker 未启用，跳过预热")
+    except Exception as e:  # noqa
+        logger.warning(f"Reranker 预热跳过: {e}")
+
+    # 3) ES：连接 + 知识库/语义缓存索引 ensure（检索与缓存都依赖）
+    try:
+        from app.rag.es_client import ensure_cache_index, ensure_kb_index, get_es
+        get_es()
+        ensure_kb_index()
+        ensure_cache_index()
+        logger.info("✅ ES 连接与索引预热完成")
+    except Exception as e:  # noqa
+        logger.warning(f"ES 预热跳过: {e}")
+
+    # 4) Agent 图与 LLM 客户端：首次 /api/chat 才 import graph，提前构建
+    try:
+        from app.agent.graph import agent_graph  # noqa
+        from app.rag.llm import get_langchain_chat
+        get_langchain_chat()
+        logger.info("✅ Agent 图与 LLM 客户端预热完成")
+    except Exception as e:  # noqa
+        logger.warning(f"Agent/LLM 预热跳过: {e}")
+
     # 预热 LLM 缓存
     try:
         from app.rag.llm_cache import get_llm_cache
@@ -109,6 +159,9 @@ def _warmup_and_seed() -> None:
         logger.info("✅ LLM 缓存模块预热完成 (background)")
     except Exception as e:  # noqa
         logger.warning(f"LLM 缓存预热跳过: {e}")
+
+    logger.info(f"✅ 后台预热总耗时 {time.time() - started:.1f}s")
+
     try:
         from app.services.sample_data_loader import load_sample_data_if_empty
         load_sample_data_if_empty()
