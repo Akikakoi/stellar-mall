@@ -99,17 +99,6 @@ public class CategoryController {
     }
 
 @RequireRole({1, 2})
-    @GetMapping("/tree")
-    @ApiOperation("分类嵌套树（最多 2 级）。onlyEnabled=true 只返回启用的")
-    public Result<List<CategoryVO>> tree(
-            @RequestParam(required = false, defaultValue = "false") boolean onlyEnabled) {
-        List<Category> tree = categoryService.tree(onlyEnabled);
-        return Result.success(tree.stream()
-                .map(CategoryVoUtils::toVoWithChildren)
-                .collect(Collectors.toList()));
-    }
-
-@RequireRole({1, 2})
     @GetMapping("/list")
     @ApiOperation("分类列表（嵌套 tree，包含启用/禁用的全部）")
     public Result<List<CategoryVO>> list() {

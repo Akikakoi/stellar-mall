@@ -38,8 +38,11 @@ body.area-admin .admin-layout .kb {
 }
 
 body.area-admin .admin-layout .panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
   padding: 16px 20px;
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 body.area-admin .admin-layout .panel-head {
@@ -53,6 +56,8 @@ body.area-admin .admin-layout .panel-title {
 }
 
 body.area-admin .admin-layout .filter-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border-base);
   padding: 10px 14px;
   margin-bottom: 14px;
   border-radius: var(--radius-md);
@@ -64,6 +69,8 @@ body.area-admin .admin-layout .batch-toolbar {
 }
 
 body.area-admin .admin-layout .pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
   margin-top: 14px;
 }
 

@@ -125,31 +125,12 @@ onMounted(load)
 
 <style scoped>
 .review-mgmt { display: flex; flex-direction: column; gap: 16px; }
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
-}
 .panel-head {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
 }
 .panel-title {
   font-size: 18px; font-weight: 600; color: var(--text-primary);
 }
-.filter-bar {
-  margin-bottom: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-}
-.pagination-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
 .review-preview { background: var(--bg-hover); padding: 12px; border-radius: var(--radius-md); margin-bottom: 4px; }
 .review-preview .user-info { color: var(--text-muted); font-size: 13px; margin-bottom: 6px; }
 .review-preview .content { color: var(--text-primary); font-size: 14px; }

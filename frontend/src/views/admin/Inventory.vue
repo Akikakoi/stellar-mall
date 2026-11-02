@@ -309,31 +309,12 @@ onMounted(load)
 
 <style scoped>
 .inventory-page { display: flex; flex-direction: column; gap: 16px; }
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
-}
 .panel-head {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
 }
 .panel-title {
   font-size: 18px; font-weight: 600; color: var(--text-primary);
 }
-.filter-bar {
-  margin-bottom: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-}
-.pagination-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
 
 .goods-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .goods-name { color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

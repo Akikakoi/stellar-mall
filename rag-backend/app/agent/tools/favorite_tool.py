@@ -2,6 +2,7 @@ from langchain_core.tools import tool
 from typing import Optional
 
 from app.agent.tools.mall_client import call_mall
+from app.agent.tools._mall_response import unwrap_mall
 
 
 @tool
@@ -25,25 +26,24 @@ def query_favorite_tool(
             "message": result["message"],
         }
 
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        items = data.get("data", [])
-        normalized = [_normalize_favorite_item(item) for item in items]
-        return {
-            "success": True,
-            "type": "list",
-            "data": normalized,
-            "count": len(normalized),
-            "message": f"收藏夹共 {len(normalized)} 件商品",
-        }
-    else:
+    data, err = unwrap_mall(result, "收藏夹查询失败")
+    if err:
         return {
             "success": False,
             "type": "list",
             "data": [],
             "count": 0,
-            "message": data.get("msg", "收藏夹查询失败"),
+            "message": err,
         }
+    items = data.get("data", [])
+    normalized = [_normalize_favorite_item(item) for item in items]
+    return {
+        "success": True,
+        "type": "list",
+        "data": normalized,
+        "count": len(normalized),
+        "message": f"收藏夹共 {len(normalized)} 件商品",
+    }
 
 
 def _normalize_favorite_item(item: dict) -> dict:

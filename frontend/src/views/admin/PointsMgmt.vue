@@ -390,13 +390,6 @@ onMounted(() => { loadRules(); loadProducts() })
   border-radius: var(--radius-lg);
   overflow: hidden;
 }
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
-}
 .panel-head {
   display: flex;
   justify-content: space-between;

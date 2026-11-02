@@ -2,6 +2,7 @@ from langchain_core.tools import tool
 from typing import Optional
 
 from app.agent.tools.mall_client import call_mall
+from app.agent.tools._mall_response import unwrap_mall
 
 
 @tool
@@ -22,21 +23,20 @@ def query_order_tool(
     if order_id:
         result = call_mall("GET", f"/user/order/{order_id}", mall_token=mall_token)
         if result["ok"]:
-            data = result["data"] or {}
-            if data.get("code") in (1, 200) and data.get("data"):
-                order = data["data"]
-                return {
-                    "success": True,
-                    "type": "detail",
-                    "data": _normalize_order(order),
-                    "message": "订单查询成功",
-                }
-            else:
+            data, err = unwrap_mall(result, "订单查询失败或订单不存在")
+            if err:
                 return {
                     "success": False,
                     "type": "detail",
                     "data": None,
-                    "message": data.get("msg", "订单查询失败或订单不存在"),
+                    "message": err,
+                }
+            if data.get("data"):
+                return {
+                    "success": True,
+                    "type": "detail",
+                    "data": _normalize_order(data["data"]),
+                    "message": "订单查询成功",
                 }
         # 详情查询失败时降级查列表
 
@@ -54,25 +54,24 @@ def query_order_tool(
             "message": result["message"],
         }
 
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        orders = data.get("data", [])
-        normalized = [_normalize_order(o) for o in orders]
-        return {
-            "success": True,
-            "type": "list",
-            "data": normalized,
-            "count": len(normalized),
-            "message": f"查询到 {len(normalized)} 个订单",
-        }
-    else:
+    data, err = unwrap_mall(result, "订单列表查询失败")
+    if err:
         return {
             "success": False,
             "type": "list",
             "data": [],
             "count": 0,
-            "message": data.get("msg", "订单列表查询失败"),
+            "message": err,
         }
+    orders = data.get("data", [])
+    normalized = [_normalize_order(o) for o in orders]
+    return {
+        "success": True,
+        "type": "list",
+        "data": normalized,
+        "count": len(normalized),
+        "message": f"查询到 {len(normalized)} 个订单",
+    }
 
 
 def _normalize_order(order: dict) -> dict:

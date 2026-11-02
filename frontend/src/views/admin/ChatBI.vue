@@ -223,13 +223,6 @@ onUnmounted(() => {
   height: 100%;
   gap: 16px;
 }
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-xl);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
-}
 .head-panel { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
 .head-title { font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
 .head-desc { color: var(--text-secondary); font-size: 13px; line-height: 1.6; max-width: 560px; }

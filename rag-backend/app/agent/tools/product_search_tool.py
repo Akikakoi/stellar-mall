@@ -2,6 +2,7 @@ from langchain_core.tools import tool
 from typing import Optional
 
 from app.agent.tools.mall_client import call_mall
+from app.agent.tools._mall_response import unwrap_mall
 from app.core.logger import logger
 
 
@@ -57,30 +58,24 @@ def product_search_tool(
                 logger.info(f"[product_search] fallback keyword: '{keyword}'")
                 result = call_mall("GET", "/user/spu/page", mall_token=mall_token, params=params)
 
-    if not result["ok"]:
-        return {"success": False, "message": result["message"]}
+    data, err = unwrap_mall(result, "商品搜索失败")
+    if err:
+        return {"success": False, "message": err}
 
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        inner = data.get("data", {})
-        records = inner.get("records", []) if isinstance(inner, dict) else []
-        total = inner.get("total", 0) if isinstance(inner, dict) else 0
-        normalized = [_normalize_spu(item) for item in records]
-        return {
-            "success": True,
-            "query": query,
-            "category": category,
-            "data": normalized,
-            "count": len(normalized),
-            "total": total,
-            "page": page,
-            "message": f"搜索「{query}」共找到 {total} 件商品（当前第{page}页，显示{len(normalized)}件）",
-        }
-    else:
-        return {
-            "success": False,
-            "message": data.get("msg", "商品搜索失败"),
-        }
+    inner = data.get("data", {})
+    records = inner.get("records", []) if isinstance(inner, dict) else []
+    total = inner.get("total", 0) if isinstance(inner, dict) else 0
+    normalized = [_normalize_spu(item) for item in records]
+    return {
+        "success": True,
+        "query": query,
+        "category": category,
+        "data": normalized,
+        "count": len(normalized),
+        "total": total,
+        "page": page,
+        "message": f"搜索「{query}」共找到 {total} 件商品（当前第{page}页，显示{len(normalized)}件）",
+    }
 
 
 def _resolve_category(category_name: str, mall_token: Optional[str] = None) -> Optional[dict]:

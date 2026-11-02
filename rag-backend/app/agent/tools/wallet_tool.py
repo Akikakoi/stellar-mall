@@ -2,6 +2,7 @@ from langchain_core.tools import tool
 from typing import Optional
 
 from app.agent.tools.mall_client import call_mall
+from app.agent.tools._mall_response import unwrap_mall
 
 
 @tool
@@ -16,23 +17,17 @@ def query_wallet_tool(
         user_id: 用户ID
     """
     result = call_mall("GET", "/user/wallet", mall_token=mall_token)
-    if not result["ok"]:
-        return {"success": False, "message": result["message"]}
+    data, err = unwrap_mall(result, "钱包查询失败")
+    if err:
+        return {"success": False, "message": err}
 
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        wallet = data.get("data", {})
-        return {
-            "success": True,
-            "balance": str(wallet.get("balance", "0")),
-            "frozen": str(wallet.get("frozen", "0")),
-            "total_recharge": str(wallet.get("totalRecharge", "0")),
-            "total_consume": str(wallet.get("totalConsume", "0")),
-            "create_time": wallet.get("createTime", ""),
-            "message": f"当前余额 ¥{wallet.get('balance', '0')}",
-        }
-    else:
-        return {
-            "success": False,
-            "message": data.get("msg", "钱包查询失败"),
-        }
+    wallet = data.get("data", {})
+    return {
+        "success": True,
+        "balance": str(wallet.get("balance", "0")),
+        "frozen": str(wallet.get("frozen", "0")),
+        "total_recharge": str(wallet.get("totalRecharge", "0")),
+        "total_consume": str(wallet.get("totalConsume", "0")),
+        "create_time": wallet.get("createTime", ""),
+        "message": f"当前余额 ¥{wallet.get('balance', '0')}",
+    }

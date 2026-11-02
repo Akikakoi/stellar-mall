@@ -2,6 +2,7 @@ from langchain_core.tools import tool
 from typing import Optional
 
 from app.agent.tools.mall_client import call_mall
+from app.agent.tools._mall_response import unwrap_mall
 
 
 @tool
@@ -25,30 +26,30 @@ def query_cart_tool(
             "message": result["message"],
         }
 
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        items = data.get("data", [])
-        normalized = [_normalize_cart_item(item) for item in items]
-        total_price = sum(
-            float(item.get("sku_price", 0)) * item.get("qty", 0)
-            for item in normalized
-        )
-        return {
-            "success": True,
-            "type": "list",
-            "data": normalized,
-            "count": len(normalized),
-            "total_price": f"{total_price:.2f}",
-            "message": f"购物车共 {len(normalized)} 件商品",
-        }
-    else:
+    data, err = unwrap_mall(result, "购物车查询失败")
+    if err:
         return {
             "success": False,
             "type": "list",
             "data": [],
             "count": 0,
-            "message": data.get("msg", "购物车查询失败"),
+            "message": err,
         }
+
+    items = data.get("data", [])
+    normalized = [_normalize_cart_item(item) for item in items]
+    total_price = sum(
+        float(item.get("sku_price", 0)) * item.get("qty", 0)
+        for item in normalized
+    )
+    return {
+        "success": True,
+        "type": "list",
+        "data": normalized,
+        "count": len(normalized),
+        "total_price": f"{total_price:.2f}",
+        "message": f"购物车共 {len(normalized)} 件商品",
+    }
 
 
 def _normalize_cart_item(item: dict) -> dict:
@@ -77,20 +78,13 @@ def clear_cart_tool(
         user_id: 用户ID
     """
     result = call_mall("DELETE", "/user/cart/clear", mall_token=mall_token)
-    if not result["ok"]:
-        return {"success": False, "message": result["message"]}
-
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        return {
-            "success": True,
-            "message": "购物车已清空",
-        }
-    else:
-        return {
-            "success": False,
-            "message": data.get("msg", "清空购物车失败"),
-        }
+    _, err = unwrap_mall(result, "清空购物车失败")
+    if err:
+        return {"success": False, "message": err}
+    return {
+        "success": True,
+        "message": "购物车已清空",
+    }
 
 
 @tool
@@ -107,22 +101,14 @@ def delete_cart_item_tool(
         user_id: 用户ID
     """
     result = call_mall("DELETE", f"/user/cart/{cart_item_id}", mall_token=mall_token)
-    if not result["ok"]:
-        return {"success": False, "cart_item_id": cart_item_id, "message": result["message"]}
-
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        return {
-            "success": True,
-            "cart_item_id": cart_item_id,
-            "message": "已从购物车中移除该商品",
-        }
-    else:
-        return {
-            "success": False,
-            "cart_item_id": cart_item_id,
-            "message": data.get("msg", "删除购物车商品失败"),
-        }
+    _, err = unwrap_mall(result, "删除购物车商品失败")
+    if err:
+        return {"success": False, "cart_item_id": cart_item_id, "message": err}
+    return {
+        "success": True,
+        "cart_item_id": cart_item_id,
+        "message": "已从购物车中移除该商品",
+    }
 
 
 @tool
@@ -149,21 +135,13 @@ def update_cart_item_tool(
         body["checked"] = checked
 
     result = call_mall("PUT", "/user/cart", mall_token=mall_token, json=body)
-    if not result["ok"]:
-        return {"success": False, "cart_item_id": cart_item_id, "message": result["message"]}
-
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        return {
-            "success": True,
-            "cart_item_id": cart_item_id,
-            "qty": qty,
-            "checked": checked,
-            "message": "购物车商品已更新",
-        }
-    else:
-        return {
-            "success": False,
-            "cart_item_id": cart_item_id,
-            "message": data.get("msg", "更新购物车商品失败"),
-        }
+    _, err = unwrap_mall(result, "更新购物车商品失败")
+    if err:
+        return {"success": False, "cart_item_id": cart_item_id, "message": err}
+    return {
+        "success": True,
+        "cart_item_id": cart_item_id,
+        "qty": qty,
+        "checked": checked,
+        "message": "购物车商品已更新",
+    }

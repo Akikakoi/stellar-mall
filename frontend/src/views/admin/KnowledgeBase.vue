@@ -417,13 +417,6 @@ async function viewChunks(row: any) {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
-}
 .panel-head {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
 }

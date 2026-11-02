@@ -2,6 +2,7 @@ from langchain_core.tools import tool
 from typing import Optional
 
 from app.agent.tools.mall_client import call_mall
+from app.agent.tools._mall_response import unwrap_mall
 
 
 @tool
@@ -27,21 +28,12 @@ def add_to_cart_tool(
 
     body = {"skuId": sku_id_int, "qty": qty}
     result = call_mall("POST", "/user/cart", mall_token=mall_token, json=body)
-    if not result["ok"]:
-        return {"success": False, "sku_id": sku_id, "qty": qty, "message": result["message"]}
-
-    data = result["data"] or {}
-    if data.get("code") in (1, 200):
-        return {
-            "success": True,
-            "sku_id": sku_id,
-            "qty": qty,
-            "message": "已成功加入购物车",
-        }
-    else:
-        return {
-            "success": False,
-            "sku_id": sku_id,
-            "qty": qty,
-            "message": data.get("msg", "加入购物车失败"),
-        }
+    _, err = unwrap_mall(result, "加入购物车失败")
+    if err:
+        return {"success": False, "sku_id": sku_id, "qty": qty, "message": err}
+    return {
+        "success": True,
+        "sku_id": sku_id,
+        "qty": qty,
+        "message": "已成功加入购物车",
+    }

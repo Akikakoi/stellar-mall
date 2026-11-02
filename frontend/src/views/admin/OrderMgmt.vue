@@ -311,31 +311,12 @@ onMounted(() => {
 
 <style scoped>
 .mgmt-page { display: flex; flex-direction: column; gap: 16px; }
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  padding: 20px 24px;
-  box-shadow: var(--shadow-sm);
-}
 .panel-head {
   display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
 }
 .panel-title {
   font-size: 18px; font-weight: 600; color: var(--text-primary);
 }
-.filter-bar {
-  margin-bottom: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-}
-.pagination-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
 
 .order-items { display: flex; flex-direction: column; gap: 6px; }
 .order-item-line { display: flex; align-items: center; gap: 8px; font-size: 13px; }

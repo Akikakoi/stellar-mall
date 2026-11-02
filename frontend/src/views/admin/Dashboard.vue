@@ -374,12 +374,6 @@ async function handleExport(type: any) {
 .stat-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
 .grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-base);
-  border-radius: var(--radius-lg);
-  padding: 16px 20px;
-}
 .panel-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
 .panel-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
 .panel-sub { font-size: 12px; color: var(--text-muted); }
