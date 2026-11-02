@@ -5,13 +5,6 @@ from typing import Optional, List, Any
 from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 
 
-# ================ 通用 ================
-class RespModel(BaseModel):
-    code: int = 0
-    message: str = "success"
-    data: Any = None
-
-
 # ================ 用户 / 认证 ================
 class UserRegisterReq(BaseModel):
     username: str = Field(..., min_length=3, max_length=32, description="用户名")
@@ -108,16 +101,6 @@ class ChatReq(BaseModel):
     # 旧字段从未被任何代码读取（唯一消费者 RAG 直连链路已删除），纯属误导性装饰字段
 
 
-class SourceRef(BaseModel):
-    id: int = 0
-    doc_name: str
-    chunk_index: int
-    page: Optional[int] = None
-    content: str
-    score: float
-    tags: Optional[str]
-
-
 # ================ 知识库 ================
 class KbDocInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -166,16 +149,6 @@ class SystemSettingsReq(BaseModel):
     chunk_overlap: Optional[int] = Field(None, ge=0, le=1024)
     query_rewrite_enabled: Optional[bool] = None
     agent_enabled: Optional[bool] = None
-
-
-class DashboardResp(BaseModel):
-    user_count: int
-    conversation_count: int
-    message_count: int
-    kb_doc_count: int
-    kb_chunk_count: int
-    last_24h_chat_count: int
-    top_questions: List[dict] = []
 
 
 # 响应里的 UserInfo 用到，需要更新引用

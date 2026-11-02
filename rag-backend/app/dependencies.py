@@ -218,18 +218,6 @@ async def get_current_user(
     return user
 
 
-async def get_current_user_opt(
-    request: Request,
-    token: Optional[str] = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
-) -> Optional[User]:
-    """可选的当前用户，不强制登录。"""
-    try:
-        return await get_current_user(request, token, db)
-    except BizError:
-        return None
-
-
 class RequireRole:
     """RBAC 依赖：必须属于指定角色之一。"""
 

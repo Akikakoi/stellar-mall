@@ -279,51 +279,6 @@ def _bloom_add(
 _SF_WAIT_TIMEOUT = 120.0
 
 
-async def _single_flight_async(key: str, producer: Callable[[], Any]):
-    """异步 single-flight：并发相同 key 只执行一次 producer，其余等待复用首次结果。
-
-    使用 asyncio.Future 传递结果；首个请求成为 leader 执行 producer，其余请求 await
-    同一个 Future 拿到同一份结果（不重复调用 LLM）。producer 抛错时错误广播给所有等待者，
-    避免各自重试造成放大。
-    """
-    if not settings.LLM_CACHE_SINGLE_FLIGHT_ENABLED:
-        return await producer()
-
-    loop = asyncio.get_running_loop()
-    with _sf_async_lock:
-        fut = _sf_async_map.get(key)
-        leader = fut is None
-        if leader:
-            fut = loop.create_future()
-            _sf_async_map[key] = fut
-
-    if not leader:
-        # 非 leader：限时等待并复用 leader 的结果 / 错误
-        try:
-            return await asyncio.wait_for(asyncio.shield(fut), timeout=_SF_WAIT_TIMEOUT)
-        except asyncio.TimeoutError:
-            # leader 挂起（未来得及清理 map 条目）：移除残留后自己执行兜底
-            with _sf_async_lock:
-                if _sf_async_map.get(key) is fut and not fut.done():
-                    _sf_async_map.pop(key, None)
-            logger.warning(f"[LLMCache] single-flight 等待超时({key[:40]}...)，兜底自行执行")
-            return await producer()
-
-    try:
-        result = await producer()
-        if not fut.done():
-            fut.set_result(result)
-        return result
-    except BaseException as e:
-        if not fut.done():
-            fut.set_exception(e)
-        raise
-    finally:
-        with _sf_async_lock:
-            if _sf_async_map.get(key) is fut:
-                _sf_async_map.pop(key, None)
-
-
 class _SyncFlight:
     __slots__ = ("done", "result", "error")
 
@@ -372,15 +327,8 @@ def _single_flight_sync(key: str, producer: Callable[[], Any]):
                 _sf_sync_map.pop(key, None)
 
 
-_sf_async_map: Dict[str, asyncio.Future] = {}
-_sf_async_lock = threading.Lock()
 _sf_sync_map: Dict[str, _SyncFlight] = {}
 _sf_sync_lock = threading.Lock()
-
-
-def single_flight(key: str, producer: Callable[[], Any]):
-    """异步 single-flight：并发相同 key 只执行一次 producer，其余复用它（缓存击穿防护）。"""
-    return _single_flight_async(key, producer)
 
 
 def single_flight_sync(key: str, producer: Callable[[], Any]):

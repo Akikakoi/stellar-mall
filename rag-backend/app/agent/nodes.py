@@ -1354,14 +1354,6 @@ def _handle_small_talk(state: AgentState) -> Dict[str, Any]:
         return {"final_answer": "您好！请问有什么可以帮您的吗？"}
 
 
-def _handle_other(state: AgentState) -> Dict[str, Any]:
-    """处理其他问题。"""
-    query = _get_last_user_query(state)
-    return {
-        "final_answer": f"抱歉，我暂时无法理解您的问题：「{query}」。\n\n我可以帮您：\n- 🔍 查询商品信息\n- 📦 查询订单 / 取消订单 / 确认收货\n- 🛒 查看/管理购物车\n- ❤️ 查看收藏夹\n- 🔧 申请售后服务\n\n请告诉我您需要什么帮助？"
-    }
-
-
 def _sanitize_error_message(raw_msg: str) -> str:
     """清洗技术错误信息，去掉 Python 异常和英文提示，转为用户友好的中文描述。"""
     import re

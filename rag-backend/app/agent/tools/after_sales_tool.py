@@ -25,15 +25,6 @@ class AfterSalesTicket(Base):
     update_time = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
 
-def init_after_sales_table():
-    """确保售后工单表存在。"""
-    try:
-        Base.metadata.create_all(bind=SessionLocal.kw['bind'] if hasattr(SessionLocal, 'kw') else None,
-                         tables=[AfterSalesTicket.__table__])
-    except Exception:
-        pass
-
-
 @tool
 def apply_after_sales_tool(
     order_id: str,
