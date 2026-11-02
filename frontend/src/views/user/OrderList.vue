@@ -27,7 +27,7 @@
             <el-icon :size="13"><Timer /></el-icon>
             <span>{{ countdownText(order.id) }}</span>
           </span>
-          <el-tag :type="statusTag(order.statusCode)" class="status-tag">{{ statusText(order.statusCode) }}</el-tag>
+          <el-tag :type="orderStatusTag(order.statusCode)" class="status-tag">{{ orderStatusText(order.statusCode) }}</el-tag>
         </div>
 
         <div class="order-body" v-if="order.items && order.items.length">
@@ -108,7 +108,7 @@
 import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { listOrder, cancelOrder, payOrder, confirmOrder, deleteUserOrder, listAfterSales, submitReturnTracking } from '@/api/mall'
-import { ORDER_STATUS, AFTER_SALE_STATUS } from '@/constants/order'
+import { ORDER_STATUS, AFTER_SALE_STATUS, orderStatusText, orderStatusTag } from '@/constants/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Timer } from '@element-plus/icons-vue'
 
@@ -191,21 +191,6 @@ const returnVisible = ref(false)
 const returnOrderId = ref<any>(null)
 const returnTracking = ref('')
 const returnSubmitting = ref(false)
-
-const STATUS_MAP: Record<string, any> = {
-  [ORDER_STATUS.CANCELLED]: ['已取消', 'info'],
-  [ORDER_STATUS.PENDING]: ['待付款', 'warning'],
-  [ORDER_STATUS.PAID]: ['待发货', 'primary'],
-  [ORDER_STATUS.SHIPPED]: ['待收货', 'primary'],
-  [ORDER_STATUS.REVIEWABLE]: ['待评价', 'success'],
-  [ORDER_STATUS.COMPLETED]: ['已完成', 'success'],
-  [ORDER_STATUS.REFUNDING]: ['退款中', 'warning'],
-  [ORDER_STATUS.REFUNDED]: ['已退款', 'danger'],
-  [ORDER_STATUS.PARTIAL_REFUNDED]: ['部分退款', 'warning']
-}
-
-function statusText(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
-function statusTag(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
 
 /**
  * 加载订单列表，根据当前选中的状态标签页筛选，并初始化倒计时和异步加载售后单

@@ -11,6 +11,7 @@ import com.stellar.service.OrderCancelService;
 import com.stellar.service.OrderService;
 import com.stellar.service.NotificationService;
 import com.stellar.service.PointsService;
+import com.stellar.service.ServiceFeeResolver;
 import com.stellar.service.SkuStockService;
 import com.stellar.service.UserMessageService;
 import com.stellar.vo.MallOrderItemVO;
@@ -70,9 +71,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderCancelService orderCancelService;
     /** 下单后登记超时取消的延迟任务（事件驱动链路，开关见 stellar.order.expire.enabled）。 */
     private final com.stellar.task.expire.OrderExpireEventPublisher orderExpireEventPublisher;
-
-    /** serviceInfo JSON 快照的序列化/反序列化（结构简单，线程安全复用） */
-    private static final ObjectMapper SERVICE_INFO_MAPPER = new ObjectMapper();
 
     // -------- 提交订单 --------
 
@@ -188,7 +186,8 @@ public class OrderServiceImpl implements OrderService {
             Spu spu = c.getSpuId() == null ? null : spuMap.get(c.getSpuId());
             // 保障服务费权威重算：以服务表价格为准（不信任前端金额），快照 JSON 用库内数据重建；
             // 购物车 extraAmount 为单价口径，行金额 = 单价 × 数量
-            ServiceResolved svc = resolveServices(sku.getSpuId(), c.getServiceInfo());
+            ServiceFeeResolver.Resolved svc = ServiceFeeResolver.resolve(
+                    spuServiceMapper, sku.getSpuId(), c.getServiceInfo());
             BigDecimal lineExtra = svc.unitExtra().multiply(BigDecimal.valueOf(qty));
             lines.add(buildLine(c, sku, spu, qty, lineExtra, svc.snapshotJson()));
         }
@@ -222,7 +221,8 @@ public class OrderServiceImpl implements OrderService {
             // 保障服务费权威重算：以服务表价格为准（不信任前端 extraAmount），行金额 = 单价 × 数量；
             // 前端直购链路传的 extraAmount 已乘过数量，此处忽略并按单价口径重算
             Spu spu = sku.getSpuId() == null ? null : spuMap.get(sku.getSpuId());
-            ServiceResolved svc = resolveServices(sku.getSpuId(), item.getServiceInfo());
+            ServiceFeeResolver.Resolved svc = ServiceFeeResolver.resolve(
+                    spuServiceMapper, sku.getSpuId(), item.getServiceInfo());
             BigDecimal lineExtra = svc.unitExtra().multiply(BigDecimal.valueOf(qty));
             lines.add(buildLine(null, sku, spu, qty, lineExtra, svc.snapshotJson()));
         }
@@ -250,73 +250,6 @@ public class OrderServiceImpl implements OrderService {
         if (stock < qty) {
             throw new BaseException(MessageConstant.STOCK_NOT_ENOUGH
                     + " (skuId=" + sku.getId() + ", stock=" + stock + ", need=" + qty + ")");
-        }
-    }
-
-    /** 保障服务重算结果：unitExtra=单件商品的服务费合计（未乘数量）；snapshotJson=用库内数据重建的快照 */
-    private record ServiceResolved(BigDecimal unitExtra, String snapshotJson) {
-        static final ServiceResolved EMPTY = new ServiceResolved(BigDecimal.ZERO, null);
-    }
-
-    /**
-     * 保障服务费权威重算（不信任前端金额）。
-     * <p>解析 serviceInfo JSON 中的服务标识（id = stellar_service_item.code），逐项校验：</p>
-     * <ul>
-     *   <li>服务存在且启用；</li>
-     *   <li>服务确实配置在该 SPU 下（spu_service 关联），防止拿别商品的服务组合下单；</li>
-     * </ul>
-     * <p>单价合计从服务表取权威值，快照 JSON 用库内标题/价格重建，保证订单明细与结算一致。</p>
-     *
-     * @param spuId           商品 SPU id（可为 null，null 时视为无关联服务，任何服务声明都会被拒绝）
-     * @param serviceInfoJson 前端传入的服务 JSON 数组，如 [{"id":"screen_insurance","title":"碎屏险 · 1年","price":99}]
-     * @return 重算结果；JSON 为空/空数组返回 EMPTY
-     */
-    private ServiceResolved resolveServices(Long spuId, String serviceInfoJson) {
-        if (serviceInfoJson == null || serviceInfoJson.isBlank()) {
-            return ServiceResolved.EMPTY;
-        }
-        List<Map<String, Object>> declared;
-        try {
-            declared = SERVICE_INFO_MAPPER.readValue(serviceInfoJson,
-                    new TypeReference<List<Map<String, Object>>>() {});
-        } catch (Exception e) {
-            log.warn("[OrderService] serviceInfo 解析失败: {}", serviceInfoJson, e);
-            throw new BaseException("保障服务信息有误，请重新选择");
-        }
-        if (declared == null || declared.isEmpty()) {
-            return ServiceResolved.EMPTY;
-        }
-
-        // 该 SPU 实际配置且启用的服务（按单个商品配置的服务组合），一个订单行只查一次
-        List<com.stellar.entity.ServiceItem> allowed = spuId == null
-                ? List.of() : spuServiceMapper.listEnabledBySpuId(spuId);
-        Map<String, com.stellar.entity.ServiceItem> byCode = allowed.stream()
-                .collect(Collectors.toMap(com.stellar.entity.ServiceItem::getCode, s -> s, (a, b) -> a));
-
-        BigDecimal unit = BigDecimal.ZERO;
-        List<Map<String, Object>> snapshot = new ArrayList<>();
-        for (Map<String, Object> d : declared) {
-            Object idVal = d.get("id");
-            String code = idVal == null ? "" : String.valueOf(idVal);
-            com.stellar.entity.ServiceItem svc = byCode.get(code);
-            if (svc == null) {
-                String title = d.get("title") == null ? code : String.valueOf(d.get("title"));
-                throw new BaseException("保障服务「" + title + "」不存在、已下架或该商品未配置，请重新选择");
-            }
-            if (svc.getPrice() != null) unit = unit.add(svc.getPrice());
-            Map<String, Object> snap = new LinkedHashMap<>();
-            snap.put("id", svc.getCode());
-            snap.put("title", svc.getTitle());
-            snap.put("price", svc.getPrice());
-            snapshot.add(snap);
-        }
-        try {
-            String json = snapshot.isEmpty() ? null
-                    : SERVICE_INFO_MAPPER.writeValueAsString(snapshot);
-            return new ServiceResolved(unit, json);
-        } catch (Exception e) {
-            log.error("[OrderService] 保障服务快照序列化失败", e);
-            throw new BaseException("保障服务信息处理失败，请重试");
         }
     }
 

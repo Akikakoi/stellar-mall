@@ -6,7 +6,7 @@
       <div class="status-card">
         <div class="status-left">
           <div class="status-title">
-            <el-tag :type="statusTag(order?.statusCode)" size="large">{{ statusText(order?.statusCode) }}</el-tag>
+            <el-tag :type="orderStatusTag(order?.statusCode)" size="large">{{ orderStatusText(order?.statusCode) }}</el-tag>
           </div>
           <div class="status-sub">
             <template v-if="order?.statusCode === ORDER_STATUS.PENDING">
@@ -194,7 +194,7 @@ import {
 } from '@/api/mall'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Location } from '@element-plus/icons-vue'
-import { ORDER_STATUS, AFTER_SALE_STATUS } from '@/constants/order'
+import { ORDER_STATUS, AFTER_SALE_STATUS, orderStatusText, orderStatusTag } from '@/constants/order'
 
 const __PH = window.__PH
 
@@ -338,20 +338,6 @@ function load() {
 function isReviewable(statusCode: any) {
   return statusCode === ORDER_STATUS.REVIEWABLE || statusCode === ORDER_STATUS.COMPLETED
 }
-
-const STATUS_MAP: Record<string, any> = {
-  [ORDER_STATUS.CANCELLED]: ['已取消', 'info'],
-  [ORDER_STATUS.PENDING]: ['待付款', 'warning'],
-  [ORDER_STATUS.PAID]: ['待发货', 'warning'],
-  [ORDER_STATUS.SHIPPED]: ['待收货', 'primary'],
-  [ORDER_STATUS.REVIEWABLE]: ['待评价', 'success'],
-  [ORDER_STATUS.COMPLETED]: ['已完成', 'success'],
-  [ORDER_STATUS.REFUNDING]: ['退款中', 'warning'],
-  [ORDER_STATUS.REFUNDED]: ['已退款', 'danger'],
-  [ORDER_STATUS.PARTIAL_REFUNDED]: ['部分退款', 'warning']
-}
-function statusText(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][0]) || '未知' }
-function statusTag(s: any) { return (STATUS_MAP[s] && STATUS_MAP[s][1]) || 'info' }
 
 function payMethodText(m: any) {
   if (m == null) return '—'

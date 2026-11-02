@@ -1,7 +1,5 @@
 package com.stellar.elasticsearch.sync;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stellar.config.AsyncExecutorConfig;
 import com.stellar.elasticsearch.doc.SpuDocument;
 import com.stellar.elasticsearch.event.SpuChangedEvent;
@@ -25,8 +23,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class SpuEsSyncService {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final ElasticsearchOperations esOps;
     private final SpuMapper spuMapper;
@@ -184,31 +180,8 @@ public class SpuEsSyncService {
 
     /** 单批 POST /api/embed。受检异常上抛给调用方（fetchEmbeddings 已 catch 记日志）。 */
     private List<double[]> doEmbedBatch(List<String> texts) throws Exception {
-        String body = MAPPER.writeValueAsString(new EmbedRequest(new ArrayList<>(texts)));
-        java.net.URL url = new java.net.URL(ragBaseUrl + "/api/embed");
-        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-        conn.setDoOutput(true);
-        conn.setConnectTimeout(5000);
-        conn.setReadTimeout(60000);
-        byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        conn.getOutputStream().write(bytes);
-        conn.getOutputStream().flush();
-
-        if (conn.getResponseCode() != 200) {
-            throw new RuntimeException("Embedding API returned " + conn.getResponseCode());
-        }
-        JsonNode node = MAPPER.readTree(conn.getInputStream());
-        List<double[]> result = new ArrayList<>(texts.size());
-        for (JsonNode vec : node.get("embeddings")) {
-            double[] arr = new double[vec.size()];
-            for (int i = 0; i < vec.size(); i++) arr[i] = vec.get(i).asDouble();
-            result.add(arr);
-        }
-        log.debug("Fetched {} embeddings, dim={}", result.size(),
-                result.isEmpty() ? 0 : result.get(0).length);
-        return result;
+        return com.stellar.elasticsearch.client.RagEmbeddingClient
+                .embedBatch(ragBaseUrl, texts, 5000, 60000);
     }
 
     /** 单条向量化（商品同步时），维度不符或失败时返回 null。 */
@@ -239,12 +212,5 @@ public class SpuEsSyncService {
                 .createTime(spu.getCreateTime() != null ? spu.getCreateTime().toString() : null)
                 .updateTime(spu.getUpdateTime() != null ? spu.getUpdateTime().toString() : null)
                 .build();
-    }
-
-    /** JSON 请求体（内部类）。 */
-    @SuppressWarnings("unused")
-    private static class EmbedRequest {
-        public List<String> texts;
-        EmbedRequest(List<String> texts) { this.texts = texts; }
     }
 }

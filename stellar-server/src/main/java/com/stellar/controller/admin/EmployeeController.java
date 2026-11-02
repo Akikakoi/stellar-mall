@@ -63,7 +63,7 @@ public class EmployeeController {
                                @RequestHeader(value = "Authorization", required = false) String authHeader,
                                @RequestBody(required = false) LogoutRequest req) {
         // E4: access token 写黑名单（从 token 或 Authorization header 提取）
-        String accessToken = extractToken(tokenHeader, authHeader);
+        String accessToken = com.stellar.utils.TokenUtils.extractToken(tokenHeader, authHeader);
         if (accessToken != null) {
             tokenBlacklistService.blacklist(accessToken);
         }
@@ -73,19 +73,6 @@ public class EmployeeController {
         }
         employeeService.logout();
         return Result.success();
-    }
-
-    /**
-     * 从多种 header 形式中提取 JWT。
-     */
-    private String extractToken(String tokenHeader, String authHeader) {
-        if (tokenHeader != null && !tokenHeader.isEmpty()) {
-            return tokenHeader;
-        }
-        if (authHeader != null && authHeader.regionMatches(true, 0, "Bearer ", 0, 7)) {
-            return authHeader.substring(7);
-        }
-        return null;
     }
 
     @PostMapping("/refresh")

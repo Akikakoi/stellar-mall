@@ -23,8 +23,9 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, Tool
 from langchain_core.tools import tool
 
 from app.core.logger import logger
+from app.core.utils import pseudo_stream_chunks
 from app.rag.llm import get_langchain_chat
-from app.agent.react_safety import safe_invoke, IdempotencyGuard
+from app.agent.react_safety import safe_invoke, IdempotencyGuard, READ_ONLY_TOOLS, REVERSIBLE_WRITE_TOOLS
 from app.agent.tools import (
     kb_search_tool,
     query_order_tool,
@@ -57,19 +58,8 @@ SYSTEM_PROMPT = """你是一位电商平台智能客服，精通商品咨询、�
 - 能直接回答时不要再调用工具。
 """
 
-# 供外部查看 P1 暴露了哪些工具
-REACT_SAFE_TOOLS: List[str] = [
-    "kb_search",
-    "query_order",
-    "query_cart",
-    "query_favorite",
-    "query_wallet",
-    "query_reviews",
-    "product_search",
-    "resolve_sku",
-    "update_cart_item",
-    "add_to_cart",
-]
+# 供外部查看 P1 暴露了哪些工具（与 react_safety 的工具分类保持单一来源）
+REACT_SAFE_TOOLS: List[str] = sorted(READ_ONLY_TOOLS | REVERSIBLE_WRITE_TOOLS)
 
 # 从工具返回结果中提取的"可信标识"字段，用于写操作的参数来源白名单
 _ID_KEYS = ("id", "spu_id", "sku_id", "cart_item_id", "order_id", "order_no")
@@ -263,19 +253,6 @@ def _build_messages(conversation_history: Optional[list], query: str) -> list:
     return messages
 
 
-def _pseudo_stream_chunks(text: str, chunk_size: int = 24):
-    """伪流式分块：按标点/空白优先、固定长度兜底切成小块逐块 yield，降低纯表现层延迟。"""
-    punct = "。！？，、；,.!?;:：\n\t "
-    buf = ""
-    for ch in text:
-        buf += ch
-        if ch in punct or len(buf) >= chunk_size:
-            yield buf
-            buf = ""
-    if buf:
-        yield buf
-
-
 def run_react_agent(
     query: str,
     user_id: Optional[int] = None,
@@ -410,7 +387,7 @@ async def astream_react(
             answer = reasoning or str(ai.content)
             if sources:
                 yield {"type": "sources", "data": sources}
-            for chunk in _pseudo_stream_chunks(answer):
+            for chunk in pseudo_stream_chunks(answer):
                 yield {"type": "token", "content": chunk}
                 await asyncio.sleep(0.005)
             yield {"type": "done", "tokens": len(answer), "tool_trace": tool_trace}
@@ -452,7 +429,7 @@ async def astream_react(
     # 达到 max_steps 仍未产出答案兜底
     logger.warning("[React] 流式 ReAct 达到最大步数，未收敛")
     fallback = "抱歉，我尝试了几步仍没能完全回答您的问题，您能补充一下吗？"
-    for chunk in _pseudo_stream_chunks(fallback):
+    for chunk in pseudo_stream_chunks(fallback):
         yield {"type": "token", "content": chunk}
         await asyncio.sleep(0.005)
     yield {"type": "done", "tokens": len(fallback), "tool_trace": tool_trace}

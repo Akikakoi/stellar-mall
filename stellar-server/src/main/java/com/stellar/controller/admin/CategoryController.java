@@ -9,12 +9,12 @@ import com.stellar.entity.Category;
 import com.stellar.result.PageResult;
 import com.stellar.result.Result;
 import com.stellar.service.CategoryService;
+import com.stellar.utils.CategoryVoUtils;
 import com.stellar.vo.CategoryDeletableVO;
 import com.stellar.vo.CategoryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -36,24 +36,6 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private static CategoryVO toVo(Category c) {
-        if (c == null) return null;
-        CategoryVO vo = new CategoryVO();
-        BeanUtils.copyProperties(c, vo);
-        return vo;
-    }
-
-    private static CategoryVO toVoWithChildren(Category c) {
-        if (c == null) return null;
-        CategoryVO vo = toVo(c);
-        if (c.getChildren() != null) {
-            vo.setChildren(c.getChildren().stream()
-                    .map(CategoryController::toVoWithChildren)
-                    .collect(Collectors.toList()));
-        }
-        return vo;
-    }
-
     @Idempotent(keyPrefix = "admin-category-save", windowSeconds = 300)
 @RequireRole({1, 2})
     @PostMapping
@@ -69,7 +51,7 @@ public class CategoryController {
     @GetMapping("/{id}")
     @ApiOperation("按 id 查询分类")
     public Result<CategoryVO> getById(@PathVariable Long id) {
-        return Result.success(toVo(categoryService.getById(id)));
+        return Result.success(CategoryVoUtils.toVo(categoryService.getById(id)));
     }
 
     @Idempotent(keyPrefix = "admin-category-update", windowSeconds = 300)
@@ -111,7 +93,7 @@ public class CategoryController {
         PageResult pr = categoryService.pageQuery(dto);
         List<Category> records = (List<Category>) pr.getRecords();
         List<CategoryVO> vos = records == null ? new ArrayList<>() :
-                records.stream().map(CategoryController::toVo).collect(Collectors.toList());
+                records.stream().map(CategoryVoUtils::toVo).collect(Collectors.toList());
         pr.setRecords(vos);
         return Result.success(pr);
     }
@@ -123,7 +105,7 @@ public class CategoryController {
             @RequestParam(required = false, defaultValue = "false") boolean onlyEnabled) {
         List<Category> tree = categoryService.tree(onlyEnabled);
         return Result.success(tree.stream()
-                .map(CategoryController::toVoWithChildren)
+                .map(CategoryVoUtils::toVoWithChildren)
                 .collect(Collectors.toList()));
     }
 
@@ -133,7 +115,7 @@ public class CategoryController {
     public Result<List<CategoryVO>> list() {
         List<Category> tree = categoryService.tree(false);
         return Result.success(tree.stream()
-                .map(CategoryController::toVoWithChildren)
+                .map(CategoryVoUtils::toVoWithChildren)
                 .collect(Collectors.toList()));
     }
 }

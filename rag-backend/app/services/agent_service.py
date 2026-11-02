@@ -7,22 +7,8 @@ from typing import AsyncGenerator, Optional
 from sqlalchemy.orm import Session
 
 from app.core.logger import logger
+from app.core.utils import pseudo_stream_chunks
 from app.models import User
-
-
-def _pseudo_stream_chunks(text: str, chunk_size: int = 24, interval: float = 0.005):
-    """伪流式分块：按标点/空白优先、固定长度兜底切成小块逐块 yield。
-    相较逐字 sleep(0.01)，更新次数更少、间隔更短，显著降低纯表现层延迟。
-    """
-    punct = "。！？，、；,.!?;:：\n\t "
-    buf = ""
-    for ch in text:
-        buf += ch
-        if ch in punct or len(buf) >= chunk_size:
-            yield buf
-            buf = ""
-    if buf:
-        yield buf
 
 
 class AgentChatService:
@@ -96,7 +82,7 @@ class AgentChatService:
 
             answer = result.get("answer", "")
             if answer:
-                for chunk in _pseudo_stream_chunks(answer):
+                for chunk in pseudo_stream_chunks(answer):
                     yield {"type": "token", "content": chunk}
                     await asyncio.sleep(0.005)
 

@@ -30,7 +30,7 @@
         </el-table-column>
         <el-table-column label="售后状态" width="130">
           <template #default="{ row }">
-            <el-tag :type="statusTag(row.status)" size="small">{{ row.statusText }}</el-tag>
+            <el-tag :type="afterSaleStatusTag(row.status)" size="small">{{ row.statusText }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="申请时间" width="170" />
@@ -92,7 +92,7 @@
           <el-tag size="small">{{ detailRow.typeText }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="售后状态">
-          <el-tag :type="statusTag(detailRow.status)" size="small">{{ detailRow.statusText }}</el-tag>
+          <el-tag :type="afterSaleStatusTag(detailRow.status)" size="small">{{ detailRow.statusText }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="退款金额">
           <span style="color: #E33; font-weight: 600;">¥{{ Number(detailRow.amount || 0).toFixed(2) }}</span>
@@ -128,7 +128,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { pageAfterSale, auditAfterSale, confirmRefund } from '@/api/admin'
-import { AFTER_SALE_STATUS, AFTER_SALE_STATUS_TEXT, AFTER_SALE_TYPE_TEXT } from '@/constants/order'
+import { AFTER_SALE_STATUS, AFTER_SALE_STATUS_TEXT, AFTER_SALE_TYPE_TEXT, afterSaleStatusTag } from '@/constants/order'
 import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
@@ -154,17 +154,6 @@ const detailRow = ref<any>(null)
 const confirmRefundVisible = ref(false)
 const confirmRefundRow = ref<any>(null)
 const confirmRefundSubmitting = ref(false)
-
-const STATUS_TAG_MAP: Record<string, any> = {
-  [AFTER_SALE_STATUS.APPLIED]: 'warning',
-  [AFTER_SALE_STATUS.AUDITING]: '',
-  [AFTER_SALE_STATUS.RETURNING]: 'primary',
-  [AFTER_SALE_STATUS.REFUNDING]: 'danger',
-  [AFTER_SALE_STATUS.COMPLETED]: 'success',
-  [AFTER_SALE_STATUS.REJECTED]: 'info',
-  [AFTER_SALE_STATUS.CANCELLED]: 'info'
-}
-function statusTag(s: any) { return STATUS_TAG_MAP[s] || 'info' }
 
 async function loadData() {
   loading.value = true

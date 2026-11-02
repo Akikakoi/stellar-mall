@@ -5,7 +5,7 @@
       <div class="status-card">
         <div class="status-left">
           <div class="status-title">
-            <el-tag :type="statusTag(afterSale?.status)" size="large">{{ afterSale?.statusText || '加载中' }}</el-tag>
+            <el-tag :type="afterSaleStatusTag(afterSale?.status)" size="large">{{ afterSale?.statusText || '加载中' }}</el-tag>
           </div>
           <div class="status-sub">{{ statusHint }}</div>
         </div>
@@ -100,7 +100,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getAfterSale, cancelAfterSale, submitReturnTracking } from '@/api/mall'
-import { AFTER_SALE_STATUS } from '@/constants/order'
+import { AFTER_SALE_STATUS, afterSaleStatusTag } from '@/constants/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Box } from '@element-plus/icons-vue'
 
@@ -115,17 +115,6 @@ const afterSale = ref<any>(null)
 const returnVisible = ref(false)
 const returnTracking = ref('')
 const returnSubmitting = ref(false)
-
-const STATUS_TAG_MAP: Record<string, any> = {
-  [AFTER_SALE_STATUS.APPLIED]: 'warning',
-  [AFTER_SALE_STATUS.AUDITING]: 'warning',
-  [AFTER_SALE_STATUS.RETURNING]: 'primary',
-  [AFTER_SALE_STATUS.REFUNDING]: 'danger',
-  [AFTER_SALE_STATUS.COMPLETED]: 'success',
-  [AFTER_SALE_STATUS.REJECTED]: 'info',
-  [AFTER_SALE_STATUS.CANCELLED]: 'info'
-}
-function statusTag(s: any) { return STATUS_TAG_MAP[s] || 'info' }
 
 /**
  * 根据售后状态返回对应的提示文案

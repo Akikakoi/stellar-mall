@@ -12,7 +12,7 @@
       <div v-for="item in list" :key="item.id" class="card" @click="viewDetail(item)">
         <div class="card-head">
           <span class="as-no">售后单号 AS{{ item.id }}</span>
-          <el-tag :type="statusTag(item.status)" size="small">{{ item.statusText }}</el-tag>
+          <el-tag :type="afterSaleStatusTag(item.status)" size="small">{{ item.statusText }}</el-tag>
         </div>
         <div class="card-body">
           <img v-if="item.skuId" :src="item.spuImage || __PH" class="thumb" v-placeholder />
@@ -69,7 +69,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { listAfterSales, cancelAfterSale, submitReturnTracking } from '@/api/mall'
-import { AFTER_SALE_STATUS } from '@/constants/order'
+import { AFTER_SALE_STATUS, afterSaleStatusTag } from '@/constants/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowRight, Box } from '@element-plus/icons-vue'
 
@@ -87,18 +87,6 @@ const returnVisible = ref(false)
 const returnItem = ref<any>(null)
 const returnTracking = ref('')
 const returnSubmitting = ref(false)
-
-const STATUS_TAG_MAP: Record<string, any> = {
-  [AFTER_SALE_STATUS.APPLIED]: 'warning',
-  [AFTER_SALE_STATUS.AUDITING]: 'warning',
-  [AFTER_SALE_STATUS.RETURNING]: 'primary',
-  [AFTER_SALE_STATUS.REFUNDING]: 'danger',
-  [AFTER_SALE_STATUS.COMPLETED]: 'success',
-  [AFTER_SALE_STATUS.REJECTED]: 'info',
-  [AFTER_SALE_STATUS.CANCELLED]: 'info'
-}
-
-function statusTag(s: any) { return STATUS_TAG_MAP[s] || 'info' }
 
 /**
  * 加载售后列表数据，支持分页

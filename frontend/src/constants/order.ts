@@ -36,6 +36,42 @@ export const AFTER_SALE_STATUS_TEXT: Record<number, string> = {
   [AFTER_SALE_STATUS.CANCELLED]: '已取消'
 }
 
+/** 售后状态 → Element Plus Tag 类型（管理端与 C 端共用） */
+export const AFTER_SALE_STATUS_TAG: Record<number, string> = {
+  [AFTER_SALE_STATUS.APPLIED]: 'warning',
+  [AFTER_SALE_STATUS.AUDITING]: 'warning',
+  [AFTER_SALE_STATUS.RETURNING]: 'primary',
+  [AFTER_SALE_STATUS.REFUNDING]: 'danger',
+  [AFTER_SALE_STATUS.COMPLETED]: 'success',
+  [AFTER_SALE_STATUS.REJECTED]: 'info',
+  [AFTER_SALE_STATUS.CANCELLED]: 'info'
+}
+
+/** 订单状态 → [中文文本, Element Plus Tag 类型]（管理端与 C 端共用，避免多份副本漂移） */
+export const ORDER_STATUS_MAP: Record<number, [string, string]> = {
+  [ORDER_STATUS.CANCELLED]: ['已取消', 'info'],
+  [ORDER_STATUS.PENDING]: ['待付款', 'warning'],
+  [ORDER_STATUS.PAID]: ['待发货', 'warning'],
+  [ORDER_STATUS.SHIPPED]: ['待收货', 'primary'],
+  [ORDER_STATUS.REVIEWABLE]: ['待评价', 'success'],
+  [ORDER_STATUS.COMPLETED]: ['已完成', 'success'],
+  [ORDER_STATUS.REFUNDING]: ['退款中', 'warning'],
+  [ORDER_STATUS.REFUNDED]: ['已退款', 'danger'],
+  [ORDER_STATUS.PARTIAL_REFUNDED]: ['部分退款', 'warning']
+}
+
+export function orderStatusText(status: number): string {
+  return ORDER_STATUS_MAP[status]?.[0] || '未知'
+}
+
+export function orderStatusTag(status: number): string {
+  return ORDER_STATUS_MAP[status]?.[1] || 'info'
+}
+
+export function afterSaleStatusTag(status: number): string {
+  return AFTER_SALE_STATUS_TAG[status] || 'info'
+}
+
 /** 售后类型枚举 */
 export const AFTER_SALE_TYPE = {
   REFUND_ONLY: 1,    // 仅退款

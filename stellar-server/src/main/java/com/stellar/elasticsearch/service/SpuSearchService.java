@@ -1,7 +1,5 @@
 package com.stellar.elasticsearch.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.stellar.dto.SpuPageQueryDTO;
@@ -54,8 +52,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class SpuSearchService {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final ScheduledExecutorService RECOVERY_EXECUTOR =
             Executors.newSingleThreadScheduledExecutor(r -> {
@@ -306,22 +302,9 @@ public class SpuSearchService {
             return cached;
         }
         try {
-            String body = MAPPER.writeValueAsString(Map.of("texts", List.of(text)));
-            java.net.URL url = new java.net.URL(ragBaseUrl + "/api/embed");
-            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            conn.setDoOutput(true);
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(10000);
-            byte[] bytes = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-            conn.getOutputStream().write(bytes);
-            conn.getOutputStream().flush();
-
-            if (conn.getResponseCode() != 200) return null;
-            JsonNode vec = MAPPER.readTree(conn.getInputStream()).get("embeddings").get(0);
-            double[] arr = new double[vec.size()];
-            for (int i = 0; i < vec.size(); i++) arr[i] = vec.get(i).asDouble();
+            double[] arr = com.stellar.elasticsearch.client.RagEmbeddingClient
+                    .embedOne(ragBaseUrl, text, 5000, 10000);
+            if (arr == null) return null;
             if (arr.length != vectorDim) {
                 log.warn("Embedding dim mismatch: got {}, expect {} (text='{}'). Semantic search disabled, "
                         + "check stellar.elasticsearch.vector-dim vs rag-backend embedding model.",

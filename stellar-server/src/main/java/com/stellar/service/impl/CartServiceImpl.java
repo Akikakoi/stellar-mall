@@ -13,6 +13,7 @@ import com.stellar.mapper.SkuMapper;
 import com.stellar.mapper.SpuMapper;
 import com.stellar.mapper.SpuServiceMapper;
 import com.stellar.service.CartService;
+import com.stellar.service.ServiceFeeResolver;
 import com.stellar.vo.CartVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +44,6 @@ public class CartServiceImpl implements CartService {
     private final MallOrderItemMapper mallOrderItemMapper;
     private final SpuServiceMapper spuServiceMapper;
 
-    /** serviceInfo JSON 快照的序列化/反序列化（结构简单，线程安全复用） */
-    private static final com.fasterxml.jackson.databind.ObjectMapper SERVICE_INFO_MAPPER =
-            new com.fasterxml.jackson.databind.ObjectMapper();
-
     /**
      * 添加商品到购物车。若已存在相同 SKU 则累加数量，否则新增记录。
      *
@@ -73,7 +70,8 @@ public class CartServiceImpl implements CartService {
 
         // 保障服务费权威重算：以服务表价格为准（不信任前端 extraAmount），快照 JSON 用库内数据重建。
         // cart.extraAmount 为单价口径（未乘数量）；服务不存在/停用/未挂在该商品下都会被拒绝
-        ServiceResolved svc = resolveServices(sku.getSpuId(), dto.getServiceInfo());
+        ServiceFeeResolver.Resolved svc = ServiceFeeResolver.resolve(
+                spuServiceMapper, sku.getSpuId(), dto.getServiceInfo());
         BigDecimal extraAmount = svc.unitExtra();
 
         Cart existing = cartMapper.getByUserIdAndSkuId(uid, dto.getSkuId());
@@ -102,63 +100,6 @@ public class CartServiceImpl implements CartService {
                 c.setServiceInfo(svc.snapshotJson());
             }
             cartMapper.insert(c);
-        }
-    }
-
-    /** 保障服务重算结果（与 OrderServiceImpl 同口径）：unitExtra=单件合计；snapshotJson=库内数据重建的快照 */
-    private record ServiceResolved(BigDecimal unitExtra, String snapshotJson) {
-        static final ServiceResolved EMPTY = new ServiceResolved(BigDecimal.ZERO, null);
-    }
-
-    /**
-     * 保障服务费权威重算：解析 serviceInfo JSON 的服务 code，校验"存在、启用、已挂在该 SPU 下"，
-     * 单价合计取服务表权威值，快照用库内数据重建。JSON 为空/空数组返回 EMPTY。
-     */
-    private ServiceResolved resolveServices(Long spuId, String serviceInfoJson) {
-        if (serviceInfoJson == null || serviceInfoJson.isBlank()) {
-            return ServiceResolved.EMPTY;
-        }
-        List<Map<String, Object>> declared;
-        try {
-            declared = SERVICE_INFO_MAPPER.readValue(serviceInfoJson,
-                    new TypeReference<List<Map<String, Object>>>() {});
-        } catch (Exception e) {
-            log.warn("[CartService] serviceInfo 解析失败: {}", serviceInfoJson, e);
-            throw new BaseException("保障服务信息有误，请重新选择");
-        }
-        if (declared == null || declared.isEmpty()) {
-            return ServiceResolved.EMPTY;
-        }
-
-        List<com.stellar.entity.ServiceItem> allowed = spuId == null
-                ? List.of() : spuServiceMapper.listEnabledBySpuId(spuId);
-        Map<String, com.stellar.entity.ServiceItem> byCode = allowed.stream()
-                .collect(Collectors.toMap(com.stellar.entity.ServiceItem::getCode, s -> s, (a, b) -> a));
-
-        java.math.BigDecimal unit = java.math.BigDecimal.ZERO;
-        List<Map<String, Object>> snapshot = new ArrayList<>();
-        for (Map<String, Object> d : declared) {
-            Object idVal = d.get("id");
-            String code = idVal == null ? "" : String.valueOf(idVal);
-            com.stellar.entity.ServiceItem svc = byCode.get(code);
-            if (svc == null) {
-                String title = d.get("title") == null ? code : String.valueOf(d.get("title"));
-                throw new BaseException("保障服务「" + title + "」不存在、已下架或该商品未配置，请重新选择");
-            }
-            if (svc.getPrice() != null) unit = unit.add(svc.getPrice());
-            Map<String, Object> snap = new LinkedHashMap<>();
-            snap.put("id", svc.getCode());
-            snap.put("title", svc.getTitle());
-            snap.put("price", svc.getPrice());
-            snapshot.add(snap);
-        }
-        try {
-            String json = snapshot.isEmpty() ? null
-                    : SERVICE_INFO_MAPPER.writeValueAsString(snapshot);
-            return new ServiceResolved(unit, json);
-        } catch (Exception e) {
-            log.error("[CartService] 保障服务快照序列化失败", e);
-            throw new BaseException("保障服务信息处理失败，请重试");
         }
     }
 
