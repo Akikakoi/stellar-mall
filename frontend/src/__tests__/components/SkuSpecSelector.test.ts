@@ -136,7 +136,6 @@ describe('SkuSpecSelector', () => {
 
     it('选择完整规格后显示"已选"摘要', async () => {
       const wrapper = mountComponent()
-      const options = wrapper.findAll('.spec-option')
       // 默认选中每个维度第一个选项,应该已有匹配 SKU
       await nextTick()
       const summary = wrapper.find('.selected-summary')

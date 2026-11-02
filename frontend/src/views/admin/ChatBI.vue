@@ -87,7 +87,6 @@
 import { ref, nextTick, onUnmounted } from 'vue'
 import { chatBiQuery } from '@/api/admin'
 import { Loading } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts/core'
 import { LineChart, BarChart, PieChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'

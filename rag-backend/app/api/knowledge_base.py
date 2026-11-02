@@ -171,9 +171,7 @@ async def download_doc(
     current_user: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ):
-    from app.services.kb_service import KbService
-    doc_info = KbService(db).get_doc(doc_id)
-    # 注意：doc_info 来自 KbDocInfo，需要原始 file_path 字段 —— 我们直接再查一次 DB
+    # 需要原始 file_path 字段，直接查一次 DB
     from app.models import KbDocument
     doc = db.query(KbDocument).filter(KbDocument.id == doc_id).first()
     if not doc:

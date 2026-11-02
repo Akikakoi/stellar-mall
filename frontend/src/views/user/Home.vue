@@ -298,7 +298,6 @@ const contentRef = ref<any>(null)
 const loading = ref(false)
 const loadingMore = ref(false)
 const filterMode = ref(false)
-const isFiltering = computed(() => false)
 /** 筛选模式无限滚动回调(当前 filterMode 恒为 false,保留占位实现供模板引用) */
 const loadMore = () => {}
 
@@ -862,8 +861,6 @@ function flattenCats(tree: any) {
 // ========== 筛选模式 + Banner ==========
 const spus = ref<any[]>([])
 const total = ref(0)
-const page = ref(1)
-const pageSize = ref(20)
 const hasMore = computed(() => spus.value.length < total.value)
 
 // ========== 通用方法 ==========

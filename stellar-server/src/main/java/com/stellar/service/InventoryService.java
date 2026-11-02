@@ -1,6 +1,5 @@
 package com.stellar.service;
 
-import com.stellar.entity.Sku;
 import com.stellar.result.PageResult;
 
 import java.time.LocalDateTime;

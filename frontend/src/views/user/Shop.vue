@@ -202,7 +202,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Loading, Search, Close } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
@@ -364,21 +364,6 @@ function doShopSearch() {
 }
 
 /**
- * 应用自定义价格区间筛选，校验最低价不能高于最高价
- */
-function applyPriceFilter() {
-  // 校验：最低价不能大于最高价
-  const from = Number(customPriceFrom.value)
-  const to = Number(customPriceTo.value)
-  if (customPriceFrom.value !== '' && customPriceTo.value !== '' && from > to) {
-    ElMessage.warning('最低价不能高于最高价')
-    return
-  }
-  page.value = 1; spus.value = []
-  loadSpu()
-}
-
-/**
  * 切换排序方式，再次点击同一排序则恢复默认排序
  * @param {string} sortKey - 排序键值
  */
@@ -406,25 +391,6 @@ function toggleCategoryFilter(catId: any) {
   }
   page.value = 1; spus.value = []
   loadSpu()
-}
-
-/**
- * 清除所有筛选条件（分类、价格、排序）并重新加载
- */
-function clearAllFilters() {
-  activeCategoryId.value = null
-  customPriceFrom.value = ''
-  customPriceTo.value = ''
-  activeSort.value = 'default'
-  initialAggCategories.value = []
-  aggCategories.value = []
-  page.value = 1; spus.value = []
-  router.replace({ query: { ...route.query, categoryId: undefined } })
-  loadSpu()
-}
-
-function categoryNameById(id: any) {
-  return categoryMap[id] || null
 }
 
 /**

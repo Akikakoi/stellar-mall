@@ -91,7 +91,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { pageEmployee, saveEmployee, updateEmployee, setEmployeeStatus } from '@/api/admin'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -166,7 +166,7 @@ async function toggleStatus(row: any, val: any) {
   } catch (e: any) { loadPage() }
 }
 
-async function handleDelete(row: any) {
+async function handleDelete(_row: any) {
   ElMessage.info('演示环境：删除接口暂未开放（员工数据建议禁用而非删除）')
 }
 

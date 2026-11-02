@@ -1,7 +1,6 @@
 package com.stellar.service;
 
 import com.stellar.entity.EmailCode;
-import com.stellar.entity.NotificationLog;
 import com.stellar.entity.MallOrder;
 import com.stellar.entity.UserCoupon;
 

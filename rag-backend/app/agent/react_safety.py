@@ -173,7 +173,7 @@ def check_write_action(
     if level == "reversible_write":
         decision.update({
             "allowed": True,
-            "reason": f"可逆写操作，参数来源可信，放行（仍建议幂等）",
+            "reason": "可逆写操作，参数来源可信，放行（仍建议幂等）",
             "idempotency_key": _make_idempotency_key(tool_name, params),
         })
         return decision

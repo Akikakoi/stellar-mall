@@ -1,6 +1,5 @@
 package com.stellar.service;
 
-import com.stellar.entity.UserMessage;
 import com.stellar.result.PageResult;
 
 public interface UserMessageService {

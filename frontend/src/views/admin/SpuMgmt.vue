@@ -476,7 +476,7 @@ import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batc
 import { adminRequest } from '@/api/request'
 import { apiKbUploadWithChunks, apiKbPreview, apiKbGet } from '@/api/rag'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, Search, Document, Box } from '@element-plus/icons-vue'
+import { Upload, Search, Document } from '@element-plus/icons-vue'
 import { storage } from '@/utils/storage'
 
 const SORT_STORAGE_KEY = 'stellar:admin:spu-mgmt:sort:v1'
@@ -554,7 +554,6 @@ const formRules: Record<string, any> = {
 }
 
 // KB upload
-const kbUploadRef = ref<any>(null)
 const kbFile = ref<any>(null)
 const kbFileList = ref<any[]>([])
 const kbChunkSize = ref(512)

@@ -9,7 +9,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 同义词引擎 — 从 synonyms.txt 加载同义词组，在查询时扩展搜索词。

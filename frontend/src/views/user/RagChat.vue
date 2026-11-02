@@ -229,9 +229,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useChatStore } from '@/stores/chat'
 import ChatMessage from '@/components/ChatMessage.vue'
-import { getAccessToken, ragRequest } from '@/api/request'
+import { getAccessToken } from '@/api/request'
 import { apiSuggestions } from '@/api/rag'
-import { storage } from '@/utils/storage'
 
 const userStore = useUserStore()
 const chatStore = useChatStore()
@@ -441,7 +440,7 @@ onMounted(async () => {
 
 // 路由离开前标记 leaving，不再中止 SSE 连接
 // SSE 会在后台继续流式传输，确保消息不丢失
-onBeforeRouteLeave((to: any, from: any, next: any) => {
+onBeforeRouteLeave((_to: any, _from: any, next: any) => {
   leaving = true
   document.body.style.overflow = ''
   next()
@@ -575,10 +574,9 @@ async function send(text: any) {
     ElMessage.error('创建会话失败，请重试')
     return
   }
-  const currentActiveId = chatStore.activeId
   const query = input.value.trim()
   input.value = ''
-  const userMsg = chatStore.pushUserMessage(query)
+  chatStore.pushUserMessage(query)
   const asstId = chatStore.pushAssistantPlaceholder().id
   chatStore.loading = true
   scrollToBottom(true) // 用户主动发消息，强制滚底看回显

@@ -230,7 +230,6 @@ const originalDisplayPrice = computed(() => {
 })
 
 // --- 轮播图 ---
-const carouselRef = ref<any>(null)
 const galleryImages = computed(() => {
   if (!spu.value) return [__PH]
   const images: any[] = []

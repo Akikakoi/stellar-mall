@@ -1,6 +1,5 @@
 package com.stellar.controller.admin;
 
-import com.stellar.result.Result;
 import com.stellar.annotation.RequireRole;
 import com.stellar.service.DataExportService;
 import io.swagger.annotations.Api;

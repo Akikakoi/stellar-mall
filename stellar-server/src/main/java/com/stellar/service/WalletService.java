@@ -2,7 +2,6 @@ package com.stellar.service;
 
 import com.stellar.dto.WalletRechargeDTO;
 import com.stellar.result.PageResult;
-import com.stellar.vo.WalletTransactionVO;
 import com.stellar.vo.WalletVO;
 
 /**

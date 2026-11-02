@@ -1,14 +1,12 @@
 """知识库服务（最小实现：DB层CRUD + 空索引器）。后续由 RAG 模块补齐向量化。"""
 from __future__ import annotations
-import os
-import shutil
 import tempfile
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional
 
-from fastapi import UploadFile, Request
+from fastapi import Request
 from sqlalchemy.orm import Session
 
 from app.config import settings

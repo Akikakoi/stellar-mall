@@ -6,9 +6,8 @@ from typing import AsyncGenerator, Optional
 
 from sqlalchemy.orm import Session
 
-from app.config import settings
 from app.core.logger import logger
-from app.models import User, MessageRole
+from app.models import User
 
 
 def _pseudo_stream_chunks(text: str, chunk_size: int = 24, interval: float = 0.005):

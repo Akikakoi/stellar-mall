@@ -1,6 +1,5 @@
 package com.stellar.service.impl;
 
-import com.stellar.constant.JwtClaimsConstant;
 import com.stellar.properties.JwtProperties;
 import com.stellar.service.TokenBlacklistService;
 import com.stellar.utils.JwtUtil;

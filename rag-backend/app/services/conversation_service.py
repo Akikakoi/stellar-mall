@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import BizError
 from app.models import Conversation, Message, User, MessageRole
 from app.schemas import (
-    ConversationCreateReq, ConversationInfo, ConversationDetail, MessageInfo
+    ConversationCreateReq, ConversationInfo, ConversationDetail
 )
 
 

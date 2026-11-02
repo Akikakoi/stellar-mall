@@ -13,7 +13,6 @@ from app.models import User
 from app.schemas import (
     UserRegisterReq,
     UserLoginReq,
-    UserLoginResp,
     ChangePasswordReq,
     RefreshTokenReq,
     UserInfo,

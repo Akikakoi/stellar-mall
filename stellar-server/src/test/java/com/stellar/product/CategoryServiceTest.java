@@ -3,7 +3,6 @@ package com.stellar.product;
 import com.stellar.constant.MessageConstant;
 import com.stellar.dto.CategoryPageQueryDTO;
 import com.stellar.dto.CategorySaveDTO;
-import com.stellar.dto.CategoryUpdateDTO;
 import com.stellar.dto.SpuSaveDTO;
 import com.stellar.entity.Category;
 import com.stellar.exception.BaseException;

@@ -5,7 +5,6 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 sys.path.insert(0, r"d:\Desktop\stellar-mall\rag-backend")
 
 import requests
-from app.config import settings
 from app.core.security import create_access_token
 from app.rag.es_client import get_es, KB_ES_INDEX
 

@@ -107,13 +107,10 @@ vi.mock('axios', () => {
 import { ElMessage } from 'element-plus'
 
 // 动态导入触发 createInstance
-let userReq: any, adminReq: any, ragReq: any, getAccessToken: any
+let getAccessToken: any
 
 beforeAll(async () => {
   const mod = await import('@/api/request')
-  userReq = mod.userRequest
-  adminReq = mod.adminRequest
-  ragReq = mod.ragRequest
   getAccessToken = mod.getAccessToken
 })
 
@@ -261,7 +258,7 @@ describe('response interceptor - user/admin code-based', () => {
 
     return fn({
       data: { code: 401, msg: 'admin token expired' }
-    }).catch((err: any) => {
+    }).catch(() => {
       expect(mockAdminLogout).toHaveBeenCalled()
       expect(mockPush).toHaveBeenCalledWith('/admin/login')
     })

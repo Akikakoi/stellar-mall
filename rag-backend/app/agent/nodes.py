@@ -5,7 +5,7 @@ import json
 import re
 from typing import Dict, Any, List
 
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
 from app.config import settings
 from app.core.logger import logger
@@ -485,7 +485,6 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
                     else:
                         # 自动解析失败（规格不存在等），直接生成友好回答，不追问 SKU 编号
                         fail_msg = state.get("resolve_sku_message", "")
-                        failed_spec = state.get("resolve_sku_failed_spec", "")
                         if fail_msg:
                             # 已有详细失败信息（来自 resolve_sku_tool），直接返回，
                             # current_tool 设为 None 避免 execute_tool 走不完整的加购流程
@@ -752,8 +751,6 @@ def _auto_resolve_sku(state: AgentState) -> str | None:
         sku_id 字符串 或 None（解析失败）
     失败时，将失败原因写入 state["resolve_sku_message"]，供后续节点使用。
     """
-    import re
-
     messages = state.get("messages", [])
     mall_token = state.get("mall_token")
 
@@ -1350,7 +1347,7 @@ def _handle_small_talk(state: AgentState) -> Dict[str, Any]:
         ])
         answer = resp.content if hasattr(resp, "content") else str(resp)
         return {"final_answer": str(answer)}
-    except Exception as e:
+    except Exception:
         return {"final_answer": "您好！请问有什么可以帮您的吗？"}
 
 
@@ -1555,7 +1552,7 @@ def _build_tool_context(tool_result: Any, intent: str) -> str:
         elif intent == "review_query":
             data = tool_result.get("data")
             if not data:
-                return f"（暂无评价）"
+                return "（暂无评价）"
             lines = [tool_result.get("message", ""), ""]
             for i, r in enumerate(data, 1):
                 stars = "★" * int(r.get("rating", 0)) + "☆" * (5 - int(r.get("rating", 0)))

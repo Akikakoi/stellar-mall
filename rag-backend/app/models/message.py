@@ -1,6 +1,6 @@
 """消息模型：会话下的消息，保留引用来源。"""
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, Enum as SAEnum, JSON
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, Text, Enum as SAEnum, JSON
 from sqlalchemy.orm import relationship
 import enum
 

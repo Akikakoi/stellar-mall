@@ -7,7 +7,6 @@ import com.stellar.exception.StockInsufficientException;
 import com.stellar.mapper.SkuMapper;
 import com.stellar.mapper.StockLogMapper;
 import com.stellar.service.impl.SkuStockServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

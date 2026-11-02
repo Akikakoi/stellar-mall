@@ -2,7 +2,6 @@ package com.stellar.service.impl;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.IdUtil;
 import com.stellar.service.CaptchaService;
 import lombok.RequiredArgsConstructor;

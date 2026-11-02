@@ -60,7 +60,6 @@ async def cache_clear(
     L1 Redis 缓存自然过期（TTL），不清除。
     """
     from app.rag.llm_cache import get_llm_cache
-    import asyncio
     cache = get_llm_cache()
     count = await cache.invalidate_all()
     return ok({"cleared": count, "message": f"已清空 {count} 条语义缓存"})

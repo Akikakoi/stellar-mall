@@ -2,7 +2,7 @@
   <div class="sku-spec-selector">
     <!-- 规格维度 -->
     <div
-      v-for="(group, groupIndex) in specGroups"
+      v-for="group in specGroups"
       :key="group.key"
       class="spec-row"
     >
@@ -116,8 +116,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'update:selectedServices', 'sku-change'])
-
-const __PH = window.__PH
 
 const imageMode = ref(true)
 const selectedValues = ref<Record<string, any>>({})

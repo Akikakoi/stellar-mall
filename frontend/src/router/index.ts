@@ -291,7 +291,7 @@ const router = createRouter({
  * - requiresUserAuth:未登录用户重定向到 /login
  * - requiresAdminAuth:未登录管理员重定向到 /admin/login
  */
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const title = to.meta?.title
   if (title) {
     document.title = `${title} - 星耀商城`

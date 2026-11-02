@@ -4,7 +4,6 @@ import com.stellar.dto.CategorySaveDTO;
 import com.stellar.dto.SpuSaveDTO;
 import com.stellar.entity.Category;
 import com.stellar.entity.RagSyncOutbox;
-import com.stellar.entity.Sku;
 import com.stellar.ragsync.client.RagSyncClient;
 import com.stellar.ragsync.service.RagSyncService;
 import com.stellar.ragsync.mapper.RagSyncOutboxMapper;

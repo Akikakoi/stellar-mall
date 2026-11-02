@@ -2,7 +2,6 @@ import datetime
 from langchain_core.tools import tool
 from typing import Optional
 from sqlalchemy import Column, Integer, String, DateTime, Text
-from sqlalchemy.orm import Session
 
 from app.core.database import Base, SessionLocal
 from app.core.logger import logger

@@ -24,7 +24,6 @@ def _name_matches(search_name: str, found_name: str) -> bool:
     - 字符 Jaccard 相似度 ≥ 0.85 → True
     - 其他 → False
     """
-    import re
     s = search_name.strip()
     f = found_name.strip()
     if not s or not f:

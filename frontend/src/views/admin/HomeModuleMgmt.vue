@@ -535,14 +535,14 @@ function onDragStart(e: any, idx: any) {
   dragIdx.value = idx
   e.dataTransfer.effectAllowed = 'move'
 }
-function onDragOver(e: any, idx: any) {
+function onDragOver(_e: any, idx: any) {
   dragOverIdx.value = idx
 }
 function onDragEnd() {
   dragIdx.value = -1
   dragOverIdx.value = -1
 }
-async function onDrop(e: any, toIdx: any) {
+async function onDrop(_e: any, toIdx: any) {
   dragOverIdx.value = -1
   const fromIdx = dragIdx.value
   dragIdx.value = -1

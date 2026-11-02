@@ -129,7 +129,7 @@
 import { ref, onMounted } from 'vue'
 import { pageAfterSale, auditAfterSale, confirmRefund } from '@/api/admin'
 import { AFTER_SALE_STATUS, AFTER_SALE_STATUS_TEXT, AFTER_SALE_TYPE_TEXT } from '@/constants/order'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 const loading = ref(false)
 const tableData = ref<any[]>([])

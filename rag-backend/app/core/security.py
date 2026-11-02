@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Tuple, Any
+from typing import Optional, Tuple
 from passlib.context import CryptContext
 import jwt
 

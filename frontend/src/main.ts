@@ -47,7 +47,7 @@ window.__PH = SVG_NO_IMAGE
 const app = createApp(App)
 // 全局指令：图片加载失败替换为占位图（替代散落各页面的内联 onerror 写法）
 app.directive('placeholder', placeholder)
-app.config.errorHandler = (err: unknown, instance: unknown, info: string) => {
+app.config.errorHandler = (err: unknown, _instance: unknown, info: string) => {
   console.error('[Vue error]', info, err)
 }
 const pinia = createPinia()

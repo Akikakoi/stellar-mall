@@ -1,7 +1,6 @@
 package com.stellar.dashboard;
 
 import com.stellar.controller.admin.AdminDashboardController;
-import com.stellar.result.Result;
 import com.stellar.service.DailyReportService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

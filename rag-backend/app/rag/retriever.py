@@ -185,7 +185,6 @@ def _get_reranker():
 
 def _rerank_with_cross_encoder(reranker, query: str, docs, top_k: int) -> List[Tuple]:
     """用 BGE CrossEncoder 做 pairwise 精排。"""
-    import numpy as np
     pairs = [[query, d.page_content] for d in docs]
     try:
         raw_scores = reranker.compute_score(

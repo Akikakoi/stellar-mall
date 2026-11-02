@@ -165,7 +165,6 @@ import {
   Present,
   SwitchButton
 } from '@element-plus/icons-vue'
-import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
 import { getUnreadCount, suggestSpu } from '@/api/mall'
 import { useUnreadBadge } from '@/composables/useUnreadBadge'
@@ -281,7 +280,6 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-const cartStore = useCartStore()
 const userStore = useUserStore()
 const { count: unreadCount } = useUnreadBadge()
 const searchKeyword = ref('')

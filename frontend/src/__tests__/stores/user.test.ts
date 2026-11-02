@@ -19,7 +19,7 @@ vi.mock('@/api/request', () => ({
 }))
 
 import { useUserStore } from '@/stores/user'
-import { loginUser, getCurrentUser } from '@/api/mall'
+import { loginUser } from '@/api/mall'
 
 function createStore() {
   setActivePinia(createPinia())

@@ -12,7 +12,6 @@ import org.springframework.data.elasticsearch.annotations.InnerField;
 import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 /**
  * SPU 商品搜索文档（ES 索引映射）。

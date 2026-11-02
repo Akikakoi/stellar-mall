@@ -21,7 +21,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.config import settings
 from app.core.database import Base, engine
 
 SQLITE_PATH = Path(__file__).resolve().parent.parent / "data" / "sqlite" / "app.db"
@@ -56,13 +55,13 @@ def main() -> int:
                 if not force:
                     print(f"[ABORT] 目标表 {t} 已有 {n} 行，防止重复迁移。确认无误后用 --force 清空重迁")
                     return 1
-                conn.exec_driver_sql(f"SET FOREIGN_KEY_CHECKS=0")
+                conn.exec_driver_sql("SET FOREIGN_KEY_CHECKS=0")
                 conn.exec_driver_sql(f"TRUNCATE TABLE `{t}`")
-                conn.exec_driver_sql(f"SET FOREIGN_KEY_CHECKS=1")
+                conn.exec_driver_sql("SET FOREIGN_KEY_CHECKS=1")
                 print(f"[force] 已清空 {t}（{n} 行）")
 
     # 2) 逐表迁移（保 id）
-    from sqlalchemy import table as sa_table, column as sa_col, MetaData, Table, insert
+    from sqlalchemy import MetaData, Table, insert
     meta = MetaData()
     total_ok = 0
     for t in TABLES:

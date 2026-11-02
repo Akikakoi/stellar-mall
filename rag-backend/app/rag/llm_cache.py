@@ -534,7 +534,6 @@ async def _semantic_search(
         ids_list = results.get("ids", [[]])[0]
         metas_list = results.get("metadatas", [[]])[0]
         embeddings = results.get("embeddings", [[]])[0]
-        distances = results.get("distances", [[]])[0]
 
         if not ids_list:
             return None
@@ -756,7 +755,6 @@ async def _semantic_put(
         raw_id = f"{query}{model}{temperature:.2f}{system_prompt_hash}{context_hash or ''}"
         doc_id = f"cache_{_sha256(raw_id)[:16]}_{int(time.time())}"
 
-        ttl = settings.LLM_CACHE_SEMANTIC_TTL_ANSWER if cache_type == "answer" else settings.LLM_CACHE_SEMANTIC_TTL_INTENT
         metadata = {
             "query": query[:500],  # 截断，避免 metadata 过大
             "answer": answer,

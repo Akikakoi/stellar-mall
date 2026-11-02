@@ -1,7 +1,5 @@
 package com.stellar.service.impl;
 
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.stellar.constant.MessageConstant;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.dto.SpuSaveDTO;

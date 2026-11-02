@@ -1,6 +1,5 @@
 package com.stellar.service.impl;
 
-import com.stellar.constant.MessageConstant;
 import com.stellar.context.BaseContext;
 import com.stellar.dto.PointsAdjustDTO;
 import com.stellar.dto.PointsProductSaveDTO;
