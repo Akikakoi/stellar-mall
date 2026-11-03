@@ -23,7 +23,6 @@ from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, Tool
 from langchain_core.tools import tool
 
 from app.core.logger import logger
-from app.core.utils import pseudo_stream_chunks
 from app.rag.llm import get_langchain_chat
 from app.agent.react_safety import safe_invoke, IdempotencyGuard
 from app.agent.tools import (
@@ -354,12 +353,12 @@ async def astream_react(
         {"type": "agent_thought", "content"}    思考过程
         {"type": "tool_call", "tool", "params"} 工具调用
         {"type": "tool_result", "tool", "success", "message"} 工具结果
-        {"type": "token", "content"}            最终回答 token(伪流式，逐字)
+        {"type": "token", "content"}            最终回答（一次返回，非逐字模拟）
         {"type": "sources", "data"}             引用来源
         {"type": "done", "tokens", "tool_trace"} 完成
 
     说明：工具决策轮用同步 invoke 快速拿到 tool_calls，将思考以 agent_thought
-    实时透出；最终答案轮整段按字符拆分 yield，给前端逐字显现的流式体验。
+    实时透出；最终答案由模型完整生成后一次性返回，不伪装成 token 增量流。
     """
     ctx = ReactContext(mall_token=mall_token, user_id=user_id)
     tools = _build_tools(ctx)
@@ -384,9 +383,9 @@ async def astream_react(
             answer = reasoning or str(ai.content)
             if sources:
                 yield {"type": "sources", "data": sources}
-            for chunk in pseudo_stream_chunks(answer):
-                yield {"type": "token", "content": chunk}
-                await asyncio.sleep(0.005)
+            # 最终答案一次返回：此前是按字符切块模拟流式，首字延迟仍等于完整生成时间
+            if answer:
+                yield {"type": "token", "content": answer}
             yield {"type": "done", "tokens": len(answer), "tool_trace": tool_trace}
             return
 
@@ -426,9 +425,7 @@ async def astream_react(
     # 达到 max_steps 仍未产出答案兜底
     logger.warning("[React] 流式 ReAct 达到最大步数，未收敛")
     fallback = "抱歉，我尝试了几步仍没能完全回答您的问题，您能补充一下吗？"
-    for chunk in pseudo_stream_chunks(fallback):
-        yield {"type": "token", "content": chunk}
-        await asyncio.sleep(0.005)
+    yield {"type": "token", "content": fallback}
     yield {"type": "done", "tokens": len(fallback), "tool_trace": tool_trace}
 
 

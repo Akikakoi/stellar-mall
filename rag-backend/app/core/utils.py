@@ -28,16 +28,3 @@ def escape_sql_like(value: str) -> str:
     value = value.replace("%", "\\%")
     value = value.replace("_", "\\_")
     return value
-
-
-def pseudo_stream_chunks(text: str, chunk_size: int = 24):
-    """伪流式分块：按标点/空白优先、固定长度兜底切成小块逐块 yield，降低纯表现层延迟。"""
-    punct = "。！？，、；,.!?;:：\n\t "
-    buf = ""
-    for ch in text:
-        buf += ch
-        if ch in punct or len(buf) >= chunk_size:
-            yield buf
-            buf = ""
-    if buf:
-        yield buf

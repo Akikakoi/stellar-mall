@@ -7,7 +7,6 @@ from typing import AsyncGenerator, Optional
 from sqlalchemy.orm import Session
 
 from app.core.logger import logger
-from app.core.utils import pseudo_stream_chunks
 from app.models import User
 
 
@@ -82,9 +81,8 @@ class AgentChatService:
 
             answer = result.get("answer", "")
             if answer:
-                for chunk in pseudo_stream_chunks(answer):
-                    yield {"type": "token", "content": chunk}
-                    await asyncio.sleep(0.005)
+                # 最终答案一次返回：此前按字符切块伪造增量流式，首字延迟并未改善
+                yield {"type": "token", "content": answer}
 
             missing_params = result.get("missing_params", [])
             if missing_params:
