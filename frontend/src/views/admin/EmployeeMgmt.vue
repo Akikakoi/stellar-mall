@@ -33,7 +33,6 @@
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="openDialog('edit', row)">编辑</el-button>
-            <el-button type="danger" link size="small" v-if="row.id !== 1" @click="handleDelete(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -164,10 +163,6 @@ async function toggleStatus(row: any, val: any) {
     row.status = val ? 1 : 0
     ElMessage.success(val ? '已启用' : '已禁用')
   } catch (e: any) { loadPage() }
-}
-
-async function handleDelete(_row: any) {
-  ElMessage.info('演示环境：删除接口暂未开放（员工数据建议禁用而非删除）')
 }
 
 // 用户导出
