@@ -891,6 +891,8 @@ const currentSpu = ref<any>(null)
 const currentSkus = ref<any[]>([])
 const cartQty = ref(1)          // 数量，由 SkuSpecSelector 通过 v-model 同步
 const addingCart = ref(false)
+// 当前弹窗商品是否配置了保障服务（快捷加购不选服务，成功后提示去详情页）
+const currentSpuHasServices = ref(false)
 const selectedSku = ref<any>(null)   // 由 SkuSpecSelector 的 sku-change 事件填充
 function onSkuChange(sku: any) { selectedSku.value = sku }
 
@@ -904,13 +906,15 @@ async function handleAddToCart(spu: any) {
     const res = await getSpu(spu.id)
     const skuList = res?.skuList || (res as any)?.skuListVo || []
     if (!skuList.length) { ElMessage.warning('该商品暂无规格可选'); return }
+    const hasServices = Array.isArray((res as any)?.services) && (res as any).services.length > 0
     if (skuList.length === 1) {
       track('add_to_cart', { spuId: spu.id, skuId: skuList[0].id, scene: 'home' })
-      await doAddCart(skuList[0].id)
+      await doAddCart(skuList[0].id, 1, hasServices)
       return
     }
     currentSpu.value = res
     currentSkus.value = skuList.filter((s: any) => s.status !== 0)
+    currentSpuHasServices.value = hasServices
     cartQty.value = 1
     selectedSku.value = null
     skuDialogVisible.value = true
@@ -920,13 +924,15 @@ async function handleAddToCart(spu: any) {
 /**
  * 执行加入购物车操作，调用接口并刷新购物车数据
  * @param {number} skuId - SKU ID
+ * @param {number} qty - 数量
+ * @param {boolean} hasServices - 该商品是否配置了保障服务（快捷加购不选服务，提示去详情页）
  */
-async function doAddCart(skuId: any, qty = 1) {
+async function doAddCart(skuId: any, qty = 1, hasServices = false) {
   if (!skuId) { ElMessage.warning('请选择商品规格'); return }
   addingCart.value = true
   try {
     await addCart({ skuId, qty })
-    ElMessage.success('已加入购物车')
+    ElMessage.success(hasServices ? '已加入购物车，保障服务可在商品详情页选择' : '已加入购物车')
     skuDialogVisible.value = false
     await cartStore.load()
   } catch (e: any) { ElMessage.error(e?.response?.data?.msg || e?.message || '加入购物车失败') } finally { addingCart.value = false }
@@ -934,7 +940,7 @@ async function doAddCart(skuId: any, qty = 1) {
 
 function confirmAddToCart() {
   track('add_to_cart', { spuId: currentSpu.value?.id, skuId: selectedSku.value?.id, scene: 'home' })
-  doAddCart(selectedSku.value?.id, cartQty.value)
+  doAddCart(selectedSku.value?.id, cartQty.value, currentSpuHasServices.value)
 }
 
 // ========== 生命周期 ==========
