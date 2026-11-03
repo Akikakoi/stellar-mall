@@ -77,6 +77,7 @@
     <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="payDialogVisible" title="选择支付方式" width="420px" :close-on-click-modal="false">
       <div class="pay-dialog-body">
         <p class="pay-dialog-tip">订单 {{ pendingOrder?.orderNo || pendingOrder?.id }}，应付 ¥{{ Number(pendingOrder?.payAmount || pendingOrder?.amount || 0).toFixed(2) }}</p>
+        <p class="pay-dialog-sim-tip">演示环境：模拟支付，不会产生真实扣款</p>
         <el-radio-group v-model="selectedPayMethod" class="pay-method-group">
           <el-radio value="1" class="pay-method-radio">微信支付</el-radio>
           <el-radio value="2" class="pay-method-radio">支付宝</el-radio>
@@ -85,7 +86,7 @@
       </div>
       <template #footer>
         <el-button @click="payDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="paying" @click="doPay">确认支付</el-button>
+        <el-button type="primary" :loading="paying" @click="doPay">确认模拟支付</el-button>
       </template>
     </el-dialog>
 
@@ -259,7 +260,7 @@ async function doPay() {
   paying.value = true
   try {
     await payOrder(pendingOrder.value.id, parseInt(selectedPayMethod.value))
-    ElMessage.success('支付成功')
+    ElMessage.success('支付成功（模拟）')
     payDialogVisible.value = false
     loadOrders()
   } catch (e: any) {
@@ -447,7 +448,8 @@ onUnmounted(stopCountdown)
 
 /* 支付方式选择 */
 .pay-dialog-body { text-align: center; padding: 8px 0 16px; }
-.pay-dialog-tip { color: var(--text-secondary); font-size: 15px; margin-bottom: 20px; }
+.pay-dialog-tip { color: var(--text-secondary); font-size: 15px; margin-bottom: 8px; }
+.pay-dialog-sim-tip { color: var(--text-muted); font-size: 12px; margin-bottom: 20px; }
 .pay-method-group { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
 .pay-method-radio { padding: 12px 16px; border: 1px solid var(--border-base); border-radius: var(--radius-md); width: 100%; }
 .pay-method-radio:hover { border-color: var(--brand-primary); }

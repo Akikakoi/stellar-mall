@@ -596,12 +596,12 @@ async function handleSubmit() {
     if (orderId) {
       try {
         await ElMessageBox.confirm(
-          `订单已生成，应付金额：¥${payAmount.toFixed(2)}，确认支付？`,
-          '支付确认',
-          { type: 'warning', confirmButtonText: '确认支付', cancelButtonText: '暂不支付' }
+          `订单已生成，应付金额：¥${payAmount.toFixed(2)}。当前为演示环境，确认后将直接标记为已支付，不会真实扣款。是否继续？`,
+          '模拟支付',
+          { type: 'info', confirmButtonText: '确认模拟支付', cancelButtonText: '暂不支付' }
         )
         await (payOrder as any)(orderId)
-        ElMessage.success('支付成功，订单已提交')
+        ElMessage.success('支付成功（模拟），订单已提交')
       } catch (e: any) {
         if (e !== 'cancel' && e?.message) {
           ElMessage.error(e?.response?.data?.msg || e?.message || '支付失败')

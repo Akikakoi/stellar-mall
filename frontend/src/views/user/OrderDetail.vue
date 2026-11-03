@@ -396,9 +396,13 @@ function parseServiceInfo(info: any): any[] {
  */
 async function onPay() {
   try {
-    await ElMessageBox.confirm('确认支付该订单？', '支付确认', { type: 'warning' })
+    await ElMessageBox.confirm(
+      '当前为演示环境，确认后仅将订单标记为已支付，不会产生真实扣款。是否继续？',
+      '模拟支付',
+      { type: 'info', confirmButtonText: '确认模拟支付', cancelButtonText: '取消' }
+    )
     await (apiPayOrder as any)(order.value.id)
-    ElMessage.success('支付成功')
+    ElMessage.success('支付成功（模拟）')
     load()
   } catch (e: any) { /* 用户取消不提示 */ }
 }
