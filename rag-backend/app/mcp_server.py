@@ -199,13 +199,14 @@ def apply_after_sales(
     order_id: str,
     after_sales_type: str,
     reason: str,
+    sku_id: Optional[str] = None,
     description: Optional[str] = "",
     contact_phone: Optional[str] = "",
-    user_id: Optional[int] = None,
+    mall_token: Optional[str] = None,
 ) -> dict:
-    """提交售后申请（退货/换货/退款）。
+    """提交售后申请（退货/换货/退款），写入商城真实售后系统。
 
-    after_sales_type 可选值：refund(退款) / return(退货) / exchange(换货) / other(其他)
+    after_sales_type 可选值：refund(仅退款) / return(退货退款) / exchange(换货)
     """
     from app.agent.tools.after_sales_tool import apply_after_sales_tool
 
@@ -213,9 +214,10 @@ def apply_after_sales(
         "order_id": order_id,
         "after_sales_type": after_sales_type,
         "reason": reason,
+        "sku_id": sku_id,
         "description": description,
         "contact_phone": contact_phone,
-        "user_id": user_id,
+        "mall_token": mall_token,
     })
 
 

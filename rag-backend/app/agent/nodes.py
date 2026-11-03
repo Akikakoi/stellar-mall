@@ -54,7 +54,7 @@ TOOL_REQUIRED_PARAMS = {
     },
     "apply_after_sales": {
         "required": ["order_id", "after_sales_type", "reason"],
-        "optional": ["description", "contact_phone"],
+        "optional": ["sku_id", "description", "contact_phone"],
     },
     "query_cart": {
         "required": [],  # 有 token 即可查询购物车
@@ -581,8 +581,7 @@ def _extract_after_sales_type(query: str) -> str | None:
         return "return"
     if "换货" in q or "换一个" in q or "exchange" in q:
         return "exchange"
-    if "售后" in q or "维修" in q or "质量" in q:
-        return "other"
+    # 仅提到「售后/维修/质量」时无法判断具体类型，返回 None 让 check_params 追问
     return None
 
 
@@ -982,11 +981,12 @@ def tool_execution_node(state: AgentState) -> Dict[str, Any]:
         elif tool_name == "apply_after_sales":
             result = apply_after_sales_tool.invoke({
                 "order_id": params.get("order_id", ""),
-                "after_sales_type": params.get("after_sales_type", "other"),
+                "after_sales_type": params.get("after_sales_type", ""),
                 "reason": params.get("reason", ""),
+                "sku_id": params.get("sku_id"),
                 "description": params.get("description", ""),
                 "contact_phone": params.get("contact_phone", ""),
-                "user_id": user_id,
+                "mall_token": mall_token,
             })
             return {"tool_results": result}
 
