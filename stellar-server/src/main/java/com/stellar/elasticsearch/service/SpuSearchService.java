@@ -347,14 +347,39 @@ public class SpuSearchService {
     /** 排序字段白名单映射，与 MySQL Mapper XML 保持一致。 */
     private String resolveSortField(String sortBy) {
         switch (sortBy) {
-            case "minPrice":   return "minPrice";
-            case "saleCount":  return "saleCount";
-            case "createTime": return "createTime";
+            case "minPrice":     return "minPrice";
+            case "saleCount":    return "saleCount";
+            case "commentCount": return "commentCount";
+            case "createTime":   return "createTime";
             // name 不使用 field sort——ES Text 字段的 .keyword 子字段在 Spring Data Sort
             // 中会被误解析为嵌套属性路径，走 ES 默认相关性评分即可（termQuery boost 100 保证精确匹配排最前）
             case "name":       return null;
             default:           return null;
         }
+    }
+
+    /** 在内存中按 SPU 字段排序（用于关键词混合检索后的显式排序）。 */
+    private static Comparator<Spu> spuComparator(String sortField, String sortOrder) {
+        boolean desc = "desc".equalsIgnoreCase(sortOrder);
+        switch (sortField) {
+            case "minPrice":
+                return Comparator.comparing(Spu::getMinPrice, sortValueComparator(desc));
+            case "saleCount":
+                return Comparator.comparing(Spu::getSaleCount, sortValueComparator(desc));
+            case "commentCount":
+                return Comparator.comparing(Spu::getCommentCount, sortValueComparator(desc));
+            case "createTime":
+                return Comparator.comparing(Spu::getCreateTime, sortValueComparator(desc));
+            case "id":
+            default:
+                return Comparator.comparing(Spu::getId, sortValueComparator(desc));
+        }
+    }
+
+    /** 升/降序比较器，空值始终排在末尾。 */
+    private static <T extends Comparable<? super T>> Comparator<T> sortValueComparator(boolean desc) {
+        Comparator<T> cmp = desc ? Comparator.<T>reverseOrder() : Comparator.<T>naturalOrder();
+        return Comparator.nullsLast(cmp);
     }
 
     // ==================== 双路召回 + RRF 融合（关键词搜索核心） ====================
@@ -481,6 +506,21 @@ public class SpuSearchService {
             throw new IllegalStateException("ES 两路召回均失败，触发 MySQL 降级");
         }
         List<Long> merged = rrfMerge(bmIds, vecIds);
+
+        // 用户指定排序字段时，在 RRF 融合结果上按字段重排；未指定则保持相关性顺序。
+        String requestedSort = dto.getSortBy() == null ? null : dto.getSortBy().trim();
+        String sortField = (requestedSort == null || requestedSort.isEmpty())
+                ? null : resolveSortField(requestedSort);
+        Map<Long, Spu> preloaded = null;
+        if (sortField != null && !merged.isEmpty()) {
+            List<Spu> all = spuMapper.listByIds(merged);
+            preloaded = new HashMap<>(all.size());
+            for (Spu s : all) preloaded.put(s.getId(), s);
+            List<Spu> sortable = new ArrayList<>(all);
+            sortable.sort(spuComparator(sortField, dto.getSortOrder()));
+            merged = sortable.stream().map(Spu::getId).collect(Collectors.toList());
+        }
+
         int total = merged.size();
         int from = Math.min((page - 1) * size, total);
         int to = Math.min(from + size, total);
@@ -488,9 +528,12 @@ public class SpuSearchService {
 
         List<Spu> spuList = Collections.emptyList();
         if (!pageIds.isEmpty()) {
-            List<Spu> byIds = spuMapper.listByIds(pageIds);
-            Map<Long, Spu> map = new HashMap<>(byIds.size());
-            for (Spu s : byIds) map.put(s.getId(), s);
+            Map<Long, Spu> map = preloaded;
+            if (map == null) {
+                List<Spu> byIds = spuMapper.listByIds(pageIds);
+                map = new HashMap<>(byIds.size());
+                for (Spu s : byIds) map.put(s.getId(), s);
+            }
             List<Spu> ordered = new ArrayList<>(pageIds.size());
             for (Long id : pageIds) {
                 Spu s = map.get(id);
@@ -629,10 +672,18 @@ public class SpuSearchService {
         int size = dto.getPageSize() != null && dto.getPageSize() > 0 ? dto.getPageSize() : 20;
         int offset = (page - 1) * size;
 
-        // 有搜索词时按相关性排序，否则走默认排序
+        // 有搜索词且未指定排序时按相关性排序；指定了排序字段则尊重用户选择。
         boolean hasKeyword = dto.getName() != null && !dto.getName().trim().isEmpty();
-        String sortBy = hasKeyword ? "relevance" : dto.getSortBy();
-        String sortOrder = hasKeyword ? null : dto.getSortOrder();
+        String requestedSort = dto.getSortBy() == null ? null : dto.getSortBy().trim();
+        String sortBy;
+        String sortOrder;
+        if (hasKeyword && (requestedSort == null || requestedSort.isEmpty())) {
+            sortBy = "relevance";
+            sortOrder = null;
+        } else {
+            sortBy = dto.getSortBy();
+            sortOrder = dto.getSortOrder();
+        }
 
         long total = spuMapper.count(dto.getName(), dto.getCategoryId(),
                 dto.getStatus(), dto.getIsNew(), dto.getIsHot(), dto.getPriceFrom(), dto.getPriceTo());
