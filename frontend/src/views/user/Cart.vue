@@ -21,17 +21,29 @@
             <div class="col col-op">操作</div>
           </div>
 
-          <div v-for="item in cartStore.items" :key="item.id || item.skuId" class="row item">
+          <div v-for="item in cartStore.items" :key="item.id || item.skuId" class="row item" :class="{ 'row-unavailable': item.unavailable }">
             <div class="col col-check">
-              <el-checkbox :model-value="!!item.checked" @change="cartStore.toggleChecked(item.id || item.skuId)" />
+              <el-checkbox :model-value="!!item.checked" :disabled="!!item.unavailable" @change="cartStore.toggleChecked(item.id || item.skuId)" />
             </div>
             <div class="col col-product">
               <div class="product-card" @click="goDetail(item.spuId || item.skuId)">
                 <img :src="item.image || item.pic || __PH" class="thumb" v-placeholder />
                 <div class="product-info">
-                  <div class="name">{{ item.name }}</div>
+                  <div class="name">
+                    {{ item.ghost ? '商品已失效' : item.name }}
+                    <el-tag v-if="item.ghost" type="info" size="small" class="status-tag">已删除</el-tag>
+                    <el-tag v-else-if="item.unavailable" type="danger" size="small" class="status-tag">已停售</el-tag>
+                  </div>
                   <div class="sku-specs" v-if="item.skuName || item.skuSpecs">
                     {{ item.skuName || (item.skuSpecs || '').replace(/;/g, ' / ') }}
+                  </div>
+                  <div class="stock-warn" v-if="!item.unavailable && item.stock != null && Number(item.stock) < Number(item.quantity)">
+                    库存不足，仅剩 {{ item.stock }} 件
+                  </div>
+                  <div class="service-tags" v-if="(item.services || []).length">
+                    <span class="service-tag" v-for="svc in (item.services as any[])" :key="svc.id || svc.title">
+                      {{ svc.title }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -42,12 +54,16 @@
                 :model-value="item.quantity"
                 :min="1"
                 :max="itemMaxQty(item)"
+                :disabled="!!item.unavailable"
                 size="small"
                 @update:model-value="(v: any) => cartStore.updateQty(item.id || item.skuId, v)"
               />
             </div>
             <div class="col col-subtotal amount">
-              ¥{{ (Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2) }}
+              ¥{{ itemSubtotal(item).toFixed(2) }}
+              <div v-if="itemServiceFee(item) > 0" class="service-row">
+                + 服务费 ¥{{ (itemServiceFee(item) * Number(item.quantity || 0)).toFixed(2) }}
+              </div>
             </div>
             <div class="col col-op">
               <el-button type="danger" link @click="handleRemove(item)">删除</el-button>
@@ -86,11 +102,31 @@ const cartStore = useCartStore()
 const loading = ref(false)
 
 /**
- * 单件商品的数量上限：设了每人限购则取限购数，否则不设上限
+ * 单件商品的数量上限：取每人限购与实时库存中的较小值，均未设置则不设上限
  */
 function itemMaxQty(item: any) {
   const limit = Number(item?.perUserLimit) || 0
-  return limit > 0 ? limit : undefined
+  const stock = Number(item?.stock)
+  const caps: number[] = []
+  if (limit > 0) caps.push(limit)
+  if (!Number.isNaN(stock) && stock > 0) caps.push(stock)
+  if (caps.length === 0) return undefined
+  return Math.min(...caps)
+}
+
+/**
+ * 单个购物车项的保障服务费（单价口径，未乘数量）
+ */
+function itemServiceFee(item: any) {
+  return Number(item?.serviceFee || 0)
+}
+
+/**
+ * 单个购物车项小计 = 商品单价 × 数量 + 服务费 × 数量（与结算页口径一致）
+ */
+function itemSubtotal(item: any) {
+  const qty = Number(item?.quantity || 0)
+  return Number(item?.price || 0) * qty + itemServiceFee(item) * qty
 }
 
 /**
@@ -181,6 +217,11 @@ onMounted(async () => {
   font-weight: 600;
 }
 .row.item:hover { background: var(--glass-hover); }
+.row.item.row-unavailable { opacity: 0.55; }
+.row.item.row-unavailable:hover { background: transparent; }
+.row.item.row-unavailable .thumb { filter: grayscale(1); }
+.status-tag { margin-left: 6px; }
+.stock-warn { color: var(--el-color-danger, #f56c6c); font-size: 12px; line-height: 1.4; }
 .row:last-child { border-bottom: none; }
 .col-check { text-align: center; }
 .product-card { display: flex; align-items: center; gap: 14px; cursor: pointer; }
@@ -188,6 +229,18 @@ onMounted(async () => {
 .product-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .name { color: var(--text-primary); font-size: 14px; line-height: 1.5; }
 .sku-specs { color: var(--text-secondary); opacity: 0.75; font-size: 12px; line-height: 1.4; }
+.service-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.service-tag {
+  color: var(--brand-primary);
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--brand-primary);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--brand-primary) 8%, transparent);
+  white-space: nowrap;
+}
+.service-row { color: var(--brand-primary); font-size: 12px; margin-top: 4px; }
 .col-price, .col-subtotal { color: var(--text-primary); }
 .amount { color: var(--text-primary); font-weight: 600; }
 .col-qty { display: flex; justify-content: center; }

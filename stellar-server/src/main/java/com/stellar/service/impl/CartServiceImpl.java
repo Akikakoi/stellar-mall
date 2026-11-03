@@ -184,6 +184,8 @@ public class CartServiceImpl implements CartService {
                     .extraAmount(c.getExtraAmount())
                     .serviceInfo(c.getServiceInfo())
                     .perUserLimit(p == null ? null : p.getPerUserLimit())
+                    .skuStatus(s == null ? null : s.getStatus())
+                    .stock(s == null ? null : s.getStock())
                     .build();
             res.add(vo);
         }

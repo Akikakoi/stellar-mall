@@ -237,6 +237,18 @@ export interface CartRowVO {
   serviceFee?: number | string
   extraAmount?: number | string
   services?: unknown[]
+  /** SKU 状态：1=在售，其他=停售；SKU 已删时为 null */
+  skuStatus?: number | null
+  /** SKU 实时库存 */
+  stock?: number | null
+}
+
+/** 购物车/订单快照中的保障服务条目 */
+export interface CartServiceItem {
+  id?: string
+  title?: string
+  price?: number
+  [key: string]: any
 }
 
 /**
@@ -252,8 +264,12 @@ export interface CartItem {
   price: number
   quantity: number
   checked: boolean
-  services: unknown[]
+  services: CartServiceItem[]
   serviceFee: number
+  /** SKU 停售或已删除（置灰不可勾选结算） */
+  unavailable?: boolean
+  /** SKU 已被删除（幽灵行） */
+  ghost?: boolean
   /** 归一化时保留的原始 SKU 展示字段 */
   skuName?: string
   skuSpecs?: string

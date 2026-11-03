@@ -35,6 +35,8 @@ interface CartState {
 /**
  * 将服务端购物车行归一化为前端条目。
  * 兼容后端 CartVO 与历史冗余字段,保证旧 localStorage 快照也能渲染。
+ * SKU 停售(status!=1)或已删除(skuName 为空且无状态)标记为不可用,强制取消勾选,
+ * 避免用户勾选后到下单环节才被后端整单拒绝。
  */
 function normalizeCartRow(it: CartRowVO): CartItem {
   const c = it.checked
@@ -42,6 +44,10 @@ function normalizeCartRow(it: CartRowVO): CartItem {
   if (typeof c === 'number') checked = c === 1
   else if (typeof c === 'string') checked = c === '1' || c === 'true'
   else if (typeof c === 'boolean') checked = c
+  // SKU 已删除：后端查不到该 SKU，skuName/skuStatus 均为 null
+  const ghost = it.skuStatus == null && !it.skuName
+  const offSale = it.skuStatus != null && Number(it.skuStatus) !== 1
+  const unavailable = ghost || offSale
   return {
     ...it,
     id: it.id || it.cartId || it.skuId!,
@@ -51,7 +57,9 @@ function normalizeCartRow(it: CartRowVO): CartItem {
     image: it.image || it.skuImage || it.spuImage || it.pic || '',
     price: Number(it.price || it.skuPrice || 0),
     quantity: Number(it.qty || it.quantity || it.number || 1),
-    checked,
+    checked: checked && !unavailable,
+    unavailable,
+    ghost,
     services: parseServices(it),
     serviceFee: Number(it.serviceFee ?? it.extraAmount ?? 0)
   }
@@ -107,8 +115,11 @@ export const useCartStore = defineStore('cart', {
         return sum + price * qty + serviceFee
       }, 0),
 
-    /** 是否全选 */
-    allChecked: (state) => state.items.length > 0 && state.items.every((it) => it.checked)
+    /** 是否全选（停售或已删除的商品不参与判断） */
+    allChecked: (state) => {
+      const selectable = state.items.filter((it) => it.unavailable !== true)
+      return selectable.length > 0 && selectable.every((it) => it.checked)
+    }
   },
 
   actions: {
@@ -183,11 +194,11 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    /** 全选/取消全选 */
+    /** 全选/取消全选（停售或已删除的商品不可勾选） */
     toggleAllChecked(val?: boolean) {
       const target = val !== undefined ? !!val : !this.allChecked
       this.items.forEach((it) => {
-        it.checked = target
+        it.checked = target && it.unavailable !== true
       })
       this.persist()
     },

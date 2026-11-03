@@ -58,4 +58,10 @@ public class CartVO implements Serializable {
 
     @ApiModelProperty("每人限购数量，0=不限购（来自 SPU，前端用于限制数量输入）")
     private Integer perUserLimit;
+
+    @ApiModelProperty("SKU 状态：1=在售，其他=停售（前端用于置灰不可结算）")
+    private Integer skuStatus;
+
+    @ApiModelProperty("SKU 实时库存（前端用于限制数量、提示缺货）")
+    private Integer stock;
 }

@@ -176,7 +176,7 @@ public class OrderServiceImpl implements OrderService {
             Sku sku = skuMap.get(c.getSkuId());
             if (sku == null) throw new BaseException(MessageConstant.SKU_NOT_FOUND);
             if (sku.getStatus() == null || sku.getStatus() != 1) {
-                throw new BaseException("SKU（id=" + sku.getId() + "）已停售，无法下单");
+                throw new BaseException("商品「" + sku.getName() + "」已停售，无法下单，请从购物车移除后重试");
             }
             int qty = c.getQty() == null ? 1 : c.getQty();
             if (qty < 1) {
@@ -211,7 +211,7 @@ public class OrderServiceImpl implements OrderService {
             Sku sku = skuMap.get(item.getSkuId());
             if (sku == null) throw new BaseException(MessageConstant.SKU_NOT_FOUND);
             if (sku.getStatus() == null || sku.getStatus() != 1) {
-                throw new BaseException("SKU（id=" + sku.getId() + "）已停售，无法下单");
+                throw new BaseException("商品「" + sku.getName() + "」已停售，无法下单");
             }
             int qty = item.getQuantity() == null ? 1 : item.getQuantity();
             if (qty < 1) {
