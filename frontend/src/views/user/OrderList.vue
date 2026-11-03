@@ -201,7 +201,7 @@ async function loadOrders() {
   try {
     const res = await listOrder({ status: activeTab.value || undefined, page: 1, pageSize: 50 })
     const d: any = res || {}
-    orders.value = (d.records || d.list || Array.isArray(res) ? res : []) as any
+    orders.value = (Array.isArray(res) ? res : (d.records || d.list || [])) as any
     initCountdowns(orders.value)
     startCountdown()
   } finally {
