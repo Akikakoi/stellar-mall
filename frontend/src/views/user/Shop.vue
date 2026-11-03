@@ -105,6 +105,20 @@
             </ul>
           </div>
 
+          <!-- 价格区间：与后端 priceFrom/priceTo 对齐，点击应用后重新加载 -->
+          <div class="filter-section">
+            <h3 class="filter-title">价格区间</h3>
+            <div class="price-range">
+              <el-input v-model="customPriceFrom" type="number" min="0" placeholder="最低" size="small" />
+              <span class="price-sep">—</span>
+              <el-input v-model="customPriceTo" type="number" min="0" placeholder="最高" size="small" />
+            </div>
+            <div class="price-actions">
+              <el-button type="primary" size="small" @click="applyPriceFilter">应用</el-button>
+              <el-button v-if="customPriceFrom !== '' || customPriceTo !== ''" size="small" @click="resetPriceFilter">清除</el-button>
+            </div>
+          </div>
+
           <div class="filter-empty" v-if="!hasActiveFilters && allCategories.length === 0">
             <span class="empty-text">暂无筛选条件</span>
           </div>
@@ -249,7 +263,6 @@ const highlights = ref<any>({})
 
 // 聚合数据
 const aggCategories = ref<any[]>([])
-const aggPriceRanges = ref<any[]>([])
 const initialAggCategories = ref<any[]>([]) // 保存初始（无筛选）聚合，用于始终显示全部分类数量
 const activeCategoryId = ref<any>(null)
 // 自定义价格筛选
@@ -378,6 +391,32 @@ function setSort(sortKey: any) {
 }
 
 /**
+ * 应用价格区间筛选：校验最低价不高于最高价后，回到第一页重新加载
+ */
+function applyPriceFilter() {
+  const from = customPriceFrom.value === '' ? null : Number(customPriceFrom.value)
+  const to = customPriceTo.value === '' ? null : Number(customPriceTo.value)
+  if (from !== null && to !== null && from > to) {
+    ElMessage.warning('最低价不能高于最高价')
+    return
+  }
+  page.value = 1
+  spus.value = []
+  loadSpu()
+}
+
+/**
+ * 清除价格区间筛选
+ */
+function resetPriceFilter() {
+  customPriceFrom.value = ''
+  customPriceTo.value = ''
+  page.value = 1
+  spus.value = []
+  loadSpu()
+}
+
+/**
  * 切换分类筛选，再次点击同一分类则取消筛选
  * @param {number|string} catId - 分类 ID
  */
@@ -460,7 +499,6 @@ async function loadSpu(append = false) {
     favSet.clear()
     highlights.value = {}
     // 聚合数据不重置，保持初始全量数据
-    aggPriceRanges.value = []
   }
   try {
     const params: Record<string, any> = { page: page.value, pageSize: pageSize.value }
@@ -500,9 +538,6 @@ async function loadSpu(append = false) {
             initialAggCategories.value = res.aggregations.categories
           } else {
             console.warn('[Shop] categories is null/empty in response')
-          }
-          if (res.aggregations.priceRanges && res.aggregations.priceRanges.length > 0) {
-            aggPriceRanges.value = res.aggregations.priceRanges
           }
         }
         await batchCheckFavs()
@@ -919,6 +954,10 @@ html.theme-dark .history-panel {
   color: var(--brand-primary, #409EFF);
   font-weight: 500;
 }
+.price-range { display: flex; align-items: center; gap: 6px; }
+.price-range :deep(.el-input) { width: 82px; }
+.price-sep { color: var(--text-muted); font-size: 12px; }
+.price-actions { display: flex; gap: 8px; margin-top: 10px; }
 .filter-label {
   flex: 1;
   overflow: hidden;
