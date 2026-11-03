@@ -132,7 +132,7 @@
         <el-radio-group v-model="form.payMethod">
           <el-radio value="WECHAT">微信支付</el-radio>
           <el-radio value="ALIPAY">支付宝</el-radio>
-          <el-radio value="WALLET">钱包支付 <span class="wallet-balance">（余额 ¥{{ Number(walletBalance || 0).toFixed(2) }}）</span></el-radio>
+          <el-radio value="WALLET" :disabled="walletBalance < finalAmount">钱包支付 <span class="wallet-balance">（余额 ¥{{ Number(walletBalance || 0).toFixed(2) }}）</span><span v-if="walletBalance < finalAmount" class="wallet-insufficient">（余额不足）</span></el-radio>
         </el-radio-group>
       </div>
 
@@ -282,6 +282,16 @@ const couponDiscount = ref(0)
 const walletBalance = ref(0)
 
 const finalAmount = computed(() => Math.max(0, orderAmount.value - couponDiscount.value - pointsDeduction.value))
+
+// 钱包余额不足以覆盖应付金额时，自动从钱包支付切回微信支付
+watch(
+  () => [walletBalance.value, finalAmount.value],
+  () => {
+    if (form.payMethod === 'WALLET' && walletBalance.value < finalAmount.value) {
+      form.payMethod = 'WECHAT'
+    }
+  }
+)
 
 // ==================== 积分抵扣 ====================
 const userPoints = ref(0)
@@ -708,6 +718,7 @@ onMounted(async () => {
 .col-price, .col-subtotal { text-align: center; color: var(--text-primary); }
 .service-row { font-size: 11px; color: var(--brand-primary); margin-top: 2px; font-weight: 400; }
 .wallet-balance { color: var(--brand-primary); font-size: 12px; margin-left: 2px; }
+.wallet-insufficient { color: var(--el-color-danger, #f56c6c); font-size: 12px; margin-left: 2px; }
 .amount { color: var(--text-primary); font-weight: 600; }
 
 .summary-bar {
