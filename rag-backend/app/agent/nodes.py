@@ -559,6 +559,12 @@ def _extract_order_id(query: str, messages: list) -> str | None:
     m = re.search(pattern, query, re.IGNORECASE)
     if m:
         return m.group(1)
+    # 短数字订单 ID（如“订单87”）：完整订单号已被上面的 6+ 位规则接住，
+    # 这里只接受 1~9 位纯数字，避免把“订单满100减10”里的金额当成订单 ID。
+    pattern_short = r'(?:订单号|订单|订单id|order[ _-]?id)[：: #]*([0-9]{1,9})(?![0-9])'
+    m_short = re.search(pattern_short, query, re.IGNORECASE)
+    if m_short:
+        return m_short.group(1)
     pattern2 = r'\b([A-Z]{2,}\d{8,}|\d{10,20})\b'
     m2 = re.search(pattern2, query)
     if m2:
