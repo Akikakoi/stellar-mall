@@ -291,11 +291,10 @@ export function payOrder(id: number, payMethod: number): Promise<any> {
 }
 
 /** 取消订单 */
-export function cancelOrder(id: number, reason?: string): Promise<any> {
+export function cancelOrder(id: number): Promise<any> {
   return userRequest({
     url: `/user/order/${id}/cancel`,
-    method: 'post',
-    data: { reason }
+    method: 'post'
   })
 }
 

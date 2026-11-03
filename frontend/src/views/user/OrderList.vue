@@ -230,7 +230,7 @@ async function loadAfterSales() {
 async function cancel(order: any) {
   try {
     await ElMessageBox.confirm('确定要取消该订单吗？', '提示', { type: 'warning' })
-    await cancelOrder(order.id, '用户取消')
+    await cancelOrder(order.id)
     ElMessage.success('已取消')
     loadOrders()
   } catch (e: any) {}

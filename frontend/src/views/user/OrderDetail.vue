@@ -409,7 +409,7 @@ async function onPay() {
 async function onCancel() {
   try {
     await ElMessageBox.confirm('确定要取消该订单吗？', '提示', { type: 'warning' })
-    await apiCancelOrder(order.value.id, '用户取消')
+    await apiCancelOrder(order.value.id)
     ElMessage.success('已取消')
     load()
   } catch (e: any) {}

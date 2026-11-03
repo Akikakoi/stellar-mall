@@ -79,9 +79,7 @@ public class OrderController {
     @Idempotent(keyPrefix = "order-cancel", windowSeconds = 300)
     @PostMapping("/{id}/cancel")
     @ApiOperation("取消订单：逐条回滚库存 + 改状态 CANCELLED")
-    public Result<String> cancel(@PathVariable Long id,
-                                 @RequestBody(required = false) java.util.Map<String, Object> body) {
-        // reason 参数暂仅预留用于后续审计日志；当前取消逻辑无需区分原因
+    public Result<String> cancel(@PathVariable Long id) {
         orderService.cancel(id, BaseContext.getCurrentId());
         return Result.success();
     }
