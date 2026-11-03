@@ -25,8 +25,8 @@ import static org.mockito.Mockito.mock;
 /**
  * 管理端看板并行查询验证。
  *
- * <p>admin/dashboard 的两个统计接口原先串行执行（enhanced 共 21 次查询：7 项统计 +
- * 最近 7 天各 2 次）。这里用桩 JdbcTemplate 给每条查询加固定耗时，从两个角度验证改造：
+ * <p>admin/dashboard 的两个统计接口原先串行执行（enhanced 共 26 次查询：7 项统计 +
+ * 最近 7 天各 2 次 + 5 项用户行为统计）。这里用桩 JdbcTemplate 给每条查询加固定耗时，从两个角度验证改造：
  * 返回结构不能变（字段名、条数、日期顺序），以及总耗时确实落在并行量级而非串行量级。</p>
  */
 class AdminDashboardParallelTest {
@@ -63,11 +63,11 @@ class AdminDashboardParallelTest {
     }
 
     @Test
-    @DisplayName("enhanced 返回 9 项统计，趋势固定 7 天且升序到今日")
+    @DisplayName("enhanced 返回 14 项统计，趋势固定 7 天且升序到今日")
     void enhancedReturnsCompleteStructure() {
         Map<String, Object> data = controller.enhanced().getData();
         assertNotNull(data);
-        assertEquals(9, data.size());
+        assertEquals(14, data.size());
         assertEquals(Long.valueOf(5L), data.get("todayOrders"));
         assertEquals(new BigDecimal("12.34"), data.get("todaySales"));
         assertEquals(Long.valueOf(5L), data.get("lowStockCount"));
@@ -75,6 +75,11 @@ class AdminDashboardParallelTest {
         assertEquals(Long.valueOf(5L), data.get("pendingAfterSaleCount"));
         assertTrue(data.get("pendingOrderList") instanceof List);
         assertTrue(data.get("pendingAfterSaleList") instanceof List);
+        assertEquals(Long.valueOf(5L), data.get("behaviorEvents"));
+        assertEquals(Long.valueOf(5L), data.get("behaviorVisitors"));
+        assertTrue(data.get("behaviorTopEvents") instanceof List);
+        assertTrue(data.get("behaviorTopKeywords") instanceof List);
+        assertTrue(data.get("behaviorTopProducts") instanceof List);
 
         List<?> orderTrend = (List<?>) data.get("orderTrend");
         List<?> salesTrend = (List<?>) data.get("salesTrend");
@@ -88,17 +93,17 @@ class AdminDashboardParallelTest {
     }
 
     @Test
-    @DisplayName("21 次查询并行执行，总耗时远低于串行")
+    @DisplayName("26 次查询并行执行，总耗时远低于串行")
     void enhancedRunsQueriesInParallel() {
         long start = System.currentTimeMillis();
         controller.enhanced().getData();
         long elapsed = System.currentTimeMillis() - start;
 
-        // 串行下限 = 21 × 50ms = 1050ms；8 线程并行约 150ms。
+        // 串行下限 = 26 × 50ms = 1300ms；8 线程并行约 200ms。
         // 阈值 600ms：留足调度抖动余量，同时能明确失败于「退化成串行」。
         assertTrue(elapsed < 600,
                 "并行编排未生效：enhanced() 耗时 " + elapsed + "ms"
-                        + "（21 次查询串行应接近 " + (21 * QUERY_COST_MS) + "ms）");
+                        + "（26 次查询串行应接近 " + (26 * QUERY_COST_MS) + "ms）");
     }
 
     /** 桩 JdbcTemplate：不连数据库，按返回类型给固定值，并模拟固定查询耗时。 */

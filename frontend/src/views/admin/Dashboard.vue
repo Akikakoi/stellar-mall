@@ -38,6 +38,56 @@
 
     <div class="panel">
       <div class="panel-head">
+        <span class="panel-title">用户行为（近 7 天）</span>
+        <span class="panel-sub">来自前端埋点，用于观察搜索与浏览热点</span>
+      </div>
+      <div class="behavior-summary">
+        <div class="behavior-num">
+          <span class="behavior-label">事件总量</span>
+          <span class="behavior-value">{{ stats.behaviorEvents || 0 }}</span>
+        </div>
+        <div class="behavior-num">
+          <span class="behavior-label">活跃访客</span>
+          <span class="behavior-value">{{ stats.behaviorVisitors || 0 }}</span>
+        </div>
+      </div>
+      <div class="behavior-grid">
+        <div class="behavior-block">
+          <div class="behavior-title">热门事件</div>
+          <div v-if="behaviorTopEvents.length" class="behavior-tags">
+            <el-tag v-for="e in behaviorTopEvents" :key="e.eventType" size="small" effect="plain">
+              {{ eventTypeText(e.eventType) }} {{ e.count }}
+            </el-tag>
+          </div>
+          <div v-else class="behavior-empty">暂无事件</div>
+        </div>
+        <div class="behavior-block">
+          <div class="behavior-title">热门搜索</div>
+          <div v-if="behaviorTopKeywords.length" class="behavior-list">
+            <div v-for="(k, i) in behaviorTopKeywords" :key="k.keyword" class="behavior-row">
+              <span class="behavior-rank">{{ i + 1 }}</span>
+              <span class="behavior-name">{{ k.keyword }}</span>
+              <span class="behavior-count">{{ k.count }}</span>
+            </div>
+          </div>
+          <div v-else class="behavior-empty">暂无搜索</div>
+        </div>
+        <div class="behavior-block">
+          <div class="behavior-title">热门浏览商品</div>
+          <div v-if="behaviorTopProducts.length" class="behavior-list">
+            <div v-for="(p, i) in behaviorTopProducts" :key="p.spuId" class="behavior-row">
+              <span class="behavior-rank">{{ i + 1 }}</span>
+              <span class="behavior-name">{{ p.name }}</span>
+              <span class="behavior-count">{{ p.count }}</span>
+            </div>
+          </div>
+          <div v-else class="behavior-empty">暂无浏览</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
         <span class="panel-title">待处理事项</span>
         <span class="panel-sub">按优先级排列，点击直达处理页</span>
       </div>
@@ -167,10 +217,27 @@ const orderChartRef = ref<any>(null)
 const salesChartRef = ref<any>(null)
 const stats = reactive<any>({
   pendingOrders: 0, todayOrders: 0, todaySales: 0, lowStockCount: 0,
-  pendingAfterSaleCount: 0
+  pendingAfterSaleCount: 0, behaviorEvents: 0, behaviorVisitors: 0
 })
 const orderTrendData = ref<any[]>([])
 const salesTrendData = ref<any[]>([])
+const behaviorTopEvents = ref<any[]>([])
+const behaviorTopKeywords = ref<any[]>([])
+const behaviorTopProducts = ref<any[]>([])
+
+// 埋点事件类型 → 中文展示名，未知类型原样显示
+const EVENT_TYPE_TEXT: Record<string, string> = {
+  view_item: '浏览商品',
+  view_item_list: '浏览列表',
+  search: '搜索',
+  add_to_cart: '加购',
+  order_placed: '下单',
+  favorite: '收藏',
+  page_view: '页面访问'
+}
+function eventTypeText(type: string) {
+  return EVENT_TYPE_TEXT[type] || type || '未知'
+}
 
 const orderTrendHasData = computed(() => orderTrendData.value.some((d: any) => (d.count || 0) > 0))
 const salesTrendHasData = computed(() => salesTrendData.value.some((d: any) => (d.amount || 0) > 0))
@@ -217,6 +284,11 @@ async function load() {
       stats.lowStockCount = d.lowStockCount || 0
       stats.pendingOrders = d.pendingOrders || 0
       stats.pendingAfterSaleCount = d.pendingAfterSaleCount || 0
+      stats.behaviorEvents = d.behaviorEvents || 0
+      stats.behaviorVisitors = d.behaviorVisitors || 0
+      behaviorTopEvents.value = Array.isArray(d.behaviorTopEvents) ? d.behaviorTopEvents : []
+      behaviorTopKeywords.value = Array.isArray(d.behaviorTopKeywords) ? d.behaviorTopKeywords : []
+      behaviorTopProducts.value = Array.isArray(d.behaviorTopProducts) ? d.behaviorTopProducts : []
       renderCharts(d.orderTrend || [], d.salesTrend || [])
     } catch (e: any) {
       console.error('加载仪表盘增强统计失败', e)
@@ -451,4 +523,23 @@ async function handleExport(type: any) {
   margin-top: 12px;
 }
 .report-body .report-heading:first-child { margin-top: 0; }
+
+/* 近 7 天用户行为 */
+.behavior-summary { display: flex; gap: 36px; margin-bottom: 16px; }
+.behavior-num { display: flex; align-items: baseline; gap: 8px; }
+.behavior-label { font-size: 12px; color: var(--text-secondary); }
+.behavior-value { font-size: 24px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+.behavior-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.behavior-block { min-width: 0; }
+.behavior-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+.behavior-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.behavior-list { display: flex; flex-direction: column; gap: 8px; }
+.behavior-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.behavior-rank { width: 16px; flex-shrink: 0; color: var(--text-muted); }
+.behavior-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); }
+.behavior-count { flex-shrink: 0; color: var(--text-secondary); }
+.behavior-empty { font-size: 13px; color: var(--text-muted); }
+@media (max-width: 1100px) {
+  .behavior-grid { grid-template-columns: 1fr; gap: 16px; }
+}
 </style>

@@ -92,7 +92,7 @@ public class AdminDashboardController {
     public Result<Map<String, Object>> enhanced() {
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
 
-        // 本接口共 21 次查询：7 项统计 + 最近 7 天各 2 次（订单数 / 净销售额）。
+        // 本接口共 26 次查询：7 项统计 + 最近 7 天各 2 次（订单数 / 净销售额）+ 5 项行为统计。
         // 原先全部串行，改为并行编排后总耗时从「21 次之和」降到约「并发度分之一」。
         // 每个任务内部保留原有的 try-catch 兜底，单条查询失败只让它自己返回默认值，
         // 不会影响其余统计（此前趋势循环是整体包一个 try，一条失败整天趋势都空）。
@@ -119,6 +119,31 @@ public class AdminDashboardController {
                 "FROM stellar_after_sale a LEFT JOIN stellar_mall_order o ON a.order_id = o.id " +
                 "WHERE a.status IN (1, 2) ORDER BY a.create_time DESC LIMIT 5"));
 
+        // 近 7 天用户行为：埋点表只追加，这里作为管理端唯一读取方，用于观察搜索与浏览热点。
+        CompletableFuture<Long> behaviorEvents = async(() -> queryLong(
+                "SELECT COUNT(*) FROM stellar_user_behavior " +
+                "WHERE event_time >= DATE_SUB(NOW(), INTERVAL 7 DAY)"));
+        CompletableFuture<Long> behaviorVisitors = async(() -> queryLong(
+                "SELECT COUNT(DISTINCT device_id) FROM stellar_user_behavior " +
+                "WHERE event_time >= DATE_SUB(NOW(), INTERVAL 7 DAY) " +
+                "AND device_id IS NOT NULL AND device_id <> ''"));
+        CompletableFuture<List<Map<String, Object>>> behaviorTopEvents = async(() -> queryList(
+                "SELECT event_type AS eventType, COUNT(*) AS count FROM stellar_user_behavior " +
+                "WHERE event_time >= DATE_SUB(NOW(), INTERVAL 7 DAY) " +
+                "GROUP BY event_type ORDER BY count DESC LIMIT 6"));
+        CompletableFuture<List<Map<String, Object>>> behaviorTopKeywords = async(() -> queryList(
+                "SELECT keyword, COUNT(*) AS count FROM stellar_user_behavior " +
+                "WHERE event_time >= DATE_SUB(NOW(), INTERVAL 7 DAY) " +
+                "AND event_type = 'search' AND keyword IS NOT NULL AND keyword <> '' " +
+                "GROUP BY keyword ORDER BY count DESC LIMIT 5"));
+        CompletableFuture<List<Map<String, Object>>> behaviorTopProducts = async(() -> queryList(
+                "SELECT b.spu_id AS spuId, COALESCE(s.name, CONCAT('商品', b.spu_id)) AS name, " +
+                "COUNT(*) AS count FROM stellar_user_behavior b " +
+                "LEFT JOIN stellar_spu s ON s.id = b.spu_id " +
+                "WHERE b.event_time >= DATE_SUB(NOW(), INTERVAL 7 DAY) " +
+                "AND b.event_type IN ('view_item', 'add_to_cart') AND b.spu_id IS NOT NULL " +
+                "GROUP BY b.spu_id, s.name ORDER BY count DESC LIMIT 5"));
+
         // 最近 7 天趋势：每天 2 条查询，共 14 次，全部并行
         List<LocalDate> days = new ArrayList<>(7);
         for (int i = 6; i >= 0; i--) {
@@ -139,6 +164,11 @@ public class AdminDashboardController {
         data.put("pendingOrderList", pendingOrderList.join());
         data.put("pendingAfterSaleCount", pendingAfterSaleCount.join());
         data.put("pendingAfterSaleList", pendingAfterSaleList.join());
+        data.put("behaviorEvents", behaviorEvents.join());
+        data.put("behaviorVisitors", behaviorVisitors.join());
+        data.put("behaviorTopEvents", behaviorTopEvents.join());
+        data.put("behaviorTopKeywords", behaviorTopKeywords.join());
+        data.put("behaviorTopProducts", behaviorTopProducts.join());
         data.put("orderTrend", orderTrendFutures.stream()
                 .map(CompletableFuture::join).collect(Collectors.toList()));
         data.put("salesTrend", salesTrendFutures.stream()
