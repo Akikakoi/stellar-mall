@@ -561,9 +561,6 @@ LLM_CACHE_SEMANTIC_K: int = 5                 # 召回候选数
 
 # 全局开关
 LLM_CACHE_ENABLED: bool = True                # 总开关
-
-# 监控
-LLM_CACHE_METRICS_ENABLED: bool = True        # 是否记录命中率指标
 ```
 
 **与现有配置的共存**：现有 `QUERY_CACHE_*` 配置保留，与新的 `LLM_CACHE_*` 独立运作。新的 L1/L2 缓存上线后，原有的 `_QueryCache` 可以逐步弃用。

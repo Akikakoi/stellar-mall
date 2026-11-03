@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import List, Optional
+from typing import Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, ToolMessage
 from langchain_core.tools import tool
@@ -25,7 +25,7 @@ from langchain_core.tools import tool
 from app.core.logger import logger
 from app.core.utils import pseudo_stream_chunks
 from app.rag.llm import get_langchain_chat
-from app.agent.react_safety import safe_invoke, IdempotencyGuard, READ_ONLY_TOOLS, REVERSIBLE_WRITE_TOOLS
+from app.agent.react_safety import safe_invoke, IdempotencyGuard
 from app.agent.tools import (
     kb_search_tool,
     query_order_tool,
@@ -57,9 +57,6 @@ SYSTEM_PROMPT = """你是一位电商平台智能客服，精通商品咨询、�
 - 不要编造任何编号；不要执行删除、清空、取消订单、售后等高风险操作(这些不在你的工具范围内，请引导用户走人工流程)。
 - 能直接回答时不要再调用工具。
 """
-
-# 供外部查看 P1 暴露了哪些工具（与 react_safety 的工具分类保持单一来源）
-REACT_SAFE_TOOLS: List[str] = sorted(READ_ONLY_TOOLS | REVERSIBLE_WRITE_TOOLS)
 
 # 从工具返回结果中提取的"可信标识"字段，用于写操作的参数来源白名单
 _ID_KEYS = ("id", "spu_id", "sku_id", "cart_item_id", "order_id", "order_no")
@@ -435,4 +432,4 @@ async def astream_react(
     yield {"type": "done", "tokens": len(fallback), "tool_trace": tool_trace}
 
 
-__all__ = ["run_react_agent", "astream_react", "REACT_SAFE_TOOLS", "SYSTEM_PROMPT"]
+__all__ = ["run_react_agent", "astream_react", "SYSTEM_PROMPT"]

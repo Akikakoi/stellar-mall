@@ -292,6 +292,9 @@ def search_knowledge_base(
 # ──────────────────────────────────────────────────────────────
 def main():
     """MCP Server 入口（stdio 传输）。"""
+    if not settings.MCP_ENABLED:
+        logger.warning("[MCP] MCP_ENABLED=false，跳过启动")
+        return
     logger.info(f"[MCP] 启动 MCP Server: {settings.MCP_SERVER_NAME}")
     mcp.run(transport="stdio")
 
