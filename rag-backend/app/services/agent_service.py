@@ -34,21 +34,59 @@ class AgentChatService:
             - {"type": "done", "tokens": N}  完成
         """
         from app.agent.graph import run_agent
+        from app.agent.nodes import set_agent_event_emitter, reset_agent_event_emitter
 
         try:
             yield {"type": "agent_thought", "content": "正在分析您的问题..."}
 
-            result = await asyncio.to_thread(
+            loop = asyncio.get_running_loop()
+            event_queue: asyncio.Queue = asyncio.Queue()
+
+            def emit(event: dict) -> None:
+                loop.call_soon_threadsafe(event_queue.put_nowait, event)
+
+            emitter_token = set_agent_event_emitter(emit)
+            task = asyncio.create_task(asyncio.to_thread(
                 run_agent,
                 query=query,
                 user_id=self.user.id,
                 mall_token=mall_token,
                 conversation_history=conversation_history or [],
-            )
+            ))
+            emitted_types: set[str] = set()
+            answer_streamed = False
+            try:
+                # 图执行期间边产生事件边下发：工具调用、来源与真实 LLM token 不再等整段完成
+                while True:
+                    get_task = asyncio.create_task(event_queue.get())
+                    done, _ = await asyncio.wait(
+                        {get_task, task}, return_when=asyncio.FIRST_COMPLETED
+                    )
+                    if get_task in done:
+                        event = get_task.result()
+                        emitted_types.add(event.get("type", ""))
+                        if event.get("type") == "token":
+                            answer_streamed = True
+                        yield event
+                        continue
+                    get_task.cancel()
+                    break
+
+                while not event_queue.empty():
+                    event = event_queue.get_nowait()
+                    emitted_types.add(event.get("type", ""))
+                    if event.get("type") == "token":
+                        answer_streamed = True
+                    yield event
+
+                result = task.result()
+            finally:
+                reset_agent_event_emitter(emitter_token)
 
             intent = result.get("intent", "other")
             intent_confidence = result.get("intent_confidence", 0)
-            yield {"type": "intent", "intent": intent, "confidence": intent_confidence}
+            if "intent" not in emitted_types:
+                yield {"type": "intent", "intent": intent, "confidence": intent_confidence}
 
             # other 场景：图内仅打标记，走 ReAct 真流式
             if result.get("uses_react"):
@@ -71,17 +109,18 @@ class AgentChatService:
 
             current_tool = result.get("current_tool")
             tool_results = result.get("tool_results", {})
-            if current_tool and tool_results:
+            if current_tool and tool_results and "tool_call" not in emitted_types:
                 yield {"type": "tool_call", "tool": current_tool, "params": result.get("required_params", {})}
+            if current_tool and tool_results and "tool_result" not in emitted_types:
                 yield {"type": "tool_result", "tool": current_tool, "success": tool_results.get("success", False)}
 
             sources = result.get("sources", [])
-            if sources:
+            if sources and "sources" not in emitted_types:
                 yield {"type": "sources", "data": sources}
 
             answer = result.get("answer", "")
-            if answer:
-                # 最终答案一次返回：此前按字符切块伪造增量流式，首字延迟并未改善
+            # 已实时推过 token（或走了缓存/闲聊等一次性路径）时不重复发送完整答案
+            if answer and not answer_streamed:
                 yield {"type": "token", "content": answer}
 
             missing_params = result.get("missing_params", [])

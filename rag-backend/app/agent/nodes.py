@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from typing import Dict, Any, List
+from contextvars import ContextVar
+from typing import Callable, Dict, Any, List, Optional
 
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
@@ -22,6 +23,31 @@ from app.agent.tools import (
 )
 from app.agent.tools.kb_tool import kb_specs_for_products
 from app.agent.tools.resolve_sku_tool import resolve_sku_tool
+
+
+# 流式请求的事件发射器由服务层注入；ContextVar 可随 asyncio.to_thread 复制到工作线程。
+_AGENT_EVENT_EMITTER: ContextVar[Optional[Callable[[dict], None]]] = ContextVar(
+    "agent_event_emitter", default=None
+)
+
+
+def set_agent_event_emitter(emitter: Optional[Callable[[dict], None]]):
+    return _AGENT_EVENT_EMITTER.set(emitter)
+
+
+def reset_agent_event_emitter(token) -> None:
+    _AGENT_EVENT_EMITTER.reset(token)
+
+
+def _emit_agent_event(event: dict) -> None:
+    emitter = _AGENT_EVENT_EMITTER.get()
+    if emitter is None:
+        return
+    try:
+        emitter(event)
+    except Exception:
+        # 事件推送失败不能影响主回答链路
+        pass
 
 
 INTENT_DESC_MAP = {
@@ -921,7 +947,32 @@ def ask_params_node(state: AgentState) -> Dict[str, Any]:
 
 
 def tool_execution_node(state: AgentState) -> Dict[str, Any]:
-    """工具执行节点：调用对应的工具。"""
+    """工具执行节点：先推送工具事件，再执行实际工具。"""
+    tool_name = state.get("current_tool")
+    params = state.get("required_params", {})
+    if tool_name:
+        _emit_agent_event({
+            "type": "intent",
+            "intent": state.get("intent", "other"),
+            "confidence": state.get("intent_confidence", 0),
+        })
+        _emit_agent_event({"type": "tool_call", "tool": tool_name, "params": params})
+
+    result = _tool_execution_impl(state)
+
+    if tool_name:
+        tr = result.get("tool_results", {}) if isinstance(result, dict) else {}
+        _emit_agent_event({
+            "type": "tool_result",
+            "tool": tool_name,
+            "success": bool(tr.get("success", False)),
+            "message": tr.get("message", ""),
+        })
+    return result
+
+
+def _tool_execution_impl(state: AgentState) -> Dict[str, Any]:
+    """工具执行实际逻辑：调用对应的工具。"""
     tool_name = state.get("current_tool")
     params = state.get("required_params", {})
     user_id = state.get("user_id")
@@ -1282,11 +1333,17 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
 {anti_hallucination}""")
 
         try:
+            sources = state.get("sources") or []
+            if sources:
+                _emit_agent_event({"type": "sources", "data": sources})
+
             answer_chunks = []
             for chunk in llm.stream([sys_msg, user_msg]):
                 txt = chunk.content if hasattr(chunk, "content") else str(chunk)
                 if txt:
                     answer_chunks.append(str(txt))
+                    # 实时推送真实 token，而不是等整段生成完再切块
+                    _emit_agent_event({"type": "token", "content": str(txt)})
 
             full_answer = "".join(answer_chunks)
 
@@ -1341,7 +1398,10 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
             logger.error(f"生成回答失败: {e}")
             return {"final_answer": "抱歉，系统暂时无法处理您的请求，请稍后重试。"}
 
-    # 缓存击穿防护：并发相同 query+context 的 miss 只触发一次 LLM，其余复用其结果
+    # 缓存击穿防护：并发相同 query+context 的 miss 只触发一次 LLM，其余复用其结果。
+    # 流式请求必须由自己执行 producer，否则 follower 拿不到 leader 线程里的 token 事件。
+    if _AGENT_EVENT_EMITTER.get() is not None:
+        return _produce_answer()
     return single_flight_sync(
         f"llm:sf:answer|{query}|{context_hash}|{intent}",
         _produce_answer,

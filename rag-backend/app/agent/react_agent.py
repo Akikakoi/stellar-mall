@@ -353,12 +353,12 @@ async def astream_react(
         {"type": "agent_thought", "content"}    思考过程
         {"type": "tool_call", "tool", "params"} 工具调用
         {"type": "tool_result", "tool", "success", "message"} 工具结果
-        {"type": "token", "content"}            最终回答（一次返回，非逐字模拟）
+        {"type": "token", "content"}            最终回答（模型真实增量）
         {"type": "sources", "data"}             引用来源
         {"type": "done", "tokens", "tool_trace"} 完成
 
-    说明：工具决策轮用同步 invoke 快速拿到 tool_calls，将思考以 agent_thought
-    实时透出；最终答案由模型完整生成后一次性返回，不伪装成 token 增量流。
+    说明：工具决策轮与最终答案轮都直接消费模型增量；工具调用轮通常没有 content，
+    最终答案 token 会随着模型生成实时下发，不再等整段完成。工具调用仍走同步执行。
     """
     ctx = ReactContext(mall_token=mall_token, user_id=user_id)
     tools = _build_tools(ctx)
@@ -373,7 +373,18 @@ async def astream_react(
     sources: list = []
 
     for step in range(max_steps):
-        ai = await asyncio.to_thread(bound.invoke, messages)
+        # 真实流式：直接消费模型增量。工具调用轮通常 content 为空，
+        # 若模型先输出文字再触发工具，这段文字会作为 token 先展示（可接受的取舍）。
+        ai = None
+        streamed_content = []
+        async for chunk in bound.astream(messages):
+            ai = chunk if ai is None else ai + chunk
+            text = chunk.content if isinstance(chunk.content, str) else ""
+            if text:
+                streamed_content.append(text)
+                yield {"type": "token", "content": text}
+        if ai is None:
+            break
         messages.append(ai)
 
         reasoning = (ai.content or "").strip() if isinstance(ai.content, str) else ""
@@ -383,13 +394,13 @@ async def astream_react(
             answer = reasoning or str(ai.content)
             if sources:
                 yield {"type": "sources", "data": sources}
-            # 最终答案一次返回：此前是按字符切块模拟流式，首字延迟仍等于完整生成时间
-            if answer:
+            # 已经在流式阶段逐 token 发出，只有模型没产出任何内容时才补一次空答案保护
+            if not streamed_content and answer:
                 yield {"type": "token", "content": answer}
             yield {"type": "done", "tokens": len(answer), "tool_trace": tool_trace}
             return
 
-        if reasoning:
+        if reasoning and not streamed_content:
             yield {"type": "agent_thought", "content": reasoning}
 
         for tc in tool_calls:
