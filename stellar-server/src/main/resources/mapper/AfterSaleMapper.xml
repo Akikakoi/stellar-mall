@@ -149,10 +149,13 @@
         </foreach>
     </select>
 
-    <!-- 按订单 + 用户查询售后单（用户端校验归属） -->
+    <!-- 按订单 + 用户查询最新售后单（用户端校验归属）。
+         必须按 id 倒序：同订单可能有多次售后（不同商品/取消后重新申请），
+         旧的 LIMIT 1 无排序会稳定命中最早一条，导致订单页显示过期状态。 -->
     <select id="getByOrderIdAndUserId" resultMap="AfterSaleMap">
         SELECT * FROM stellar_after_sale
         WHERE order_id = #{orderId} AND user_id = #{userId}
+        ORDER BY id DESC
         LIMIT 1
     </select>
 
