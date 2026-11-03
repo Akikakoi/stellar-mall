@@ -176,6 +176,8 @@ class Settings(BaseSettings):
 
     # Agent 智能体
     AGENT_ENABLED: bool = True
+    # 多轮对话查询上下文改写（指代消解）
+    QUERY_REWRITE_ENABLED: bool = True
 
     # MCP (Model Context Protocol) Server
     MCP_ENABLED: bool = True

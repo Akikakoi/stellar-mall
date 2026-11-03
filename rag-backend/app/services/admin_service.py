@@ -51,16 +51,22 @@ class AdminService:
             "similarity_threshold": settings.SIMILARITY_THRESHOLD,
             "chunk_size": settings.CHUNK_SIZE,
             "chunk_overlap": settings.CHUNK_OVERLAP,
+            "query_rewrite_enabled": settings.QUERY_REWRITE_ENABLED,
             "agent_enabled": settings.AGENT_ENABLED,
         }
 
     @staticmethod
     def apply_runtime_settings(req: SystemSettingsReq) -> None:
-        """修改当前运行时 settings（不写 .env，重启失效但不影响演示）。"""
+        """修改当前运行时 settings（不写 .env，重启失效但不影响演示）。
+
+        注意：SystemSettingsReq 字段是小写（llm_model_name），而 Settings 属性是大写
+        （LLM_MODEL_NAME），必须做大小写映射，否则 hasattr 永远为假、所有设置都会被静默丢弃。
+        """
         for f in req.model_fields:
             v = getattr(req, f)
-            if v is not None and hasattr(settings, f):
-                setattr(settings, f, v)
+            attr = f.upper()
+            if v is not None and hasattr(settings, attr):
+                setattr(settings, attr, v)
 
     # ---------- 用户列表 ----------
     def list_users(self, page: int = 1, page_size: int = 20, keyword: str = ""):

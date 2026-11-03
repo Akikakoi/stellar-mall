@@ -22,8 +22,8 @@
         <el-form-item label="相似度过滤阈值"><el-slider v-model="form.similarity_threshold" :min="0" :max="1" :step="0.05" show-input /></el-form-item>
         <el-form-item label="文档分块 Chunk Size"><el-input-number v-model="form.chunk_size" :min="256" :max="2048" :step="64" /></el-form-item>
         <el-form-item label="分块 Overlap"><el-input-number v-model="form.chunk_overlap" :min="0" :max="512" :step="16" /></el-form-item>
-        <el-form-item label="查询上下文改写"><el-switch v-model="form.query_rewrite_enabled" /></el-form-item>
-        <el-form-item label="启用智能体 Agent"><el-switch v-model="form.agent_enabled" /></el-form-item>
+        <el-form-item label="查询上下文改写（多轮指代消解）"><el-switch v-model="form.query_rewrite_enabled" /></el-form-item>
+        <el-form-item label="启用智能体 Agent（复杂问题走 ReAct）"><el-switch v-model="form.agent_enabled" /></el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onSave" :loading="saving">保存并应用（立即生效）</el-button>
           <el-button @click="reload">重置为当前值</el-button>

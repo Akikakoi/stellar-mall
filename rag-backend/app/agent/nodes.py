@@ -384,7 +384,9 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
 
     # 指代消解：查询含"它/他/她/该款"等回指词且存在对话历史时，结合历史改写为自包含查询
     # （追问场景："它的拍照怎么样" -> "星耀 X200 5G 影像旗舰的拍照怎么样"）
-    if tool_name in ("kb_search", "product_search") and state.get("messages"):
+    if (settings.QUERY_REWRITE_ENABLED
+            and tool_name in ("kb_search", "product_search")
+            and state.get("messages")):
         history_text = _format_recent_history(state.get("messages", []), max_turns=6)
         if history_text and history_text != "（无）" and re.search(r"(?<![其这那])它|(?<![其])他的|她的|该款|此款", query):
             rewritten = _resolve_pronoun(query, history_text)
@@ -1192,6 +1194,10 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
         # fallback 路由：无法用确定性流程识别的复杂/组合问题，标记交给 ReAct agent 处理。
         # 此处不执行 ReAct，仅打标记，由服务层(agent_service)对 other 走 astream_react 真流式；
         # 同步路径(answer_sync)则由服务层调用 run_react_agent。
+        # 开关关闭时不再进入 ReAct，直接返回可解释的降级提示。
+        if not settings.AGENT_ENABLED:
+            fallback = "智能体模式已关闭，暂时无法处理这类复杂问题。您可以换个说法，或直接使用商品搜索/订单页面。"
+            return {"final_answer": fallback, "sources": [], "stream_chunks": [fallback]}
         return {"uses_react": True}
 
     # === LLM 缓存：答案生成 ===
