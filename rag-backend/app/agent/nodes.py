@@ -296,60 +296,84 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
             "intent_confidence": cached.get("tokens_used", 90) / 100.0,
         }
 
-    def _intent_produce():
-        llm = get_langchain_chat()
-        prompt = INTENT_CLASSIFICATION_PROMPT.format(
-            history=history_text,
-            query=query,
-        )
+    def _classify(classify_query: str, allow_cache: bool) -> Dict[str, Any]:
+        """对给定问句做一次意图分类。allow_cache=False 时不读不写缓存（用于兜底重分类）。
+        对话历史 history_text 固定来自当前 state，保证上下文一致。"""
+        def _produce():
+            llm = get_langchain_chat()
+            prompt = INTENT_CLASSIFICATION_PROMPT.format(
+                history=history_text,
+                query=classify_query,
+            )
 
+            try:
+                resp = llm.invoke([SystemMessage(content="你是一个严格的JSON输出助手。"),
+                                   HumanMessage(content=prompt)])
+                content = resp.content if hasattr(resp, "content") else str(resp)
+                content = content.strip()
+                if content.startswith("```json"):
+                    content = content[7:]
+                if content.endswith("```"):
+                    content = content[:-3]
+                content = content.strip()
+
+                result = json.loads(content)
+                intent = result.get("intent", "other")
+                confidence = float(result.get("confidence", 0.5))
+
+                logger.info(f"[Intent] query={classify_query[:30]}... -> intent={intent} conf={confidence:.2f}")
+
+                # === 异步写入缓存（同样跳过短回答 + 有历史的场景） ===
+                if allow_cache and use_cache:
+                    try:
+                        put_cache_sync(
+                            query=classify_query,
+                            model=settings.LLM_MODEL_NAME,
+                            temperature=settings.LLM_TEMPERATURE,
+                            system_prompt_hash=INTENT_PROMPT_HASH,
+                            context_hash=None,
+                            answer=json.dumps(result, ensure_ascii=False),
+                            sources=[],
+                            intent=intent,
+                            tokens_used=int(confidence * 100),
+                            cache_type="intent",
+                        )
+                    except Exception:
+                        pass
+
+                return {
+                    "intent": intent,
+                    "intent_confidence": confidence,
+                }
+            except Exception as e:
+                logger.warning(f"意图识别失败，默认 other: {e}")
+                return {"intent": "other", "intent_confidence": 0.0}
+
+        if allow_cache and use_cache:
+            # 缓存击穿防护：并发相同 query 的 miss 只触发一次 LLM，其余复用其结果
+            return single_flight_sync(f"llm:sf:intent|{classify_query}", _produce)
+        return _produce()
+
+    result = _classify(query, allow_cache=True)
+
+    # === 兜底重分类（消融实验 D03 发现）：含指代的模糊追问被误判 other 时，
+    # 先用指代消解改写成自包含问句，再重新分类一次。
+    # 重分类不复用/不写入缓存：既避免 other 结果被缓存固化，也降低单次 LLM 抖动影响。
+    if result.get("intent") == "other" and has_history:
+        # 改写用的历史必须排除当前问句：_format_recent_history 默认会拼入最后一条
+        # 用户消息，改写 LLM 看到"历史里已有这句话"会原样返回，导致兜底失效
+        prior_text = _format_recent_history(state.get("messages", [])[:-1], max_turns=6)
         try:
-            resp = llm.invoke([SystemMessage(content="你是一个严格的JSON输出助手。"),
-                               HumanMessage(content=prompt)])
-            content = resp.content if hasattr(resp, "content") else str(resp)
-            content = content.strip()
-            if content.startswith("```json"):
-                content = content[7:]
-            if content.endswith("```"):
-                content = content[:-3]
-            content = content.strip()
-
-            result = json.loads(content)
-            intent = result.get("intent", "other")
-            confidence = float(result.get("confidence", 0.5))
-
-            logger.info(f"[Intent] query={query[:30]}... -> intent={intent} conf={confidence:.2f}")
-
-            # === 异步写入缓存（同样跳过短回答 + 有历史的场景） ===
-            if use_cache:
-                try:
-                    put_cache_sync(
-                        query=query,
-                        model=settings.LLM_MODEL_NAME,
-                        temperature=settings.LLM_TEMPERATURE,
-                        system_prompt_hash=INTENT_PROMPT_HASH,
-                        context_hash=None,
-                        answer=json.dumps(result, ensure_ascii=False),
-                        sources=[],
-                        intent=intent,
-                        tokens_used=int(confidence * 100),
-                        cache_type="intent",
-                    )
-                except Exception:
-                    pass
-
-            return {
-                "intent": intent,
-                "intent_confidence": confidence,
-            }
+            rewritten = _resolve_pronoun(query, prior_text) if prior_text != "（无）" else query
         except Exception as e:
-            logger.warning(f"意图识别失败，默认 other: {e}")
-            return {"intent": "other", "intent_confidence": 0.0}
-
-    if use_cache:
-        # 缓存击穿防护：并发相同 query 的 miss 只触发一次 LLM，其余复用其结果
-        return single_flight_sync(f"llm:sf:intent|{query}", _intent_produce)
-    return _intent_produce()
+            logger.warning(f"[Intent] other 兜底改写失败，跳过重分类: {e}")
+            rewritten = query
+        if rewritten and rewritten != query:
+            logger.info(f"[Intent] other 兜底重分类: {query!r} -> {rewritten!r}")
+            retry = _classify(rewritten, allow_cache=False)
+            if retry.get("intent") != "other":
+                return retry
+    return result
 
 
 def check_params_node(state: AgentState) -> Dict[str, Any]:
@@ -414,7 +438,9 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
             and tool_name in ("kb_search", "product_search")
             and state.get("messages")):
         history_text = _format_recent_history(state.get("messages", []), max_turns=6)
-        if history_text and history_text != "（无）" and re.search(r"(?<![其这那])它|(?<![其])他的|她的|该款|此款", query):
+        if history_text and history_text != "（无）" and re.search(
+                r"(?<![其这那])它|(?<![其])他的|她的|该款|此款"
+                r"|这款|那款|这台|那台|该机|同款|这个|那个", query):
             rewritten = _resolve_pronoun(query, history_text)
             if rewritten and rewritten != query:
                 logger.info(f"[CheckParams] 指代消解: {query!r} -> {rewritten!r}")
