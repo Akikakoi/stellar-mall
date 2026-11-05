@@ -1,0 +1,2533 @@
+{
+ "bm25_only": {
+  "summary": {
+   "recall12": 0.8712500000000001,
+   "mrr": 0.5356547619047619,
+   "ndcg5": 0.696040522120923,
+   "latency_avg_ms": 13.842689999989943,
+   "latency_p50_ms": 12.711900000113019,
+   "latency_p95_ms": 23.860400000103255,
+   "embed_ms_avg": 0.0,
+   "retrieve_ms_avg": 13.842689999989943,
+   "rerank_ms_avg": 0.0
+  },
+  "by_type": {
+   "exact": {
+    "n": 10,
+    "recall12": 1.0,
+    "mrr": 0.6583333333333333,
+    "ndcg5": 1.0149140253005207
+   },
+   "semantic": {
+    "n": 10,
+    "recall12": 0.8,
+    "mrr": 0.5866666666666667,
+    "ndcg5": 0.64388216269829
+   },
+   "multi_constraint": {
+    "n": 10,
+    "recall12": 0.885,
+    "mrr": 0.5533333333333333,
+    "ndcg5": 0.7618600274232944
+   },
+   "multi_turn": {
+    "n": 10,
+    "recall12": 0.8,
+    "mrr": 0.3442857142857143,
+    "ndcg5": 0.36350587306158694
+   }
+  },
+  "per_query": [
+   {
+    "id": "A01",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.1309297535714575,
+    "hit_docs": [
+     "星耀X100青春版-产品参数.md",
+     "星耀X100青春版-产品参数.md"
+    ],
+    "latency_ms": 27.084500000000844,
+    "embed_ms": 0.0,
+    "retrieve_ms": 27.084500000000844,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A02",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.5616063116448506,
+    "hit_docs": [
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 23.860400000103255,
+    "embed_ms": 0.0,
+    "retrieve_ms": 23.860400000103255,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A03",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.8175293653079347,
+    "hit_docs": [
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 20.499599999993734,
+    "embed_ms": 0.0,
+    "retrieve_ms": 20.499599999993734,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A04",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 16.537000000198532,
+    "embed_ms": 0.0,
+    "retrieve_ms": 16.537000000198532,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A05",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 17.745500000046377,
+    "embed_ms": 0.0,
+    "retrieve_ms": 17.745500000046377,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A06",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.0177825608059992,
+    "hit_docs": [
+     "充电宝.md",
+     "充电宝.md"
+    ],
+    "latency_ms": 17.403999999942243,
+    "embed_ms": 0.0,
+    "retrieve_ms": 17.403999999942243,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A07",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.9197207891481876,
+    "hit_docs": [
+     "星耀 GamePro 16 游戏本 产品规格.md",
+     "清逸 ProBook 16 高性能本 产品规格.md"
+    ],
+    "latency_ms": 17.91500000013002,
+    "embed_ms": 0.0,
+    "retrieve_ms": 17.91500000013002,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A08",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.3333333333333333,
+    "ndcg5": 0.5706417189553201,
+    "hit_docs": [
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "星耀 Creator 14 设计师本 产品规格.md"
+    ],
+    "latency_ms": 17.4299999998766,
+    "embed_ms": 0.0,
+    "retrieve_ms": 17.4299999998766,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A09",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Band 9 智能手环 产品规格.md"
+    ],
+    "latency_ms": 20.4727999998795,
+    "embed_ms": 0.0,
+    "retrieve_ms": 20.4727999998795,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A10",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 13.881999999966865,
+    "embed_ms": 0.0,
+    "retrieve_ms": 13.881999999966865,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B01",
+    "type": "semantic",
+    "recall12": 0.5,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀 X200 5G 影像旗舰.md"
+    ],
+    "latency_ms": 13.745100000051025,
+    "embed_ms": 0.0,
+    "retrieve_ms": 13.745100000051025,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B02",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.0616063116448506,
+    "hit_docs": [
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md"
+    ],
+    "latency_ms": 19.00330000012218,
+    "embed_ms": 0.0,
+    "retrieve_ms": 19.00330000012218,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B03",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "清逸 AirBook 13 极致轻薄 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 13.752299999850948,
+    "embed_ms": 0.0,
+    "retrieve_ms": 13.752299999850948,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B04",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 11.971199999834425,
+    "embed_ms": 0.0,
+    "retrieve_ms": 11.971199999834425,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B05",
+    "type": "semantic",
+    "recall12": 0.5,
+    "mrr": 0.3333333333333333,
+    "ndcg5": 0.3065735963827292,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 12.234799999987445,
+    "embed_ms": 0.0,
+    "retrieve_ms": 12.234799999987445,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B06",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.8772153153380493,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 12.866999999914697,
+    "embed_ms": 0.0,
+    "retrieve_ms": 12.866999999914697,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B07",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.3333333333333333,
+    "ndcg5": 0.5,
+    "hit_docs": [
+     "星耀 SmartRing Nova 智能戒指 产品规格.md"
+    ],
+    "latency_ms": 13.614899999993213,
+    "embed_ms": 0.0,
+    "retrieve_ms": 13.614899999993213,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B08",
+    "type": "semantic",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 13.013999999884618,
+    "embed_ms": 0.0,
+    "retrieve_ms": 13.013999999884618,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B09",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 14.498600000024453,
+    "embed_ms": 0.0,
+    "retrieve_ms": 14.498600000024453,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B10",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6934264036172708,
+    "hit_docs": [
+     "星耀 Band 9 智能手环 产品规格.md",
+     "星耀 Band 8 智能手环 产品规格.md"
+    ],
+    "latency_ms": 14.044000000012602,
+    "embed_ms": 0.0,
+    "retrieve_ms": 14.044000000012602,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C01",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.9574945261898617,
+    "hit_docs": [
+     "星耀 Note 14 Pro.md",
+     "玉米手机 10 Pro.md",
+     "玉米手机 10 Pro.md",
+     "星耀 Note 14 Pro.md",
+     "玉米手机 10 Pro.md",
+     "星耀 Note 14 Pro.md"
+    ],
+    "latency_ms": 11.651400000118883,
+    "embed_ms": 0.0,
+    "retrieve_ms": 11.651400000118883,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C02",
+    "type": "multi_constraint",
+    "recall12": 0.6,
+    "mrr": 0.5,
+    "ndcg5": 0.21398626473452756,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀 X200 5G 影像旗舰.md",
+     "苍穹 Aether N8 Max.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 10.790499999984604,
+    "embed_ms": 0.0,
+    "retrieve_ms": 10.790499999984604,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C03",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.4306765580733931,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 11.834599999929196,
+    "embed_ms": 0.0,
+    "retrieve_ms": 11.834599999929196,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C04",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.7328286204777911,
+    "hit_docs": [
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "星耀 GamePro 16 游戏本 产品规格.md",
+     "星耀 Creator 14 设计师本 产品规格.md"
+    ],
+    "latency_ms": 12.345000000095752,
+    "embed_ms": 0.0,
+    "retrieve_ms": 12.345000000095752,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C05",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.16666666666666666,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md",
+     "星耀 Tab Pro 12.4 产品规格.md"
+    ],
+    "latency_ms": 12.042399999927511,
+    "embed_ms": 0.0,
+    "retrieve_ms": 12.042399999927511,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C06",
+    "type": "multi_constraint",
+    "recall12": 0.25,
+    "mrr": 0.3333333333333333,
+    "ndcg5": 0.19519002499605084,
+    "hit_docs": [
+     "灵耀 Lumina Z9 Ultra.md"
+    ],
+    "latency_ms": 10.799599999927523,
+    "embed_ms": 0.0,
+    "retrieve_ms": 10.799599999927523,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C07",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.3333333333333333,
+    "ndcg5": 0.5706417189553201,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 12.711900000113019,
+    "embed_ms": 0.0,
+    "retrieve_ms": 12.711900000113019,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C08",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.6309297535714575,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 12.246700000105193,
+    "embed_ms": 0.0,
+    "retrieve_ms": 12.246700000105193,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C09",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 10.657199999968725,
+    "embed_ms": 0.0,
+    "retrieve_ms": 10.657199999968725,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C10",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 13.756299999840849,
+    "embed_ms": 0.0,
+    "retrieve_ms": 13.756299999840849,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D01",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 10.625300000128846,
+    "embed_ms": 0.0,
+    "retrieve_ms": 10.625300000128846,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D02",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "玉米手机 10 Pro.md"
+    ],
+    "latency_ms": 12.291300000015326,
+    "embed_ms": 0.0,
+    "retrieve_ms": 12.291300000015326,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D03",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 9.2511000000286,
+    "embed_ms": 0.0,
+    "retrieve_ms": 9.2511000000286,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D04",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "清逸 AirBook 13 极致轻薄 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 8.6069999999836,
+    "embed_ms": 0.0,
+    "retrieve_ms": 8.6069999999836,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D05",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.14285714285714285,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 9.652700000060577,
+    "embed_ms": 0.0,
+    "retrieve_ms": 9.652700000060577,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D06",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+    ],
+    "latency_ms": 11.122799999839117,
+    "embed_ms": 0.0,
+    "retrieve_ms": 11.122799999839117,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D07",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.43067655807339306,
+    "hit_docs": [
+     "星耀 GamePro 16 游戏本 产品规格.md"
+    ],
+    "latency_ms": 9.930999999824053,
+    "embed_ms": 0.0,
+    "retrieve_ms": 9.930999999824053,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D08",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 9.574100000008912,
+    "embed_ms": 0.0,
+    "retrieve_ms": 9.574100000008912,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D09",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.43067655807339306,
+    "hit_docs": [
+     "星耀 Note 14 Pro.md"
+    ],
+    "latency_ms": 10.528399999884641,
+    "embed_ms": 0.0,
+    "retrieve_ms": 10.528399999884641,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D10",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.1,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 SmartRing Nova 智能戒指 产品规格.md"
+    ],
+    "latency_ms": 11.712299999999232,
+    "embed_ms": 0.0,
+    "retrieve_ms": 11.712299999999232,
+    "rerank_ms": 0.0
+   }
+  ]
+ },
+ "vector_only": {
+  "summary": {
+   "recall12": 0.7570833333333333,
+   "mrr": 0.42055555555555557,
+   "ndcg5": 0.5840869020397779,
+   "latency_avg_ms": 1188.201410000022,
+   "latency_p50_ms": 1187.346800000114,
+   "latency_p95_ms": 1348.9978999998584,
+   "embed_ms_avg": 588.8115174999939,
+   "retrieve_ms_avg": 599.389892500028,
+   "rerank_ms_avg": 0.0
+  },
+  "by_type": {
+   "exact": {
+    "n": 10,
+    "recall12": 0.85,
+    "mrr": 0.5311111111111111,
+    "ndcg5": 0.8414700798564784
+   },
+   "semantic": {
+    "n": 10,
+    "recall12": 1.0,
+    "mrr": 0.48,
+    "ndcg5": 0.5986721913179338
+   },
+   "multi_constraint": {
+    "n": 10,
+    "recall12": 0.5783333333333334,
+    "mrr": 0.38111111111111107,
+    "ndcg5": 0.518802470012381
+   },
+   "multi_turn": {
+    "n": 10,
+    "recall12": 0.6,
+    "mrr": 0.29,
+    "ndcg5": 0.3774028669723182
+   }
+  },
+  "per_query": [
+   {
+    "id": "A01",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀X100青春版-产品参数.md"
+    ],
+    "latency_ms": 1191.9350000000577,
+    "embed_ms": 588.5533000000578,
+    "retrieve_ms": 603.3816999999999,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A02",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.9306765580733931,
+    "hit_docs": [
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 1139.2799000000196,
+    "embed_ms": 563.1816999998591,
+    "retrieve_ms": 576.0982000001604,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A03",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.0177825608059992,
+    "hit_docs": [
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 1261.8230000000494,
+    "embed_ms": 623.3425999998872,
+    "retrieve_ms": 638.4804000001623,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A04",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 1149.218799999744,
+    "embed_ms": 567.626399999881,
+    "retrieve_ms": 581.5923999998631,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A05",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.1309297535714575,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 1167.9345000002286,
+    "embed_ms": 578.9675000000898,
+    "retrieve_ms": 588.9670000001388,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A06",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.4306765580733931,
+    "hit_docs": [
+     "充电宝.md",
+     "充电宝.md"
+    ],
+    "latency_ms": 1406.7741999999726,
+    "embed_ms": 698.0897000000823,
+    "retrieve_ms": 708.6844999998902,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A07",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 GamePro 16 游戏本 产品规格.md",
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "清逸 ProBook 16 高性能本 产品规格.md"
+    ],
+    "latency_ms": 1203.9113999999245,
+    "embed_ms": 596.4801999998599,
+    "retrieve_ms": 607.4312000000646,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A08",
+    "type": "exact",
+    "recall12": 0.5,
+    "mrr": 0.1111111111111111,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "清逸 ProBook 16 高性能本 产品规格.md"
+    ],
+    "latency_ms": 1270.3061999998226,
+    "embed_ms": 630.0959000000148,
+    "retrieve_ms": 640.2102999998078,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A09",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 Band 9 智能手环 产品规格.md"
+    ],
+    "latency_ms": 1348.9978999998584,
+    "embed_ms": 669.3761999999879,
+    "retrieve_ms": 679.6216999998705,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A10",
+    "type": "exact",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 1046.7876000002434,
+    "embed_ms": 518.2825000001685,
+    "retrieve_ms": 528.5051000000749,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B01",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 1190.77470000002,
+    "embed_ms": 590.5004999999619,
+    "retrieve_ms": 600.274200000058,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B02",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md"
+    ],
+    "latency_ms": 1251.8468999999186,
+    "embed_ms": 621.1533999999119,
+    "retrieve_ms": 630.6935000000067,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B03",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.3065735963827294,
+    "hit_docs": [
+     "清逸 AirBook 13 极致轻薄 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 1062.8933999998935,
+    "embed_ms": 526.1524000000009,
+    "retrieve_ms": 536.7409999998927,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B04",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.8175293653079347,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 1165.198799999871,
+    "embed_ms": 577.939699999888,
+    "retrieve_ms": 587.2590999999829,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B05",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md",
+     "星耀 Tab Air 11 产品规格.md"
+    ],
+    "latency_ms": 1187.346800000114,
+    "embed_ms": 588.5442000001149,
+    "retrieve_ms": 598.8025999999991,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B06",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.23719771276929622,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 1199.0810999998303,
+    "embed_ms": 594.8638999998366,
+    "retrieve_ms": 604.2171999999937,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B07",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.43067655807339306,
+    "hit_docs": [
+     "星耀 SmartRing Nova 智能戒指 产品规格.md"
+    ],
+    "latency_ms": 1268.1874000002153,
+    "embed_ms": 629.2610000000423,
+    "retrieve_ms": 638.9264000001731,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B08",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.43067655807339306,
+    "hit_docs": [
+     "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+    ],
+    "latency_ms": 1194.8499000000083,
+    "embed_ms": 592.5908000001527,
+    "retrieve_ms": 602.2590999998556,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B09",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.1,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 1218.766799999912,
+    "embed_ms": 604.7077999999146,
+    "retrieve_ms": 614.0589999999975,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B10",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.2640681225725909,
+    "hit_docs": [
+     "星耀 Band 8 智能手环 产品规格.md",
+     "星耀 Band 9 智能手环 产品规格.md"
+    ],
+    "latency_ms": 1197.5506000001133,
+    "embed_ms": 593.5997000001407,
+    "retrieve_ms": 603.9508999999725,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C01",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "玉米手机 10 Pro.md",
+     "星耀 Note 14 Pro.md",
+     "星耀 Note 14 Pro.md"
+    ],
+    "latency_ms": 1146.4384000000791,
+    "embed_ms": 568.7725999998747,
+    "retrieve_ms": 577.6658000002044,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C02",
+    "type": "multi_constraint",
+    "recall12": 0.2,
+    "mrr": 0.2,
+    "ndcg5": 0.13120507751234178,
+    "hit_docs": [
+     "灵耀 Lumina Z9 Ultra.md"
+    ],
+    "latency_ms": 1271.9752000000426,
+    "embed_ms": 630.9274000000187,
+    "retrieve_ms": 641.0478000000239,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C03",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.0177825608059992,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 1175.4854000000705,
+    "embed_ms": 582.977000000028,
+    "retrieve_ms": 592.5084000000425,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C04",
+    "type": "multi_constraint",
+    "recall12": 0.3333333333333333,
+    "mrr": 0.25,
+    "ndcg5": 0.20210734650054757,
+    "hit_docs": [
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "清逸 ProBook 16 高性能本 产品规格.md"
+    ],
+    "latency_ms": 1326.9873000001553,
+    "embed_ms": 659.0300000000298,
+    "retrieve_ms": 667.9573000001255,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C05",
+    "type": "multi_constraint",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 1188.1385999997747,
+    "embed_ms": 589.5066999999017,
+    "retrieve_ms": 598.631899999873,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C06",
+    "type": "multi_constraint",
+    "recall12": 0.25,
+    "mrr": 0.25,
+    "ndcg5": 0.3191471544989227,
+    "hit_docs": [
+     "灵耀 Lumina Z9 Ultra.md",
+     "灵耀 Lumina Z9 Ultra.md"
+    ],
+    "latency_ms": 1201.9262000001163,
+    "embed_ms": 588.1673000001229,
+    "retrieve_ms": 613.7588999999934,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C07",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.1111111111111111,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 1171.5211000000636,
+    "embed_ms": 580.7704999999714,
+    "retrieve_ms": 590.7506000000922,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C08",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 1040.5404000000544,
+    "embed_ms": 515.225399999963,
+    "retrieve_ms": 525.3150000000915,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C09",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.6309297535714575,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 1163.1083000002036,
+    "embed_ms": 576.5360000000328,
+    "retrieve_ms": 586.5723000001708,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C10",
+    "type": "multi_constraint",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 1187.0702999999594,
+    "embed_ms": 588.5734999999386,
+    "retrieve_ms": 598.4968000000208,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D01",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.8503449055347546,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 1049.4818999998188,
+    "embed_ms": 520.1360999999451,
+    "retrieve_ms": 529.3457999998736,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D02",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "玉米手机 10 Pro.md"
+    ],
+    "latency_ms": 1159.9133000001984,
+    "embed_ms": 575.2494000000752,
+    "retrieve_ms": 584.6639000001232,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D03",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 1292.0014000001174,
+    "embed_ms": 641.1891000000196,
+    "retrieve_ms": 650.8123000000978,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D04",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.8881186425764287,
+    "hit_docs": [
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 13 极致轻薄 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 1150.2574000001005,
+    "embed_ms": 570.3112999999576,
+    "retrieve_ms": 579.9461000001429,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D05",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 1142.1470000000227,
+    "embed_ms": 566.5329999999358,
+    "retrieve_ms": 575.6140000000869,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D06",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+    ],
+    "latency_ms": 1216.3495999998304,
+    "embed_ms": 603.5411999998814,
+    "retrieve_ms": 612.808399999949,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D07",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 1161.5396000001965,
+    "embed_ms": 576.2090000000626,
+    "retrieve_ms": 585.3306000001339,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D08",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 1074.9788000000535,
+    "embed_ms": 532.735700000103,
+    "retrieve_ms": 542.2430999999506,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D09",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 Note 14 Pro.md"
+    ],
+    "latency_ms": 1147.9835999998613,
+    "embed_ms": 569.2675999998755,
+    "retrieve_ms": 578.7159999999858,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D10",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 1136.7477000003419,
+    "embed_ms": 563.4925000001658,
+    "retrieve_ms": 573.255200000176,
+    "rerank_ms": 0.0
+   }
+  ]
+ },
+ "rrf_hybrid": {
+  "summary": {
+   "recall12": 0.85375,
+   "mrr": 0.5321933621933621,
+   "ndcg5": 0.6764417371566531,
+   "latency_avg_ms": 17.127777499979402,
+   "latency_p50_ms": 16.854999999850406,
+   "latency_p95_ms": 23.75819999997475,
+   "embed_ms_avg": 0.004102499974578677,
+   "retrieve_ms_avg": 17.123675000004823,
+   "rerank_ms_avg": 0.0
+  },
+  "by_type": {
+   "exact": {
+    "n": 10,
+    "recall12": 1.0,
+    "mrr": 0.65,
+    "ndcg5": 1.0004556915672163
+   },
+   "semantic": {
+    "n": 10,
+    "recall12": 0.9,
+    "mrr": 0.5035714285714286,
+    "ndcg5": 0.6010065430524243
+   },
+   "multi_constraint": {
+    "n": 10,
+    "recall12": 0.8150000000000001,
+    "mrr": 0.5957575757575758,
+    "ndcg5": 0.6955452080078844
+   },
+   "multi_turn": {
+    "n": 10,
+    "recall12": 0.7,
+    "mrr": 0.3794444444444444,
+    "ndcg5": 0.40875950599908767
+   }
+  },
+  "per_query": [
+   {
+    "id": "A01",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.43067655807339306,
+    "hit_docs": [
+     "星耀X100青春版-产品参数.md",
+     "星耀X100青春版-产品参数.md",
+     "星耀X100青春版-产品参数.md"
+    ],
+    "latency_ms": 18.11849999990045,
+    "embed_ms": 0.007199999799922807,
+    "retrieve_ms": 18.111300000100528,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A02",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.9306765580733931,
+    "hit_docs": [
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 19.027600000072198,
+    "embed_ms": 0.004300000000512227,
+    "retrieve_ms": 19.023300000071686,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A03",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.8175293653079347,
+    "hit_docs": [
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 17.202299999780735,
+    "embed_ms": 0.003299999889350147,
+    "retrieve_ms": 17.198999999891385,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A04",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 16.017900000178997,
+    "embed_ms": 0.003600000127335079,
+    "retrieve_ms": 16.014300000051662,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A05",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.1309297535714575,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 16.987800000151765,
+    "embed_ms": 0.0033999999686784577,
+    "retrieve_ms": 16.984400000183086,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A06",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "充电宝.md",
+     "充电宝.md"
+    ],
+    "latency_ms": 16.353699999854143,
+    "embed_ms": 0.0033999999686784577,
+    "retrieve_ms": 16.350299999885465,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A07",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 GamePro 16 游戏本 产品规格.md",
+     "清逸 ProBook 16 高性能本 产品规格.md"
+    ],
+    "latency_ms": 16.347699999869292,
+    "embed_ms": 0.00389999991057266,
+    "retrieve_ms": 16.34379999995872,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A08",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.2640681225725909,
+    "hit_docs": [
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "星耀 Creator 14 设计师本 产品规格.md"
+    ],
+    "latency_ms": 16.854999999850406,
+    "embed_ms": 0.004600000011123484,
+    "retrieve_ms": 16.850399999839283,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A09",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Band 9 智能手环 产品规格.md"
+    ],
+    "latency_ms": 23.75819999997475,
+    "embed_ms": 0.006100000064179767,
+    "retrieve_ms": 23.75209999991057,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "A10",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.43067655807339306,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 19.74049999989802,
+    "embed_ms": 0.0035999998999614036,
+    "retrieve_ms": 19.73689999999806,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B01",
+    "type": "semantic",
+    "recall12": 0.5,
+    "mrr": 0.5,
+    "ndcg5": 0.6934264036172708,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀 X200 5G 影像旗舰.md"
+    ],
+    "latency_ms": 19.88279999977749,
+    "embed_ms": 0.007899999900473631,
+    "retrieve_ms": 19.874899999877016,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B02",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.5616063116448506,
+    "hit_docs": [
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md"
+    ],
+    "latency_ms": 17.01520000005985,
+    "embed_ms": 0.0031000001854408765,
+    "retrieve_ms": 17.01209999987441,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B03",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "清逸 AirBook 13 极致轻薄 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 18.303600000081133,
+    "embed_ms": 0.003999999989900971,
+    "retrieve_ms": 18.299600000091232,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B04",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.14285714285714285,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 17.380400000092777,
+    "embed_ms": 0.003800000058618025,
+    "retrieve_ms": 17.37660000003416,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B05",
+    "type": "semantic",
+    "recall12": 0.5,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 17.37579999985428,
+    "embed_ms": 0.0037999998312443495,
+    "retrieve_ms": 17.372000000023036,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B06",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.38685280723454163,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 17.41700000002311,
+    "embed_ms": 0.00389999991057266,
+    "retrieve_ms": 17.413100000112536,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B07",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.43067655807339306,
+    "hit_docs": [
+     "星耀 SmartRing Nova 智能戒指 产品规格.md"
+    ],
+    "latency_ms": 17.035999999734486,
+    "embed_ms": 0.0037999998312443495,
+    "retrieve_ms": 17.03219999990324,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B08",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.14285714285714285,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+    ],
+    "latency_ms": 16.576799999938885,
+    "embed_ms": 0.004199999921183917,
+    "retrieve_ms": 16.5726000000177,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B09",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 16.381499999852167,
+    "embed_ms": 0.0037999998312443495,
+    "retrieve_ms": 16.377700000020923,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "B10",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6934264036172708,
+    "hit_docs": [
+     "星耀 Band 8 智能手环 产品规格.md",
+     "星耀 Band 9 智能手环 产品规格.md"
+    ],
+    "latency_ms": 17.06130000002304,
+    "embed_ms": 0.004300000000512227,
+    "retrieve_ms": 17.057000000022526,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C01",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.264068122572591,
+    "hit_docs": [
+     "玉米手机 10 Pro.md",
+     "星耀 Note 14 Pro.md",
+     "星耀 Note 14 Pro.md",
+     "星耀 Note 14 Pro.md",
+     "玉米手机 10 Pro.md"
+    ],
+    "latency_ms": 16.732400000137204,
+    "embed_ms": 0.007000000096013537,
+    "retrieve_ms": 16.72540000004119,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C02",
+    "type": "multi_constraint",
+    "recall12": 0.4,
+    "mrr": 0.25,
+    "ndcg5": 0.14606834984270645,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "灵耀 Lumina Z9 Ultra.md",
+     "星耀 X200 5G 影像旗舰.md"
+    ],
+    "latency_ms": 16.950599999972837,
+    "embed_ms": 0.00389999991057266,
+    "retrieve_ms": 16.946700000062265,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C03",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.3333333333333333,
+    "ndcg5": 1.3175293653079347,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 24.556700000175624,
+    "embed_ms": 0.0033000001167238224,
+    "retrieve_ms": 24.5534000000589,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C04",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.46927872602275644,
+    "hit_docs": [
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "星耀 GamePro 16 游戏本 产品规格.md",
+     "星耀 Creator 14 设计师本 产品规格.md"
+    ],
+    "latency_ms": 16.95489999997335,
+    "embed_ms": 0.00389999991057266,
+    "retrieve_ms": 16.951000000062777,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C05",
+    "type": "multi_constraint",
+    "recall12": 0.5,
+    "mrr": 0.08333333333333333,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 16.139000000066517,
+    "embed_ms": 0.003600000127335079,
+    "retrieve_ms": 16.13539999993918,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C06",
+    "type": "multi_constraint",
+    "recall12": 0.25,
+    "mrr": 1.0,
+    "ndcg5": 0.3903800499921017,
+    "hit_docs": [
+     "灵耀 Lumina Z9 Ultra.md",
+     "灵耀 Lumina Z9 Ultra.md"
+    ],
+    "latency_ms": 16.25330000001668,
+    "embed_ms": 0.004600000011123484,
+    "retrieve_ms": 16.248700000005556,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C07",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.23719771276929622,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 16.55750000008993,
+    "embed_ms": 0.003800000058618025,
+    "retrieve_ms": 16.553700000031313,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C08",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 17.30530000008912,
+    "embed_ms": 0.0036999999792897142,
+    "retrieve_ms": 17.30160000010983,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C09",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.6309297535714575,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 15.35329999978785,
+    "embed_ms": 0.0035999998999614036,
+    "retrieve_ms": 15.34969999988789,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "C10",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.09090909090909091,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 15.140800000153831,
+    "embed_ms": 0.0033000001167238224,
+    "retrieve_ms": 15.137500000037107,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D01",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 16.49150000002919,
+    "embed_ms": 0.0035999998999614036,
+    "retrieve_ms": 16.48790000012923,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D02",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.25,
+    "ndcg5": 0.8175293653079347,
+    "hit_docs": [
+     "玉米手机 10 Pro.md",
+     "玉米手机 10 Pro.md"
+    ],
+    "latency_ms": 15.240599999970073,
+    "embed_ms": 0.003999999989900971,
+    "retrieve_ms": 15.236599999980172,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D03",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.1,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 16.99109999981374,
+    "embed_ms": 0.003299999889350147,
+    "retrieve_ms": 16.98779999992439,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D04",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.1569185019174837,
+    "hit_docs": [
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 13 极致轻薄 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 15.78630000017256,
+    "embed_ms": 0.0032000000373955118,
+    "retrieve_ms": 15.783100000135164,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D05",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 16.036299999996118,
+    "embed_ms": 0.00389999991057266,
+    "retrieve_ms": 16.032400000085545,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D06",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.3333333333333333,
+    "ndcg5": 0.5,
+    "hit_docs": [
+     "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+    ],
+    "latency_ms": 16.2910000001375,
+    "embed_ms": 0.0041000000692292815,
+    "retrieve_ms": 16.28690000006827,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D07",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.1111111111111111,
+    "ndcg5": 0.0,
+    "hit_docs": [
+     "星耀 GamePro 16 游戏本 产品规格.md"
+    ],
+    "latency_ms": 15.73499999994965,
+    "embed_ms": 0.0036999999792897142,
+    "retrieve_ms": 15.73129999997036,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D08",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 15.078599999924336,
+    "embed_ms": 0.004199999921183917,
+    "retrieve_ms": 15.074400000003152,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D09",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Note 14 Pro.md"
+    ],
+    "latency_ms": 15.25509999987662,
+    "embed_ms": 0.0035000000480067683,
+    "retrieve_ms": 15.251599999828613,
+    "rerank_ms": 0.0
+   },
+   {
+    "id": "D10",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 15.422199999875374,
+    "embed_ms": 0.00389999991057266,
+    "retrieve_ms": 15.418299999964802,
+    "rerank_ms": 0.0
+   }
+  ]
+ },
+ "rrf_hybrid_rerank": {
+  "summary": {
+   "recall12": 0.85375,
+   "mrr": 0.72875,
+   "ndcg5": 0.8553937705220827,
+   "latency_avg_ms": 10175.523917500033,
+   "latency_p50_ms": 9233.615200000713,
+   "latency_p95_ms": 9733.549700000367,
+   "embed_ms_avg": 0.014367500006073897,
+   "retrieve_ms_avg": 19.17178999999578,
+   "rerank_ms_avg": 10156.337760000031
+  },
+  "by_type": {
+   "exact": {
+    "n": 10,
+    "recall12": 1.0,
+    "mrr": 0.8,
+    "ndcg5": 1.1903745029639579
+   },
+   "semantic": {
+    "n": 10,
+    "recall12": 0.9,
+    "mrr": 0.95,
+    "ndcg5": 0.8901047889941225
+   },
+   "multi_constraint": {
+    "n": 10,
+    "recall12": 0.8150000000000001,
+    "mrr": 0.665,
+    "ndcg5": 0.8016902805246243
+   },
+   "multi_turn": {
+    "n": 10,
+    "recall12": 0.7,
+    "mrr": 0.5,
+    "ndcg5": 0.5394055096056259
+   }
+  },
+  "per_query": [
+   {
+    "id": "A01",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "星耀X100青春版-产品参数.md",
+     "星耀X100青春版-产品参数.md",
+     "星耀X100青春版-产品参数.md"
+    ],
+    "latency_ms": 59191.985200000316,
+    "embed_ms": 0.0031000001854408765,
+    "retrieve_ms": 16.40369999995528,
+    "rerank_ms": 59175.57840000017
+   },
+   {
+    "id": "A02",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.8868528072345416,
+    "hit_docs": [
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 9733.549700000367,
+    "embed_ms": 0.18790000012813834,
+    "retrieve_ms": 44.182399999954214,
+    "rerank_ms": 9689.179400000285
+   },
+   {
+    "id": "A03",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.5,
+    "hit_docs": [
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 9263.487799999439,
+    "embed_ms": 0.007499999810534064,
+    "retrieve_ms": 19.419199999902048,
+    "rerank_ms": 9244.061099999726
+   },
+   {
+    "id": "A04",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.4306765580733931,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 8829.744500000288,
+    "embed_ms": 0.007900000127847306,
+    "retrieve_ms": 18.337900000005902,
+    "rerank_ms": 8811.398700000154
+   },
+   {
+    "id": "A05",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.1309297535714575,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 8980.947899999137,
+    "embed_ms": 0.0057999995988211595,
+    "retrieve_ms": 18.380099999831145,
+    "rerank_ms": 8962.561999999707
+   },
+   {
+    "id": "A06",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.1309297535714575,
+    "hit_docs": [
+     "充电宝.md",
+     "充电宝.md"
+    ],
+    "latency_ms": 9087.927399999899,
+    "embed_ms": 0.046800000291113975,
+    "retrieve_ms": 17.469299999902432,
+    "rerank_ms": 9070.411299999705
+   },
+   {
+    "id": "A07",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 GamePro 16 游戏本 产品规格.md",
+     "清逸 ProBook 16 高性能本 产品规格.md"
+    ],
+    "latency_ms": 9360.64609999994,
+    "embed_ms": 0.006799999937356915,
+    "retrieve_ms": 18.256099999689468,
+    "rerank_ms": 9342.383200000313
+   },
+   {
+    "id": "A08",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6934264036172708,
+    "hit_docs": [
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "星耀 Creator 14 设计师本 产品规格.md"
+    ],
+    "latency_ms": 9405.870699999923,
+    "embed_ms": 0.005700000201613875,
+    "retrieve_ms": 17.741799999839714,
+    "rerank_ms": 9388.123199999882
+   },
+   {
+    "id": "A09",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Band 9 智能手环 产品规格.md"
+    ],
+    "latency_ms": 9264.869600000111,
+    "embed_ms": 0.009299999874201603,
+    "retrieve_ms": 18.60690000012255,
+    "rerank_ms": 9246.253400000114
+   },
+   {
+    "id": "A10",
+    "type": "exact",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 9342.956299999969,
+    "embed_ms": 0.00760000011723605,
+    "retrieve_ms": 17.648000000008324,
+    "rerank_ms": 9325.300699999843
+   },
+   {
+    "id": "B01",
+    "type": "semantic",
+    "recall12": 0.5,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀 X200 5G 影像旗舰.md"
+    ],
+    "latency_ms": 8965.64699999999,
+    "embed_ms": 0.009500000032858225,
+    "retrieve_ms": 17.812600000070233,
+    "rerank_ms": 8947.824899999887
+   },
+   {
+    "id": "B02",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.4306765580733931,
+    "hit_docs": [
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md",
+     "星耀 A60 5G 学生机.md"
+    ],
+    "latency_ms": 9244.350400000258,
+    "embed_ms": 0.00670000008540228,
+    "retrieve_ms": 25.126800000180083,
+    "rerank_ms": 9219.216899999992
+   },
+   {
+    "id": "B03",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "清逸 AirBook 13 极致轻薄 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md"
+    ],
+    "latency_ms": 9478.72120000011,
+    "embed_ms": 0.008399999842367833,
+    "retrieve_ms": 24.730099999942468,
+    "rerank_ms": 9453.982700000324
+   },
+   {
+    "id": "B04",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 9325.714499999776,
+    "embed_ms": 0.005599999894911889,
+    "retrieve_ms": 21.165099999961967,
+    "rerank_ms": 9304.54379999992
+   },
+   {
+    "id": "B05",
+    "type": "semantic",
+    "recall12": 0.5,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 9274.562499999774,
+    "embed_ms": 0.006799999937356915,
+    "retrieve_ms": 19.612399999914487,
+    "rerank_ms": 9254.943299999923
+   },
+   {
+    "id": "B06",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 7359.549100000095,
+    "embed_ms": 0.008900000011635711,
+    "retrieve_ms": 18.834900000001653,
+    "rerank_ms": 7340.7053000000815
+   },
+   {
+    "id": "B07",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 SmartRing Nova 智能戒指 产品规格.md"
+    ],
+    "latency_ms": 7376.445800000056,
+    "embed_ms": 0.008100000286503928,
+    "retrieve_ms": 18.34259999986898,
+    "rerank_ms": 7358.0950999999
+   },
+   {
+    "id": "B08",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+    ],
+    "latency_ms": 9026.090500000464,
+    "embed_ms": 0.007800000275892671,
+    "retrieve_ms": 19.568300000173622,
+    "rerank_ms": 9006.514400000015
+   },
+   {
+    "id": "B09",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 9356.280200000128,
+    "embed_ms": 0.009200000022246968,
+    "retrieve_ms": 18.919000000096275,
+    "rerank_ms": 9337.35200000001
+   },
+   {
+    "id": "B10",
+    "type": "semantic",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Band 8 智能手环 产品规格.md",
+     "星耀 Band 9 智能手环 产品规格.md"
+    ],
+    "latency_ms": 7346.048599999904,
+    "embed_ms": 0.007699999969190685,
+    "retrieve_ms": 17.548700000133977,
+    "rerank_ms": 7328.4921999998005
+   },
+   {
+    "id": "C01",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.1569185019174837,
+    "hit_docs": [
+     "星耀 Note 14 Pro.md",
+     "玉米手机 10 Pro.md",
+     "玉米手机 10 Pro.md",
+     "星耀 Note 14 Pro.md",
+     "星耀 Note 14 Pro.md"
+    ],
+    "latency_ms": 9011.261500000273,
+    "embed_ms": 0.008700000307726441,
+    "retrieve_ms": 17.904400000134046,
+    "rerank_ms": 8993.348399999832
+   },
+   {
+    "id": "C02",
+    "type": "multi_constraint",
+    "recall12": 0.4,
+    "mrr": 0.2,
+    "ndcg5": 0.13120507751234178,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "灵耀 Lumina Z9 Ultra.md",
+     "星耀 X200 5G 影像旗舰.md"
+    ],
+    "latency_ms": 8984.933799999453,
+    "embed_ms": 0.05639999972117948,
+    "retrieve_ms": 18.244200000026467,
+    "rerank_ms": 8966.633199999706
+   },
+   {
+    "id": "C03",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.1309297535714575,
+    "hit_docs": [
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md",
+     "星耀 Flip 折叠屏.md"
+    ],
+    "latency_ms": 9233.615200000713,
+    "embed_ms": 0.009500000032858225,
+    "retrieve_ms": 17.305600000327104,
+    "rerank_ms": 9216.300100000353
+   },
+   {
+    "id": "C04",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.2,
+    "ndcg5": 0.18154179253735267,
+    "hit_docs": [
+     "星耀 Creator 14 设计师本 产品规格.md",
+     "清逸 ProBook 16 高性能本 产品规格.md",
+     "星耀 GamePro 16 游戏本 产品规格.md"
+    ],
+    "latency_ms": 9331.399799999872,
+    "embed_ms": 0.005699999746866524,
+    "retrieve_ms": 23.147599999902013,
+    "rerank_ms": 9308.246500000223
+   },
+   {
+    "id": "C05",
+    "type": "multi_constraint",
+    "recall12": 0.5,
+    "mrr": 0.25,
+    "ndcg5": 0.2640681225725909,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 9315.492399999584,
+    "embed_ms": 0.008999999863590347,
+    "retrieve_ms": 17.55609999963781,
+    "rerank_ms": 9297.927300000083
+   },
+   {
+    "id": "C06",
+    "type": "multi_constraint",
+    "recall12": 0.25,
+    "mrr": 1.0,
+    "ndcg5": 0.3903800499921017,
+    "hit_docs": [
+     "灵耀 Lumina Z9 Ultra.md",
+     "灵耀 Lumina Z9 Ultra.md"
+    ],
+    "latency_ms": 8903.171399999792,
+    "embed_ms": 0.00959999988481286,
+    "retrieve_ms": 17.99529999971128,
+    "rerank_ms": 8885.166500000196
+   },
+   {
+    "id": "C07",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Watch 3 Pro 智能手表 产品规格.md",
+     "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+    ],
+    "latency_ms": 7432.284499999696,
+    "embed_ms": 0.009700000191514846,
+    "retrieve_ms": 17.694299999675422,
+    "rerank_ms": 7414.580499999829
+   },
+   {
+    "id": "C08",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.6309297535714575,
+    "hit_docs": [
+     "充电器.md",
+     "充电器.md"
+    ],
+    "latency_ms": 8891.431400000783,
+    "embed_ms": 0.008400000297115184,
+    "retrieve_ms": 18.56530000031853,
+    "rerank_ms": 8872.857700000168
+   },
+   {
+    "id": "C09",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 1.1309297535714575,
+    "hit_docs": [
+     "路由器.md",
+     "路由器.md"
+    ],
+    "latency_ms": 9320.083499999782,
+    "embed_ms": 0.0068999997893115506,
+    "retrieve_ms": 19.86170000009224,
+    "rerank_ms": 9300.2148999999
+   },
+   {
+    "id": "C10",
+    "type": "multi_constraint",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Tab Lite 10.4 产品规格.md"
+    ],
+    "latency_ms": 9337.51729999949,
+    "embed_ms": 0.008099999831756577,
+    "retrieve_ms": 17.178099999910046,
+    "rerank_ms": 9320.331099999748
+   },
+   {
+    "id": "D01",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 0.6131471927654584,
+    "hit_docs": [
+     "星耀 X200 5G 影像旗舰.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md",
+     "星耀X100ProMax-产品参数.md"
+    ],
+    "latency_ms": 8942.28669999984,
+    "embed_ms": 0.004699999863078119,
+    "retrieve_ms": 18.001299999923503,
+    "rerank_ms": 8924.280700000054
+   },
+   {
+    "id": "D02",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "玉米手机 10 Pro.md",
+     "玉米手机 10 Pro.md"
+    ],
+    "latency_ms": 6450.904600000285,
+    "embed_ms": 0.009899999895424116,
+    "retrieve_ms": 17.688100000214035,
+    "rerank_ms": 6433.206600000176
+   },
+   {
+    "id": "D03",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 Tab Max 14.6 产品规格.md"
+    ],
+    "latency_ms": 8873.148500000752,
+    "embed_ms": 0.006800000392104266,
+    "retrieve_ms": 18.012500000168075,
+    "rerank_ms": 8855.129200000192
+   },
+   {
+    "id": "D04",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.8881186425764287,
+    "hit_docs": [
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 14 轻薄本 产品规格.md",
+     "清逸 AirBook 13 极致轻薄 产品规格.md"
+    ],
+    "latency_ms": 9353.579900000113,
+    "embed_ms": 0.007699999969190685,
+    "retrieve_ms": 17.060099999980594,
+    "rerank_ms": 9336.512100000164
+   },
+   {
+    "id": "D05",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 8956.465100000514,
+    "embed_ms": 0.009000000318337698,
+    "retrieve_ms": 17.80289999987872,
+    "rerank_ms": 8938.653200000317
+   },
+   {
+    "id": "D06",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+    ],
+    "latency_ms": 9234.111300000222,
+    "embed_ms": 0.007499999810534064,
+    "retrieve_ms": 17.255000000204745,
+    "rerank_ms": 9216.848800000207
+   },
+   {
+    "id": "D07",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 1.0,
+    "ndcg5": 1.0,
+    "hit_docs": [
+     "星耀 GamePro 16 游戏本 产品规格.md"
+    ],
+    "latency_ms": 9330.150300000241,
+    "embed_ms": 0.008600000001024455,
+    "retrieve_ms": 17.276999999921827,
+    "rerank_ms": 9312.864700000318
+   },
+   {
+    "id": "D08",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 9009.343299999728,
+    "embed_ms": 0.008199999683711212,
+    "retrieve_ms": 17.11509999995542,
+    "rerank_ms": 8992.220000000088
+   },
+   {
+    "id": "D09",
+    "type": "multi_turn",
+    "recall12": 1.0,
+    "mrr": 0.5,
+    "ndcg5": 0.6309297535714575,
+    "hit_docs": [
+     "星耀 Note 14 Pro.md"
+    ],
+    "latency_ms": 8936.642799999845,
+    "embed_ms": 0.006299999768089037,
+    "retrieve_ms": 16.335799999978917,
+    "rerank_ms": 8920.300700000098
+   },
+   {
+    "id": "D10",
+    "type": "multi_turn",
+    "recall12": 0.0,
+    "mrr": 0.0,
+    "ndcg5": 0.0,
+    "hit_docs": [],
+    "latency_ms": 8957.73840000038,
+    "embed_ms": 0.0069000002440589014,
+    "retrieve_ms": 16.76530000031562,
+    "rerank_ms": 8940.96619999982
+   }
+  ]
+ }
+}

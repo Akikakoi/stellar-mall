@@ -1,0 +1,373 @@
+{
+ "description": "RAG 检索链路消融实验评测集。相关标注为文档级：KB 文档用 doc_name（.md），商品 SPU 文档用 SPU:商品名。命中判定：chunk 的 meta.doc_name 命中标注，或 meta.source=='mall_spu' 且 'SPU:'+meta.name 命中标注。",
+ "metrics": [
+  "recall@12",
+  "mrr",
+  "ndcg@5",
+  "latency_ms"
+ ],
+ "queries": [
+  {
+   "id": "A01",
+   "type": "exact",
+   "query": "骁龙 7+ Gen3 处理器的手机有哪些",
+   "relevant": [
+    "星耀X100青春版-产品参数.md"
+   ]
+  },
+  {
+   "id": "A02",
+   "type": "exact",
+   "query": "星耀 X100 Pro Max 支持卫星通信吗",
+   "relevant": [
+    "星耀X100ProMax-产品参数.md"
+   ]
+  },
+  {
+   "id": "A03",
+   "type": "exact",
+   "query": "清逸 AirBook 14 的屏幕参数",
+   "relevant": [
+    "清逸 AirBook 14 轻薄本 产品规格.md"
+   ]
+  },
+  {
+   "id": "A04",
+   "type": "exact",
+   "query": "AX3000 路由器支持哪些无线协议",
+   "relevant": [
+    "路由器.md"
+   ]
+  },
+  {
+   "id": "A05",
+   "type": "exact",
+   "query": "65W GaN 氮化镓充电器有几个接口",
+   "relevant": [
+    "充电器.md"
+   ]
+  },
+  {
+   "id": "A06",
+   "type": "exact",
+   "query": "20000mAh 移动电源可以带上飞机吗",
+   "relevant": [
+    "充电宝.md"
+   ]
+  },
+  {
+   "id": "A07",
+   "type": "exact",
+   "query": "搭载 i9-14900HX 的游戏本推荐",
+   "relevant": [
+    "星耀 GamePro 16 游戏本 产品规格.md",
+    "清逸 ProBook 16 高性能本 产品规格.md"
+   ]
+  },
+  {
+   "id": "A08",
+   "type": "exact",
+   "query": "RTX 4070 独显的笔记本有哪些",
+   "relevant": [
+    "清逸 ProBook 16 高性能本 产品规格.md",
+    "星耀 Creator 14 设计师本 产品规格.md"
+   ]
+  },
+  {
+   "id": "A09",
+   "type": "exact",
+   "query": "星耀 Band 9 支持多少种运动模式",
+   "relevant": [
+    "星耀 Band 9 智能手环 产品规格.md"
+   ]
+  },
+  {
+   "id": "A10",
+   "type": "exact",
+   "query": "天玑 9300 芯片的平板",
+   "relevant": [
+    "星耀 Tab Max 14.6 产品规格.md"
+   ]
+  },
+  {
+   "id": "B01",
+   "type": "semantic",
+   "query": "适合专业摄影爱好者、传感器底很大的旗舰手机",
+   "relevant": [
+    "星耀 X200 5G 影像旗舰.md",
+    "星耀X100ProMax-产品参数.md"
+   ]
+  },
+  {
+   "id": "B02",
+   "type": "semantic",
+   "query": "预算一千多，给孩子买的第一部 5G 手机",
+   "relevant": [
+    "星耀 A60 5G 学生机.md"
+   ]
+  },
+  {
+   "id": "B03",
+   "type": "semantic",
+   "query": "经常出差，想要机身轻、续航久的办公笔记本",
+   "relevant": [
+    "清逸 AirBook 13 极致轻薄 产品规格.md",
+    "清逸 AirBook 14 轻薄本 产品规格.md"
+   ]
+  },
+  {
+   "id": "B04",
+   "type": "semantic",
+   "query": "女孩子化妆包里能塞下的翻盖式手机",
+   "relevant": [
+    "星耀 Flip 折叠屏.md"
+   ]
+  },
+  {
+   "id": "B05",
+   "type": "semantic",
+   "query": "孩子上网课，屏幕看着眼睛不难受的学习平板",
+   "relevant": [
+    "星耀 Tab Lite 10.4 产品规格.md",
+    "星耀 Tab Air 11 产品规格.md"
+   ]
+  },
+  {
+   "id": "B06",
+   "type": "semantic",
+   "query": "能测心电图和血压趋势的智能手表",
+   "relevant": [
+    "星耀 Watch 3 Pro 智能手表 产品规格.md",
+    "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+   ]
+  },
+  {
+   "id": "B07",
+   "type": "semantic",
+   "query": "戴着睡觉也几乎没感觉的健康监测穿戴设备",
+   "relevant": [
+    "星耀 SmartRing Nova 智能戒指 产品规格.md"
+   ]
+  },
+  {
+   "id": "B08",
+   "type": "semantic",
+   "query": "坐高铁飞机时隔音效果好的真无线耳机",
+   "relevant": [
+    "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+   ]
+  },
+  {
+   "id": "B09",
+   "type": "semantic",
+   "query": "考研党看网课用的大屏平板，价格要实惠",
+   "relevant": [
+    "星耀 Tab Lite 10.4 产品规格.md"
+   ]
+  },
+  {
+   "id": "B10",
+   "type": "semantic",
+   "query": "健身房记训练用、好久不用充电的智能手环",
+   "relevant": [
+    "星耀 Band 8 智能手环 产品规格.md",
+    "星耀 Band 9 智能手环 产品规格.md"
+   ]
+  },
+  {
+   "id": "C01",
+   "type": "multi_constraint",
+   "query": "5500mAh 电池配 120W 快充的手机",
+   "relevant": [
+    "玉米手机 10 Pro.md",
+    "星耀 Note 14 Pro.md"
+   ]
+  },
+  {
+   "id": "C02",
+   "type": "multi_constraint",
+   "query": "16GB 大内存的旗舰手机",
+   "relevant": [
+    "星耀X100ProMax-产品参数.md",
+    "星耀 X200 5G 影像旗舰.md",
+    "苍穹 Aether N8 Max.md",
+    "灵耀 Lumina Z9 Ultra.md",
+    "星域 Stellar X1 Pro.md"
+   ]
+  },
+  {
+   "id": "C03",
+   "type": "multi_constraint",
+   "query": "支持无线充电的折叠屏手机",
+   "relevant": [
+    "星耀 Flip 折叠屏.md"
+   ]
+  },
+  {
+   "id": "C04",
+   "type": "multi_constraint",
+   "query": "屏幕 14 英寸及以上、带独立显卡的笔记本电脑",
+   "relevant": [
+    "清逸 ProBook 16 高性能本 产品规格.md",
+    "星耀 GamePro 16 游戏本 产品规格.md",
+    "星耀 Creator 14 设计师本 产品规格.md"
+   ]
+  },
+  {
+   "id": "C05",
+   "type": "multi_constraint",
+   "query": "2K 分辨率以上的 OLED 平板",
+   "relevant": [
+    "星耀 Tab Pro 12.4 产品规格.md",
+    "星耀 Tab Max 14.6 产品规格.md"
+   ]
+  },
+  {
+   "id": "C06",
+   "type": "multi_constraint",
+   "query": "峰值亮度 3000nit 以上的手机",
+   "relevant": [
+    "玉米手机 10 Pro.md",
+    "苍穹 Aether N8 Max.md",
+    "星耀 X200 5G 影像旗舰.md",
+    "灵耀 Lumina Z9 Ultra.md"
+   ]
+  },
+  {
+   "id": "C07",
+   "type": "multi_constraint",
+   "query": "带 eSIM 能独立打电话的智能手表",
+   "relevant": [
+    "星耀 Watch 3 Pro 智能手表 产品规格.md",
+    "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+   ]
+  },
+  {
+   "id": "C08",
+   "type": "multi_constraint",
+   "query": "能同时给三台设备充电的氮化镓充电器",
+   "relevant": [
+    "充电器.md"
+   ]
+  },
+  {
+   "id": "C09",
+   "type": "multi_constraint",
+   "query": "支持 Mesh 组网扩展覆盖的无线路由器",
+   "relevant": [
+    "路由器.md"
+   ]
+  },
+  {
+   "id": "C10",
+   "type": "multi_constraint",
+   "query": "可以插存储卡扩容的平板电脑",
+   "relevant": [
+    "星耀 Tab Lite 10.4 产品规格.md"
+   ]
+  },
+  {
+   "id": "D01",
+   "type": "multi_turn",
+   "context": "星耀 X100 Pro Max 卖多少钱",
+   "query": "它和 X200 哪个拍照更好",
+   "relevant": [
+    "星耀X100ProMax-产品参数.md",
+    "星耀 X200 5G 影像旗舰.md"
+   ],
+   "oracle": "星耀 X100 Pro Max 和星耀 X200 5G 影像旗舰哪个拍照更好"
+  },
+  {
+   "id": "D02",
+   "type": "multi_turn",
+   "context": "介绍一下玉米手机 10 Pro",
+   "query": "这款手机的续航和快充表现怎么样",
+   "relevant": [
+    "玉米手机 10 Pro.md"
+   ],
+   "oracle": "玉米手机 10 Pro 的电池容量和有线快充功率是多少"
+  },
+  {
+   "id": "D03",
+   "type": "multi_turn",
+   "context": "我想买台平板用来画画",
+   "query": "屏幕最大那款对触控笔的支持怎么样",
+   "relevant": [
+    "星耀 Tab Max 14.6 产品规格.md"
+   ],
+   "oracle": "星耀 Tab Max 14.6 对触控笔的支持怎么样"
+  },
+  {
+   "id": "D04",
+   "type": "multi_turn",
+   "context": "清逸 AirBook 13 什么价格",
+   "query": "它比 AirBook 14 轻多少",
+   "relevant": [
+    "清逸 AirBook 13 极致轻薄 产品规格.md",
+    "清逸 AirBook 14 轻薄本 产品规格.md"
+   ],
+   "oracle": "清逸 AirBook 13 比 清逸 AirBook 14 轻多少"
+  },
+  {
+   "id": "D05",
+   "type": "multi_turn",
+   "context": "店里有哪些智能手表",
+   "query": "能独立插卡打电话的那款续航多久",
+   "relevant": [
+    "星耀 Watch 3 Pro 智能手表 产品规格.md",
+    "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+   ],
+   "oracle": "星耀 Watch 4 Ultra 旗舰手表的续航多久"
+  },
+  {
+   "id": "D06",
+   "type": "multi_turn",
+   "context": "星耀 Buds Pro 3 降噪深度是多少",
+   "query": "开着降噪能连续用几个小时",
+   "relevant": [
+    "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+   ],
+   "oracle": "星耀 Buds Pro 3 开着降噪能连续用几个小时"
+  },
+  {
+   "id": "D07",
+   "type": "multi_turn",
+   "context": "帮我看看星耀 GamePro 16",
+   "query": "这台机器的散热规格怎么样",
+   "relevant": [
+    "星耀 GamePro 16 游戏本 产品规格.md"
+   ],
+   "oracle": "星耀 GamePro 16 游戏本的散热规格怎么样"
+  },
+  {
+   "id": "D08",
+   "type": "multi_turn",
+   "context": "苍穹 Aether N8 Max 屏幕多大",
+   "query": "它的峰值亮度能到多少",
+   "relevant": [
+    "苍穹 Aether N8 Max.md"
+   ],
+   "oracle": "苍穹 Aether N8 Max 的峰值亮度能到多少"
+  },
+  {
+   "id": "D09",
+   "type": "multi_turn",
+   "context": "看看星耀 Note 14 Pro 吧",
+   "query": "12 加 512 那个版本现在卖多少",
+   "relevant": [
+    "星耀 Note 14 Pro.md"
+   ],
+   "oracle": "星耀 Note 14 Pro 12GB+512GB 版本现在卖多少钱"
+  },
+  {
+   "id": "D10",
+   "type": "multi_turn",
+   "context": "我想要一个能监测睡眠的智能戒指",
+   "query": "防水等级能戴着游泳吗",
+   "relevant": [
+    "星耀 SmartRing Nova 智能戒指 产品规格.md"
+   ],
+   "oracle": "星耀 SmartRing Nova 的防水等级能戴着游泳吗"
+  }
+ ]
+}

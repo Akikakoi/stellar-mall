@@ -1,0 +1,3142 @@
+[
+ {
+  "id": "mall_spu_23_0",
+  "meta": {
+   "name": "大米手机 10 Pro",
+   "chunk_index": 0,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "on_shelf"
+   ],
+   "status": 1,
+   "total_chunks": 1,
+   "min_price": 2699.0,
+   "biz_type": "SPU",
+   "biz_id": "23",
+   "spu_id": 23,
+   "source": "mall_spu",
+   "main_image": "https://tse2-mm.cn.bing.net/th/id/OIP-C.-keO3mAmSxdWGLVDNODclAHaE7?w=251&h=180&c=7&r=0&o=7&pid=1.7&rm=3"
+  },
+  "content": "# 商品：大米手机 10 Pro\n**基本信息**：商品ID(SPU_ID)：23 | 参考最低价：¥2699.00 | SKU 规格数：1 | 标签：mall_spu、cat:1、on_shelf\n\n## 详情描述\n很好用的手机"
+ },
+ {
+  "id": "mall_spu_157_0",
+  "meta": {
+   "total_chunks": 3,
+   "main_image": "https://picsum.photos/seed/tab-pro-12/400/400",
+   "biz_id": "157",
+   "status": 1,
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "spu_id": 157,
+   "name": "星耀 Tab Pro 12.4",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "min_price": 4299.0,
+   "chunk_index": 0,
+   "category_path": "平板电脑"
+  },
+  "content": "# 商品：星耀 Tab Pro 12.4\n> 12.4\" OLED · 骁龙8Gen3 · 10000mAh · 星耀笔\n**基本信息**：商品ID(SPU_ID)：157 | 分类：平板电脑 | 参考最低价：¥4299.00 | SKU 规格数：4 | 标签：mall_spu、cat:10、is_new、is_hot、on_shelf\n\n## 详情描述\n星耀 Tab Pro 12.4星耀 Tab Pro 12.4 是星耀品牌旗舰级平板电脑，搭载12.4英寸2.8K OLED屏幕，支持120Hz自适应刷新率和HDR10+显示，峰值亮度达1600nit。内置高通骁龙8 Gen 3处理器，配备12GB LPDDR5X内存，提供256GB/512GB UFS 4.0存储选择。内置10000mAh大容量电池，支持67W有线快充和20W无线充电。支持星耀笔（4096级压感、2ms延迟）、磁吸键盘和星耀互联跨设备协同。前置1200万超广角摄像头，后置5000万主摄+1300万超广角双摄系统。四扬声器杜比全景声，支持WiFi 7和蓝牙5.4，可选5G蜂窝网络版本。金属一体化机身，厚度仅6.5mm，重量约580g。核心卖点12.4\" 2.8K OLED 120Hz 屏幕 — 1600nit 峰值亮度骁龙8 Gen 3 + 12GB LPDDR5X — 旗舰性能10000mAh + 67W快充 + 20W无线充星耀笔 4096级压感 2ms延迟四扬声器杜比全景声"
+ },
+ {
+  "id": "mall_spu_157_2",
+  "meta": {
+   "chunk_index": 2,
+   "main_image": "https://picsum.photos/seed/tab-pro-12/400/400",
+   "spu_id": 157,
+   "status": 1,
+   "total_chunks": 3,
+   "name": "星耀 Tab Pro 12.4",
+   "min_price": 4299.0,
+   "biz_type": "SPU",
+   "category_path": "平板电脑",
+   "source": "mall_spu",
+   "biz_id": "157",
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ]
+  },
+  "content": "2G;存储:512G;颜色:星云灰 | ¥4799.00 | 60 |\n| 星耀 Tab Pro 12.4 · 5G版 12G+256G 极光蓝 / 网络:5G;内存:12G;存储:256G;颜色:极光蓝 | ¥4999.00 | 50 |"
+ },
+ {
+  "id": "mall_spu_158_0",
+  "meta": {
+   "spu_id": 158,
+   "name": "星耀 Tab Air 11",
+   "main_image": "https://picsum.photos/seed/tab-air-11/400/400",
+   "status": 1,
+   "min_price": 2199.0,
+   "total_chunks": 3,
+   "source": "mall_spu",
+   "chunk_index": 0,
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "on_shelf"
+   ],
+   "biz_type": "SPU",
+   "biz_id": "158",
+   "category_path": "平板电脑"
+  },
+  "content": "# 商品：星耀 Tab Air 11\n> 11\" 2.5K LCD · 490g · 骁龙7+Gen3 · 8000mAh\n**基本信息**：商品ID(SPU_ID)：158 | 分类：平板电脑 | 参考最低价：¥2199.00 | SKU 规格数：4 | 标签：mall_spu、cat:10、is_new、on_shelf\n\n## 详情描述\n星耀 Tab Air 11星耀 Tab Air 11 定位中端轻薄平板，整机仅490g，厚度6.2mm，极致便携。配备11英寸2.5K分辨率LCD屏幕，支持144Hz高刷和DC调光，通过莱茵TUV低蓝光认证。搭载高通骁龙7+ Gen3处理器和8GB/12GB LPDDR5内存，日常使用流畅无压力。内置8000mAh电池，支持45W快充，续航长达14小时。支持星耀笔（4096级压感）和磁吸键盘。四扬声器杜比音效，前置800万摄像头支持人脸解锁，后置1300万像素主摄。提供WiFi版，银翼白、深空黑双色可选。核心卖点490g超轻机身 — 单手握持无负担11\" 2.5K 144Hz LCD — DC调光护眼骁龙7+Gen3 — 性能功耗完美平衡8000mAh + 45W快充 — 14小时续航全金属机身仅6.2mm"
+ },
+ {
+  "id": "mall_spu_158_2",
+  "meta": {
+   "status": 1,
+   "biz_id": "158",
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "on_shelf"
+   ],
+   "total_chunks": 3,
+   "category_path": "平板电脑",
+   "name": "星耀 Tab Air 11",
+   "source": "mall_spu",
+   "chunk_index": 2,
+   "min_price": 2199.0,
+   "biz_type": "SPU",
+   "main_image": "https://picsum.photos/seed/tab-air-11/400/400",
+   "spu_id": 158
+  },
+  "content": "储:256G;颜色:深空黑 | ¥2499.00 | 120 |\n| 星耀 Tab Air 11 · WiFi版 12G+128G 银翼白 / 网络:WiFi;内存:12G;存储:128G;颜色:银翼白 | ¥2499.00 | 100 |"
+ },
+ {
+  "id": "mall_spu_159_0",
+  "meta": {
+   "min_price": 6299.0,
+   "total_chunks": 2,
+   "main_image": "https://picsum.photos/seed/tab-max-14/400/400",
+   "category_path": "平板电脑",
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "biz_id": "159",
+   "biz_type": "SPU",
+   "spu_id": 159,
+   "chunk_index": 0,
+   "name": "星耀 Tab Max 14.6",
+   "source": "mall_spu",
+   "status": 1
+  },
+  "content": "# 商品：星耀 Tab Max 14.6\n> 14.6\" 3K OLED · 天玑9300 · 星耀笔Pro · 12000mAh\n**基本信息**：商品ID(SPU_ID)：159 | 分类：平板电脑 | 参考最低价：¥6299.00 | SKU 规格数：4 | 标签：mall_spu、cat:10、is_new、is_hot、on_shelf\n\n## 详情描述\n星耀 Tab Max 14.6星耀 Tab Max 14.6 是专为创意工作者打造的超大屏旗舰平板。配备14.6英寸3K分辨率OLED屏幕（3000×2000），120Hz自适应刷新率，P3广色域Delta E小于1出厂校色，支持10bit色深。搭载联发科天玑9300旗舰处理器和16GB LPDDR5T内存。12000mAh超大电池支持65W快充和反向无线充电。标配星耀笔 Pro（8192级压感，1ms延迟，倾角感应，悬空笔触预览），可选磁吸全尺寸键盘。8扬声器空间音频系统，前置1200万+ToF深感摄像头，后置5000万主摄+1300万超广角+800万长焦三摄。雷电4接口×2，支持外接4K显示器。可选5G版，机身厚度6.8mm，重约720g。核心卖点14.6\" 3K OLED — P3色域 Delta E天玑9300 + 16GB LPDDR5T — 移动工作站星耀笔 Pro — 8192级压感 1ms延迟12000mAh超大电池 + 65W快充8扬声器空间音频 + 雷电4双接口"
+ },
+ {
+  "id": "mall_spu_160_0",
+  "meta": {
+   "total_chunks": 3,
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "on_shelf"
+   ],
+   "biz_id": "160",
+   "spu_id": 160,
+   "status": 1,
+   "name": "星耀 Tab Lite 10.4",
+   "min_price": 1299.0,
+   "main_image": "https://picsum.photos/seed/tab-lite-10/400/400",
+   "category_path": "平板电脑",
+   "chunk_index": 0
+  },
+  "content": "# 商品：星耀 Tab Lite 10.4\n> 10.4\" 2K屏 · 骁龙6Gen1 · 7500mAh · 学生优选\n**基本信息**：商品ID(SPU_ID)：160 | 分类：平板电脑 | 参考最低价：¥1299.00 | SKU 规格数：4 | 标签：mall_spu、cat:10、on_shelf\n\n## 详情描述\n星耀 Tab Lite 10.4星耀 Tab Lite 10.4 是为学生和家庭用户打造的入门级平板。配备10.4英寸2K分辨率LCD屏幕（2000×1200），通过莱茵TUV低蓝光认证和类纸显示模式。搭载高通骁龙6 Gen 1处理器和6GB/8GB LPDDR4X内存，日常网课、视频、阅读流畅运行。7500mAh大电池支持25W快充，续航长达13小时。支持星耀笔 Lite（2048级压感）和磁吸键盘。双扬声器，前置500万+后置800万摄像头，支持MicroSD扩展（最高1TB）。磨砂机身，厚度7.5mm，重约460g。WiFi版，晴空蓝、星夜灰双色可选。核心卖点10.4\" 2K护眼大屏 — 类纸模式阅读舒适骁龙6Gen1 — 够用不卡顿7500mAh — 13小时超长续航学生模式 — 家长管控+专注学习MicroSD扩展 1TB — 海量存储"
+ },
+ {
+  "id": "mall_spu_160_2",
+  "meta": {
+   "total_chunks": 3,
+   "chunk_index": 2,
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "on_shelf"
+   ],
+   "biz_type": "SPU",
+   "category_path": "平板电脑",
+   "min_price": 1299.0,
+   "main_image": "https://picsum.photos/seed/tab-lite-10/400/400",
+   "name": "星耀 Tab Lite 10.4",
+   "source": "mall_spu",
+   "status": 1,
+   "spu_id": 160,
+   "biz_id": "160"
+  },
+  "content": ":256G;颜色:星夜灰 | ¥1499.00 | 200 |\n| 星耀 Tab Lite 10.4 · WiFi版 8G+128G 晴空蓝 / 网络:WiFi;内存:8G;存储:128G;颜色:晴空蓝 | ¥1399.00 | 220 |"
+ },
+ {
+  "id": "mall_spu_129_0",
+  "meta": {
+   "name": "星耀 Creator 14 设计师本",
+   "source": "mall_spu",
+   "category_path": "笔记本电脑",
+   "main_image": "https://picsum.photos/seed/laptop-creator14/400/400",
+   "chunk_index": 0,
+   "spu_id": 129,
+   "tags": [
+    "mall_spu",
+    "cat:4",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "biz_type": "SPU",
+   "min_price": 12999.0,
+   "biz_id": "129",
+   "total_chunks": 3,
+   "status": 1
+  },
+  "content": "# 商品：星耀 Creator 14 设计师本\n> RTX 4070 · 3.2K OLED · 100% DCI-P3\n**基本信息**：商品ID(SPU_ID)：129 | 分类：笔记本电脑 | 参考最低价：¥12999.00 | SKU 规格数：4 | 标签：mall_spu、cat:4、is_new、is_hot、on_shelf\n\n## 详情描述\n专为创意工作者打造的高性能笔记本。3.2K OLED 屏幕覆盖 100% DCI-P3 色域，每台出厂校色 Delta E < 1。RTX 4070 独显可胜任 3D 渲染、视频剪辑、AI 绘画等工作。\n\n项目：规格\n处理器：Intel Core Ultra 9 285H\n显卡：NVIDIA GeForce RTX 4070 8GB (100W)\n内存：64GB LPDDR5x\n存储：2TB PCIe 4.0 SSD\n屏幕：14.5 寸 3200×2000 OLED，120Hz，100% DCI-P3，HDR500\n电池：76Wh\n重量：1.65kg\n接口：2×Thunderbolt 4, 1×USB-A, HDMI 2.1, SD Express 读卡器"
+ },
+ {
+  "id": "mall_spu_136_0",
+  "meta": {
+   "main_image": "https://picsum.photos/seed/watch-ultra/400/400",
+   "chunk_index": 0,
+   "biz_type": "SPU",
+   "category_path": "智能穿戴",
+   "min_price": 3299.0,
+   "spu_id": 136,
+   "biz_id": "136",
+   "source": "mall_spu",
+   "status": 1,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "total_chunks": 3,
+   "name": "星耀 Watch 4 Ultra 旗舰手表"
+  },
+  "content": "# 商品：星耀 Watch 4 Ultra 旗舰手表\n> 钛合金 · 蓝宝石玻璃 · 双频GPS · 14天续航\n**基本信息**：商品ID(SPU_ID)：136 | 分类：智能穿戴 | 参考最低价：¥3299.00 | SKU 规格数：1 | 标签：mall_spu、cat:8、is_new、is_hot、on_shelf\n\n## 详情描述\n星耀旗舰智能手表，采用 TC4 钛合金表壳和蓝宝石玻璃表镜。支持 100+ 运动模式、双频五星定位、ECG 心电图、血氧监测。14 天超长续航，适合户外运动和商务佩戴。\n\n项目：规格\n表壳：TC4 钛合金，49mm\n屏幕：1.5 寸 LTPO AMOLED，2000nit 峰值亮度\n表镜：蓝宝石玻璃\n定位：双频五星（GPS+北斗+GLONASS+Galileo+QZSS）\n传感器：心率(8通道)、血氧、ECG、体温、气压、地磁\n防水：10ATM（100米）+ IP68\n电池：590mAh（日常 14 天，重度 8 天）\n系统：Stellar Wear OS"
+ },
+ {
+  "id": "mall_spu_137_0",
+  "meta": {
+   "total_chunks": 2,
+   "source": "mall_spu",
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "on_shelf"
+   ],
+   "biz_id": "137",
+   "biz_type": "SPU",
+   "name": "星耀 Band 9 智能手环",
+   "chunk_index": 0,
+   "main_image": "https://picsum.photos/seed/band9/400/400",
+   "min_price": 329.0,
+   "status": 1,
+   "category_path": "智能穿戴",
+   "spu_id": 137
+  },
+  "content": "# 商品：星耀 Band 9 智能手环\n> 1.74寸AMOLED · 120种运动 · 磁吸快充\n**基本信息**：商品ID(SPU_ID)：137 | 分类：智能穿戴 | 参考最低价：¥329.00 | SKU 规格数：3 | 标签：mall_spu、cat:8、on_shelf\n\n## 详情描述\n轻巧时尚的智能手环，9.8mm 超薄机身仅重 18g。1.74 寸方屏大屏，120 种运动模式，支持血氧、心率、睡眠全天候监测。磁吸快充 15 分钟可用一整天。\n\n项目：规格\n屏幕：1.74 寸 AMOLED 方屏，336×480\n亮度：最高 800nit\n传感器：心率、血氧、加速度计、陀螺仪\n防水：5ATM（50米）\n电池：300mAh（日常 10 天，重度 6 天）\n充电：磁吸快充，15 分钟充 50%\n重量：18g（不含表带）\n系统：Stellar Lite OS\n\n运动爱好者（跑步、骑行、游泳数据记录）\n睡眠质量关注者（详细睡眠分析）\n预算有限的智能穿戴入门用户\n学生党（消息提醒、课程提醒）"
+ },
+ {
+  "id": "mall_spu_138_0",
+  "meta": {
+   "status": 1,
+   "name": "星耀 Buds Pro 3 降噪耳机",
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "category_path": "智能穿戴",
+   "total_chunks": 3,
+   "biz_type": "SPU",
+   "main_image": "https://picsum.photos/seed/buds-pro3/400/400",
+   "chunk_index": 0,
+   "source": "mall_spu",
+   "biz_id": "138",
+   "min_price": 1299.0,
+   "spu_id": 138
+  },
+  "content": "# 商品：星耀 Buds Pro 3 降噪耳机\n> 自适应降噪 · 空间音频 · 36小时续航\n**基本信息**：商品ID(SPU_ID)：138 | 分类：智能穿戴 | 参考最低价：¥1299.00 | SKU 规格数：2 | 标签：mall_spu、cat:8、is_new、on_shelf\n\n## 详情描述\n旗舰真无线降噪耳机，自适应 ANC 降噪深度达 55dB。支持空间音频头部追踪，Hi-Res 认证 LDAC 高清传输。IP54 防水防汗，适合运动和日常通勤。\n\n项目：规格\n降噪：自适应 ANC，最大 55dB\n驱动单元：11mm 镀铍振膜 + 6mm 高音单元（同轴双单元）\n蓝牙：Bluetooth 5.4，支持 LE Audio\n音频编码：LDAC, AAC, SBC, LC3\n续航：耳机 9 小时 + 充电盒 27 小时（共 36 小时，ANC 开）\n充电：USB-C + Qi 无线充电\n防水：IP54（耳机）\n重量：单耳 5.2g"
+ },
+ {
+  "id": "mall_spu_138_2",
+  "meta": {
+   "chunk_index": 2,
+   "main_image": "https://picsum.photos/seed/buds-pro3/400/400",
+   "category_path": "智能穿戴",
+   "spu_id": 138,
+   "source": "mall_spu",
+   "biz_type": "SPU",
+   "status": 1,
+   "biz_id": "138",
+   "name": "星耀 Buds Pro 3 降噪耳机",
+   "min_price": 1299.0,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "total_chunks": 3
+  },
+  "content": "\n| --- | --- | --- |\n| 星耀 Buds Pro 3 · 陶瓷白 / 颜色:陶瓷白 | ¥1299.00 | 200 |\n| 星耀 Buds Pro 3 · 石墨黑 / 颜色:石墨黑 | ¥1499.00 | 150 |"
+ },
+ {
+  "id": "mall_spu_139_0",
+  "meta": {
+   "main_image": "https://picsum.photos/seed/glass-ar/400/400",
+   "total_chunks": 3,
+   "status": 1,
+   "source": "mall_spu",
+   "spu_id": 139,
+   "min_price": 2799.0,
+   "biz_type": "SPU",
+   "category_path": "智能穿戴",
+   "chunk_index": 0,
+   "biz_id": "139",
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "name": "星耀 AR Glasses Air 智能眼镜"
+  },
+  "content": "# 商品：星耀 AR Glasses Air 智能眼镜\n> Micro-OLED · 201寸巨幕 · 49g超轻\n**基本信息**：商品ID(SPU_ID)：139 | 分类：智能穿戴 | 参考最低价：¥2799.00 | SKU 规格数：1 | 标签：mall_spu、cat:8、is_new、on_shelf\n\n## 详情描述\n新一代消费级 AR 智能眼镜。仅重 49g，佩戴如普通眼镜般舒适。Micro-OLED 屏幕投射等效 4 米 201 寸巨幕。支持连接手机、电脑、游戏机，随时随地享受大屏体验。\n\n项目：规格\n显示：双 Micro-OLED，1920×1080 每眼\nFOV：46°\n等效屏幕：4 米距离 201 寸\n亮度：入眼 600nit\n刷新率：120Hz\n连接：USB-C（DP Alt Mode）\n音频：双扬声器 + 双麦克风\n重量：49g\n近视适配：支持 0-600° 屈光度调节"
+ },
+ {
+  "id": "mall_spu_140_0",
+  "meta": {
+   "total_chunks": 2,
+   "status": 1,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "biz_id": "140",
+   "category_path": "智能穿戴",
+   "main_image": "https://picsum.photos/seed/ring-nova/400/400",
+   "biz_type": "SPU",
+   "min_price": 999.0,
+   "spu_id": 140,
+   "name": "星耀 SmartRing Nova 智能戒指",
+   "source": "mall_spu",
+   "chunk_index": 0
+  },
+  "content": "# 商品：星耀 SmartRing Nova 智能戒指\n> 钛合金 · 健康监测 · 7天续航 · 3g超轻\n**基本信息**：商品ID(SPU_ID)：140 | 分类：智能穿戴 | 参考最低价：¥999.00 | SKU 规格数：1 | 标签：mall_spu、cat:8、is_new、on_shelf\n\n## 详情描述\n星耀首款智能戒指，采用医用级钛合金材质。内置心率、血氧、体温传感器，全天候无感佩戴。3g 超轻设计，适合睡眠监测和不习惯戴手表的用户。\n\n项目：规格\n材质：TC4 钛合金 + 陶瓷内圈\n传感器：PPG 心率、SpO2 血氧、皮肤温度、加速度计\n防水：IP68\n电池：22mAh（7 天续航）\n充电：无线充电底座，60 分钟充满\n重量：3-4g（取决于尺码）\n尺寸：7/8/9/10/11/12 号（美码）\n\n睡眠监测：戒指是睡眠监测的理想形态，比手表更无感\n静息心率：24 小时连续监测，异常心率提醒\n血氧：夜间自动监测，低血氧预警\n体温趋势：基础体温变化跟踪，女性生理周期预测\n活动记录：步数、卡路里、活动时长"
+ },
+ {
+  "id": "doc6_chunk0",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀X100青春版",
+    "中端"
+   ],
+   "doc_id": "6",
+   "source_file": "data\\uploads\\381db89015_星耀X100青春版-产品参数.md",
+   "doc_name": "星耀X100青春版-产品参数.md",
+   "chunk_index": 0
+  },
+  "content": "# 星耀 X100 青春版 产品参数与配置\n\n## 产品概述\n\n星耀 X100 青春版是星耀科技针对年轻用户打造的高性价比中端机型，搭载骁龙 7+ Gen3 高性能芯片，配备 5000mAh 大电池与 67W 快充，兼顾日常流畅体验与长续航。全系提供星夜黑、晴雪白、薄荷绿、樱花粉四款青春配色。\n\n---\n\n## 一、核心参数\n\n| 参数项 | 规格 |\n|--------|------|\n| 产品型号 | 星耀 X100 青春版 |\n| 上市时间 | 2026 年 3 月 |\n| 处理器 | 骁龙 7+ Gen3（4nm 制程） |\n| CPU 架构 | 1×Cortex-X4 @2.8GHz + 4×Cortex-A720 @2.6GHz + 3×Cortex-A520 @1.9GHz |\n| GPU | Adreno 732 @950MHz |\n| 内存 | 8GB / 12GB LPDDR5 6400Mbps |\n| 存储 | 128GB / 256GB UFS 3.1 |\n| 屏幕 | 6.67 英寸 AMOLED 柔性直屏 |\n| 分辨率 | 2712 × 1220（446 PPI） |\n| 刷新率 | 120Hz 智能刷新率（60/90/120Hz 三档） |\n| 触控采样率 | 240Hz（游戏模式瞬时 480Hz） |\n| 峰值亮度 | 2400nit（局部峰值）/ 1200nit（全局） |\n| 调光方式 | 1920Hz 高频 PWM 调光 + 类 DC 调光 |\n| 色深 | 12bit，10.7 亿色 |\n| 色域 | 100% DCI-P3 广色域 |\n| 屏幕保护 | 康宁大猩猩玻璃 Victus |\n| 解锁方式 | 光学屏下指纹 + 面部识别 |\n\n---\n\n## 二、影像系统\n\n### 后置双摄\n\n| 镜头 | 规格 |\n|------|------|\n| 主摄 | 50MP 索尼 IMX890，1/1.56 英寸，f/1.8 光圈，OIS 光学防抖 |\n| 超广角 | 8MP 索尼 IMX355，f/2.2 光圈，112° 超广角 |\n\n### 后置视频拍摄\n\n- 最高支持 4K@30fps 视频录制\n- 支持 1080P@60fps 视频录制\n- 支持 EIS 电子防抖\n- 支持延时摄影、慢动作（720P@960fps）\n\n### 前置摄像头"
+ },
+ {
+  "id": "doc6_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "source_file": "data\\uploads\\381db89015_星耀X100青春版-产品参数.md",
+   "doc_name": "星耀X100青春版-产品参数.md",
+   "doc_id": "6",
+   "tags": [
+    "智能手机",
+    "星耀X100青春版",
+    "中端"
+   ]
+  },
+  "content": "### 后置视频拍摄\n\n- 最高支持 4K@30fps 视频录制\n- 支持 1080P@60fps 视频录制\n- 支持 EIS 电子防抖\n- 支持延时摄影、慢动作（720P@960fps）\n\n### 前置摄像头\n\n- 16MP 三星 S5K3P9，f/2.4 光圈\n- 支持 1080P@30fps 视频录制\n- 支持 AI 美颜、人像模式、夜景自拍\n\n### AI 影像功能\n\n- AI 场景识别（20+ 场景）\n- AI 魔法消除（一键消除路人、杂物）\n- AI 文档扫描（自动矫正、增强）\n- 魔法换天、魔法分身\n- 声控拍照、手势拍照\n\n---\n\n## 三、电池与充电\n\n| 项目 | 规格 |\n|------|------|\n| 电池容量 | 5000mAh 高能量密度电池 |\n| 有线快充 | 67W 星耀超级闪充 |\n| 充电接口 | USB Type-C 2.0 |\n| 快充速度 | 0-50% 约 15 分钟 / 0-100% 约 38 分钟 |\n| 充电芯片 | 星耀 S1 电源管理芯片 |\n| 电池寿命 | 1000 次完整充放电循环后电池健康度 ≥ 80% |\n\n---\n\n## 四、机身尺寸与重量\n\n| 版本 | 尺寸 | 重量 |\n|------|------|------|\n| 星夜黑 / 晴雪白（玻璃版） | 162.3 × 74.6 × 8.2 mm | 196g |\n| 薄荷绿 / 樱花粉（素皮版） | 162.3 × 74.6 × 8.5 mm | 188g |\n\n---\n\n## 五、连接与网络\n\n- 5G 全网通（SA/NSA 双模），支持 n1/n3/n5/n8/n28/n41/n78 等频段\n- Wi-Fi 6（802.11ax），2×2 MIMO\n- 蓝牙 5.3，支持 LE Audio、aptX Adaptive\n- NFC（支持门禁卡、公交卡模拟）\n- 红外遥控\n- USB Type-C 2.0\n- 双频 GPS（L1+L5）+ 北斗\n- 电子罗盘、加速度传感器、陀螺仪\n\n---\n\n## 六、音频与振动\n\n- 立体声双扬声器（1012 上扬声器 + 1216 下扬声器）\n- 杜比全景声认证\n- Hi-Res Audio 认证\n- X 轴线性马达\n\n---\n\n## 七、操作系统"
+ },
+ {
+  "id": "doc6_chunk2",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀X100青春版",
+    "中端"
+   ],
+   "chunk_index": 2,
+   "doc_name": "星耀X100青春版-产品参数.md",
+   "doc_id": "6",
+   "source_file": "data\\uploads\\381db89015_星耀X100青春版-产品参数.md"
+  },
+  "content": "---\n\n## 六、音频与振动\n\n- 立体声双扬声器（1012 上扬声器 + 1216 下扬声器）\n- 杜比全景声认证\n- Hi-Res Audio 认证\n- X 轴线性马达\n\n---\n\n## 七、操作系统\n\n- 星耀 StarOS 4.0（基于 Android 15 深度定制）\n- 承诺 3 次 Android 大版本更新 + 4 年安全补丁\n- 特色功能：原子通知、隐私替身、权限空白通行证、应用行为记录\n\n---\n\n## 八、包装内容\n\n- 星耀 X100 青春版 × 1\n- 67W 快充充电器 × 1\n- USB Type-C 数据线（5A）× 1\n- 取卡针 × 1\n- 透明保护壳 × 1\n- 快速入门指南 × 1\n- 三包凭证 × 1\n\n---\n\n## 九、价格（建议零售价）\n\n| 配置 | 价格 |\n|------|------|\n| 8GB + 128GB | ¥1,999 |\n| 12GB + 256GB | ¥2,499 |\n\n---\n\n## 十、售后服务\n\n- **保修期限**：主机自购买之日起享受 **1 年** 免费保修服务\n- **退换货政策**：自签收之日起 **7 天内** 支持无理由退货（需包装完整、配件齐全）；**15 天内** 出现非人为硬件故障，支持换货\n- **维修方式**：全国 1500+ 星耀授权服务中心提供线下维修；支持寄修（双向免邮）\n- **客服热线**：400-888-6688（7×24 小时）\n- **碎屏保**：购机 7 天内可购买官方碎屏保（¥99/年），一年内意外碎屏免费更换原装屏幕一次\n- **延长保**：购机 7 天内可购买延长保（¥99），保修期延长至 2 年\n\n---\n\n## 十一、购机权益（限量）\n\n- 购机即赠星耀云空间 50GB 一年（价值 ¥98）\n- 以旧换新最高额外补贴 ¥300\n- 分期免息：3/6 期花呗/信用卡免息\n\n---\n\n## 十二、常见问题（FAQ）\n\n**Q：星耀 X100 青春版支持无线充电吗？**\nA：不支持无线充电。X100 青春版定位中端性价比机型，仅支持 67W 有线快充。如需无线充电功能，建议考虑星耀 X100 Pro Max。\n\n**Q：是否支持存储扩展？**\nA：不支持 microSD 卡扩展，建议根据需要选择 128GB 或 256GB 版本。"
+ },
+ {
+  "id": "doc6_chunk3",
+  "meta": {
+   "source_file": "data\\uploads\\381db89015_星耀X100青春版-产品参数.md",
+   "tags": [
+    "智能手机",
+    "星耀X100青春版",
+    "中端"
+   ],
+   "chunk_index": 3,
+   "doc_name": "星耀X100青春版-产品参数.md",
+   "doc_id": "6"
+  },
+  "content": "---\n\n## 十二、常见问题（FAQ）\n\n**Q：星耀 X100 青春版支持无线充电吗？**\nA：不支持无线充电。X100 青春版定位中端性价比机型，仅支持 67W 有线快充。如需无线充电功能，建议考虑星耀 X100 Pro Max。\n\n**Q：是否支持存储扩展？**\nA：不支持 microSD 卡扩展，建议根据需要选择 128GB 或 256GB 版本。\n\n**Q：游戏性能如何？**\nA：骁龙 7+ Gen3 安兔兔跑分约 150 万分，可流畅运行《王者荣耀》120 帧、《和平精英》90 帧、《原神》中高画质 60 帧。\n\n**Q：NFC 支持哪些功能？**\nA：支持公交卡（全国 300+ 城市）、门禁卡（未加密 13.56MHz）、银行卡（云闪付）模拟。\n\n**Q：防水能力？**\nA：支持 IP54 生活防泼溅，日常小雨、洗手溅水无影响，但不建议浸泡或在水龙头下冲洗。\n\n**Q：是曲面屏还是直屏？**\nA：X100 青春版采用 AMOLED 柔性直屏设计，贴膜方便、握持舒适、不易误触。"
+ },
+ {
+  "id": "doc8_chunk0",
+  "meta": {
+   "doc_name": "星耀 Tab Pro 12.4 产品规格.md",
+   "doc_id": "8",
+   "tags": [
+    "平板电脑",
+    "星耀TabPro",
+    "旗舰"
+   ],
+   "chunk_index": 0,
+   "source_file": "data\\uploads\\de23d0f42f_tabpro.md"
+  },
+  "content": "# 星耀 Tab Pro 12.4 产品规格说明书\n\n## 产品概述\n星耀 Tab Pro 12.4 是星耀品牌旗舰级平板电脑，面向专业用户和高性能需求场景，集顶级显示、旗舰性能和长效续航于一身。\n\n## 显示屏幕\n- 尺寸：12.4 英寸\n- 面板类型：OLED\n- 分辨率：2.8K（2800 × 1840）\n- 刷新率：120Hz 自适应刷新率（1-120Hz LTPO）\n- 峰值亮度：1600nit（HDR 模式下）\n- 色域覆盖：100% DCI-P3，支持 10bit 色深\n- 认证：HDR10+、Dolby Vision、SGS 低蓝光认证\n- 触控采样率：360Hz（触控笔模式），240Hz（手指模式）\n\n## 处理器与性能\n- 处理器：高通骁龙 8 Gen 3（台积电 4nm 工艺）\n- CPU：1×Cortex-X4 @3.3GHz + 3×Cortex-A720 @3.2GHz + 2×Cortex-A720 @3.0GHz + 2×Cortex-A520 @2.3GHz\n- GPU：Adreno 750\n- AI 引擎：高通 Hexagon NPU，支持端侧大模型推理\n- 内存：12GB LPDDR5X（8533Mbps）\n- 存储：256GB / 512GB UFS 4.0（不支持扩展）\n\n## 电池与充电\n- 电池容量：10000mAh（典型值），9800mAh（额定值）\n- 有线快充：67W 星耀 SuperCharge\n- 无线充电：20W Qi 无线充电\n- 反向无线充电：支持 5W 反向充电（可为耳机、手表应急充电）\n- 视频播放续航：最长 14 小时\n- 充电速度：0-80% 约 45 分钟\n\n## 影像系统\n- 后置摄像头：1300 万像素主摄（f/1.8）+ 800 万像素超广角（f/2.2，120°）\n- 前置摄像头：1200 万像素超广角（f/2.0，110°）\n- 视频拍摄：后置支持 4K@60fps，前置支持 1080p@60fps\n- 功能：AI 人像居中、背景虚化、文档扫描\n\n## 音频\n- 扬声器：四扬声器系统（2 高音 + 2 低音）\n- 调音：星耀声学实验室调校，支持 Dolby Atmos\n- 麦克风：三麦克风阵列，支持 AI 降噪"
+ },
+ {
+  "id": "doc8_chunk1",
+  "meta": {
+   "source_file": "data\\uploads\\de23d0f42f_tabpro.md",
+   "tags": [
+    "平板电脑",
+    "星耀TabPro",
+    "旗舰"
+   ],
+   "doc_id": "8",
+   "chunk_index": 1,
+   "doc_name": "星耀 Tab Pro 12.4 产品规格.md"
+  },
+  "content": "## 音频\n- 扬声器：四扬声器系统（2 高音 + 2 低音）\n- 调音：星耀声学实验室调校，支持 Dolby Atmos\n- 麦克风：三麦克风阵列，支持 AI 降噪\n\n## 连接性\n- Wi-Fi：Wi-Fi 7（802.11be），2.4G/5G/6G 三频\n- 蓝牙：Bluetooth 5.4\n- USB：USB-C 3.2 Gen 2（支持 DisplayPort 视频输出 4K@60Hz）\n- 定位：GPS / GLONASS / 北斗 / Galileo / QZSS\n- NFC：支持（读卡器模式）\n\n## 配件支持\n- 星耀笔（Stellar Pen）：4096 级压感，磁吸充电，延迟 2ms\n- 星耀磁吸键盘：全尺寸背光键盘，1.3mm 键程，触控板支持多点手势\n- 星耀保护套：磁吸支架保护套，多角度调节\n\n## 机身与设计\n- 尺寸：278.5 × 185.3 × 6.6mm\n- 重量：约 585g（Wi-Fi 版）\n- 材质：一体化铝合金机身，纳米微晶玻璃面板\n- 颜色：星空灰、月岩白、苍穹蓝\n- 生物识别：电源键集成指纹识别 + 3D 面部识别\n\n## 操作系统\n- 系统：StarOS 3.0（基于 Android 14 深度定制）\n- 特色功能：多窗口分屏（最高 4 窗口）、跨设备协同（与星耀手机/笔记本无缝流转）、PC 模式\n- 更新策略：3 年大版本更新 + 5 年安全补丁\n\n## 包装内容\n- 星耀 Tab Pro 12.4 主机 ×1\n- 67W 充电器 ×1\n- USB-C 数据线（1m）×1\n- 快速入门指南 ×1\n- 取卡针 ×1\n\n## 售后服务\n- 质保：主机 2 年，配件 1 年\n- 碎屏险：购机首年可选购星耀碎屏险服务\n- 客服热线：400-888-XXXX\n- 官方服务网点：全国 2000+ 授权服务中心"
+ },
+ {
+  "id": "doc9_chunk0",
+  "meta": {
+   "doc_id": "9",
+   "source_file": "data\\uploads\\526c4c45ff_tabair.md",
+   "doc_name": "星耀 Tab Air 11 产品规格.md",
+   "chunk_index": 0,
+   "tags": [
+    "平板电脑",
+    "星耀TabAir",
+    "中端"
+   ]
+  },
+  "content": "# 星耀 Tab Air 11 产品规格说明书\n\n## 产品概述\n星耀 Tab Air 11 定位中端轻薄平板，以极致便携和均衡性能为核心卖点，适合日常办公、影音娱乐和轻度创作。\n\n## 显示屏幕\n- 尺寸：11 英寸\n- 面板类型：LTPS LCD\n- 分辨率：2.5K（2560 × 1600）\n- 刷新率：144Hz 高刷新率\n- 峰值亮度：600nit\n- 色域覆盖：100% sRGB，支持 8bit 色深\n- 认证：莱茵 TÜV 低蓝光认证、DC 调光、SGS 护眼认证\n- 触控采样率：240Hz（手指模式），360Hz（笔模式）\n\n## 处理器与性能\n- 处理器：高通骁龙 7+ Gen 3（台积电 4nm 工艺）\n- CPU：1×Cortex-X4 @2.8GHz + 4×Cortex-A720 @2.6GHz + 3×Cortex-A520 @2.0GHz\n- GPU：Adreno 732\n- 内存：8GB / 12GB LPDDR5（6400Mbps）\n- 存储：128GB / 256GB UFS 3.1\n\n## 电池与充电\n- 电池容量：8000mAh（典型值），7800mAh（额定值）\n- 快充：45W 星耀 SuperCharge\n- 视频播放续航：最长 14 小时\n- 网页浏览续航：最长 11 小时\n- 充电速度：0-80% 约 55 分钟\n\n## 影像\n- 后置摄像头：1300 万像素主摄（f/2.0，自动对焦）\n- 前置摄像头：800 万像素超广角（f/2.2，105°）\n- 视频拍摄：后置 4K@30fps，前置 1080p@30fps\n- 功能：文档扫描矫正、AI 人像居中\n\n## 音频\n- 扬声器：四扬声器系统\n- 调音：Dolby Atmos 认证\n- 麦克风：双麦克风，支持通话降噪\n\n## 连接性\n- Wi-Fi：Wi-Fi 6E（802.11ax），2.4G/5G/6G\n- 蓝牙：Bluetooth 5.3\n- USB：USB-C 3.1 Gen 1（支持视频输出 1080p）\n- 定位：GPS / GLONASS / 北斗\n- 耳机接口：无 3.5mm（需 USB-C 转接）\n\n## 配件支持\n- 星耀笔（Stellar Pen）：4096 级压感，磁吸充电\n- 星耀磁吸键盘��Air 版）：轻薄设计，1.0mm 键程\n- 星耀 Folio 保护套：纤薄磁吸保护套"
+ },
+ {
+  "id": "doc9_chunk1",
+  "meta": {
+   "doc_name": "星耀 Tab Air 11 产品规格.md",
+   "doc_id": "9",
+   "source_file": "data\\uploads\\526c4c45ff_tabair.md",
+   "chunk_index": 1,
+   "tags": [
+    "平板电脑",
+    "星耀TabAir",
+    "中端"
+   ]
+  },
+  "content": "## 配件支持\n- 星耀笔（Stellar Pen）：4096 级压感，磁吸充电\n- 星耀磁吸键盘��Air 版）：轻薄设计，1.0mm 键程\n- 星耀 Folio 保护套：纤薄磁吸保护套\n\n## 机身与设计\n- 尺寸：254.2 × 166.4 × 6.2mm\n- 重量：约 490g\n- 材质：铝合金中框 + 复合材质背板\n- 颜色：星光银、深空黑、薄荷绿\n- 生物识别：侧边指纹（电源键集成）\n\n## 操作系统\n- 系统：StarOS 3.0（基于 Android 14）\n- 特色：多窗口分屏、儿童模式、简易模式\n- 更新策略：2 年大版本 + 4 年安全补丁\n\n## 包装内容\n- 星耀 Tab Air 11 ×1\n- 45W 充电器 ×1\n- USB-C 数据线 ×1\n- 快速入门指南 ×1\n\n## 售后服务\n- 质保：主机 2 年，配件 1 年\n- 碎屏险：购机首年可选\n- 客服热线：400-888-XXXX"
+ },
+ {
+  "id": "doc10_chunk0",
+  "meta": {
+   "tags": [
+    "平板电脑",
+    "星耀TabMax",
+    "创意",
+    "旗舰"
+   ],
+   "doc_id": "10",
+   "source_file": "data\\uploads\\f90bd89773_tabmax.md",
+   "chunk_index": 0,
+   "doc_name": "星耀 Tab Max 14.6 产品规格.md"
+  },
+  "content": "# 星耀 Tab Max 14.6 产品规格说明书\n\n## 产品概述\n星耀 Tab Max 14.6 是专为创意工作者和专业人士打造的超大屏旗舰平板，以顶级显示素质、强悍性能和专业级配件生态重新定义移动工作站。\n\n## 显示屏幕\n- 尺寸：14.6 英寸\n- 面板类型：OLED\n- 分辨率：3K（3000 × 2000），像素密度 244 PPI\n- 刷新率：120Hz 自适应刷新率（1-120Hz LTPO 3.0）\n- 峰值亮度：1800nit（HDR），800nit（全局）\n- 色域覆盖：100% DCI-P3，100% sRGB，Delta E < 1（出厂校色）\n- 色深：10bit（10.7 亿色彩）\n- 认证：HDR10+、Dolby Vision、Pantone 色彩认证、莱茵 TÜV 低蓝光\n- 触控采样率：480Hz（笔模式）\n\n## 处理器与性能\n- 处理器：联发科天玑 9300（台积电 4nm 工艺）\n- CPU：4×Cortex-X4 @3.25GHz + 4×Cortex-A720 @2.0GHz（全大核架构）\n- GPU：Immortalis-G720 MC12，支持硬件级光线追踪\n- AI 引擎：APU 790，支持端侧大模型推理（支持 LLaMA 2 7B）\n- 内存：16GB LPDDR5T（9600Mbps）\n- 存储：512GB / 1TB UFS 4.0\n\n## 电池与充电\n- 电池容量：12000mAh（典型值）\n- 快充：65W 星耀 SuperCharge\n- 无线充电：支持 15W 反向无线充电\n- 视频播放续航：最长 16 小时\n- 办公续航：最长 12 小时\n- 充电速度：0-80% 约 50 分钟\n\n## 影像系统\n- 后置摄像头：\n  - 5000 万像素主摄（f/1.8，OIS）\n  - 1300 万像素超广角（f/2.2，120°）\n- 前置摄像头：1600 万像素超广角（f/2.0，120°，支持 4K 视频通话）\n- 视频拍摄：后置 4K@60fps HDR，前置 4K@30fps\n- 功能：AI 构图辅助、多机位联动拍摄、专业模式"
+ },
+ {
+  "id": "doc10_chunk1",
+  "meta": {
+   "tags": [
+    "平板电脑",
+    "星耀TabMax",
+    "创意",
+    "旗舰"
+   ],
+   "source_file": "data\\uploads\\f90bd89773_tabmax.md",
+   "doc_id": "10",
+   "doc_name": "星耀 Tab Max 14.6 产品规格.md",
+   "chunk_index": 1
+  },
+  "content": "## 影像系统\n- 后置摄像头：\n  - 5000 万像素主摄（f/1.8，OIS）\n  - 1300 万像素超广角（f/2.2，120°）\n- 前置摄像头：1600 万像素超广角（f/2.0，120°，支持 4K 视频通话）\n- 视频拍摄：后置 4K@60fps HDR，前置 4K@30fps\n- 功能：AI 构图辅助、多机位联动拍摄、专业模式\n\n## 音频\n- 扬声器：六扬声器系统（4 高音 + 2 低音单元）\n- 调音：星耀声学 × Dynaudio 联合调校\n- 认证：Dolby Atmos、Hi-Res Audio、Hi-Res Audio Wireless\n- 麦克风：四麦克风阵列，支持空间音频录制\n\n## 连接性\n- Wi-Fi：Wi-Fi 7（802.11be），2.4G/5G/6G 三频，支持 MLO\n- 蓝牙：Bluetooth 5.4，支持 LE Audio / Auracast\n- USB：双 USB-C 3.2 Gen 2（均支持充电和 DisplayPort 4K@60Hz 输出）\n- 定位：GPS（双频）/ GLONASS / 北斗（三频）/ Galileo / QZSS / NavIC\n- NFC：支持\n\n## 配件支持\n- 星耀笔 Pro：8192 级压感，延迟 1.5ms，磁吸充电，触觉反馈，支持悬停预览\n- 星耀妙控键盘 Max：全尺寸背光键盘，1.5mm 键程，大面积 Force Touch 触控板，Type-C 直通充电\n- 星耀数字小键盘（选配）：磁吸式独立数字小键盘\n\n## 机身与设计\n- 尺寸：326.2 × 225.8 × 5.9mm\n- 重量：约 685g\n- 材质：航空级铝合金一体化机身，纳米微晶陶瓷面板（选配）\n- 颜色：深空灰、星光银\n- 生物识别：3D 结构光面部识别 + 屏下超声波指纹\n\n## 操作系统\n- 系统：StarOS 3.0 Pro（基于 Android 14）\n- 专业软件生态：Clip Studio Paint、Concepts、LumaFusion 等专业应用深度适配\n- PC 模式 2.0：窗口化多任务，支持外接 4K 显示器，桌面级文件管理\n- 更新策略：4 年大版本更新 + 6 年安全补丁"
+ },
+ {
+  "id": "doc10_chunk2",
+  "meta": {
+   "chunk_index": 2,
+   "tags": [
+    "平板电脑",
+    "星耀TabMax",
+    "创意",
+    "旗舰"
+   ],
+   "source_file": "data\\uploads\\f90bd89773_tabmax.md",
+   "doc_name": "星耀 Tab Max 14.6 产品规格.md",
+   "doc_id": "10"
+  },
+  "content": "## 操作系统\n- 系统：StarOS 3.0 Pro（基于 Android 14）\n- 专业软件生态：Clip Studio Paint、Concepts、LumaFusion 等专业应用深度适配\n- PC 模式 2.0：窗口化多任务，支持外接 4K 显示器，桌面级文件管理\n- 更新策略：4 年大版本更新 + 6 年安全补丁\n\n## 包装内容\n- 星耀 Tab Max 14.6 ×1\n- 星耀笔 Pro ×1\n- 65W 充电器 ×1\n- USB-C 数据线（1.5m）×1\n- 快速入门指南 ×1\n\n## 售后服务\n- 质保：主机 2 年，配件（含星耀笔 Pro）1 年\n- 专业服务：首年免费上门取送，VIP 专属客服通道\n- 碎屏险：购机 30 日内可选购\n- 客服热线：400-888-XXXX"
+ },
+ {
+  "id": "doc11_chunk0",
+  "meta": {
+   "tags": [
+    "平板电脑",
+    "星耀TabLite",
+    "学生",
+    "入门"
+   ],
+   "chunk_index": 0,
+   "doc_name": "星耀 Tab Lite 10.4 产品规格.md",
+   "doc_id": "11",
+   "source_file": "data\\uploads\\6bde633034_tablite.md"
+  },
+  "content": "# 星耀 Tab Lite 10.4 产品规格说明书\n\n## 产品概述\n星耀 Tab Lite 10.4 是为学生群体和家庭用户打造的入门级平板电脑，以护眼大屏、长续航和实惠价格为核心卖点，是网课学习和影音娱乐的理想选择。\n\n## 显示屏幕\n- 尺寸：10.4 英寸\n- 面板类型：IPS LCD\n- 分辨率：2K（2000 × 1200），像素密度 225 PPI\n- 刷新率：60Hz\n- 峰值亮度：400nit\n- 色域覆盖：70% NTSC\n- 认证：莱茵 TÜV 低蓝光认证、类纸显示模式、SGS 护眼认证\n- 触控采样率：120Hz\n\n## 处理器与性能\n- 处理器：高通骁龙 6 Gen 1（三星 4nm 工艺）\n- CPU：4×Cortex-A78 @2.2GHz + 4×Cortex-A55 @1.8GHz\n- GPU：Adreno 710\n- 内存：6GB / 8GB LPDDR4X（4266Mbps）\n- 存储：64GB / 128GB UFS 2.2\n- 存储扩展：支持 microSD 卡扩展（最高 1TB）\n\n## 电池与充电\n- 电池容量：7500mAh（典型值），7300mAh（额定值）\n- 充电：25W 快充\n- 视频播放续航：最长 13 小时\n- 网课续航：最长 10 小时\n- 充电速度：0-100% 约 120 分钟\n\n## 影像\n- 后置摄像头：800 万像素主摄（f/2.0，自动对焦）\n- 前置摄像头：500 万像素（f/2.4，固定焦距）\n- 视频拍摄：后置 1080p@30fps，前置 720p@30fps\n\n## 音频\n- 扬声器：双扬声器\n- 调音：Dolby Atmos\n- 麦克风：单麦克风，支持通话降噪\n- 耳机接口：3.5mm 耳机孔\n\n## 连接性\n- Wi-Fi：Wi-Fi 5（802.11ac），2.4G/5G 双频\n- 蓝牙：Bluetooth 5.1\n- USB：USB-C 2.0\n- 定位：GPS / GLONASS / 北斗\n\n## 配件支持\n- 星耀笔 Lite：2048 级压感，USB-C 充电\n- 星耀磁吸键盘 Lite：薄膜键盘，轻巧便携\n- 星耀支架保护套：三折支架结构，两种观看角度"
+ },
+ {
+  "id": "doc11_chunk1",
+  "meta": {
+   "doc_name": "星耀 Tab Lite 10.4 产品规格.md",
+   "source_file": "data\\uploads\\6bde633034_tablite.md",
+   "doc_id": "11",
+   "chunk_index": 1,
+   "tags": [
+    "平板电脑",
+    "星耀TabLite",
+    "学生",
+    "入门"
+   ]
+  },
+  "content": "## 连接性\n- Wi-Fi：Wi-Fi 5（802.11ac），2.4G/5G 双频\n- 蓝牙：Bluetooth 5.1\n- USB：USB-C 2.0\n- 定位：GPS / GLONASS / 北斗\n\n## 配件支持\n- 星耀笔 Lite：2048 级压感，USB-C 充电\n- 星耀磁吸键盘 Lite：薄膜键盘，轻巧便携\n- 星耀支架保护套：三折支架结构，两种观看角度\n\n## 机身与设计\n- 尺寸：245.2 × 155.3 × 7.5mm\n- 重量：约 465g\n- 材质：铝合金中框 + 复合材质背板\n- 颜色：星空灰、冰川蓝、樱花粉\n- 生物识别：不支持\n\n## 操作系统\n- 系统：StarOS 3.0 Lite（基于 Android 14）\n- 特色功能：\n  - 学生模式：家长可设置使用时长、应用白名单、护眼提醒\n  - 简易模式：大图标大字体，适合老人使用\n  - 学习空间：专注模式屏蔽通知，内置课程表\n- 更新策略：1 年大版本 + 3 年安全补丁\n\n## 包装内容\n- 星耀 Tab Lite 10.4 ×1\n- 25W 充电器 ×1\n- USB-C 数据线 ×1\n- 快速入门指南 ×1\n- 取卡针 ×1\n\n## 售后服务\n- 质保：主机 1 年，配件 6 个月\n- 客服热线：400-888-XXXX"
+ },
+ {
+  "id": "doc12_chunk0",
+  "meta": {
+   "tags": [
+    "笔记本电脑",
+    "清逸",
+    "AirBook14",
+    "轻薄本"
+   ],
+   "doc_name": "清逸 AirBook 14 轻薄本 产品规格.md",
+   "doc_id": "12",
+   "chunk_index": 0,
+   "source_file": "data\\uploads\\faac837d62_qingyi_airbook14.md"
+  },
+  "content": "# 清逸 AirBook 14 轻薄本 产品规格说明书\n\n## 产品概述\n清逸 AirBook 14 是清逸品牌旗舰级轻薄笔记本电脑，以 2.8K OLED 高素质屏幕、1.1kg 极致轻量机身和 18 小时超长续航重新定义移动办公体验。\n\n## 显示屏幕\n- 尺寸：14 英寸\n- 面板类型：OLED\n- 分辨率：2.8K（2880 × 1800）\n- 刷新率：90Hz\n- 峰值亮度：600nit（HDR 1000nit）\n- 色域覆盖：100% DCI-P3，Delta E < 1\n- 认证：HDR True Black 500、莱茵 TÜV 低蓝光、SGS 护眼\n- 屏幕比例：16:10\n\n## 处理器与性能\n- 处理器：Intel Core Ultra 7 155H（Intel 4 工艺）\n- CPU：6P + 8E + 2LPE，最高 4.8GHz\n- GPU：Intel Arc Graphics（8 Xe 核心）\n- NPU：Intel AI Boost，支持端侧 AI\n- 内存：16GB / 32GB LPDDR5x 7467MHz（板载）\n- 存储：512GB / 1TB PCIe 4.0 NVMe SSD\n\n## 电池与充电\n- 电池容量：75Wh\n- 充电：65W USB-C PD 快充\n- 视频播放续航：最长 18 小时\n- 办公续航：最长 14 小时\n- 快充：30 分钟充至 50%\n\n## 接口\n- 2× Thunderbolt 4（USB-C，支持 PD 充电和 DP 视频输出）\n- 1× USB-A 3.2 Gen 2\n- 1× HDMI 2.1\n- 1× 3.5mm 耳机麦克风二合一\n- 1× microSD 读卡器\n\n## 音频与摄像头\n- 扬声器：2× 2W 立体声，Dolby Atmos\n- 麦克风：双麦克风阵列，AI 降噪\n- 摄像头：1080p FHD，Windows Hello IR 人脸识别\n- 物理防窥开关\n\n## 连接性\n- Wi-Fi：Wi-Fi 7（802.11be）\n- 蓝牙：Bluetooth 5.4\n\n## 键盘与触控板\n- 键盘：全尺寸背光键盘，1.3mm 键程，防泼溅\n- 触控板：大面积玻璃触控板（130×80mm），支持多点手势"
+ },
+ {
+  "id": "doc12_chunk1",
+  "meta": {
+   "source_file": "data\\uploads\\faac837d62_qingyi_airbook14.md",
+   "tags": [
+    "笔记本电脑",
+    "清逸",
+    "AirBook14",
+    "轻薄本"
+   ],
+   "doc_name": "清逸 AirBook 14 轻薄本 产品规格.md",
+   "chunk_index": 1,
+   "doc_id": "12"
+  },
+  "content": "## 连接性\n- Wi-Fi：Wi-Fi 7（802.11be）\n- 蓝牙：Bluetooth 5.4\n\n## 键盘与触控板\n- 键盘：全尺寸背光键盘，1.3mm 键程，防泼溅\n- 触控板：大面积玻璃触控板（130×80mm），支持多点手势\n\n## 机身与设计\n- 尺寸：312 × 221 × 14.9mm\n- 重量：约 1.1kg\n- 材质：航空级铝镁合金一体化机身\n- 颜色：星空银、深空灰\n- 转轴：可 180° 开合\n\n## 操作系统\n- 系统：Windows 11 家庭版 / 专业版\n- 预装软件：清逸管家（性能模式切换、驱动更新、电池健康管理）\n\n## 包装内容\n- 清逸 AirBook 14 ×1\n- 65W USB-C 充电器 ×1\n- USB-C 充电线（1.8m）×1\n- 快速入门指南 ×1\n\n## 售后服务\n- 质保：整机 2 年，电池 1 年\n- 上门服务：首年免费上门维修\n- 客服热线：400-888-XXXX"
+ },
+ {
+  "id": "doc13_chunk0",
+  "meta": {
+   "doc_id": "13",
+   "source_file": "data\\uploads\\987d22bfcc_qingyi_probook16.md",
+   "doc_name": "清逸 ProBook 16 高性能本 产品规格.md",
+   "chunk_index": 0,
+   "tags": [
+    "笔记本电脑",
+    "清逸",
+    "ProBook16",
+    "高性能"
+   ]
+  },
+  "content": "# 清逸 ProBook 16 高性能本 产品规格说明书\n\n## 产品概述\n清逸 ProBook 16 是为专业创作者和硬核玩家打造的高性能大屏笔记本，搭载 RTX 4070 独立显卡和标压 i9 处理器，配合 240Hz 高刷电竞屏，兼顾创作效率与游戏体验。\n\n## 显示屏幕\n- 尺寸：16 英寸\n- 面板类型：IPS（Mini-LED 分区背光）\n- 分辨率：2.5K（2560 × 1600）\n- 刷新率：240Hz\n- 响应时间：3ms（灰阶）\n- 峰值亮度：1200nit（HDR）\n- 色域覆盖：100% DCI-P3，Delta E < 1.5\n- 认证：NVIDIA G-SYNC、Dolby Vision、莱茵 TÜV 低蓝光\n- 屏幕比例：16:10\n\n## 处理器与性能\n- 处理器：Intel Core i9-14900HX（Intel 7 工艺）\n- CPU：8P + 16E，24 核 32 线程，最高 5.8GHz\n- 独立显卡：NVIDIA GeForce RTX 4070 8GB GDDR6（140W TGP）\n- 内存：32GB DDR5 5600MHz（双通道，可扩展至 64GB）\n- 存储：1TB PCIe 4.0 NVMe SSD（双 M.2 2280 插槽，支持 RAID 0）\n\n## 散热系统\n- 双风扇 + 五热管 + 液态金属导热\n- 四出风口设计\n- 最大散热能力：175W（CPU+GPU 双烤）\n- 噪音控制：性能模式 < 48dB\n\n## 电池与充电\n- 电池容量：99Wh（航空携带上限）\n- 充电：280W 氮化镓电源适配器\n- 支持 100W USB-C PD 充电\n- 视频播放续航：最长 8 小时\n\n## 接口\n- 1× Thunderbolt 4（USB-C，PD + DP）\n- 1× USB-C 3.2 Gen 2（PD + DP）\n- 2× USB-A 3.2 Gen 2\n- 1× HDMI 2.1（支持 8K@60Hz / 4K@120Hz）\n- 1× RJ-45 2.5G 有线网口\n- 1× 3.5mm 耳机麦克风\n- 1× SD Express 7.0 读卡器\n\n## 音频与摄像头\n- 扬声器：2× 2W 高音 + 2× 2W 低音，Nahimic 音效\n- 麦克风：双麦克风阵列\n- 摄像头：1080p FHD + IR 人脸识别"
+ },
+ {
+  "id": "doc13_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "tags": [
+    "笔记本电脑",
+    "清逸",
+    "ProBook16",
+    "高性能"
+   ],
+   "source_file": "data\\uploads\\987d22bfcc_qingyi_probook16.md",
+   "doc_id": "13",
+   "doc_name": "清逸 ProBook 16 高性能本 产品规格.md"
+  },
+  "content": "## 音频与摄像头\n- 扬声器：2× 2W 高音 + 2× 2W 低音，Nahimic 音效\n- 麦克风：双麦克风阵列\n- 摄像头：1080p FHD + IR 人脸识别\n\n## 连接性\n- Wi-Fi：Wi-Fi 6E（802.11ax）\n- 蓝牙：Bluetooth 5.3\n- 有线：2.5G 以太网\n\n## 键盘与触控板\n- 键盘：RGB 单键背光键盘，1.5mm 键程，全尺寸方向键，数字小键盘\n- 触控板：大面积玻璃触控板\n\n## 机身与设计\n- 尺寸：357 × 268 × 20.5mm\n- 重量：约 2.4kg\n- 材质：铝合金 A/C/D 面\n- 颜色：暗夜黑\n\n## 操作系统\n- 系统：Windows 11 专业版\n- 预装：清逸控制中心（性能模式、风扇曲线、RGB 灯效）\n\n## 包装内容\n- 清逸 ProBook 16 ×1\n- 280W 电源适配器 ×1\n- 快速入门指南 ×1\n\n## 售后服务\n- 质保：整机 2 年，主要部件 3 年\n- 上门服务：首年免费\n- 客服热线：400-888-XXXX"
+ },
+ {
+  "id": "doc14_chunk0",
+  "meta": {
+   "doc_name": "清逸 AirBook 13 极致轻薄 产品规格.md",
+   "chunk_index": 0,
+   "doc_id": "14",
+   "tags": [
+    "笔记本电脑",
+    "清逸",
+    "AirBook13",
+    "轻薄"
+   ],
+   "source_file": "data\\uploads\\d35612a579_qingyi_airbook13.md"
+  },
+  "content": "# 清逸 AirBook 13 极致轻薄 产品规格说明书\n\n## 产品概述\n清逸 AirBook 13 以 980g 极致轻量机身重新定义移动办公，搭载 2.5K OLED 屏幕，16 小时续航，是出差通勤的理想伴侣。\n\n## 显示屏幕\n- 尺寸：13.3 英寸\n- 面板类型：OLED\n- 分辨率：2.5K（2560 × 1600）\n- 刷新率：60Hz\n- 峰值亮度：550nit\n- 色域覆盖：100% DCI-P3\n- 屏幕比例：16:10\n\n## 处理器\n- Intel Core Ultra 5 125H\n- 14 核 18 线程，最高 4.5GHz\n- Intel Arc Graphics（7 Xe 核心）\n\n## 内存与存储\n- 16GB LPDDR5x 6400MHz（板载）\n- 512GB PCIe 4.0 NVMe SSD\n\n## 电池\n- 60Wh，65W USB-C PD 快充\n- 续航：视频 16h / 办公 12h\n\n## 接口\n- 2× Thunderbolt 4，1× USB-A 3.2，1× HDMI 2.1，3.5mm 耳机孔\n\n## 机身\n- 295 × 206 × 13.5mm，980g\n- 铝镁合金机身，星空银 / 玫瑰金\n- Windows Hello IR 人脸识别\n\n## 包装\n清逸 AirBook 13 ×1，65W 充电器 ×1，USB-C 线 ×1\n\n## 售后\n整机 2 年质保，首年免费上门"
+ },
+ {
+  "id": "doc15_chunk0",
+  "meta": {
+   "doc_name": "星耀 ThinkBook 16 商务本 产品规格.md",
+   "chunk_index": 0,
+   "tags": [
+    "笔记本电脑",
+    "星耀",
+    "ThinkBook",
+    "商务"
+   ],
+   "doc_id": "15",
+   "source_file": "data\\uploads\\bafde9a391_stellar_thinkbook16.md"
+  },
+  "content": "# 星耀 ThinkBook 16 商务本 产品规格说明书\n\n## 产品概述\n星耀 ThinkBook 16 面向企业商务用户，搭载 Intel Ultra 9 处理器和 32GB 大内存，配合 2.5K 高色域屏幕，兼顾性能、安全与可靠性。\n\n## 显示屏幕\n- 16 英寸 IPS，2.5K（2560 × 1600），120Hz\n- 400nit 亮度，100% sRGB，DC 调光\n- 16:10 比例，莱茵 TÜV 低蓝光\n\n## 处理器\n- Intel Core Ultra 9 185H，16 核 22 线程，最高 5.1GHz\n- Intel Arc Graphics（8 Xe 核心），Intel AI Boost NPU\n\n## 内存与存储\n- 32GB DDR5 5600MHz（双通道可扩展至 64GB）\n- 1TB PCIe 4.0 NVMe SSD（双 M.2 插槽）\n\n## 电池\n- 84Wh，100W USB-C PD 快充\n- 续航：视频 12h / 办公 10h\n\n## 接口\n- 2× Thunderbolt 4，2× USB-A 3.2，1× HDMI 2.1，RJ-45 千兆网口，3.5mm 耳机孔，SD 读卡器，安全锁孔\n\n## 安全特性\n- dTPM 2.0，指纹电源键，IR 人脸识别，物理摄像头防窥开关，Kensington 安全锁孔\n\n## 键盘\n- 全尺寸防泼溅背光键盘，1.5mm 键程，数字小键盘\n\n## 机身\n- 358 × 252 × 18.5mm，1.8kg\n- 铝合金机身，深空灰\n\n## 系统与软件\n- Windows 11 专业版，星耀商务管家（系统诊断/驱动管理/安全中心）\n\n## 包装\n星耀 ThinkBook 16 ×1，100W 充电器 ×1，USB-C 线 ×1\n\n## 售后\n整机 3 年质保，3 年上门服务，VIP 专线"
+ },
+ {
+  "id": "doc16_chunk0",
+  "meta": {
+   "source_file": "data\\uploads\\7a8566cc37_stellar_creator14.md",
+   "chunk_index": 0,
+   "doc_name": "星耀 Creator 14 设计师本 产品规格.md",
+   "doc_id": "16",
+   "tags": [
+    "笔记本电脑",
+    "星耀",
+    "Creator",
+    "设计师"
+   ]
+  },
+  "content": "# 星耀 Creator 14 设计师本 产品规格说明书\n\n## 产品概述\n星耀 Creator 14 为设计师、视频剪辑师和 3D 艺术家量身打造，搭载 RTX 4070 显卡和 3.2K OLED 专业级屏幕，100% DCI-P3 出厂校色。\n\n## 显示屏幕\n- 14 英寸 OLED，3.2K（3200 × 2000），120Hz\n- 峰值亮度 600nit（HDR 1000nit）\n- 100% DCI-P3 / 100% Adobe RGB，Delta E < 1 出厂校色\n- Pantone 色彩认证，HDR True Black 500\n- 触控屏：支持 4096 级压感笔\n\n## 处理器\n- Intel Core i9-14900H，24 核 32 线程，最高 5.8GHz\n\n## 显卡\n- NVIDIA GeForce RTX 4070 8GB（100W TGP）\n- NVIDIA Studio 驱动认证\n\n## 内存与存储\n- 64GB DDR5 5600MHz（双通道）\n- 2TB PCIe 4.0 NVMe SSD\n\n## 电池\n- 76Wh，100W USB-C PD 快充\n- 续航：视频 10h\n\n## 接口\n- 2× Thunderbolt 4，1× USB-A 3.2，1× HDMI 2.1，SD Express 7.0 读卡器，3.5mm 耳机孔\n\n## 音频\n- 4 扬声器 Dynaudio 调校，Dolby Atmos\n- 四麦克风阵列，空间音频录制\n\n## 键盘\n- 白色背光键盘，1.4mm 键程\n\n## 机身\n- 319 × 227 × 16.8mm，1.5kg\n- 镁铝合金，星辰白\n\n## 系统\n- Windows 11 专业版，NVIDIA Studio 驱动\n- 星耀创作中心（色彩管理/性能预设/素材库同步）\n\n## 包装\nCreator 14 ×1，100W 充电器 ×1，星耀触控笔 ×1，USB-C 线 ×1\n\n## 售后\n整机 2 年，主要部件 3 年，首年免费上门 + VIP 专线"
+ },
+ {
+  "id": "doc17_chunk0",
+  "meta": {
+   "doc_id": "17",
+   "chunk_index": 0,
+   "source_file": "data\\uploads\\508878180f_stellar_book14.md",
+   "doc_name": "星耀 Book 14 学生本 产品规格.md",
+   "tags": [
+    "笔记本电脑",
+    "星耀",
+    "Book14",
+    "学生"
+   ]
+  },
+  "content": "# 星耀 Book 14 学生本 产品规格说明书\n\n## 产品概述\n星耀 Book 14 面向学生群体，搭载 i5-13500H 标压处理器和 16GB 内存，2.2K 高清护眼屏，以高性价比满足网课学习和日常使用需求。\n\n## 显示屏幕\n- 14 英寸 IPS LCD，2.2K（2240 × 1400），60Hz\n- 300nit 亮度，100% sRGB\n- 16:10 比例，DC 调光，莱茵 TÜV 低蓝光 + 无频闪双认证\n- 防眩光雾面屏\n\n## 处理器\n- Intel Core i5-13500H，12 核 16 线程，最高 4.7GHz\n- Intel Iris Xe Graphics（80EU）\n\n## 内存与存储\n- 16GB DDR5 5200MHz（双通道，板载）\n- 512GB PCIe 4.0 NVMe SSD（单 M.2 插槽）\n\n## 电池\n- 56Wh，65W USB-C PD 快充\n- 续航：视频 12h / 网课 10h\n\n## 接口\n- 1× Thunderbolt 4，2× USB-A 3.2 Gen 1，1× HDMI 1.4，3.5mm 耳机孔，microSD 读卡器\n\n## 音频与摄像头\n- 双扬声器，Dolby Atmos\n- 720p HD 摄像头，物理防窥开关\n\n## 键盘\n- 全尺寸键盘，白色背光（可选），1.3mm 键程\n\n## 机身\n- 323 × 218 × 17.5mm，1.45kg\n- 塑料机身，星空灰 / 冰川蓝 / 樱花粉\n\n## 连接性\n- Wi-Fi 6（802.11ax），Bluetooth 5.2\n\n## 系统\n- Windows 11 家庭版\n- 预装 Office 家庭和学生版 2021\n\n## 包装\n星耀 Book 14 ×1，65W 充电器 ×1，USB-C 线 ×1\n\n## 售后\n整机 2 年质保，主要部件 2 年"
+ },
+ {
+  "id": "doc18_chunk0",
+  "meta": {
+   "chunk_index": 0,
+   "doc_id": "18",
+   "source_file": "data\\uploads\\cad91c7611_stellar_gamepro16.md",
+   "doc_name": "星耀 GamePro 16 游戏本 产品规格.md",
+   "tags": [
+    "笔记本电脑",
+    "星耀",
+    "GamePro",
+    "游戏本"
+   ]
+  },
+  "content": "# 星耀 GamePro 16 游戏本 产品规格说明书\n\n## 产品概述\n星耀 GamePro 16 为硬核玩家打造的旗舰游戏本，搭载 i9-14900HX 和 RTX 4060 显卡，240Hz 电竞屏，畅玩 3A 大作。\n\n## 显示屏幕\n- 16 英寸 IPS，2.5K（2560 × 1600），240Hz\n- 3ms 灰阶响应，NVIDIA G-SYNC\n- 500nit 亮度，100% sRGB\n- 16:10 比例，DC 调光\n\n## 处理器\n- Intel Core i9-14900HX，24 核 32 线程，最高 5.8GHz\n\n## 显卡\n- NVIDIA GeForce RTX 4060 8GB GDDR6（140W 满血 TGP）\n- 支持 DLSS 3.5、光线追踪\n\n## 内存与存储\n- 32GB DDR5 5600MHz（双通道，可扩展至 64GB）\n- 1TB PCIe 4.0 NVMe SSD（双 M.2 插槽，支持 RAID 0）\n\n## 散热\n- 双风扇 6 热管 + 液态金属，四出风口\n- 一键强冷模式（风扇全速）\n\n## 电池\n- 90Wh，支持 100W USB-C PD 充电\n- 280W 氮化镓电源适配器\n\n## 接口\n- 1× Thunderbolt 4，2× USB-A 3.2 Gen 2，1× USB-C 3.2，1× HDMI 2.1，RJ-45 2.5G，3.5mm 耳机孔\n\n## 音频\n- 2× 2W 扬声器，Nahimic 3D 音效，Hi-Res Audio 认证\n\n## 键盘\n- 单键 RGB 背光键盘，1.8mm 键程，全尺寸方向键，数字小键盘，WASD 透明键帽\n\n## 机身\n- 358 × 265 × 25mm，2.5kg\n- 铝合金 A 面，战甲黑（机甲风格线条 + RGB 灯带）\n\n## 连接性\n- Wi-Fi 6E，Bluetooth 5.3，2.5G 以太网\n\n## 系统\n- Windows 11 家庭版\n- 星耀游戏中心（性能监控/风扇控制/RGB 灯效/游戏优化）\n\n## 包装\nGamePro 16 ×1，280W 适配器 ×1\n\n## 售后\n整机 2 年，主要部件 3 年，首年免费上门"
+ },
+ {
+  "id": "doc19_chunk0",
+  "meta": {
+   "chunk_index": 0,
+   "doc_id": "19",
+   "tags": [
+    "智能穿戴",
+    "手表",
+    "Watch3Pro"
+   ],
+   "doc_name": "星耀 Watch 3 Pro 智能手表 产品规格.md",
+   "source_file": "data\\uploads\\68c7793cd6_stellar_watch3pro.md"
+  },
+  "content": "# 星耀 Watch 3 Pro 智能手表 产品规格说明书\n\n## 产品概述\n星耀 Watch 3 Pro 采用钛合金机身，1.5 英寸 LTPO AMOLED 屏幕，支持 14 天超长续航，集成全面健康监测和独立通信功能。\n\n## 显示\n- 1.5 英寸 LTPO AMOLED，466×466，326 PPI\n- 常亮显示，峰值亮度 2000nit\n- 蓝宝石玻璃镜面\n\n## 材质\n- 钛合金表壳，陶瓷后盖\n- 氟橡胶表带（标配），可选真皮/不锈钢\n\n## 健康监测\n- 心率（PPG 8 通道）、血氧、体温、睡眠（REM 分期）、压力\n- ECG 心电图（医疗器械认证）、血压趋势\n- 跌倒检测、紧急 SOS\n\n## 运动\n- 150+ 运动模式，自动识别 6 种\n- 双频五星定位（GPS L1+L5）\n- 跑步功率、最大摄氧量、训练负荷\n\n## 续航与充电\n- 505mAh，典型 14 天 / 重度 7 天 / GPS 模式 40h\n- 无线磁吸快充，0-100% 约 75 分钟\n\n## 功能\n- eSIM 独立通话、NFC（公交/门禁/支付）\n- 蓝牙通话、音乐存储（32GB）、语音助手\n- 5ATM 防水、IP68\n\n## 系统\n- StarWear OS，兼容 Android 8.0+ / iOS 15+\n\n## 包装\n手表 ×1，充电底座 ×1，氟橡胶表带 ×1，快速指南 ×1\n\n## 售后\n主机 2 年质保，表带/充电器 1 年"
+ },
+ {
+  "id": "doc20_chunk0",
+  "meta": {
+   "source_file": "data\\uploads\\df87597eba_stellar_band8.md",
+   "doc_name": "星耀 Band 8 智能手环 产品规格.md",
+   "doc_id": "20",
+   "chunk_index": 0,
+   "tags": [
+    "智能穿戴",
+    "手环",
+    "Band8"
+   ]
+  },
+  "content": "# 星耀 Band 8 智能手环 产品规格说明书\n\n## 产品概述\n星耀 Band 8 搭载 AMOLED 彩屏，支持血氧和全天心率监测，14 天续航，入门级健身追踪首选。\n\n## 显示\n1.47 英寸 AMOLED，194×368，282 PPI，450nit，2.5D 玻璃\n\n## 健康\n心率、血氧、睡眠、压力、女性健康，PAI 活力指数\n\n## 运动\n100 种运动模式，5ATM 防水，无独立 GPS（需连接手机）\n\n## 续航\n180mAh，典型 14 天 / 重度 7 天，磁吸充电约 60 分钟\n\n## 功能\nNFC（公交/门禁）、消息通知、音乐控制、找手机、遥控拍照\n\n## 材质\n塑料机身 + TPU 表带，约 24g\n\n## 系统\n兼容 Android 8.0+ / iOS 13+\n\n## 包装\n手环 ×1，充电线 ×1\n\n## 售后\n1 年质保"
+ },
+ {
+  "id": "doc21_chunk0",
+  "meta": {
+   "doc_id": "21",
+   "tags": [
+    "智能穿戴",
+    "手表",
+    "Watch4Ultra",
+    "旗舰"
+   ],
+   "source_file": "data\\uploads\\6e8198acf6_stellar_watch4ultra.md",
+   "doc_name": "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+   "chunk_index": 0
+  },
+  "content": "# 星耀 Watch 4 Ultra 旗舰手表 产品规格说明书\n\n## 产品概述\n星耀 Watch 4 Ultra 为极限运动与探险打造，钛合金表壳 + 蓝宝石玻璃，双频 GPS，14 天续航，军工级耐用。\n\n## 显示\n1.5 英寸 LTPO AMOLED，480×480，327 PPI，峰值 3000nit，蓝宝石玻璃\n\n## 材质\nTC4 钛合金表壳 + DLC 涂层，陶瓷后盖，氟橡胶 / 钛合金表带可选\n\n## 健康\n心率（12 通道 PPG）、血氧、体温 24h、睡眠（REM+鼾症）、ECG、血压趋势、皮肤温度变异\n\n## 运动\n160+ 运动模式，双频五星 GPS（GPS L1+L5 / 北斗三频），离线地图，海拔气压计，路线导航\n\n## 续航\n530mAh，典型 14 天 / GPS 100h / 探险模式 40 天\n\n## 功能\neSIM 独立通话，NFC，32GB 存储，蓝牙 5.3，扬声器+麦克风\n\n## 耐用\nMIL-STD-810H 军规认证，10ATM 防水，IP69K，-30°C~50°C 工作温度\n\n## 包装\n手表 ×1，磁吸充电底座 ×1，氟橡胶表带 ×1，钛合金表带 ×1\n\n## 售后\n2 年质保，首年意外保"
+ },
+ {
+  "id": "doc22_chunk0",
+  "meta": {
+   "doc_id": "22",
+   "tags": [
+    "智能穿戴",
+    "手环",
+    "Band9"
+   ],
+   "doc_name": "星耀 Band 9 智能手环 产品规格.md",
+   "source_file": "data\\uploads\\bdb68656bd_stellar_band9.md",
+   "chunk_index": 0
+  },
+  "content": "# 星耀 Band 9 智能手环 产品规格说明书\n\n## 产品概述\n星耀 Band 9 升级 1.74 英寸 AMOLED 大屏，支持 120 种运动模式，磁吸快充，时尚轻巧的健康伴侣。\n\n## 显示\n1.74 英寸 AMOLED，336×480，341 PPI，600nit，60Hz，超窄边框\n\n## 健康\n心率（PPG 6 通道）、血氧 24h、睡眠（REM+深睡评分）、压力、女性健康\n\n## 运动\n120 种运动模式，5ATM 防水，连接手机 GPS\n\n## 续航\n230mAh，典型 14 天，磁吸快充 45 分钟充满\n\n## 功能\nNFC，蓝牙通话（扬声器+麦克风），消息快捷回复，音乐控制\n\n## 材质\n塑料机身 + 快拆表带，约 26g，多彩配色\n\n## 系统\n兼容 Android 8.0+ / iOS 13+\n\n## 包装\n手环 ×1，磁吸充电线 ×1\n\n## 售后\n1 年质保"
+ },
+ {
+  "id": "doc23_chunk0",
+  "meta": {
+   "doc_id": "23",
+   "tags": [
+    "智能穿戴",
+    "耳机",
+    "BudsPro3",
+    "降噪"
+   ],
+   "source_file": "data\\uploads\\321462245d_stellar_budspro3.md",
+   "doc_name": "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+   "chunk_index": 0
+  },
+  "content": "# 星耀 Buds Pro 3 降噪耳机 产品规格说明书\n\n## 产品概述\n星耀 Buds Pro 3 旗舰真无线降噪耳机，自适应 ANC 降噪深度达 50dB，支持空间音频头部追踪，36 小时综合续航。\n\n## 音频\n- 11mm 超动态驱动单元 + 6mm 高音单元（同轴双单元）\n- LDAC / LHDC 5.0 高清音频，Hi-Res Audio Wireless\n- 空间音频 + 动态头部追踪\n- 自适应均衡（根据耳道形状自动调节）\n\n## 降噪\n- 自适应主动降噪，最大深度 50dB\n- 透传模式（环境音增强）、风噪抑制\n- 三麦克风 + VPU 骨传导，通话降噪\n\n## 续航\n- 耳机 8h（ANC 关）/ 5.5h（ANC 开）\n- 充电盒额外 28h，总续航 36h\n- 无线充电 + USB-C 快充，10 分钟充 2h 播放\n\n## 连接\n- Bluetooth 5.4，LE Audio / Auracast\n- 双设备同时连接，Google Fast Pair\n\n## 功能\n- IP54 防水（耳机），触控操作，佩戴检测，查找耳机\n- 星耀音频 App（EQ / 降噪调节 / 固件更新）\n\n## 包装\n耳机 ×2，充电盒 ×1，S/M/L 硅胶套 ×3 对，USB-C 线 ×1\n\n## 售后\n1 年质保"
+ },
+ {
+  "id": "doc24_chunk0",
+  "meta": {
+   "tags": [
+    "智能穿戴",
+    "AR眼镜",
+    "Glasses"
+   ],
+   "doc_id": "24",
+   "source_file": "data\\uploads\\db470725da_stellar_arglasses.md",
+   "doc_name": "星耀 AR Glasses Air 智能眼镜 产品规格.md",
+   "chunk_index": 0
+  },
+  "content": "# 星耀 AR Glasses Air 智能眼镜 产品规格说明书\n\n## 产品概述\n星耀 AR Glasses Air 采用 Micro-OLED 显示技术，49g 超轻机身，投射等效 201 英寸巨幕，支持空间交互。\n\n## 显示\n- 双 Micro-OLED，单眼 1920×1080，120Hz\n- 峰值亮度 1800nit，100% sRGB，等效 201 英寸（6 米距离）\n- 透光率 85%，支持电致变色镜片（3 档亮度）\n\n## 光学\n- Birdbath 光学方案，46° 视场角\n- 屈光度调节 0°~-5.0°（近视友好）\n\n## 音频\n- 双侧开放式定向扬声器（漏音 < 5%）\n- 双麦克风降噪\n\n## 连接\n- USB-C（DP Alt Mode）连接手机/电脑/游戏机\n- 星耀 Beam 无线投屏盒（选配），Wi-Fi 6 无线投屏\n\n## 功能\n- 3DoF 空间定位，手势识别\n- 多窗口空间布局（最高 3 个虚拟屏幕）\n- 手机 App 触控板 / 物理按键操控\n\n## 机身\n- 49g（不含线），镁合金框架\n- IP52 防尘防水\n\n## 包装\nAR Glasses Air ×1，USB-C 线 ×1，鼻托 ×3，收纳盒 ×1\n\n## 售后\n1 年质保"
+ },
+ {
+  "id": "doc25_chunk0",
+  "meta": {
+   "source_file": "data\\uploads\\4886d51854_stellar_smartring.md",
+   "doc_id": "25",
+   "doc_name": "星耀 SmartRing Nova 智能戒指 产品规格.md",
+   "tags": [
+    "智能穿戴",
+    "戒指",
+    "SmartRing"
+   ],
+   "chunk_index": 0
+  },
+  "content": "# 星耀 SmartRing Nova 智能戒指 产品规格说明书\n\n## 产品概述\n星耀 SmartRing Nova 将健康监测浓缩于一枚 3g 的钛合金戒指中，7 天续航，IP68 防水，无感佩戴 24 小时健康追踪。\n\n## 健康监测\n- PPG 光学心率（红外 + 绿光双模），血氧\n- 皮肤温度 24h 监测，睡眠分期（REM+深睡+浅睡）\n- 压力指数，HRV 心率变异性\n- 活动热量、步数、距离\n\n## 材质\n- TC4 钛合金外壳，内圈医用级树脂\n- 厚度 2.5mm，宽 7.8mm\n- 提供 7/8/9/10/11/12 号（附量尺）\n\n## 续航\n- 电池 22mAh，7 天续航\n- 磁吸充电座，0-100% 约 60 分钟\n\n## 耐用\n- IP68 防水（可游泳佩戴）\n- -20°C~45°C 工作温度\n\n## 连接\n- Bluetooth 5.3 LE\n- 星耀健康 App（Android 8.0+ / iOS 15+）\n\n## 功能\n- 无屏幕，无振动，纯被动监测\n- 睡眠分析 + AI 健康建议\n- 与星耀手表自动数据融合\n\n## 包装\n智能戒指 ×1，磁吸充电底座 ×1，指环量尺 ×1，收纳盒 ×1\n\n## 售后\n1 年质保"
+ },
+ {
+  "id": "doc26_chunk0",
+  "meta": {
+   "tags": [
+    "其他",
+    "充电宝 20000mAh 大容量快充移动电源"
+   ],
+   "chunk_index": 0,
+   "doc_id": "26",
+   "source_file": "data\\uploads\\3b6824c836_充电宝.md",
+   "doc_name": "充电宝.md"
+  },
+  "content": "# 充电宝 - 20000mAh 大容量快充移动电源\n\n## 产品概述\n本产品是一款20000mAh大容量移动电源，采用高品质锂聚合物电芯，支持多种快充协议，适用于手机、平板等各类电子设备。\n\n## 核心参数\n- **容量**：20000mAh（74Wh）\n- **输入接口**：USB-C（支持PD快充），Micro-USB\n- **输出接口**：USB-C × 1，USB-A × 2\n- **快充协议**：支持PD 3.0、QC 3.0、华为SCP/FCP、三星AFC等\n- **最大输出功率**：22.5W（USB-C）\n- **重量**：约380g\n- **尺寸**：148 × 68 × 28mm\n\n## 产品特点\n1. 三口输出，可同时为三台设备充电\n2. LED数显电量，剩余电量一目了然\n3. 多重安全保护：过充、过放、过流、短路、温度保护\n4. 符合民航登机标准（＜100Wh）\n5. 小电流模式，支持蓝牙耳机、手环等小设备充电\n\n## 包装清单\n- 移动电源 × 1\n- USB-C充电线 × 1\n- 说明书 × 1"
+ },
+ {
+  "id": "doc26_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "tags": [
+    "其他",
+    "充电宝 20000mAh 大容量快充移动电源"
+   ],
+   "doc_name": "充电宝.md",
+   "source_file": "data\\uploads\\3b6824c836_充电宝.md",
+   "doc_id": "26"
+  },
+  "content": "## 包装清单\n- 移动电源 × 1\n- USB-C充电线 × 1\n- 说明书 × 1\n\n## 保修信息\n- 质保期限：12个月\n- 保修范围：非人为损坏的质量问题免费维修"
+ },
+ {
+  "id": "doc27_chunk0",
+  "meta": {
+   "chunk_index": 0,
+   "source_file": "data\\uploads\\39cf6e9849_路由器.md",
+   "doc_id": "27",
+   "tags": [
+    "其他",
+    "AX3000 Wi-Fi 6 双频千兆无线路由器"
+   ],
+   "doc_name": "路由器.md"
+  },
+  "content": "# 路由器 - AX3000 Wi-Fi 6 双频千兆无线路由器\n\n## 产品概述\n本产品是一款AX3000规格的Wi-Fi 6无线路由器，支持2.4GHz和5GHz双频并发，搭载高通芯片，提供稳定高速的无线网络覆盖。\n\n## 核心参数\n- **无线标准**：IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6）\n- **无线速率**：2.4GHz 574Mbps + 5GHz 2402Mbps，双频并发3000Mbps\n- **天线**：4根高增益外置天线\n- **处理器**：高通IPQ5000双核1.0GHz\n- **内存**：256MB RAM + 128MB Flash\n- **接口**：1 × WAN口（千兆），3 × LAN口（千兆），1 × USB 3.0\n- **MU-MIMO**：支持 2×2 MU-MIMO\n- **OFDMA**：支持"
+ },
+ {
+  "id": "doc27_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "source_file": "data\\uploads\\39cf6e9849_路由器.md",
+   "tags": [
+    "其他",
+    "AX3000 Wi-Fi 6 双频千兆无线路由器"
+   ],
+   "doc_id": "27",
+   "doc_name": "路由器.md"
+  },
+  "content": "## 产品特点\n1. Wi-Fi 6技术，高速率、低延迟、大容量\n2. 160MHz频宽，带来更快的5GHz速度体验\n3. 4根高增益天线，覆盖面积可达120㎡\n4. Mesh组网支持，多台路由器轻松扩展覆盖范围\n5. 智能QoS带宽管理，游戏/视频优先\n6. 家长控制、访客网络、安全防护等多功能\n\n## 网络管理\n- 支持APP远程管理\n- Web管理界面：192.168.1.1\n- 默认用户名/密码：admin / admin\n\n## 包装清单\n- 路由器 × 1\n- 电源适配器 × 1\n- 千兆网线 × 1\n- 说明书 × 1\n\n## 保修信息\n- 质保期限：12个月\n- 保修范围：非人为损坏免费保修"
+ },
+ {
+  "id": "doc28_chunk0",
+  "meta": {
+   "doc_id": "28",
+   "tags": [
+    "其他",
+    "65W GaN氮化镓快速充电器 三口输出"
+   ],
+   "doc_name": "充电器.md",
+   "chunk_index": 0,
+   "source_file": "data\\uploads\\f2fa6e726b_充电器.md"
+  },
+  "content": "# 充电器 - 65W GaN氮化镓快速充电器\n\n## 产品概述\n本产品是一款65W GaN氮化镓快速充电器，采用第三代半导体材料氮化镓技术，体积小巧、发热低、效率高，兼容主流快充协议，可为笔记本、平板、手机等多种设备快速充电。\n\n## 核心参数\n- **总功率**：65W（最大）\n- **接口**：USB-C × 2，USB-A × 1（三口设计）\n- **输��**：AC 100-240V ~ 50/60Hz，1.5A\n- **输出规格**：\n  - USB-C1：5V/3A, 9V/3A, 12V/3A, 15V/3A, 20V/3.25A（65W Max）\n  - USB-C2：5V/3A, 9V/2.22A, 12V/1.5A（20W Max）\n  - USB-A：5V/3A, 9V/2A, 12V/1.5A（18W Max）\n- **快充协议**：支持PD 3.0、QC 4.0+、PPS、SCP、FCP、AFC、Apple 2.4A等\n- **GaN材料**：氮化镓第三代半导体\n- **重量**：约110g\n- **尺寸**：56 × 55 × 28mm（可折叠插脚设计）"
+ },
+ {
+  "id": "doc28_chunk1",
+  "meta": {
+   "doc_id": "28",
+   "doc_name": "充电器.md",
+   "tags": [
+    "其他",
+    "65W GaN氮化镓快速充电器 三口输出"
+   ],
+   "chunk_index": 1,
+   "source_file": "data\\uploads\\f2fa6e726b_充电器.md"
+  },
+  "content": "## 产品特点\n1. 三口输出设计，同时为三台设备充电\n2. GaN氮化镓技术，体积小、效率高、发热低\n3. 可折叠插脚，便于收纳和携带\n4. 兼容笔记本充电（USB-C1 65W Max）\n5. 智能分配功率，多口同时使用时自动调整\n6. 多重安全保护：过压、过流、过温、短路保护\n\n## 适用设备\n- 笔记本：MacBook Air/Pro、MateBook、XPS等\n- 平板：iPad Pro、iPad Air、安卓平板\n- 手机：iPhone 15系列、华为/小米/OPPO/vivo等快充手机\n\n## 包装清单\n- GaN充电器 × 1\n- USB-C to C充电线（1米） × 1\n- 说明书 × 1\n\n## 保修信息\n- 质保期限：18个月\n- 保修范围：非人为损坏免费更换"
+ },
+ {
+  "id": "doc29_chunk0",
+  "meta": {
+   "chunk_index": 0,
+   "doc_name": "苍穹 Aether N8 Max.md",
+   "tags": [
+    "智能手机",
+    "苍穹 Aether N8 Max"
+   ],
+   "doc_id": "29",
+   "source_file": "data\\uploads\\b8cc60371a_苍穹 Aether N8 Max.md"
+  },
+  "content": "# 苍穹 Aether N8 Max 产品参数与配置\n\n## 核心参数"
+ },
+ {
+  "id": "doc29_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "source_file": "data\\uploads\\b8cc60371a_苍穹 Aether N8 Max.md",
+   "tags": [
+    "智能手机",
+    "苍穹 Aether N8 Max"
+   ],
+   "doc_id": "29",
+   "doc_name": "苍穹 Aether N8 Max.md"
+  },
+  "content": "| 项目 | 参数 |\n|------|------|\n| 处理器 | 苍核 Aero C1 4nm 旗舰平台 |\n| 内存 | 12GB / 16GB LPDDR5X |\n| 存储 | 256GB / 512GB / 1TB UFS 4.0 |\n| 屏幕 | 6.82 英寸 AMOLED 2K 天穹钻石屏，3168×1440 分辨率 |\n| 刷新率 | 1-120Hz LTPO 自适应刷新率 |\n| 触控采样率 | 最高 240Hz |\n| 亮度 | 峰值 4500nit，全局 1600nit |\n| 后置摄像头 | 双远望四天目系统 |\n| | 天目广角主摄 5000 万像素（Aether-S1 传感器，F1.8，1 英寸） |\n| | 天目超广角 5000 万像素（F2.0，123°） |\n| | 3 倍远望长焦 5000 万像素（F2.6，65mm） |\n| | 6 倍远望长焦 5000 万像素（F4.3，135mm） |\n| 前置摄像头 | 3200 万像素（F2.4，自动对焦） |\n| 视频拍摄 | 最高 4K 60fps，支持杜比视界 |\n| 电池容量 | 5000mAh 双电芯苍穹电池 |"
+ },
+ {
+  "id": "doc29_chunk2",
+  "meta": {
+   "doc_name": "苍穹 Aether N8 Max.md",
+   "tags": [
+    "智能手机",
+    "苍穹 Aether N8 Max"
+   ],
+   "doc_id": "29",
+   "chunk_index": 2,
+   "source_file": "data\\uploads\\b8cc60371a_苍穹 Aether N8 Max.md"
+  },
+  "content": "| 视频拍摄 | 最高 4K 60fps，支持杜比视界 |\n| 电池容量 | 5000mAh 双电芯苍穹电池 |\n| 有线快充 | 100W 苍闪超级闪充 |\n| 无线快充 | 50W 苍闪无线闪充 |\n| 反向充电 | 10W 无线反向充电 |\n| 操作系统 | AetherOS 1.0（基于 Android 14） |\n| 卫星通信 | 卫星通话版（仅特定配置） |\n| 网络支持 | 5G NR / 4G LTE / Wi-Fi 7 / 蓝牙 5.4 |\n| NFC | 支持（多功能 NFC） |\n| 红外遥控 | 支持 |\n| 生物识别 | 超薄屏下光学指纹 + 2D 人脸解锁 |\n| 防护等级 | IP68（1.5 米水深 30 分钟） |\n| 机身重量 | 约 221g |\n| 机身尺寸 | 164.3mm × 76.2mm × 9.5mm |\n| 材质 | 铝合金中框 + 玻璃 / 素皮拼接后盖 |\n| 颜色 | 苍穹蓝（蓝+白拼接）、荒漠金（棕+银拼接）、苍翠绿 |"
+ },
+ {
+  "id": "doc29_chunk3",
+  "meta": {
+   "doc_id": "29",
+   "source_file": "data\\uploads\\b8cc60371a_苍穹 Aether N8 Max.md",
+   "tags": [
+    "智能手机",
+    "苍穹 Aether N8 Max"
+   ],
+   "doc_name": "苍穹 Aether N8 Max.md",
+   "chunk_index": 3
+  },
+  "content": "## 影像系统\n\n苍穹 Aether N8 Max 搭载双远望四天目影像系统：\n\n- **双远望长焦**：3 倍（65mm）+ 6 倍（135mm）双远望镜头，覆盖中远距离全场景\n- **苍影人像**：苍穹大师模式 + 苍影宽画幅\n- **一英寸天目主摄**：Aether-S1 一英寸大底传感器，进光量大幅提升\n- **苍空影像引擎**：AI 计算摄影，自然光影质感\n\n## 配置与价格\n\n| 版本 | 内存 | 存储 | 价格 |\n|------|------|------|------|\n| 苍云版 | 12GB | 256GB | ¥4,999 |\n| 苍域版 | 16GB | 512GB | ¥5,499 |\n| 苍穹版 | 16GB | 1TB | ¥5,999 |\n\n## 包装内容\n\n- 苍穹 Aether N8 Max 手机 ×1\n- 100W 苍闪充电器 ×1\n- USB Type-C 数据线 ×1\n- 取卡针 ×1\n- 保护壳 ×1\n- 快速指南 ×1\n- 三包凭证 ×1\n\n## 售后政策"
+ },
+ {
+  "id": "doc29_chunk4",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "苍穹 Aether N8 Max"
+   ],
+   "doc_id": "29",
+   "doc_name": "苍穹 Aether N8 Max.md",
+   "chunk_index": 4,
+   "source_file": "data\\uploads\\b8cc60371a_苍穹 Aether N8 Max.md"
+  },
+  "content": "## 售后政策\n\n- 7 天无理由退货（激活后不支持）\n- 15 天质量问题换货\n- 1 年整机保修\n- 苍穹官方服务中心全国联保\n- 碎屏保（购机时可选购）\n- 延保服务（购机时可选购）\n\n## 购机权益\n\n- 苍穹云服务 50GB 免费试用 3 个月\n- 苍穹会员 VIP 免费试用 1 个月\n- 游戏中心礼包\n- 以旧换新最高补贴 ¥700\n\n## 常见问题\n\n**Q: Aether N8 Max 的双远望有什么优势？**\nA: 3 倍远望（65mm）适合人像和中距离拍摄，6 倍远望（135mm）适合远摄特写。两颗镜头均支持 OIS 光学防抖，覆盖从特写到远景的完整焦段。\n\n**Q: 支持卫星通信吗？**\nA: 标准版不支持，特定\"卫星通信版\"支持天通卫星通话功能，需确认购买的是卫星通信版本。\n\n**Q: 天目影像系统有哪些特色？**\nA: 包括苍穹自然色彩优化、苍穹大师模式（可调参数）、苍穹宽画幅模式、苍穹快门声音，以及苍穹专业水印。"
+ },
+ {
+  "id": "mall_spu_122_1",
+  "meta": {
+   "min_price": 4999.0,
+   "total_chunks": 2,
+   "chunk_index": 1,
+   "spu_id": 122,
+   "category_path": "智能手机",
+   "biz_id": "122",
+   "status": 1,
+   "main_image": "https://picsum.photos/seed/aether-n8/800/800",
+   "source": "mall_spu",
+   "name": "苍穹 Aether N8 Max",
+   "biz_type": "SPU",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ]
+  },
+  "content": "Aether N8 Max · 12GB · 512GB / 内存:12GB;存储:512GB | ¥4999.00 | 0 |\n| 苍穹 Aether N8 Max · 12GB · 1TB / 内存:12GB;存储:1TB | ¥4999.00 | 0 |\n| 苍穹 Aether N8 Max · 16GB · 256GB / 内存:16GB;存储:256GB | ¥4999.00 | 0 || 苍穹 Aether N8 Max · 16GB · 512GB / 内存:16GB;存储:512GB | ¥4999.00 | 0 |\n| 苍穹 Aether N8 Max · 16GB · 1TB / 内存:16GB;存储:1TB | ¥4999.00 | 0 |"
+ },
+ {
+  "id": "doc30_chunk0",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "灵耀 Lumina Z9 Ultra"
+   ],
+   "source_file": "data\\uploads\\063180a468_灵耀 Lumina Z9 Ultra.md",
+   "doc_id": "30",
+   "chunk_index": 0,
+   "doc_name": "灵耀 Lumina Z9 Ultra.md"
+  },
+  "content": "# 灵耀 Lumina Z9 Ultra 产品参数与配置\n\n## 核心参数"
+ },
+ {
+  "id": "doc30_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "doc_name": "灵耀 Lumina Z9 Ultra.md",
+   "doc_id": "30",
+   "source_file": "data\\uploads\\063180a468_灵耀 Lumina Z9 Ultra.md",
+   "tags": [
+    "智能手机",
+    "灵耀 Lumina Z9 Ultra"
+   ]
+  },
+  "content": "| 项目 | 参数 |\n|------|------|\n| 处理器 | 灵芯 Photon Z1 4nm 旗舰平台 |\n| 内存 | 12GB / 16GB LPDDR5X |\n| 存储 | 256GB / 512GB / 1TB UFS 4.0 |\n| 屏幕 | 6.73 英寸 AMOLED 全等深流光屏，3200×1440 分辨率 |\n| 刷新率 | 1-120Hz LTPO 自适应刷新率 |\n| 触控采样率 | 最高 240Hz |\n| 亮度 | 峰值 3000nit，全局 1000nit |\n| 后置摄像头 | 灵眸全焦段四摄系统 |\n| | 灵眸主摄 5000 万像素（Lumina-S1 传感器，F1.63-F4.0 无级可变光圈） |\n| | 超广角 5000 万像素（F1.8，122°） |\n| | 浮动长焦 5000 万像素（F2.0，3.2 倍光学变焦，10cm 微距） |\n| | 特写长焦 5000 万像素（F2.5，5 倍光学变焦，30cm 微距） |\n| 前置摄像头 | 3200 万像素（F2.0） |\n| 视频拍摄 | 最高 8K 30fps，支持杜比视界 |"
+ },
+ {
+  "id": "doc30_chunk2",
+  "meta": {
+   "doc_name": "灵耀 Lumina Z9 Ultra.md",
+   "chunk_index": 2,
+   "source_file": "data\\uploads\\063180a468_灵耀 Lumina Z9 Ultra.md",
+   "tags": [
+    "智能手机",
+    "灵耀 Lumina Z9 Ultra"
+   ],
+   "doc_id": "30"
+  },
+  "content": "| 前置摄像头 | 3200 万像素（F2.0） |\n| 视频拍摄 | 最高 8K 30fps，支持杜比视界 |\n| 电池容量 | 5300mAh 灵能硅碳负极电池 |\n| 有线快充 | 90W 灵闪秒充 |\n| 无线快充 | 80W 灵闪无线秒充 |\n| 反向充电 | 10W 无线反向充电 |\n| 操作系统 | LumiOS 2.0（基于 Android 14） |\n| 卫星通信 | 双向卫星通信（天通卫星） |\n| 网络支持 | 5G NR / 4G LTE / Wi-Fi 7 / 蓝牙 5.4 |\n| NFC | 支持（多功能 NFC） |\n| 红外遥控 | 支持 |\n| 生物识别 | 3D 超声波屏下指纹 + 2D 人脸解锁 |\n| 防护等级 | IP68（1.5 米水深 30 分钟） |\n| 机身重量 | 约 224g（素皮版）/ 229g（陶瓷版） |\n| 机身尺寸 | 161.4mm × 75.3mm × 9.2mm |\n| 材质 | 灵盾架构 + 灵晶玻璃 + 科技纳米皮 / 陶瓷 |\n| 颜色 | 月辉白（陶瓷）、玄夜黑（科技纳米皮）、极光蓝（陶瓷） |"
+ },
+ {
+  "id": "doc30_chunk3",
+  "meta": {
+   "doc_name": "灵耀 Lumina Z9 Ultra.md",
+   "tags": [
+    "智能手机",
+    "灵耀 Lumina Z9 Ultra"
+   ],
+   "doc_id": "30",
+   "chunk_index": 3,
+   "source_file": "data\\uploads\\063180a468_灵耀 Lumina Z9 Ultra.md"
+  },
+  "content": "## 影像系统\n\n灵耀 Lumina Z9 Ultra 搭载灵眸全焦段四摄系统：\n\n- **灵眸一英寸主摄**：Lumina-S1 定制传感器，F1.63 超大光圈，无级可变光圈\n- **双长焦系统**：3.2 倍 + 5 倍灵眸光学镜头，均支持 OIS 光学防抖和微距拍摄\n- **灵犀人像**：原生双画质 + 大师镜头包\n- **街拍模式**：0.7 秒极速启动，可变光圈街拍\n- **影像套装**（需另购）：外接手柄、快门按钮、滤镜转接环\n\n## 配置与价格\n\n| 版本 | 内存 | 存储 | 价格 |\n|------|------|------|------|\n| 灵光版 | 12GB | 256GB | ¥5,499 |\n| 灵耀版 | 16GB | 512GB | ¥5,999 |\n| 灵域版 | 16GB | 1TB | ¥6,499 |\n\n## 包装内容\n\n- 灵耀 Lumina Z9 Ultra 手机 ×1\n- 90W 灵闪充电器 ×1\n- USB Type-C 数据线 ×1\n- 取卡针 ×1\n- 保护壳 ×1\n- 快速入门指南 ×1\n- 三包凭证 ×1\n\n## 售后政策"
+ },
+ {
+  "id": "doc30_chunk4",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "灵耀 Lumina Z9 Ultra"
+   ],
+   "doc_name": "灵耀 Lumina Z9 Ultra.md",
+   "chunk_index": 4,
+   "doc_id": "30",
+   "source_file": "data\\uploads\\063180a468_灵耀 Lumina Z9 Ultra.md"
+  },
+  "content": "## 售后政策\n\n- 7 天无理由退货（激活后不支持）\n- 15 天质量问题换货\n- 1 年整机保修\n- 灵耀之家全国联保\n- 碎屏保（购机时可选购）\n- 延保服务（购机时可选购）\n\n## 购机权益\n\n- 灵耀云服务 50GB 免费试用 3 个月\n- 灵耀视频 VIP 免费试用 1 个月\n- 主题壁纸 VIP 免费试用 1 个月\n- 以旧换新最高补贴 ¥800\n\n## 常见问题\n\n**Q: Lumina Z9 Ultra 支持卫星通信吗？**\nA: 支持。搭载双向卫星通信功能，在无地面网络覆盖区域可拨打卫星电话，也可以发送和接收卫星消息。\n\n**Q: 可变光圈如何调节？**\nA: 相机专业模式中可手动调节光圈大小（F1.63-F4.0），自动模式下相机会根据场景智能选择最佳光圈值。\n\n**Q: 电池续航怎么样？**\nA: 5300mAh 大电池配合 LumiOS 系统优化，日常使用可达 1.5 天。90W 有线快充约 35 分钟充满。"
+ },
+ {
+  "id": "mall_spu_121_1",
+  "meta": {
+   "total_chunks": 2,
+   "main_image": "https://picsum.photos/seed/lumina-z9/800/800",
+   "status": 1,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "category_path": "智能手机",
+   "min_price": 5499.0,
+   "spu_id": 121,
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "chunk_index": 1,
+   "name": "灵耀 Lumina Z9 Ultra",
+   "biz_id": "121"
+  },
+  "content": "ina Z9 Ultra 12+256GB 灵光版 / 内存:12GB;存储:256GB | ¥5499.00 | 75 |\n| 灵耀 Lumina Z9 Ultra 16+512GB 灵耀版 / 内存:16GB;存储:512GB | ¥5999.00 | 75 |\n| 灵耀 Lumina Z9 Ultra 16+1TB 灵域版 / 内存:16GB;存储:1TB | ¥6499.00 | 75 |"
+ },
+ {
+  "id": "doc31_chunk0",
+  "meta": {
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md",
+   "doc_id": "31",
+   "chunk_index": 0,
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ],
+   "doc_name": "玉米手机 10 Pro.md"
+  },
+  "content": "# 玉米手机 10 Pro 产品参数与配置\n\n## 核心参数"
+ },
+ {
+  "id": "doc31_chunk1",
+  "meta": {
+   "doc_id": "31",
+   "chunk_index": 1,
+   "doc_name": "玉米手机 10 Pro.md",
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md",
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ]
+  },
+  "content": "| 项目 | 参数 |\n|------|------|\n| 处理器 | 谷神 Grain G1 4nm 旗舰芯片 |\n| 内存 | 8GB / 12GB / 16GB LPDDR5X |\n| 存储 | 128GB / 256GB / 512GB / 1TB UFS 4.0 |\n| 屏幕 | 6.67 英寸 AMOLED 柔性直屏，2712×1220 分辨率 |\n| 刷新率 | 1-120Hz LTPO 自适应刷新率 |\n| 触控采样率 | 最高 480Hz（瞬时 2160Hz） |\n| 亮度 | 峰值 4000nit，全局 1800nit |\n| 后置摄像头 | 三摄田字影像系统 |\n| | 田字主摄 6400 万像素（F1.6，OIS，1/1.3 英寸） |\n| | 超广角 5000 万像素（F2.0，119°） |\n| | 微距长焦 1200 万像素（F2.4，2 倍光学，4cm 微距） |\n| 前置摄像头 | 3200 万像素（F2.2，居中挖孔） |\n| 视频拍摄 | 最高 8K 24fps / 4K 60fps，支持 10bit LOG |\n| 电池容量 | 5500mAh 谷能高密度电池 |"
+ },
+ {
+  "id": "doc31_chunk2",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ],
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md",
+   "chunk_index": 2,
+   "doc_name": "玉米手机 10 Pro.md",
+   "doc_id": "31"
+  },
+  "content": "| 电池容量 | 5500mAh 谷能高密度电池 |\n| 有线快充 | 120W 谷闪极速快充（19 分钟充满） |\n| 无线快充 | 50W 谷闪无线快充 |\n| 反向充电 | 15W 无线反向充电 |\n| 操作系统 | CornOS 3.0（基于 Android 15） |\n| AI 功能 | 玉米大脑 AI 引擎：AI 通话摘要、AI 智能消除、AI 实时翻译、AI 字幕 |\n| 网络支持 | 5G NR（n1/n3/n5/n8/n28/n41/n77/n78）/ 4G LTE / Wi-Fi 7 / 蓝牙 5.4 |\n| NFC | 支持（多功能 NFC，公交卡/门禁卡/车钥匙） |\n| 红外遥控 | 支持 |\n| 线性马达 | X 轴线性马达（CornEngine 4.0 振感调校） |\n| 双扬声器 | 立体声双扬声器（Dolby Atmos，Hi-Res Audio 认证） |\n| 生物识别 | 屏下超薄光学指纹 + 2D 人脸解锁 |\n| 防护等级 | IP68（1.5 米水深 30 分钟） |\n| 机身重量 | 约 199g |"
+ },
+ {
+  "id": "doc31_chunk3",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ],
+   "doc_name": "玉米手机 10 Pro.md",
+   "doc_id": "31",
+   "chunk_index": 3,
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md"
+  },
+  "content": "| 防护等级 | IP68（1.5 米水深 30 分钟） |\n| 机身重量 | 约 199g |\n| 机身尺寸 | 160.5mm × 74.3mm × 8.1mm |\n| 材质 | 玉米金刚架构 + 玉米龙鳞玻璃 + AG 磨砂玻璃后盖 |\n| 颜色 | 田野绿、麦浪金、星空黑、樱花粉 |"
+ },
+ {
+  "id": "doc31_chunk4",
+  "meta": {
+   "doc_id": "31",
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ],
+   "chunk_index": 4,
+   "doc_name": "玉米手机 10 Pro.md",
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md"
+  },
+  "content": "## 影像系统\n\n玉米手机 10 Pro 搭载田字三摄影像系统，主打真实自然色彩：\n\n- **田字主摄**：6400 万像素 1/1.3 英寸大底传感器，F1.6 大光圈 + OIS 光学防抖，暗光画质提升 40%\n- **超广角**：5000 万像素 119° 超广视野，支持自动畸变校正\n- **微距长焦**：1200 万像素，最近 4cm 对焦，支持 2 倍光学变焦\n- **玉米影像大脑**：AI 场景识别 200+ 种，实时 HDR 预览，极速抓拍\n- **专业模式**：手动对焦、快门速度、ISO、白平衡全可控，支持 RAW 格式\n\n## 性能与游戏\n\n- **谷神 Grain G1 芯片**：台积电 4nm 工艺，安兔兔跑分 210 万+\n- **玉米冰封散热系统**：5000mm² VC 液冷均热板 + 多层石墨烯，游戏 1 小时温度不超过 42°C\n- **游戏工具箱**：性能模式、触控增强、消息免打扰、准星辅助\n- **CornEngine 4.0**：X 轴线性马达 + 双扬声器，4D 沉浸震感\n\n## 配置与价格"
+ },
+ {
+  "id": "doc31_chunk5",
+  "meta": {
+   "doc_id": "31",
+   "chunk_index": 5,
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ],
+   "doc_name": "玉米手机 10 Pro.md",
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md"
+  },
+  "content": "## 配置与价格\n\n| 版本 | 内存 | 存储 | 价格 |\n|------|------|------|------|\n| 青春版 | 8GB | 128GB | ¥2,499 |\n| 标准版 | 12GB | 256GB | ¥2,999 |\n| 高配版 | 16GB | 512GB | ¥3,499 |\n| 旗舰版 | 16GB | 1TB | ¥3,999 |\n\n## 包装内容\n\n- 玉米手机 10 Pro ×1\n- 120W 谷闪快充充电器 ×1\n- USB Type-C 数据线（1.5m） ×1\n- 取卡针 ×1\n- 清水保护壳 ×1\n- 品牌贴纸 ×1\n- 快速入门指南 ×1\n- 三包凭证 ×1\n\n## 售后政策\n\n- 7 天无理由退货（激活后不支持）\n- 15 天质量问题换货\n- 1 年整机保修\n- 玉米之家全国 3000+ 门店联保\n- 玉米 Care+ 碎屏保（购机时可选购，¥199/年）\n- 延保服务（购机时可选购，¥99/年）\n\n## 购机权益"
+ },
+ {
+  "id": "doc31_chunk6",
+  "meta": {
+   "doc_name": "玉米手机 10 Pro.md",
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ],
+   "chunk_index": 6,
+   "doc_id": "31",
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md"
+  },
+  "content": "## 购机权益\n\n- 玉米云空间 100GB 免费试用 6 个月\n- 玉米视频 VIP 免费试用 3 个月\n- 玉米音乐 VIP 免费试用 3 个月\n- 玉米阅读 10 万册免费畅读\n- 游戏中心专属礼包（价值 ¥200）\n- 以旧换新最高补贴 ¥500\n\n## 常见问题\n\n**Q: 玉米手机 10 Pro 的充电速度如何？**\nA: 120W 谷闪快充可在 19 分钟内从 0 充到 100%，充电 5 分钟即可使用 4 小时。电池为 5500mAh 高密度电芯，正常使用续航可达 1.5 天。\n\n**Q: 支持无线充电吗？**\nA: 支持 50W 谷闪无线快充和 15W 无线反向充电，可为耳机、手表等设备应急充电。\n\n**Q: 谷神 Grain G1 芯片性能怎么样？**\nA: 台积电 4nm 工艺制造，安兔兔跑分 210 万+，日常使用和大型游戏均流畅无卡顿。配合玉米冰封散热系统，长时间游戏不过热降频。\n\n**Q: 相机适合拍什么？**\nA: 田字三摄系统主打真实色彩还原，主摄适合日常街拍和人像，超广角适合风景建筑，微距长焦适合花鸟特写和美食拍摄。"
+ },
+ {
+  "id": "doc31_chunk7",
+  "meta": {
+   "chunk_index": 7,
+   "tags": [
+    "智能手机",
+    "玉米手机 10 Pro"
+   ],
+   "source_file": "data\\uploads\\321da0979f_玉米手机 10 Pro.md",
+   "doc_name": "玉米手机 10 Pro.md",
+   "doc_id": "31"
+  },
+  "content": "**Q: 玉米品牌跟其他品牌有什么不同？**\nA: 玉米手机主打「真实」理念——真实色彩、真实续航、真实价格。不堆砌参数，专注于用户体验和性价比。CornOS 无广告、无预装垃圾应用，系统纯净流畅。"
+ },
+ {
+  "id": "doc32_chunk0",
+  "meta": {
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "doc_id": "32",
+   "chunk_index": 0,
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "doc_name": "星耀X100ProMax-产品参数.md"
+  },
+  "content": "# 星耀 X100 Pro Max 产品参数与配置\n\n## 产品概述\n\n星耀 X100 Pro Max 是星耀科技 2026 年度全能影像旗舰，搭载骁龙 8 Gen4 领先版 3nm 旗舰芯片，配备 1 英寸超大底主摄与 200MP 潜望长焦，支持双向卫星通信。全系提供钛空灰、苍穹黑、雪山白、暮光紫四款高端配色，钛空灰版本采用钛合金中框。\n\n---\n\n## 一、核心参数"
+ },
+ {
+  "id": "doc32_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "doc_id": "32",
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "doc_name": "星耀X100ProMax-产品参数.md"
+  },
+  "content": "| 参数项 | 规格 |\n|--------|------|\n| 产品型号 | 星耀 X100 Pro Max |\n| 上市时间 | 2026 年 4 月 |\n| 处理器 | 骁龙 8 Gen4 领先版（3nm 制程） |\n| CPU 架构 | 2×Cortex-X5 @4.2GHz + 6×Cortex-A730 @3.0GHz |\n| GPU | Adreno 850 @1.2GHz |\n| AI 引擎 | Hexagon NPU，45 TOPS 算力 |\n| 内存 | 16GB LPDDR5T 9600Mbps |\n| 存储 | 512GB / 1TB UFS 4.1 |\n| 屏幕 | 6.82 英寸 AMOLED 2K+ 全等深微曲屏 |\n| 分辨率 | 3200 × 1440（522 PPI） |\n| 刷新率 | 1-120Hz LTPO 自适应刷新率 |\n| 触控采样率 | 360Hz（瞬时 2160Hz） |\n| 峰值亮度 | 5000nit（局部峰值）/ 2500nit（全局） |\n| 调光方式 | 3840Hz 超高频 PWM 调光 + 类 DC 调光 |"
+ },
+ {
+  "id": "doc32_chunk2",
+  "meta": {
+   "doc_id": "32",
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "chunk_index": 2,
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "doc_name": "星耀X100ProMax-产品参数.md"
+  },
+  "content": "| 调光方式 | 3840Hz 超高频 PWM 调光 + 类 DC 调光 |\n| 色深 | 12bit，10.7 亿色 |\n| 色域 | 100% DCI-P3 广色域，ΔE < 0.3 |\n| 屏幕认证 | HDR10+、Dolby Vision、ZREAL 帧享超高清 |\n| 屏幕保护 | 星盾金刚玻璃 2.0 |\n| 解锁方式 | 3D 超声波屏下指纹 + 3D 结构光人脸识别 |"
+ },
+ {
+  "id": "doc32_chunk3",
+  "meta": {
+   "doc_id": "32",
+   "doc_name": "星耀X100ProMax-产品参数.md",
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "chunk_index": 3,
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ]
+  },
+  "content": "---\n\n## 二、影像系统\n\n### 后置四摄\n\n| 镜头 | 规格 |\n|------|------|\n| 主摄 | 50MP 索尼 LYT-900，1 英寸超大底，f/1.6-f/4.0 无级可变光圈，OIS 光学防抖 |\n| 超广角 | 50MP 三星 JN5，f/2.0 光圈，122° 超广角，支持 2.5cm 微距 |\n| 潜望长焦 | 200MP 三星 HP9，1/1.4 英寸，f/2.6 光圈，3.7× 光学变焦，OIS 光学防抖 |\n| 人像长焦 | 50MP 索尼 IMX858，f/2.0 光圈，2.6× 光学变焦，OIS 光学防抖 |\n\n### 后置视频拍摄\n\n- 支持 8K@30fps、4K@120fps、4K@60fps HDR\n- 支持 4K@30fps 杜比视界 HDR 录制\n- 支持 10bit Log 视频录制（Rec.2020）\n- 支持全焦段 4K@60fps 无缝切换\n- 支持导演模式、专业视频模式（峰值对焦、波形图、斑马纹）\n- 支持超级防抖 Pro（OIS + EIS 融合防抖）\n\n### 前置摄像头"
+ },
+ {
+  "id": "doc32_chunk4",
+  "meta": {
+   "chunk_index": 4,
+   "doc_id": "32",
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "doc_name": "星耀X100ProMax-产品参数.md",
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ]
+  },
+  "content": "### 前置摄像头\n\n- 32MP 三星 S5KGD2，f/2.0 光圈\n- 支持 4K@60fps 视频录制\n- 支持 AI 美颜、夜景自拍、人像模式\n- 支持隔空手势拍照\n\n### AI 影像功能\n\n- 星瞳 AI 影像引擎 2.0\n- AI 超清人像（细节增强、背景虚化优化）\n- AI 魔法消除 Pro（支持视频消除路人）\n- AI 扩图（智能画面扩展）\n- AI 云增强（上传云端超分处理）\n- AI 夜景视频（4K 夜景视频实时降噪）\n- 月亮模式、星空模式、超级微距\n\n---\n\n## 三、电池与充电"
+ },
+ {
+  "id": "doc32_chunk5",
+  "meta": {
+   "doc_id": "32",
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "doc_name": "星耀X100ProMax-产品参数.md",
+   "chunk_index": 5,
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md"
+  },
+  "content": "---\n\n## 三、电池与充电\n\n| 项目 | 规格 |\n|------|------|\n| 电池容量 | 7500mAh 硅碳负极电池（星能电池 2.0） |\n| 有线快充 | 120W 星闪超级快充 2.0 |\n| 无线快充 | 80W 星闪无线快充 |\n| 反向无线充电 | 20W |\n| 充电芯片 | 星耀 S2 电源管理芯片 × 2 |\n| 快充速度 | 有线 0-100% 约 21 分钟 / 无线 0-100% 约 32 分钟 |\n| 充电协议 | 兼容 PD 3.1（最高 140W）、QC 5.0 |\n| 电池寿命 | 1600 次完整充放电循环后电池健康度 ≥ 80% |\n| 电池技术 | 极寒模式（-20℃ 仍可正常充电和使用） |\n\n---\n\n## 四、机身尺寸与重量"
+ },
+ {
+  "id": "doc32_chunk6",
+  "meta": {
+   "doc_id": "32",
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "chunk_index": 6,
+   "doc_name": "星耀X100ProMax-产品参数.md"
+  },
+  "content": "---\n\n## 四、机身尺寸与重量\n\n| 版本 | 尺寸 | 重量 |\n|------|------|------|\n| 钛空灰（钛合金版） | 163.2 × 76.1 × 8.5 mm | 225g |\n| 苍穹黑 / 雪山白（玻璃版） | 163.2 × 76.1 × 8.5 mm | 232g |\n| 暮光紫（素皮版） | 163.2 × 76.1 × 8.9 mm | 218g |\n\n---\n\n## 五、连接与��络"
+ },
+ {
+  "id": "doc32_chunk7",
+  "meta": {
+   "doc_id": "32",
+   "chunk_index": 7,
+   "doc_name": "星耀X100ProMax-产品参数.md",
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md"
+  },
+  "content": "---\n\n## 五、连接与��络\n\n- 5G 全网通（SA/NSA 双模），支持 n1/n3/n5/n8/n28/n41/n77/n78/n79 等全频段\n- 卫星通信：天通卫星通话 + 北斗卫星消息（双向）\n- Wi-Fi 7（802.11be），4×4 MIMO，峰值速率 5.8Gbps\n- 蓝牙 6.0，支持 LE Audio、aptX Lossless、LDAC、LHDC 5.0\n- NFC（支持门禁卡、公交卡、银行卡、车钥匙模拟）\n- UWB 超宽带（支持精准定位、无感车钥匙）\n- 红外遥控\n- USB Type-C 3.2 Gen 2（支持 DP 视频输出，最高 8K@30Hz / 4K@144Hz）\n- 三频 GPS（L1+L2+L5）+ 北斗四频（B1I+B1C+B2a+B2b）\n- 气压计、电子罗盘、激光对焦传感器、色温传感器\n\n---\n\n## 六、音频与振动"
+ },
+ {
+  "id": "doc32_chunk8",
+  "meta": {
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "doc_name": "星耀X100ProMax-产品参数.md",
+   "doc_id": "32",
+   "chunk_index": 8,
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ]
+  },
+  "content": "---\n\n## 六、音频与振动\n\n- 立体声双扬声器（1216P 超线性上扬声器 + 1216E 超线性下扬声器）\n- 杜比全景声认证 + DTS:X Ultra\n- Hi-Res Audio / Hi-Res Audio Wireless 双认证\n- 4 麦克风波束成形阵列（通话降噪 + 音频变焦）\n- X 轴超宽频线性马达（瑞声 1016，适配 200+ 场景振动反馈）\n\n---\n\n## 七、操作系统\n\n- 星耀 StarOS 5.0（基于 Android 16 深度定制）\n- 承诺 5 次 Android 大版本更新 + 6 年安全补丁\n- 星耀 AI 大模型端侧部署（70 亿参数，支持离线使用）\n- 特色功能：星耀互传（跨设备文件传输）、星耀流转（应用跨设备接力）、AI 摘要、AI 写作、AI 通话翻译\n\n---\n\n## 八、包装内容"
+ },
+ {
+  "id": "doc32_chunk9",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "chunk_index": 9,
+   "doc_id": "32",
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "doc_name": "星耀X100ProMax-产品参数.md"
+  },
+  "content": "---\n\n## 八、包装内容\n\n- 星耀 X100 Pro Max × 1\n- 120W 星闪快充充电器 × 1\n- USB Type-C 数据线（6A，1.5m）× 1\n- 取卡针 × 1\n- 定制保护壳 × 1（钛空灰版附送芳纶纤维壳，其余版本附送硅胶壳）\n- 快速入门指南 × 1\n- 三包凭证 × 1\n\n**注意：包装不含耳机和屏幕保护膜，需单独购买。**\n\n---\n\n## 九、价格（建议零售价）\n\n| 配置 | 价格 |\n|------|------|\n| 16GB + 512GB | ¥5,999 |\n| 16GB + 1TB | ¥7,999 |\n\n---\n\n## 十、售后服务"
+ },
+ {
+  "id": "doc32_chunk10",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "chunk_index": 10,
+   "doc_name": "星耀X100ProMax-产品参数.md",
+   "doc_id": "32"
+  },
+  "content": "---\n\n## 十、售后服务\n\n- **保修期限**：主机自购买之日起享受 **1 年** 免费保修服务\n- **退换货政策**：自签收之日起 **7 天内** 支持无理由退货（需包装完整、配件齐全）；**15 天内** 出现非人为硬件故障，支持换货\n- **维修方式**：全国 2000+ 星耀授权服务中心提供线下维修；支持寄修（双向免邮）；1 小时快修服务（部分城市）\n- **VIP 专线**：钛空灰版用户享专属 VIP 客服通道\n- **客服热线**：400-888-6688（7×24 小时）\n- **碎屏保**：购机 7 天内可购买官方碎屏保（¥299/年），一年内意外碎屏免费更换原装屏幕一次\n- **延长保**：购机 7 天内可购买延长保（¥249），保修期延长至 2 年\n- **电池保**：购机 7 天内可购买电池保（¥99/2 年），两年内电池健康度低于 80% 免费更换\n\n---\n\n## 十一、购机权益（限量）"
+ },
+ {
+  "id": "doc32_chunk11",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "doc_id": "32",
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md",
+   "chunk_index": 11,
+   "doc_name": "星耀X100ProMax-产品参数.md"
+  },
+  "content": "---\n\n## 十一、购机权益（限量）\n\n- 购机即赠星耀云空间 500GB 一年（价值 ¥588）\n- 星耀视频 VIP 免费试用 3 个月\n- 星耀音乐 VIP 免费试用 3 个月\n- 以旧换新最高额外补贴 ¥1000\n- 分期免息：3/6/12/24 期花呗/信用卡免息\n- 天通卫星通话体验包（12 个月免费）\n\n---\n\n## ��二、常见问题（FAQ）\n\n**Q：星耀 X100 Pro Max 支持卫星通信吗？**\nA：支持。X100 Pro Max 支持天通卫星通话和北斗卫星消息，在无地面网络覆盖的偏远地区（山区、海洋、沙漠等）仍可拨打卫星电话或发送卫星消息。卫星通话需开通中国电信天通卫星业务。\n\n**Q：200MP 长焦和小米/三星的 200MP 有什么区别？**\nA：X100 Pro Max 的 200MP 潜望长焦采用三星 HP9 传感器（1/1.4 英寸），是目前手机长焦中传感器尺寸最大的方案之一。3.7× 原生光学变焦，配合 200MP 高像素，可实现 10× 无损变焦和最高 120× 数字变焦，远景画质行业领先。"
+ },
+ {
+  "id": "doc32_chunk12",
+  "meta": {
+   "chunk_index": 12,
+   "doc_name": "星耀X100ProMax-产品参数.md",
+   "doc_id": "32",
+   "tags": [
+    "智能手机",
+    "星耀 X100 Pro Max"
+   ],
+   "source_file": "data\\uploads\\7a375f023a_星耀X100ProMax-产品参数.md"
+  },
+  "content": "**Q：6000mAh 电池会不会让手机很厚？**\nA：采用硅碳负极电池技术，在 6000mAh 大容量的同时将机身厚度控制在 8.5mm（玻璃版），与主流旗舰持平。能量密度相比传统锂电池提升约 15%。\n\n**Q：X100 Pro Max 与 Stellar X1 Pro 有什么区别？**\nA：X100 Pro Max 主打全能水桶旗舰，骁龙 8 Gen4 + 6000mAh + 200MP 长焦；Stellar X1 Pro 主打影像极致和创新设计，自研星核 Orion X1 芯片 + 伸缩主摄 + 星瞳影像系统。两者定位不同，X100 Pro Max 更注重综合体验，Stellar X1 Pro 更注重影像突破。\n\n**Q：是否支持存储扩展？**\nA：不支持 microSD 卡扩展。建议直接选购 1TB 版本，或搭配星耀私有云实现本地数据备份。\n\n**Q：无线充电兼容 MagSafe 吗？**\nA：星耀 X100 Pro Max 支持 Qi2 协议（兼容 MagSafe），配合星耀磁吸无线充电器可实现 15W 磁吸无线充电。完整 80W 无线快充需使用星耀星闪无线充电座。"
+ },
+ {
+  "id": "doc33_chunk0",
+  "meta": {
+   "chunk_index": 0,
+   "doc_name": "星耀 Flip 折叠屏.md",
+   "tags": [
+    "智能手机",
+    "星耀 Flip 折叠屏"
+   ],
+   "source_file": "data\\uploads\\0c93935b6f_星耀 Flip 折叠屏.md",
+   "doc_id": "33"
+  },
+  "content": "# 星耀 Flip 折叠屏\n\n## 产品概述\n\n星耀首款竖向折叠屏手机，翻盖式设计致敬经典。展开是 6.8 寸旗舰内屏，折叠后仅掌心大小。3.6 寸外屏支持全功能操作，不用翻开就能回复消息、拍照、导航。\n\n## 核心参数\n\n| 项目 | 规格 |\n|------|------|\n| 处理器 | 骁龙 8 Gen3 |\n| 内屏 | 6.8 英寸 FHD+ AMOLED，120Hz LTPO |\n| 外屏 | 3.6 英寸 AMOLED，60Hz |\n| 后置相机 | 50MP 主摄(OIS) + 12MP 超广角 |\n| 前置相机 | 32MP（内屏打孔） |\n| 电池 | 4300mAh |\n| 充电 | 67W 有线 + 15W 无线 |\n| 折叠厚度 | 15.8mm |\n| 展开厚度 | 7.3mm |\n| 重量 | 188g |\n| 系统 | StellarOS 3.0（基于 Android 15） |\n| 存储 | 12GB+256GB / 12GB+512GB（LPDDR5X + UFS 4.0） |\n\n## 版本与售价（来自数据库）"
+ },
+ {
+  "id": "doc33_chunk1",
+  "meta": {
+   "source_file": "data\\uploads\\0c93935b6f_星耀 Flip 折叠屏.md",
+   "doc_id": "33",
+   "doc_name": "星耀 Flip 折叠屏.md",
+   "chunk_index": 1,
+   "tags": [
+    "智能手机",
+    "星耀 Flip 折叠屏"
+   ]
+  },
+  "content": "## 版本与售价（来自数据库）\n\n| 型号 | 颜色 | 存储 | 售价 | 库存 |\n|------|------|------|------|------|\n| Flip | 香槟粉 | 12GB + 256GB | ¥4,999 | 111 |\n| Flip | 香槟粉 | 12GB + 512GB | ¥4,999 | 111 |\n| Flip | 曜石黑 | 12GB + 256GB | ¥5,999 | 110 |\n| Flip | 曜石黑 | 12GB + 512GB | ¥5,999 | 110 |\n\n*SPU ID: 14 | 分类: 手机数码 > 智能手机 | 首款竖向折叠屏，50 万次折叠认证*\n\n## 屏幕详情\n\n### 内屏\n- 6.8 英寸 FHD+（2520×1080）AMOLED\n- 1-120Hz LTPO 自适应刷新率\n- 峰值亮度 2500nit\n- HDR10+ 认证\n- 2160Hz PWM 高频调光\n- 21:9 超宽比例"
+ },
+ {
+  "id": "doc33_chunk2",
+  "meta": {
+   "chunk_index": 2,
+   "doc_name": "星耀 Flip 折叠屏.md",
+   "source_file": "data\\uploads\\0c93935b6f_星耀 Flip 折叠屏.md",
+   "tags": [
+    "智能手机",
+    "星耀 Flip 折叠屏"
+   ],
+   "doc_id": "33"
+  },
+  "content": "### 外屏\n- 3.6 英寸 AMOLED（1066×1056）\n- 60Hz 刷新率\n- 峰值亮度 1200nit\n- 康宁大猩猩玻璃 Victus\n- 全功能操作（接打电话、快捷回复、拍照、支付、导航）\n\n## 影像系统\n\n- **50MP 主摄**：索尼 IMX890，f/1.8，OIS，1/1.56 英寸\n- **12MP 超广角**：120° 视角，f/2.2\n- 支持 2 倍光学品质变焦、20 倍数码变焦\n- 4K 60fps 视频录制\n- 夜景模式、专业模式、延时摄影\n\n## 折叠特色功能\n\n### 悬停拍照\n半折叠状态下放在桌面上，解放双手进行自拍或延时摄影。支持 45°-135° 自由角度悬停。\n\n### 外屏快捷回复\n在外屏上使用预设回复或语音输入快速回消息。支持微信、短信、QQ 等主流应用。\n\n### 双屏预览\n拍照时内外屏同时显示画面，被拍者通过外屏也能看到构图，告别\"直男拍照\"。\n\n### 分屏多任务\n展开状态下支持上下分屏，边看视频边聊天。支持任意两应用自由组合。\n\n## 铰链设计"
+ },
+ {
+  "id": "doc33_chunk3",
+  "meta": {
+   "doc_id": "33",
+   "doc_name": "星耀 Flip 折叠屏.md",
+   "chunk_index": 3,
+   "source_file": "data\\uploads\\0c93935b6f_星耀 Flip 折叠屏.md",
+   "tags": [
+    "智能手机",
+    "星耀 Flip 折叠屏"
+   ]
+  },
+  "content": "### 分屏多任务\n展开状态下支持上下分屏，边看视频边聊天。支持任意两应用自由组合。\n\n## 铰链设计\n\n- 水滴形铰链，闭合无缝\n- 莱茵认证 50 万次折叠测试\n- 超薄柔性玻璃（UTG）内屏盖板\n- 折痕相比竞品更浅，正常使用几乎不可见\n\n## 续航\n\n- 4300mAh 双电芯设计\n- 67W 有线快充：15 分钟充至 50%，42 分钟充满\n- 15W 无线充电\n- 中度使用续航约 1 天\n\n## 通信与连接\n\n- 5G 双卡双待\n- Wi-Fi 7\n- 蓝牙 5.4\n- NFC 全功能\n- 立体声双扬声器\n- 线性马达\n\n## 外观配色\n\n- 星夜黑（AG 磨砂玻璃）\n- 流光金（镜面玻璃）\n- 薰衣草紫（素皮）\n- 薄荷绿（AG 磨砂玻璃）\n\n## 常见问题\n\n**Q: 折叠屏耐用吗？铰链寿命多长？**\nA: 通过 50 万次折叠测试（莱茵认证），正常使用 5 年以上无问题。\n\n**Q: 折痕明显吗？**\nA: 采用超薄柔性玻璃（UTG），折痕相比竞品更浅，正常使用几乎不可见。"
+ },
+ {
+  "id": "doc33_chunk4",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀 Flip 折叠屏"
+   ],
+   "doc_id": "33",
+   "chunk_index": 4,
+   "doc_name": "星耀 Flip 折叠屏.md",
+   "source_file": "data\\uploads\\0c93935b6f_星耀 Flip 折叠屏.md"
+  },
+  "content": "**Q: 折痕明显吗？**\nA: 采用超薄柔性玻璃（UTG），折痕相比竞品更浅，正常使用几乎不可见。\n\n**Q: 外屏能运行所有应用吗？**\nA: 主流应用（微信、抖音、支付宝、地图等）均已适配外屏。未适配应用可在设置中开启强制显示。\n\n**Q: 支持防水吗？**\nA: 支持 IPX8 防水（仅限清水），日常雨淋、洗手溅水无影响。不建议在泳池或海水环境中使用。\n\n**Q: 内屏贴膜怎么办？**\nA: 出厂已预贴专用保护膜，不建议自行撕除或更换。如需更换，请前往星耀官方售后服务中心。"
+ },
+ {
+  "id": "mall_spu_127_0",
+  "meta": {
+   "status": 1,
+   "name": "星耀 Flip 折叠屏",
+   "source": "mall_spu",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "main_image": "https://picsum.photos/seed/phone-flip/400/400",
+   "chunk_index": 0,
+   "spu_id": 127,
+   "biz_type": "SPU",
+   "min_price": 4999.0,
+   "biz_id": "127",
+   "total_chunks": 3,
+   "category_path": "智能手机"
+  },
+  "content": "# 商品：星耀 Flip 折叠屏\n> 竖折设计 · 3.6寸外屏 · 轻薄时尚\n**基本信息**：商品ID(SPU_ID)：127 | 分类：智能手机 | 参考最低价：¥4999.00 | SKU 规格数：4 | 标签：mall_spu、cat:1、is_new、is_hot、on_shelf\n\n## 详情描述\n星耀首款竖向折叠屏手机，翻盖式设计致敬经典。展开是 6.8 寸旗舰内屏，折叠后仅掌心大小。3.6 寸外屏支持全功能操作，不用翻开就能回复消息、拍照、导航。\n\n项目：规格\n处理器：骁龙 8 Gen3\n内屏：6.8 寸 FHD+ AMOLED，120Hz LTPO\n外屏：3.6 寸 AMOLED，60Hz\n后置相机：50MP 主摄(OIS) + 12MP 超广角\n前置相机：32MP（内屏打孔）\n电池：4300mAh\n充电：67W 有线 + 15W 无线\n折叠厚度：15.8mm\n展开厚度：7.3mm\n重量：188g\n\n悬停拍照：半折叠状态下放在桌面上，解放双手进行自拍或延时摄影\n外屏快捷回复：在外屏上使用预设回复或语音输入快速回消息\n双屏预览：拍照时内外屏同时显示画面，被拍者也能看到构图\n分屏多任务：展开状态下支持上下分屏，边看视频边聊天"
+ },
+ {
+  "id": "mall_spu_127_2",
+  "meta": {
+   "chunk_index": 2,
+   "category_path": "智能手机",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "name": "星耀 Flip 折叠屏",
+   "min_price": 4999.0,
+   "total_chunks": 3,
+   "biz_type": "SPU",
+   "spu_id": 127,
+   "biz_id": "127",
+   "status": 1,
+   "source": "mall_spu",
+   "main_image": "https://picsum.photos/seed/phone-flip/400/400"
+  },
+  "content": ":香槟粉;内存:12GB;存储:512GB | ¥4999.00 | 111 |\n| 星耀 Flip 折叠屏 · 曜石黑 · 12GB · 256GB / 颜色:曜石黑;内存:12GB;存储:256GB | ¥5999.00 | 110 |\n| 星耀 Flip 折叠屏 · 曜石黑 · 12GB · 512GB / 颜色:曜石黑;内存:12GB;存储:512GB | ¥5999.00 | 110 |"
+ },
+ {
+  "id": "doc34_chunk0",
+  "meta": {
+   "doc_name": "星耀 X200 5G 影像旗舰.md",
+   "tags": [
+    "智能手机",
+    "星耀 X200 5G 影像旗舰"
+   ],
+   "chunk_index": 0,
+   "source_file": "data\\uploads\\e3acd1efda_星耀 X200 5G 影像旗舰.md",
+   "doc_id": "34"
+  },
+  "content": "# 星耀 X200 5G 影像旗舰\n\n## 产品概述\n\n星耀 X200 是星耀品牌的影像旗舰手机，与徕卡联合研发的光学系统，搭载 1 英寸大底传感器，为专业摄影师和摄影爱好者打造。支持全焦段 4K 120fps 视频录制。\n\n## 核心参数"
+ },
+ {
+  "id": "doc34_chunk1",
+  "meta": {
+   "doc_id": "34",
+   "doc_name": "星耀 X200 5G 影像旗舰.md",
+   "tags": [
+    "智能手机",
+    "星耀 X200 5G 影像旗舰"
+   ],
+   "chunk_index": 1,
+   "source_file": "data\\uploads\\e3acd1efda_星耀 X200 5G 影像旗舰.md"
+  },
+  "content": "## 核心参数\n\n| 项目 | 规格 |\n|------|------|\n| 处理器 | 骁龙 8 Gen4，台积电 3nm 工艺 |\n| 屏幕 | 6.73 英寸 2K+ LTPO OLED，1-120Hz 自适应刷新率，峰值亮度 3200nit |\n| 后置相机 | 50MP 一英寸主摄(OIS) + 50MP 超广角 + 50MP 3.2x 长焦(OIS) + 50MP 5x 潜望长焦(OIS) |\n| 前置相机 | 32MP，f/2.0 光圈，支持 4K 60fps 视频 |\n| 电池 | 5400mAh 硅碳负极电池 |\n| 充电 | 120W 有线 + 50W 无线 + 10W 反向无线充电 |\n| 系统 | StellarOS 3.0（基于 Android 15） |\n| 防护 | IP68 防水防尘 |\n| 重量 | 219g |\n| 厚度 | 9.2mm（相机模组处 12.8mm） |\n| 存储 | 12GB+256GB / 16GB+512GB / 16GB+1TB（LPDDR5X + UFS 4.0） |\n\n## 版本与售价（来自数据库）"
+ },
+ {
+  "id": "doc34_chunk2",
+  "meta": {
+   "doc_name": "星耀 X200 5G 影像旗舰.md",
+   "doc_id": "34",
+   "tags": [
+    "智能手机",
+    "星耀 X200 5G 影像旗舰"
+   ],
+   "source_file": "data\\uploads\\e3acd1efda_星耀 X200 5G 影像旗舰.md",
+   "chunk_index": 2
+  },
+  "content": "## 版本与售价（来自数据库）\n\n| 颜色 | 内存 | 存储选项 | 统一售价 | 库存(每款) |\n|------|------|----------|----------|------------|\n| 钛灰 | 12GB | 256GB / 512GB / 1TB | ¥5,999 | 90 |\n| 钛灰 | 16GB | 256GB / 512GB / 1TB | ¥5,999 | 90 |\n| 陶瓷白 | 12GB | 256GB / 512GB / 1TB | ¥5,999 | 90 |\n| 陶瓷白 | 16GB | 256GB / 512GB / 1TB | ¥5,999 | 90 |\n\n*SPU ID: 124 | 分类: 手机数码 > 智能手机 | 12 款 SKU，全系统一定价 ¥5,999*\n\n## 影像系统详情\n\n### 一英寸主摄\n- 索尼 LYT-900 传感器，5000 万像素\n- f/1.63 大光圈，OIS 光学防抖\n- 支持双原生 ISO Fusion，暗光画质提升 40%\n- 单像素面积 1.6μm，融合像素 3.2μm"
+ },
+ {
+  "id": "doc34_chunk3",
+  "meta": {
+   "doc_id": "34",
+   "tags": [
+    "智能手机",
+    "星耀 X200 5G 影像旗舰"
+   ],
+   "chunk_index": 3,
+   "doc_name": "星耀 X200 5G 影像旗舰.md",
+   "source_file": "data\\uploads\\e3acd1efda_星耀 X200 5G 影像旗舰.md"
+  },
+  "content": "### 徕卡色彩科学\n- **徕卡经典**：真实还原，保留光影层次\n- **徕卡鲜艳**：色彩饱满，更具视觉冲击力\n- 支持 RAW 格式输出，14-bit 色深\n\n### 大师人像\n- 支持 23mm / 35mm / 50mm / 75mm / 90mm 五个经典焦段\n- AI 景深虚化，模拟 f/0.95-f/16 光圈效果\n- 人像模式支持后期重新对焦\n\n### 视频拍摄\n- 全焦段 4K 120fps 录制\n- 8K@30fps 全像素读取\n- 夜景视频：AI 降噪算法，4K 夜景视频噪点降低 60%\n- 支持 10-bit LOG 格式录制\n- 立体声收音，支持外接麦克风\n\n## 屏幕特性\n- 2K+ 分辨率（3200×1440）\n- 1-120Hz LTPO 自适应刷新率\n- 杜比视界认证\n- P3 广色域，ΔE < 0.3\n- 1920Hz 高频 PWM 调光\n- 康宁大猩猩玻璃 Victus 2\n\n## 通信与连接\n- 5G 双卡双待（SA/NSA）\n- Wi-Fi 7\n- 蓝牙 5.4\n- NFC 全功能\n- 北斗卫星消息（仅限中国境内使用，需开通服务）\n- 红外遥控"
+ },
+ {
+  "id": "doc34_chunk4",
+  "meta": {
+   "source_file": "data\\uploads\\e3acd1efda_星耀 X200 5G 影像旗舰.md",
+   "doc_name": "星耀 X200 5G 影像旗舰.md",
+   "doc_id": "34",
+   "tags": [
+    "智能手机",
+    "星耀 X200 5G 影像旗舰"
+   ],
+   "chunk_index": 4
+  },
+  "content": "## 适用人群\n- 摄影爱好者、内容创作者\n- 需要顶级影像能力的用户\n- 对屏幕素质有高要求的用户\n\n## 常见问题\n\n**Q: 是否支持卫星通信？**\nA: 本机型支持北斗卫星消息（仅限中国境内使用，需开通服务）。\n\n**Q: 是否带充电器和数据线？**\nA: 包装内含 120W 氮化镓充电器、USB-C to USB-C 6A 数据线、透明保护壳。\n\n**Q: 防水性能如何？**\nA: IP68 等级，可在 1.5 米深清水中浸泡 30 分钟。但不建议在海水中使用。\n\n**Q: 系统更新支持多久？**\nA: 承诺 4 年 Android 大版本更新 + 5 年安全补丁。\n\n**Q: 电池续航如何？**\nA: 5400mAh 硅碳负极电池，日常中度使用可持续约 1.5 天。重度影像使用约 8-10 小时。\n\n**Q: 支持内存卡扩展吗？**\nA: 不支持 MicroSD 扩展，建议选择 512GB 或 1TB 版本满足影像存储需求。"
+ },
+ {
+  "id": "doc35_chunk0",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀 A60 5G 学生机"
+   ],
+   "doc_name": "星耀 A60 5G 学生机.md",
+   "source_file": "data\\uploads\\79188bad34_星耀 A60 5G 学生机.md",
+   "chunk_index": 0,
+   "doc_id": "35"
+  },
+  "content": "# 星耀 A60 5G 学生机\n\n## 产品概述\n\n专为青少年和学生打造的入门 5G 手机。内置家长管控功能，支持护眼模式、应用时长管理、定位追踪。性价比极高，适合作为第一部 5G 手机。\n\n## 核心参数\n\n| 项目 | 规格 |\n|------|------|\n| 处理器 | 天玑 7300 |\n| 屏幕 | 6.58 英寸 FHD+ LCD，120Hz，全局 DC 调光 |\n| 后置相机 | 64MP 主摄 + 2MP 景深 |\n| 前置相机 | 16MP，f/2.0 光圈 |\n| 电池 | 5000mAh |\n| 充电 | 33W 有线快充 |\n| 系统 | StellarOS Lite（家长管控版，基于 Android 15） |\n| 存储 | 6GB+128GB / 8GB+256GB（LPDDR4X + UFS 2.2） |\n| 重量 | 196g |\n| 厚度 | 8.3mm |\n| 解锁方式 | 侧边指纹 + 2D 人脸识别 |\n\n## 版本与售价（来自数据库）"
+ },
+ {
+  "id": "doc35_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "doc_name": "星耀 A60 5G 学生机.md",
+   "tags": [
+    "智能手机",
+    "星耀 A60 5G 学生机"
+   ],
+   "source_file": "data\\uploads\\79188bad34_星耀 A60 5G 学生机.md",
+   "doc_id": "35"
+  },
+  "content": "## 版本与售价（来自数据库）\n\n| 型号 | 颜色 | 存储 | 售价 | 库存 |\n|------|------|------|------|------|\n| A60 5G | 薄荷绿 | 6GB + 128GB | ¥1,299 | 90 |\n| A60 5G | 薄荷绿 | 6GB + 256GB | ¥1,299 | 90 |\n| A60 5G | 星空黑 | 6GB + 128GB | ¥1,299 | 90 |\n| A60 5G | 星空黑 | 6GB + 256GB | ¥1,499 | 89 |\n| A60 5G | 薄荷绿 | 8GB + 128GB | ¥1,499 | 90 |\n| A60 5G | 星空黑 | 8GB + 128GB | ¥1,299 | 90 |\n| A60 5G | 薄荷绿 | 8GB + 256GB | ¥1,699 | 90 |\n| A60 5G | 星空黑 | 8GB + 256GB | ¥1,699 | 90 |\n\n*SPU ID: 126 | 分类: 手机数码 > 智能手机 | 入门级 5G 学生机，8 款 SKU*\n\n## 家长管控功能"
+ },
+ {
+  "id": "doc35_chunk2",
+  "meta": {
+   "doc_id": "35",
+   "doc_name": "星耀 A60 5G 学生机.md",
+   "tags": [
+    "智能手机",
+    "星耀 A60 5G 学生机"
+   ],
+   "source_file": "data\\uploads\\79188bad34_星耀 A60 5G 学生机.md",
+   "chunk_index": 2
+  },
+  "content": "## 家长管控功能\n\n### 应用白名单\n- 家长可设置允许使用的应用\n- 未被授权的应用无法打开\n- 支持按时间段设置不同白名单\n\n### 屏幕时间管理\n- 设置每日使用时长上限（30 分钟 - 12 小时可调）\n- 超时后仅允许通话和紧急功能\n- 每日使用报告，了解孩子手机使用习惯\n\n### 定位追踪\n- 实时查看孩子位置（GPS + 基站 + Wi-Fi 三重定位）\n- 电子围栏：设定安全区域，超出即提醒\n- 历史轨迹查询\n\n### 学习模式\n- 上课时间自动静音\n- 仅允许学习类应用运行\n- 支持自定义学习时段（周一至周五可分别设置）\n\n### 护眼提醒\n- 距离过近提醒（< 25cm 自动弹窗）\n- 光线过暗提醒\n- 蓝光过滤护眼模式\n- 全局 DC 调光，无频闪\n\n## 屏幕特性\n\n- 6.58 英寸 FHD+（2408×1080）LCD\n- 120Hz 刷新率，240Hz 触控采样率\n- 全局 DC 调光，无 PWM 频闪\n- 通过德国莱茵 TÜV 护眼认证\n- 阳光屏模式，户外可视\n\n## 续航"
+ },
+ {
+  "id": "doc35_chunk3",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀 A60 5G 学生机"
+   ],
+   "doc_id": "35",
+   "doc_name": "星耀 A60 5G 学生机.md",
+   "chunk_index": 3,
+   "source_file": "data\\uploads\\79188bad34_星耀 A60 5G 学生机.md"
+  },
+  "content": "## 续航\n\n- 5000mAh 大电池，轻度使用 2 天，中度 1.5 天\n- 33W 快充，30 分钟充至 50%，70 分钟充满\n- 超级省电模式：5% 电量可待机 12 小时\n\n## 通信与连接\n\n- 5G 双卡双待\n- Wi-Fi 6\n- 蓝牙 5.2\n- 3.5mm 耳机孔\n- 双扬声器\n- 支持最大 1TB TF 卡扩展\n\n## 常见问题\n\n**Q: 学生模式可以关闭吗？**\nA: 需要家长密码才能关闭。如遗忘密码，可通过绑定手机号找回。\n\n**Q: 打游戏流畅吗？**\nA: 王者荣耀高帧率流畅运行，原神中低画质 40fps 左右。定位是学习和日常使用，非游戏手机。\n\n**Q: 支持 NFC 吗？**\nA: 不支持 NFC 功能。\n\n**Q: 外壳材质是什么？**\nA: 聚碳酸酯一体成型机身，抗摔耐磨，提供星空蓝、薄荷白、石墨黑三色。\n\n**Q: 有防水功能吗？**\nA: 具备生活防水（IP52），可防日常泼溅，不建议浸泡。"
+ },
+ {
+  "id": "mall_spu_124_0",
+  "meta": {
+   "source": "mall_spu",
+   "chunk_index": 0,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "spu_id": 124,
+   "min_price": 5999.0,
+   "status": 1,
+   "biz_type": "SPU",
+   "total_chunks": 4,
+   "biz_id": "124",
+   "main_image": "https://picsum.photos/seed/phone-x200/400/400",
+   "category_path": "智能手机",
+   "name": "星耀 X200 5G 影像旗舰"
+  },
+  "content": "# 商品：星耀 X200 5G 影像旗舰\n> 徕卡光学镜头 · 1英寸大底 · 骁龙8 Gen4\n**基本信息**：商品ID(SPU_ID)：124 | 分类：智能手机 | 参考最低价：¥5999.00 | SKU 规格数：12 | 标签：mall_spu、cat:1、is_new、is_hot、on_shelf\n\n## 详情描述\n星耀 X200 是星耀品牌的影像旗舰手机，与徕卡联合研发的光学系统，搭载 1 英寸大底传感器，为专业摄影师和摄影爱好者打造。支持全焦段 4K 120fps 视频录制。\n\n项目：规格\n处理器：骁龙 8 Gen4 3nm\n屏幕：6.73 寸 2K+ LTPO OLED，1-120Hz 自适应刷新率\n后置相机：50MP 一英寸主摄(OIS) + 50MP 超广角 + 50MP 3.2x 长焦(OIS) + 50MP 5x 潜望长焦(OIS)\n前置相机：32MP\n电池：5400mAh 硅碳负极\n充电：120W 有线 + 50W 无线 + 10W 反向\n系统：StellarOS 3.0（基于 Android 15）\n防护：IP68 防水防尘\n重量：219g\n\n一英寸主摄：索尼 LYT-900 传感器，f/1.63 光圈，支持双原生 ISO Fusion，暗光画质提升 40%\n徕卡色彩科学：提供\"徕卡经典\"和\"徕卡鲜艳\"两种色彩风格\n大师人像：支持 23mm/35mm/50mm/75mm/90mm 五个经典焦段\n夜景视频：AI 降噪算法，4K 夜景视频噪点降低 60%\n8K 视频：支持 8K@30fps 全像素读取"
+ },
+ {
+  "id": "mall_spu_124_2",
+  "meta": {
+   "main_image": "https://picsum.photos/seed/phone-x200/400/400",
+   "source": "mall_spu",
+   "category_path": "智能手机",
+   "name": "星耀 X200 5G 影像旗舰",
+   "biz_id": "124",
+   "biz_type": "SPU",
+   "total_chunks": 4,
+   "chunk_index": 2,
+   "status": 1,
+   "min_price": 5999.0,
+   "spu_id": 124,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ]
+  },
+  "content": "/ 颜色:钛灰;内存:12GB;存储:256GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 钛灰 · 12GB · 512GB / 颜色:钛灰;内存:12GB;存储:512GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 钛灰 · 12GB · 1TB / 颜色:钛灰;内存:12GB;存储:1TB | ¥5999.00 | 90 || 星耀 X200 5G 影像旗舰 · 钛灰 · 16GB · 256GB / 颜色:钛灰;内存:16GB;存储:256GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 钛灰 · 16GB · 512GB / 颜色:钛灰;内存:16GB;存储:512GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 钛灰 · 16GB · 1TB / 颜色:钛灰;内存:16GB;存储:1TB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 陶瓷白 · 12GB · 256GB / 颜色:陶瓷白;内存:12GB;存储:256GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 陶瓷白 · 12GB · 512GB / 颜色:陶瓷白;内存:12GB;存储:512GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 陶瓷白 · 12GB · 1TB / 颜色:陶瓷白;内存:12GB;存储:1TB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 陶瓷白 · 16GB · 256GB / 颜色:陶瓷白;内存:16GB;存储:256GB | ¥5999.00 | 90 |"
+ },
+ {
+  "id": "mall_spu_124_3",
+  "meta": {
+   "chunk_index": 3,
+   "main_image": "https://picsum.photos/seed/phone-x200/400/400",
+   "name": "星耀 X200 5G 影像旗舰",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "total_chunks": 4,
+   "category_path": "智能手机",
+   "biz_type": "SPU",
+   "biz_id": "124",
+   "source": "mall_spu",
+   "status": 1,
+   "spu_id": 124,
+   "min_price": 5999.0
+  },
+  "content": "陶瓷白;内存:12GB;存储:512GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 陶瓷白 · 12GB · 1TB / 颜色:陶瓷白;内存:12GB;存储:1TB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 陶瓷白 · 16GB · 256GB / 颜色:陶瓷白;内存:16GB;存储:256GB | ¥5999.00 | 90 || 星耀 X200 5G 影像旗舰 · 陶瓷白 · 16GB · 512GB / 颜色:陶瓷白;内存:16GB;存储:512GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 陶瓷白 · 16GB · 1TB / 颜色:陶瓷白;内存:16GB;存储:1TB | ¥5999.00 | 90 |"
+ },
+ {
+  "id": "mall_spu_126_0",
+  "meta": {
+   "source": "mall_spu",
+   "name": "星耀 A60 5G 学生机",
+   "biz_type": "SPU",
+   "min_price": 1299.0,
+   "biz_id": "126",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "category_path": "智能手机",
+   "total_chunks": 3,
+   "spu_id": 126,
+   "chunk_index": 0,
+   "status": 1,
+   "main_image": "https://picsum.photos/seed/phone-a60/400/400"
+  },
+  "content": "# 商品：星耀 A60 5G 学生机\n> 5000mAh · 护眼屏 · 学生模式\n**基本信息**：商品ID(SPU_ID)：126 | 分类：智能手机 | 参考最低价：¥1299.00 | SKU 规格数：8 | 标签：mall_spu、cat:1、is_new、on_shelf\n\n## 详情描述\n专为青少年和学生打造的入门 5G 手机。内置家长管控功能，支持护眼模式、应用时长管理、定位追踪。性价比极高，适合作为第一部 5G 手机。\n\n项目：规格\n处理器：天玑 7300\n屏幕：6.58 寸 FHD+ LCD，120Hz，全局 DC 调光\n后置相机：64MP 主摄 + 2MP 景深\n前置相机：16MP\n电池：5000mAh\n充电：33W 有线\n系统：StellarOS Lite（家长管控版）\n\n应用白名单：家长可设置允许使用的应用\n屏幕时间管理：设置每日使用时长上限\n定位追踪：实时查看孩子位置\n学习模式：上课时间自动静音，仅允许学习类应用\n护眼提醒：距离过近、光线过暗自动提醒\n\nQ: 学生模式可以关闭吗？\nA: 需要家长密码才能关闭。如遗忘密码，可通过绑定手机号找回。\n\nQ: 打游戏流畅吗？\nA: 王者荣耀高帧率流畅运行，原神中低画质 40fps 左右。定位是学习和日常使用，非游戏手机。"
+ },
+ {
+  "id": "mall_spu_126_2",
+  "meta": {
+   "biz_type": "SPU",
+   "main_image": "https://picsum.photos/seed/phone-a60/400/400",
+   "source": "mall_spu",
+   "chunk_index": 2,
+   "name": "星耀 A60 5G 学生机",
+   "min_price": 1299.0,
+   "status": 1,
+   "total_chunks": 3,
+   "biz_id": "126",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "category_path": "智能手机",
+   "spu_id": 126
+  },
+  "content": "/ 颜色:薄荷绿;内存:8GB;存储:128GB | ¥1499.00 | 90 |\n| 星耀 A60 5G 学生机 · 薄荷绿 · 8GB · 256GB / 颜色:薄荷绿;内存:8GB;存储:256GB | ¥1699.00 | 90 |\n| 星耀 A60 5G 学生机 · 星空黑 · 6GB · 256GB / 颜色:星空黑;内存:6GB;存储:256GB | ¥1499.00 | 89 || 星耀 A60 5G 学生机 · 星空黑 · 8GB · 128GB / 颜色:星空黑;内存:8GB;存储:128GB | ¥1299.00 | 90 |\n| 星耀 A60 5G 学生机 · 星空黑 · 8GB · 256GB / 颜色:星空黑;内存:8GB;存储:256GB | ¥1699.00 | 90 |"
+ },
+ {
+  "id": "doc36_chunk0",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星耀 Note 14 Pro"
+   ],
+   "source_file": "data\\uploads\\fd1ce56433_星耀 Note 14 Pro.md",
+   "doc_id": "36",
+   "doc_name": "星耀 Note 14 Pro.md",
+   "chunk_index": 0
+  },
+  "content": "# 星耀 Note 14 Pro\n\n## 产品概述\n\n星耀 Note 14 Pro 定位中高端全能机型，主打 2 亿像素主摄和超长续航。轻薄机身内塞入 5500mAh 大电池，是同价位综合体验最均衡的选择。\n\n## 核心参数\n\n| 项目 | 规格 |\n|------|------|\n| 处理器 | 骁龙 8s Gen4，台积电 4nm 工艺 |\n| 屏幕 | 6.67 英寸 1.5K AMOLED，120Hz 刷新率，峰值亮度 1800nit |\n| 后置相机 | 200MP 主摄(OIS) + 8MP 超广角 + 2MP 微距 |\n| 前置相机 | 32MP，f/2.2 光圈 |\n| 电池 | 5500mAh |\n| 充电 | 120W 有线快充（15 分钟充至 50%，38 分钟充满） |\n| 厚度 | 7.8mm |\n| 重量 | 188g |\n| 系统 | StellarOS 3.0（基于 Android 15） |\n| 存储 | 8GB+128GB / 12GB+256GB / 16GB+512GB（LPDDR5X + UFS 3.1） |\n\n## 版本与售价（来自数据库）"
+ },
+ {
+  "id": "doc36_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "doc_id": "36",
+   "doc_name": "星耀 Note 14 Pro.md",
+   "tags": [
+    "智能手机",
+    "星耀 Note 14 Pro"
+   ],
+   "source_file": "data\\uploads\\fd1ce56433_星耀 Note 14 Pro.md"
+  },
+  "content": "## 版本与售价（来自数据库）\n\n| 颜色 | 8+256 | 8+512 | 12+256 | 12+512 | 库存/款 |\n|------|-------|-------|--------|--------|---------|\n| 子夜黑 | ¥2,600 | ¥2,602 | ¥2,603 | ¥2,599 | 90 |\n| 冰川蓝 | ¥2,599 | ¥2,999 | ¥2,579 | ¥2,599 | 90 |\n| 香槟金 | ¥2,779 | ¥2,569 | ¥2,669 | ¥2,699 | 90 |\n\n*SPU ID: 125 | 分类: 手机数码 > 智能手机 | 12 款 SKU，¥2,569-2,999*\n\n## 2 亿像素主摄\n\n- 三星 HP3 传感器，1/1.4 英寸\n- 支持 16 合 1 像素融合，等效 2.24μm 大像素\n- 默认 12.5MP 像素融合模式\n- OIS 光学防抖 + EIS 电子防抖\n- 30 倍数码变焦\n- 单张 200MP 照片占用约 30-50MB 存储空间\n\n## 屏幕特性"
+ },
+ {
+  "id": "doc36_chunk2",
+  "meta": {
+   "doc_id": "36",
+   "tags": [
+    "智能手机",
+    "星耀 Note 14 Pro"
+   ],
+   "chunk_index": 2,
+   "doc_name": "星耀 Note 14 Pro.md",
+   "source_file": "data\\uploads\\fd1ce56433_星耀 Note 14 Pro.md"
+  },
+  "content": "## 屏幕特性\n\n- 1.5K 分辨率（2712×1220）\n- 120Hz 刷新率，240Hz 触控采样率\n- 2160Hz 高频 PWM 调光\n- DCI-P3 广色域\n- SGS 低蓝光认证\n\n## 续航与充电\n\n- 5500mAh 大容量电池，中度使用可持续约 1.5 天\n- 电池健康引擎：经过 1600 次充放电循环后仍保留 80% 以上容量\n- 120W 超级闪充，充电 5 分钟通话 3 小时\n\n## 通信与连接\n\n- 5G 双卡双待\n- Wi-Fi 6E\n- 蓝牙 5.3\n- NFC 全功能\n- 红外遥控\n- 立体声双扬声器（杜比全景声）\n\n## 使用场景\n\n- 日常拍照和社交媒体分享\n- 重度使用者（5500mAh 可满足一天半使用）\n- 预算 2500-3500 元的中端用户\n\n## 常见问题\n\n**Q: 2 亿像素照片占用多少存储？**\nA: 单张约 30-50MB，建议 256GB 起步。日常使用建议用 12.5MP 像素融合模式，效果更好。\n\n**Q: 是否有耳机孔？**\nA: 没有 3.5mm 耳机孔，需使用 Type-C 耳机或蓝牙耳机。"
+ },
+ {
+  "id": "doc36_chunk3",
+  "meta": {
+   "doc_id": "36",
+   "tags": [
+    "智能手机",
+    "星耀 Note 14 Pro"
+   ],
+   "chunk_index": 3,
+   "doc_name": "星耀 Note 14 Pro.md",
+   "source_file": "data\\uploads\\fd1ce56433_星耀 Note 14 Pro.md"
+  },
+  "content": "**Q: 是否有耳机孔？**\nA: 没有 3.5mm 耳机孔，需使用 Type-C 耳机或蓝牙耳机。\n\n**Q: 快充对电池有损伤吗？**\nA: 内置电池健康引擎，经过 1600 次充放电循环后仍保留 80% 以上容量。\n\n**Q: 支持无线充电吗？**\nA: 不支持无线充电，仅支持 120W 有线快充。\n\n**Q: 机身是什么材质？**\nA: 铝合金中框 + AG 磨砂玻璃后盖，提供星夜黑、冰霜银、薄荷绿三色可选。"
+ },
+ {
+  "id": "mall_spu_125_0",
+  "meta": {
+   "source": "mall_spu",
+   "biz_type": "SPU",
+   "spu_id": 125,
+   "min_price": 2569.0,
+   "biz_id": "125",
+   "main_image": "https://picsum.photos/seed/phone-note14/400/400",
+   "chunk_index": 0,
+   "status": 1,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "category_path": "智能手机",
+   "name": "星耀 Note 14 Pro",
+   "total_chunks": 4
+  },
+  "content": "# 商品：星耀 Note 14 Pro\n> 2亿像素 · 120W快充 · 轻薄长续航\n**基本信息**：商品ID(SPU_ID)：125 | 分类：智能手机 | 参考最低价：¥2569.00 | SKU 规格数：12 | 标签：mall_spu、cat:1、is_new、on_shelf\n\n## 详情描述\n# 星耀 Note 14 Pro\n\n## 产品概述\n星耀 Note 14 Pro 定位中高端全能机型，主打 2 亿像素主摄和超长续航。轻薄机身内塞入 5500mAh 大电池，是同价位综合体验最均衡的选择。\n\n## 核心参数\n| 项目 | 规格 |\n|------|------|\n| 处理器 | 骁龙 8s Gen4 |\n| 屏幕 | 6.67 寸 1.5K AMOLED，120Hz |\n| 后置相机 | 200MP 主摄(OIS) + 8MP 超广角 + 2MP 微距 |\n| 前置相机 | 32MP |\n| 电池 | 5500mAh |\n| 充电 | 120W 有线 |\n| 厚度 | 7.8mm |\n| 重量 | 188g |\n\n## 使用场景\n- 日常拍照和社交媒体分享\n- 重度使用者（5500mAh 可满足一天半使用）\n- 预算 2500-3500 元的中端用户"
+ },
+ {
+  "id": "mall_spu_125_2",
+  "meta": {
+   "biz_id": "125",
+   "chunk_index": 2,
+   "biz_type": "SPU",
+   "name": "星耀 Note 14 Pro",
+   "total_chunks": 4,
+   "min_price": 2569.0,
+   "source": "mall_spu",
+   "main_image": "https://picsum.photos/seed/phone-note14/400/400",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "spu_id": 125,
+   "category_path": "智能手机",
+   "status": 1
+  },
+  "content": "夜黑;内存:8GB;存储:512GB | ¥2602.00 | 90 |\n| 星耀 Note 14 Pro · 子夜黑 · 12GB · 256GB / 颜色:子夜黑;内存:12GB;存储:256GB | ¥2603.00 | 90 |\n| 星耀 Note 14 Pro · 子夜黑 · 12GB · 512GB / 颜色:子夜黑;内存:12GB;存储:512GB | ¥2599.00 | 90 || 星耀 Note 14 Pro · 冰川蓝 · 8GB · 256GB / 颜色:冰川蓝;内存:8GB;存储:256GB | ¥2599.00 | 90 |\n| 星耀 Note 14 Pro · 冰川蓝 · 8GB · 512GB / 颜色:冰川蓝;内存:8GB;存储:512GB | ¥2999.00 | 90 |\n| 星耀 Note 14 Pro · 冰川蓝 · 12GB · 256GB / 颜色:冰川蓝;内存:12GB;存储:256GB | ¥2579.00 | 90 |\n| 星耀 Note 14 Pro · 冰川蓝 · 12GB · 512GB / 颜色:冰川蓝;内存:12GB;存储:512GB | ¥2599.00 | 89 |\n| 星耀 Note 14 Pro · 香槟金 · 8GB · 256GB / 颜色:香槟金;内存:8GB;存储:256GB | ¥2779.00 | 90 |\n| 星耀 Note 14 Pro · 香槟金 · 8GB · 512GB / 颜色:香槟金;内存:8GB;存储:512GB | ¥2569.00 | 90 |\n| 星耀 Note 14 Pro · 香槟金 · 12GB · 256GB / 颜色:香槟金;内存:12GB;存储:256GB | ¥2669.00 | 90 |"
+ },
+ {
+  "id": "mall_spu_125_3",
+  "meta": {
+   "name": "星耀 Note 14 Pro",
+   "spu_id": 125,
+   "chunk_index": 3,
+   "source": "mall_spu",
+   "biz_id": "125",
+   "biz_type": "SPU",
+   "main_image": "https://picsum.photos/seed/phone-note14/400/400",
+   "min_price": 2569.0,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "status": 1,
+   "category_path": "智能手机",
+   "total_chunks": 4
+  },
+  "content": ":香槟金;内存:8GB;存储:256GB | ¥2779.00 | 90 |\n| 星耀 Note 14 Pro · 香槟金 · 8GB · 512GB / 颜色:香槟金;内存:8GB;存储:512GB | ¥2569.00 | 90 |\n| 星耀 Note 14 Pro · 香槟金 · 12GB · 256GB / 颜色:香槟金;内存:12GB;存储:256GB | ¥2669.00 | 90 || 星耀 Note 14 Pro · 香槟金 · 12GB · 512GB / 颜色:香槟金;内存:12GB;存储:512GB | ¥2699.00 | 90 |"
+ },
+ {
+  "id": "doc37_chunk0",
+  "meta": {
+   "source_file": "data\\uploads\\d61ad88b49_星域 Stellar X1 Pro.md",
+   "doc_name": "星域 Stellar X1 Pro.md",
+   "chunk_index": 0,
+   "tags": [
+    "智能手机",
+    "星域 Stellar X1 Pro"
+   ],
+   "doc_id": "37"
+  },
+  "content": "# 星域 Stellar X1 Pro 产品参数与配置\n\n## 核心参数"
+ },
+ {
+  "id": "doc37_chunk1",
+  "meta": {
+   "chunk_index": 1,
+   "source_file": "data\\uploads\\d61ad88b49_星域 Stellar X1 Pro.md",
+   "doc_name": "星域 Stellar X1 Pro.md",
+   "tags": [
+    "智能手机",
+    "星域 Stellar X1 Pro"
+   ],
+   "doc_id": "37"
+  },
+  "content": "| 项目 | 参数 |\n|------|------|\n| 处理器 | 星核 Orion X1 4nm 旗舰芯片 |\n| 内存 | 12GB / 16GB LPDDR5X |\n| 存储 | 256GB / 512GB / 1TB UFS 4.0 |\n| 屏幕 | 6.78 英寸 AMOLED 流光微曲屏，2844×1260 分辨率 |\n| 刷新率 | 1-120Hz LTPO 自适应刷新率 |\n| 触控采样率 | 300Hz（瞬时 1440Hz） |\n| 亮度 | 峰值 2600nit，全局 1600nit |\n| 后置摄像头 | 星瞳伸缩主摄 5000 万像素（F1.6~F4.0 可变光圈） |\n| | 超广角 4000 万像素（F2.2） |\n| | 潜望长焦微距 5000 万像素（F2.1，3.5 倍光学变焦） |\n| 前置摄像头 | 1300 万像素（F2.4） |\n| 视频拍摄 | 最高 4K 60fps，支持 HDR Vivid |\n| 电池容量 | 5200mAh 星能硅碳负极电池 |\n| 有线快充 | 100W 星闪超级快充 |\n| 无线快充 | 80W 星闪无线快充 |"
+ },
+ {
+  "id": "doc37_chunk2",
+  "meta": {
+   "source_file": "data\\uploads\\d61ad88b49_星域 Stellar X1 Pro.md",
+   "doc_name": "星域 Stellar X1 Pro.md",
+   "chunk_index": 2,
+   "tags": [
+    "智能手机",
+    "星域 Stellar X1 Pro"
+   ],
+   "doc_id": "37"
+  },
+  "content": "| 有线快充 | 100W 星闪超级快充 |\n| 无线快充 | 80W 星闪无线快充 |\n| 反向充电 | 20W 无线反向充电 |\n| 操作系统 | StarOS 4.0（基于 Android 14） |\n| 卫星通信 | 北斗卫星消息 + 天通卫星通话 |\n| 网络支持 | 5G NR / 4G LTE / Wi-Fi 7 / 蓝牙 5.4 |\n| NFC | 支持（读卡器模式、卡模拟模式） |\n| 生物识别 | 3D 结构光人脸识别 + 超声波屏下指纹 |\n| 防护等级 | IP68（1.5 米水深 30 分钟） |\n| 机身重量 | 约 226g |\n| 机身尺寸 | 162.6mm × 75.1mm × 8.4mm |\n| 材质 | 星盾金刚玻璃 + 素皮 / 陶瓷背板 |\n| 颜色 | 星河银、极夜黑、晨曦金、沧海蓝 |"
+ },
+ {
+  "id": "doc37_chunk3",
+  "meta": {
+   "source_file": "data\\uploads\\d61ad88b49_星域 Stellar X1 Pro.md",
+   "chunk_index": 3,
+   "tags": [
+    "智能手机",
+    "星域 Stellar X1 Pro"
+   ],
+   "doc_id": "37",
+   "doc_name": "星域 Stellar X1 Pro.md"
+  },
+  "content": "## 影像系统\n\n星域 Stellar X1 Pro 搭载星瞳影像系统：\n\n- **星瞳伸缩主摄**：1 英寸超大底传感器，F1.6~F4.0 十档物理可变光圈，机械式伸缩镜头结构\n- **星速抓拍**：StarMotion 运动引擎，抓拍清晰无拖影\n- **星瞳微距长焦**：支持 35 倍微距拍摄，最近对焦距离 5cm\n- **AI 星辰影像**：AI 消除、AI 扩图、AI 云增强\n\n## 配置与价格\n\n| 版本 | 内存 | 存储 | 价格 |\n|------|------|------|------|\n| 星耀版 | 12GB | 256GB | ¥8,999 |\n| 星辰版 | 16GB | 512GB | ¥9,999 |\n| 星域版 | 16GB | 1TB | ¥10,999 |\n\n## 包装内容\n\n- 星域 Stellar X1 Pro 手机 ×1\n- 100W 星闪快充充电器 ×1\n- USB Type-C 数据线 ×1\n- 取卡针 ×1\n- 定制保护壳 ×1（根据颜色版本不同）\n- 快速指南 ×1\n- 三包凭证 ×1\n\n## 售后政策"
+ },
+ {
+  "id": "doc37_chunk4",
+  "meta": {
+   "tags": [
+    "智能手机",
+    "星域 Stellar X1 Pro"
+   ],
+   "chunk_index": 4,
+   "source_file": "data\\uploads\\d61ad88b49_星域 Stellar X1 Pro.md",
+   "doc_id": "37",
+   "doc_name": "星域 Stellar X1 Pro.md"
+  },
+  "content": "## 售后政策\n\n- 7 天无理由退货（激活后不支持）\n- 15 天质量问题换货\n- 1 年整机保修\n- 星域官方服务中心全国联保\n- 碎屏服务宝（购机时可选购）\n\n## 购机权益\n\n- 星域云空间 200GB 免费试用 3 个月\n- 星域视频 VIP 免费试用 1 个月\n- 星域音乐 VIP 免费试用 1 个月\n- 天际通畅连套餐\n\n## 常见问题\n\n**Q: Stellar X1 Pro 支持卫星通话吗？**\nA: 支持。Stellar X1 Pro 支持天通卫星通话和北斗卫星消息，在无地面网络覆盖区域仍可拨打卫星电话或发送卫星消息。\n\n**Q: 可变光圈有什么作用？**\nA: F1.6~F4.0 十档物理可变光圈可根据光线自动调节，大光圈提升暗光画质，小光圈保证画面边缘清晰，还可拍出星芒效果。\n\n**Q: 是否支持存储扩展？**\nA: 不支持扩展存储卡，建议根据需求选择合适存储版本。"
+ },
+ {
+  "id": "mall_spu_7_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://www.oppo.com/content/dam/oppo_com/common/mkt/v2-2/oppo-reno16-series-cn/reno16/listpage/480-600-green.png",
+   "min_price": 1999.0,
+   "status": 1,
+   "biz_id": "7",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "spu_id": 7,
+   "total_chunks": 2,
+   "source": "mall_spu",
+   "biz_type": "SPU",
+   "category_path": "智能手机",
+   "name": "星耀 X100 青春版"
+  },
+  "content": "3 |\n| 星耀 X100 青春版 · 8GB · 256GB / 内存:8GB;存储:256GB | ¥2599.00 | 27 |\n| 星耀 X100 青春版 · 12GB · 128GB / 内存:12GB;存储:128GB | ¥2599.00 | 77 |\n| 星耀 X100 青春版 · 12GB · 256GB / 内存:12GB;存储:256GB | ¥2999.00 | 330 |"
+ },
+ {
+  "id": "mall_spu_164_0",
+  "meta": {
+   "category_path": "生活家电 > 家用电视",
+   "total_chunks": 1,
+   "name": "星耀 65 寸 4K Mini-LED 智能电视 Max",
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=65%20inch%20mini%20LED%20TV&image_size=landscape_16_9",
+   "biz_type": "SPU",
+   "spu_id": 164,
+   "source": "mall_spu",
+   "chunk_index": 0,
+   "min_price": 4999.0,
+   "biz_id": "164",
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:5",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "status": 1
+  },
+  "content": "# 商品：星耀 65 寸 4K Mini-LED 智能电视 Max\n**基本信息**：商品ID(SPU_ID)：164 | 分类：生活家电 > 家用电视 | 参考最低价：¥4999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:5、is_new、is_hot、on_shelf\n\n## 详情描述\n# 星耀 65 寸 4K Mini-LED 智能电视 Max\n\n## 核心卖点\n\n- Mini-LED 576 分区背光\n- 144Hz 原生高刷新率\n- 杜比全景声 + DTS:X\n- 4GB+64GB 大存储\n- HDMI 2.1 x 2\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 65 寸 Mini-LED Max 标准版 / 版本:标准版 | ¥4999.00 | 80 |\n| 星耀 65 寸 Mini-LED Max 高配版 / 版本:高配版(含摄像头) | ¥5999.00 | 50 |"
+ },
+ {
+  "id": "mall_spu_165_0",
+  "meta": {
+   "name": "星耀 75 寸 8K 量子点电视 Ultra",
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:5",
+    "is_new",
+    "on_shelf"
+   ],
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=75%20inch%208K%20QLED%20TV&image_size=landscape_16_9",
+   "source": "mall_spu",
+   "chunk_index": 0,
+   "min_price": 8999.0,
+   "biz_id": "165",
+   "spu_id": 165,
+   "biz_type": "SPU",
+   "category_path": "生活家电 > 家用电视",
+   "total_chunks": 1,
+   "status": 1
+  },
+  "content": "# 商品：星耀 75 寸 8K 量子点电视 Ultra\n**基本信息**：商品ID(SPU_ID)：165 | 分类：生活家电 > 家用电视 | 参考最低价：¥8999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:5、is_new、on_shelf\n\n## 详情描述\n# 星耀 75 寸 8K 量子点电视 Ultra\n\n## 核心卖点\n\n- 8K 超高清分辨率\n- 量子点 Pro 广色域\n- 120Hz MEMC 运动补偿\n- AI 画质引擎\n- 6GB+128GB 旗舰存储\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 75 寸 8K Ultra 标准版 / 版本:标准版 | ¥8999.00 | 40 |\n| 星耀 75 寸 8K Ultra 尊享版 / 版本:尊享版(含SoundBar) | ¥10999.00 | 30 |"
+ },
+ {
+  "id": "mall_spu_166_0",
+  "meta": {
+   "min_price": 3299.0,
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=50%20inch%20gaming%20TV&image_size=landscape_16_9",
+   "spu_id": 166,
+   "chunk_index": 0,
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:5",
+    "is_hot",
+    "on_shelf"
+   ],
+   "status": 1,
+   "biz_id": "166",
+   "total_chunks": 1,
+   "name": "星耀 50 寸 4K 游戏电视 G-Series",
+   "category_path": "生活家电 > 家用电视"
+  },
+  "content": "# 商品：星耀 50 寸 4K 游戏电视 G-Series\n**基本信息**：商品ID(SPU_ID)：166 | 分类：生活家电 > 家用电视 | 参考最低价：¥3299.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:5、is_hot、on_shelf\n\n## 详情描述\n# 星耀 50 寸 4K 游戏电视 G-Series\n\n## 核心卖点\n\n- 144Hz VRR 可变刷新率\n- AMD FreeSync Premium\n- 5.8ms 超低输入延迟\n- ALLM 自动低延迟模式\n- 游戏模式专属 UI\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 50 寸 G-Series 标准版 / 版本:标准版 | ¥3299.00 | 120 |\n| 星耀 50 寸 G-Series 套装版 / 版本:套装版(含游戏手柄) | ¥3699.00 | 60 |"
+ },
+ {
+  "id": "mall_spu_167_0",
+  "meta": {
+   "chunk_index": 0,
+   "min_price": 1499.0,
+   "source": "mall_spu",
+   "spu_id": 167,
+   "total_chunks": 1,
+   "biz_type": "SPU",
+   "status": 1,
+   "name": "星耀 43 寸 全高清智能电视 Lite",
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=43%20inch%20smart%20TV%20minimalist&image_size=landscape_16_9",
+   "biz_id": "167",
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:5",
+    "on_shelf"
+   ],
+   "category_path": "生活家电 > 家用电视"
+  },
+  "content": "# 商品：星耀 43 寸 全高清智能电视 Lite\n**基本信息**：商品ID(SPU_ID)：167 | 分类：生活家电 > 家用电视 | 参考最低价：¥1499.00 | SKU 规格数：1 | 标签：mall_spu、cat:9、cat2:5、on_shelf\n\n## 详情描述\n# 星耀 43 寸 全高清智能电视 Lite\n\n## 核心卖点\n\n- 43 英寸黄金尺寸\n- 无边框全面屏\n- 双频 WiFi 6\n- 2GB+16GB 存储\n- 丰富影视资源\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 43 寸 Lite 标准版 / 版本:标准版 | ¥1499.00 | 200 |"
+ },
+ {
+  "id": "mall_spu_168_0",
+  "meta": {
+   "biz_type": "SPU",
+   "category_path": "生活家电 > 家用电视",
+   "chunk_index": 0,
+   "status": 1,
+   "name": "星耀 85 寸 4K 巨幕电视 Cinema",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:5",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "spu_id": 168,
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=85%20inch%20giant%20TV%20cinema&image_size=landscape_16_9",
+   "min_price": 14999.0,
+   "source": "mall_spu",
+   "biz_id": "168"
+  },
+  "content": "# 商品：星耀 85 寸 4K 巨幕电视 Cinema\n**基本信息**：商品ID(SPU_ID)：168 | 分类：生活家电 > 家用电视 | 参考最低价：¥14999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:5、is_new、is_hot、on_shelf\n\n## 详情描述\n# 星耀 85 寸 4K 巨幕电视 Cinema\n\n## 核心卖点\n\n- 85 英寸巨幕影院\n- 2000nits 峰值亮度\n- 1200 分区 Mini-LED\n- 7.1.4 内置环绕声\n- 金属机身极简设计\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 85 寸 Cinema 标准版(壁挂) / 版本:标准版(壁挂) | ¥14999.00 | 20 |\n| 星耀 85 寸 Cinema 落地版(含艺术支架) / 版本:落地版(含艺术支架) | ¥16999.00 | 15 |"
+ },
+ {
+  "id": "mall_spu_173_0",
+  "meta": {
+   "source": "mall_spu",
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=window%20air%20conditioner%20kitchen%20white&image_size=square",
+   "status": 1,
+   "chunk_index": 0,
+   "total_chunks": 1,
+   "biz_type": "SPU",
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:3",
+    "is_new",
+    "on_shelf"
+   ],
+   "name": "极净 窗式变频空调 厨房专用款",
+   "biz_id": "173",
+   "min_price": 2199.0,
+   "category_path": "生活家电 > 家用空调",
+   "spu_id": 173
+  },
+  "content": "# 商品：极净 窗式变频空调 厨房专用款\n**基本信息**：商品ID(SPU_ID)：173 | 分类：生活家电 > 家用空调 | 参考最低价：¥2199.00 | SKU 规格数：1 | 标签：mall_spu、cat:9、cat2:3、is_new、on_shelf\n\n## 详情描述\n# 极净 窗式变频空调 厨房专用款\n\n## 核心卖点\n\n- 厨房专用耐油烟设计\n- 防腐蚀涂层\n- 高密度过滤网\n- 高风压稳定运行\n- 1 匹变频节能\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 窗式厨房专用 标准版 / 版本:标准版 | ¥2199.00 | 90 |"
+ },
+ {
+  "id": "mall_spu_176_0",
+  "meta": {
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:2",
+    "on_shelf"
+   ],
+   "category_path": "生活家电 > 家用电冰箱",
+   "biz_id": "176",
+   "min_price": 999.0,
+   "source": "mall_spu",
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=small%20two%20door%20refrigerator%20white%20apartment&image_size=portrait_16_9",
+   "spu_id": 176,
+   "status": 1,
+   "chunk_index": 0,
+   "biz_type": "SPU",
+   "name": "极净 200L 双门小型冰箱"
+  },
+  "content": "# 商品：极净 200L 双门小型冰箱\n**基本信息**：商品ID(SPU_ID)：176 | 分类：生活家电 > 家用电冰箱 | 参考最低价：¥999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:2、on_shelf\n\n## 详情描述\n# 极净 200L 双门小型冰箱\n\n## 核心卖点\n\n- 200L 紧凑双门\n- 宽度仅 55cm\n- 占地 0.3㎡\n- 37dB 超静音\n- 租房神器\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 200L双门 白色 / 颜色:白色 | ¥999.00 | 250 |\n| 极净 200L双门 银色 / 颜色:银色 | ¥1099.00 | 180 |"
+ },
+ {
+  "id": "mall_spu_178_0",
+  "meta": {
+   "status": 1,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:2",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "total_chunks": 1,
+   "min_price": 1499.0,
+   "chunk_index": 0,
+   "category_path": "生活家电 > 家用电冰箱",
+   "biz_id": "178",
+   "biz_type": "SPU",
+   "main_image": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=retro%20style%20refrigerator%20mint%20green%20vintage&image_size=portrait_16_9",
+   "name": "极净 180L 复古迷你冰箱",
+   "source": "mall_spu",
+   "spu_id": 178
+  },
+  "content": "# 商品：极净 180L 复古迷你冰箱\n**基本信息**：商品ID(SPU_ID)：178 | 分类：生活家电 > 家用电冰箱 | 参考最低价：¥1499.00 | SKU 规格数：3 | 标签：mall_spu、cat:9、cat2:2、is_new、is_hot、on_shelf\n\n## 详情描述\n# 极净 180L 复古冰箱\n\n## 核心卖点\n\n- 复古高颜值设计\n- 180L 精致容量\n- 多色可选\n- 13 档机械调温\n- 38dB 超静音\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 180L复古 薄荷绿 / 颜色:薄荷绿 | ¥1499.00 | 150 |\n| 极净 180L复古 奶油白 / 颜色:奶油白 | ¥1499.00 | 150 |\n| 极净 180L复古 樱花粉 / 颜色:樱花粉 | ¥1599.00 | 120 |"
+ },
+ {
+  "id": "mall_spu_169_0",
+  "meta": {
+   "chunk_index": 0,
+   "biz_id": "169",
+   "source": "mall_spu",
+   "min_price": 5999.0,
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/nr-pub/202506251716_b022b657c6bc88191817d8adf5196108.png",
+   "spu_id": 169,
+   "name": "极净 3 匹 立柜式变频冷暖空调",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:3",
+    "is_hot",
+    "on_shelf"
+   ],
+   "biz_type": "SPU",
+   "status": 1,
+   "category_path": "生活家电 > 家用空调"
+  },
+  "content": "# 商品：极净 3 匹 立柜式变频冷暖空调\n**基本信息**：商品ID(SPU_ID)：169 | 分类：生活家电 > 家用空调 | 参考最低价：¥5999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:3、is_hot、on_shelf\n\n## 详情描述\n<p>极净 3 匹立柜式空调，适用于 30-45㎡ 大客厅。新一级能效认证，全年省电。120° 广角送风 + 15 米超远送风距离，全屋均匀恒温。</p>\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 3匹立柜式 标准版 / 版本:标准版(WiFi) | ¥5999.00 | 60 |\n| 极净 3匹立柜式 智能版 / 版本:智能版(WiFi+语音) | ¥6999.00 | 40 |"
+ },
+ {
+  "id": "mall_spu_170_0",
+  "meta": {
+   "spu_id": 170,
+   "name": "极净 2 匹 壁挂式变频冷暖空调",
+   "biz_type": "SPU",
+   "biz_id": "170",
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/nr-pub/202506251716_b022b657c6bc88191817d8adf5196108.png",
+   "total_chunks": 1,
+   "category_path": "生活家电 > 家用空调",
+   "source": "mall_spu",
+   "chunk_index": 0,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:3",
+    "is_new",
+    "on_shelf"
+   ],
+   "status": 1,
+   "min_price": 3999.0
+  },
+  "content": "# 商品：极净 2 匹 壁挂式变频冷暖空调\n**基本信息**：商品ID(SPU_ID)：170 | 分类：生活家电 > 家用空调 | 参考最低价：¥3999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:3、is_new、on_shelf\n\n## 详情描述\n<p>极净 2 匹壁挂式空调，专为大卧室和小客厅设计。Ultra 静音技术低至 18dB(A)，睡眠不打扰。3D 环抱式送风，冷风不直吹。</p>\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 2匹壁挂式 标准版 / 版本:标准版 | ¥3999.00 | 100 |\n| 极净 2匹壁挂式 智能版 / 版本:智能版(语音) | ¥4599.00 | 60 |"
+ },
+ {
+  "id": "mall_spu_171_0",
+  "meta": {
+   "biz_type": "SPU",
+   "min_price": 1799.0,
+   "name": "极净 1 匹 变频冷暖空调 青春版",
+   "total_chunks": 1,
+   "category_path": "生活家电 > 家用空调",
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:3",
+    "on_shelf"
+   ],
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/nr-pub/202512041003_13be929c60478818f6e5aaf8ca861f37.png",
+   "spu_id": 171,
+   "source": "mall_spu",
+   "status": 1,
+   "biz_id": "171",
+   "chunk_index": 0
+  },
+  "content": "# 商品：极净 1 匹 变频冷暖空调 青春版\n**基本信息**：商品ID(SPU_ID)：171 | 分类：生活家电 > 家用空调 | 参考最低价：¥1799.00 | SKU 规格数：1 | 标签：mall_spu、cat:9、cat2:3、on_shelf\n\n## 详情描述\n<p>极净青春版 1 匹空调，入门级价格享受变频舒适体验。30 秒速冷、60 秒速热，新三级能效省电够用。紧凑机身设计，小空间首选。</p>\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 1匹 青春版 标准版 / 版本:标准版 | ¥1799.00 | 180 |"
+ },
+ {
+  "id": "mall_spu_172_0",
+  "meta": {
+   "status": 1,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:3",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "category_path": "生活家电 > 家用空调",
+   "biz_type": "SPU",
+   "total_chunks": 1,
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/nr-pub/202512031738_7a8aec7b75a0129cb2beb095e6f38bb4.png",
+   "chunk_index": 0,
+   "min_price": 3499.0,
+   "source": "mall_spu",
+   "biz_id": "172",
+   "spu_id": 172,
+   "name": "极净 1.5 匹 新风变频冷暖空调"
+  },
+  "content": "# 商品：极净 1.5 匹 新风变频冷暖空调\n**基本信息**：商品ID(SPU_ID)：172 | 分类：生活家电 > 家用空调 | 参考最低价：¥3499.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:3、is_new、is_hot、on_shelf\n\n## 详情描述\n<p>极净新风空调，1.5 匹黄金功率。独立新风系统，60m³/h 新风量，不开窗也能呼吸新鲜空气。HEPA H13 级滤网，PM2.5 过滤效率 99.95%。</p>\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 1.5匹新风 标准版 / 版本:标准版 | ¥3499.00 | 80 |\n| 极净 1.5匹新风 Pro版 / 版本:Pro版(含CO2传感器) | ¥4299.00 | 50 |"
+ },
+ {
+  "id": "mall_spu_174_0",
+  "meta": {
+   "min_price": 4999.0,
+   "biz_id": "174",
+   "source": "mall_spu",
+   "status": 1,
+   "chunk_index": 0,
+   "category_path": "生活家电 > 家用电冰箱",
+   "name": "极净 450L 法式多门智能冰箱",
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/nr-upload-outer/87864A86C4898966D046A998F5DF1074_1767860355994.png?thumb=1&w=180&h=180&f=webp&q=90",
+   "spu_id": 174,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:2",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "biz_type": "SPU",
+   "total_chunks": 1
+  },
+  "content": "# 商品：极净 450L 法式多门智能冰箱\n**基本信息**：商品ID(SPU_ID)：174 | 分类：生活家电 > 家用电冰箱 | 参考最低价：¥4999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:2、is_new、is_hot、on_shelf\n\n## 详情描述\n<p>极净 450L 法式多门冰箱，优雅法式四门设计。双变频压缩机 + 风机，精准控温更省电。10.1 英寸智能触控屏，食材管理、菜谱推荐一屏搞定。</p>\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 450L法式 星云灰 / 颜色:星云灰 | ¥4999.00 | 50 |\n| 极净 450L法式 极光白 / 颜色:极光白 | ¥5299.00 | 40 |"
+ },
+ {
+  "id": "mall_spu_175_0",
+  "meta": {
+   "min_price": 2799.0,
+   "chunk_index": 0,
+   "spu_id": 175,
+   "biz_id": "175",
+   "name": "极净 300L 三门风冷无霜冰箱",
+   "category_path": "生活家电 > 家用电冰箱",
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:2",
+    "is_hot",
+    "on_shelf"
+   ],
+   "total_chunks": 1,
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/nr-pub/202512081619_0e92be74918c46bf083d17119641272a.png?thumb=1&w=180&h=180&f=webp&q=90",
+   "source": "mall_spu",
+   "status": 1,
+   "biz_type": "SPU"
+  },
+  "content": "# 商品：极净 300L 三门风冷无霜冰箱\n**基本信息**：商品ID(SPU_ID)：175 | 分类：生活家电 > 家用电冰箱 | 参考最低价：¥2799.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:2、is_hot、on_shelf\n\n## 详情描述\n<p>极净 300L 三门冰箱，经典三门结构满足家庭日常所需。中门 -18℃~5℃ 宽幅变温，既可做冷冻也可做冷藏。风冷无霜，告别手动除冰。</p>\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 300L三门 银色 / 颜色:银色 | ¥2799.00 | 150 |\n| 极净 300L三门 香槟金 / 颜色:香槟金 | ¥2999.00 | 100 |"
+ },
+ {
+  "id": "mall_spu_177_0",
+  "meta": {
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/nr-pub/202505071617_1e519cb46de40b0c6d5c39f817573d92.png?thumb=1&w=180&h=180&f=webp&q=90",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:9",
+    "cat2:2",
+    "is_hot",
+    "on_shelf"
+   ],
+   "status": 1,
+   "chunk_index": 0,
+   "category_path": "生活家电 > 家用电冰箱",
+   "spu_id": 177,
+   "biz_id": "177",
+   "min_price": 3999.0,
+   "name": "极净 550L 对开门大容量冰箱"
+  },
+  "content": "# 商品：极净 550L 对开门大容量冰箱\n**基本信息**：商品ID(SPU_ID)：177 | 分类：生活家电 > 家用电冰箱 | 参考最低价：¥3999.00 | SKU 规格数：2 | 标签：mall_spu、cat:9、cat2:2、is_hot、on_shelf\n\n## 详情描述\n<p>极净 550L 对开门冰箱，满足大家庭一周食材储存需求。-32℃ 深冷速冻锁住食材原鲜，风冷无霜 360° 环绕送风。1 级能效，大容量也省电。</p>\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 550L对开门 星云灰 / 颜色:星云灰 | ¥3999.00 | 70 |\n| 极净 550L对开门 月光银 / 颜色:月光银 | ¥4299.00 | 50 |"
+ },
+ {
+  "id": "mall_spu_120_1",
+  "meta": {
+   "total_chunks": 2,
+   "biz_type": "SPU",
+   "name": "星域 Stellar X1 Pro",
+   "source": "mall_spu",
+   "chunk_index": 1,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "spu_id": 120,
+   "biz_id": "120",
+   "status": 1,
+   "main_image": "https://picsum.photos/seed/stellar-x1/800/800",
+   "min_price": 8999.0,
+   "category_path": "智能手机"
+  },
+  "content": "o · 12GB · 256GB / 内存:12GB;存储:256GB | ¥8999.00 | 1230 |\n| 星域 Stellar X1 Pro · 12GB · 512GB / 内存:12GB;存储:512GB | ¥9999.00 | 1230 |\n| 星域 Stellar X1 Pro · 12GB · 1TB / 内存:12GB;存储:1TB | ¥10999.00 | 1230 || 星域 Stellar X1 Pro · 16GB · 256GB / 内存:16GB;存储:256GB | ¥8999.00 | 1230 |\n| 星域 Stellar X1 Pro · 16GB · 512GB / 内存:16GB;存储:512GB | ¥8999.00 | 1230 |\n| 星域 Stellar X1 Pro · 16GB · 1TB / 内存:16GB;存储:1TB | ¥12999.00 | 1230 |"
+ },
+ {
+  "id": "mall_spu_152_0",
+  "meta": {
+   "chunk_index": 0,
+   "name": "逸彩 The Wall 120 寸巨幕电视",
+   "tags": [
+    "mall_spu",
+    "cat:5",
+    "is_new",
+    "on_shelf"
+   ],
+   "main_image": "https://picsum.photos/seed/tv-thewall/400/400",
+   "category_path": "家用电视",
+   "spu_id": 152,
+   "source": "mall_spu",
+   "min_price": 9999.0,
+   "biz_id": "152",
+   "status": 1,
+   "biz_type": "SPU",
+   "total_chunks": 2
+  },
+  "content": "# 商品：逸彩 The Wall 120 寸巨幕电视\n> 120寸 · MicroLED · 模块化拼接 · 商用/豪宅\n**基本信息**：商品ID(SPU_ID)：152 | 分类：家用电视 | 参考最低价：¥9999.00 | SKU 规格数：1 | 标签：mall_spu、cat:5、is_new、on_shelf\n\n## 详情描述\n面向高端商业和豪宅用户的 120 寸 MicroLED 电视。采用模块化拼接技术，由多个 MicroLED 模块无缝拼接成 120 寸巨幕。亮度高达 3000nit，色域覆盖 100% DCI-P3，是顶级别墅、高端会所、董事会议室的终极显示方案。\n\n项目：规格\n屏幕：120 寸 MicroLED\n分辨率：3840×2160\n亮度：峰值 3000nit\n色域：100% DCI-P3\n对比度：无限（像素级控光）\n寿命：100000 小时\n音响：需配独立音响系统\n安装：专业团队上门拼接安装\n\n无烧屏：无机材料，不会有机材料那样老化烧屏\n超高亮度：3000nit 峰值亮度，白天不拉窗帘也能看清\n模块化：可拼接任意尺寸，维修只需更换故障模块\n超长寿命：10 万小时，按每天 8 小时可用 34 年"
+ },
+ {
+  "id": "mall_spu_152_1",
+  "meta": {
+   "name": "逸彩 The Wall 120 寸巨幕电视",
+   "spu_id": 152,
+   "total_chunks": 2,
+   "chunk_index": 1,
+   "category_path": "家用电视",
+   "biz_type": "SPU",
+   "biz_id": "152",
+   "main_image": "https://picsum.photos/seed/tv-thewall/400/400",
+   "min_price": 9999.0,
+   "source": "mall_spu",
+   "tags": [
+    "mall_spu",
+    "cat:5",
+    "is_new",
+    "on_shelf"
+   ],
+   "status": 1
+  },
+  "content": "D\n分辨率：3840×2160\n亮度：峰值 3000nit\n色域：100% DCI-P3\n对比度：无限（像素级控光）\n寿命：100000 小时\n音响：需配独立音响系统\n安装：专业团队上门拼接安装\n\n无烧屏：无机材料，不会有机材料那样老化烧屏\n超高亮度：3000nit 峰值亮度，白天不拉窗帘也能看清\n模块化：可拼接任意尺寸，维修只需更换故障模块\n超长寿命：10 万小时，按每天 8 小时可用 34 年Q: 安装需要什么条件？\nA: 需要承重墙、380V 电源、足够的空间。我们的专业团队会提前上门勘测。\n\nQ: 价格包含安装吗？\nA: 包含专业团队上门安装和调试。如需特殊支架或布线，费用另计。\n\nQ: 有一个模块坏了怎么办？\nA: 单个模块可独立更换，无需更换整屏。模块享有 5 年质保。\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 逸彩 The Wall 120寸 · 标准套装（含安装） / 规格:120寸标准套装（含安装） | ¥9999.00 | 225 |"
+ },
+ {
+  "id": "mall_spu_154_0",
+  "meta": {
+   "total_chunks": 2,
+   "name": "极净 HeatChef 空气炸锅",
+   "tags": [
+    "mall_spu",
+    "cat:281",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "chunk_index": 0,
+   "spu_id": 154,
+   "min_price": 399.0,
+   "status": 1,
+   "category_path": "其他",
+   "biz_id": "154",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "main_image": "https://picsum.photos/seed/airfryer/400/400"
+  },
+  "content": "# 商品：极净 HeatChef 空气炸锅\n> 5.5L · 360°热风 · 智能菜单 · 免翻面\n**基本信息**：商品ID(SPU_ID)：154 | 分类：其他 | 参考最低价：¥399.00 | SKU 规格数：2 | 标签：mall_spu、cat:281、is_new、is_hot、on_shelf\n\n## 详情描述\n5.5 升大容量空气炸锅，满足 3-5 人家庭使用。360° 高速热风循环，无需翻面也能均匀加热。内置 8 大智能菜单，一键烹饪薯条、鸡翅、蛋糕、牛排等。\n\n项目：规格\n容量：5.5L\n功率：1500W\n温度范围：80-200°C\n定时：1-60 分钟\n内胆：不粘涂层（可拆卸清洗）\n预设菜单：薯条、鸡翅、蛋糕、牛排、鱼、虾、蔬菜、解冻\n\n油脂减少 80%：利用食材自身油脂，无需额外加油\n无油烟：厨房不再油腻腻\n更安全：没有高温油锅溅油风险\n更健康：减少油炸产生的反式脂肪酸\n\n1. 脆皮鸡翅：200°C、15 分钟，中途无需翻面\n2. 蒜香排骨：180°C、20 分钟，外酥里嫩\n3. 芝士焗红薯：180°C、12 分钟，拉丝诱人\n\nQ: 炸篮能放洗碗机吗？\nA: 可以。炸篮和烤盘均可放入洗碗机清洗。"
+ },
+ {
+  "id": "mall_spu_154_1",
+  "meta": {
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "status": 1,
+   "biz_type": "SPU",
+   "name": "极净 HeatChef 空气炸锅",
+   "chunk_index": 1,
+   "min_price": 399.0,
+   "spu_id": 154,
+   "category_path": "其他",
+   "tags": [
+    "mall_spu",
+    "cat:281",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "main_image": "https://picsum.photos/seed/airfryer/400/400",
+   "biz_id": "154"
+  },
+  "content": "蛋糕、牛排、鱼、虾、蔬菜、解冻\n\n油脂减少 80%：利用食材自身油脂，无需额外加油\n无油烟：厨房不再油腻腻\n更安全：没有高温油锅溅油风险\n更健康：减少油炸产生的反式脂肪酸\n\n1. 脆皮鸡翅：200°C、15 分钟，中途无需翻面\n2. 蒜香排骨：180°C、20 分钟，外酥里嫩\n3. 芝士焗红薯：180°C、12 分钟，拉丝诱人\n\nQ: 炸篮能放洗碗机吗？\nA: 可以。炸篮和烤盘均可放入洗碗机清洗。Q: 需要预热吗？\nA: 不需要。开机即用，比烤箱快 3-5 倍。\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 极净 HeatChef · 象牙白 / 颜色:象牙白 | ¥399.00 | 500 |\n| 极净 HeatChef · 墨岩黑 / 颜色:墨岩黑 | ¥499.00 | 300 |"
+ },
+ {
+  "id": "mall_spu_123_1",
+  "meta": {
+   "chunk_index": 1,
+   "status": 1,
+   "category_path": "智能手机",
+   "name": "玉米手机 10 Pro",
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "on_shelf"
+   ],
+   "biz_id": "123",
+   "source": "mall_spu",
+   "main_image": "https://tse1-mm.cn.bing.net/th/id/OIP-C.A3jO6NnCO8xvsBhiMFBbdQHaDt?w=295&h=180&c=7&r=0&o=7&pid=1.7&rm=3",
+   "min_price": 2699.0,
+   "total_chunks": 2,
+   "biz_type": "SPU",
+   "spu_id": 123
+  },
+  "content": "0 | 77 |\n| 玉米手机 10 Pro · 白色 · 12+256 / 颜色:白色;内存:12+256 | ¥2699.00 | 77 |\n| 玉米手机 10 Pro · 白色 · 16+256 / 颜色:白色;内存:16+256 | ¥2899.00 | 77 |\n| 玉米手机 10 Pro · 白色 · 16+512 / 颜色:白色;内存:16+512 | ¥2999.00 | 77 |"
+ },
+ {
+  "id": "mall_spu_157_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/tab-pro-12/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 4299.0,
+   "category_path": "平板电脑",
+   "name": "星耀 Tab Pro 12.4",
+   "spu_id": 157,
+   "biz_id": "157",
+   "status": 1
+  },
+  "content": "2.4\" 2.8K OLED 120Hz 屏幕 — 1600nit 峰值亮度骁龙8 Gen 3 + 12GB LPDDR5X — 旗舰性能10000mAh + 67W快充 + 20W无线充星耀笔 4096级压感 2ms延迟四扬声器杜比全景声\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Tab Pro 12.4 · WiFi版 12G+256G / 网络:WiFi;内存:12G;存储:256G;颜色:星云灰 | ¥4299.00 | 80 |\n| 星耀 Tab Pro 12.4 · 5G版 12G+512G / 网络:5G;内存:12G;存储:512G;颜色:晨曦金 | ¥5299.00 | 80 |\n| 星耀 Tab Pro 12.4 · WiFi版 12G+512G 星云灰 / 网络:WiFi;内存:12G;存储:512G;颜色:星云灰 | ¥4799.00 | 60 |\n| 星耀 Tab Pro 12.4 · 5G版 12G+256G 极光蓝 / 网络:5G;内存:12G;存储:256G;颜色:极光蓝 | ¥4999.00 | 50 |"
+ },
+ {
+  "id": "mall_spu_158_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/tab-air-11/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 2199.0,
+   "category_path": "平板电脑",
+   "name": "星耀 Tab Air 11",
+   "spu_id": 158,
+   "biz_id": "158",
+   "status": 1
+  },
+  "content": "iFi版，银翼白、深空黑双色可选。核心卖点490g超轻机身 — 单手握持无负担11\" 2.5K 144Hz LCD — DC调光护眼骁龙7+Gen3 — 性能功耗完美平衡8000mAh + 45W快充 — 14小时续航全金属机身仅6.2mm\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Tab Air 11 · WiFi版 8G+128G / 网络:WiFi;内存:8G;存储:128G;颜色:银翼白 | ¥2199.00 | 150 |\n| 星耀 Tab Air 11 · WiFi版 12G+256G / 网络:WiFi;内存:12G;存储:256G;颜色:深空黑 | ¥2799.00 | 100 |\n| 星耀 Tab Air 11 · WiFi版 8G+256G 深空黑 / 网络:WiFi;内存:8G;存储:256G;颜色:深空黑 | ¥2499.00 | 120 |\n| 星耀 Tab Air 11 · WiFi版 12G+128G 银翼白 / 网络:WiFi;内存:12G;存储:128G;颜色:银翼白 | ¥2499.00 | 100 |"
+ },
+ {
+  "id": "mall_spu_159_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/tab-max-14/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 6299.0,
+   "category_path": "平板电脑",
+   "name": "星耀 Tab Max 14.6",
+   "spu_id": 159,
+   "biz_id": "159",
+   "status": 1
+  },
+  "content": "心卖点14.6\" 3K OLED — P3色域 Delta E天玑9300 + 16GB LPDDR5T — 移动工作站星耀笔 Pro — 8192级压感 1ms延迟12000mAh超大电池 + 65W快充8扬声器空间音频 + 雷电4双接口\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Tab Max 14.6 · WiFi版 16G+512G / 网络:WiFi;内存:16G;存储:512G;颜色:深空灰 | ¥6299.00 | 50 |\n| 星耀 Tab Max 14.6 · 5G版 16G+1T / 网络:5G;内存:16G;存储:1T;颜色:极光银 | ¥7499.00 | 30 |\n| 星耀 Tab Max 14.6 · WiFi版 16G+1T 深空灰 / 网络:WiFi;内存:16G;存储:1T;颜色:深空灰 | ¥6799.00 | 40 |\n| 星耀 Tab Max 14.6 · 5G版 16G+512G 极光银 / 网络:5G;内存:16G;存储:512G;颜色:极光银 | ¥6999.00 | 35 |"
+ },
+ {
+  "id": "mall_spu_160_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/tab-lite-10/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:10",
+    "on_shelf"
+   ],
+   "min_price": 1299.0,
+   "category_path": "平板电脑",
+   "name": "星耀 Tab Lite 10.4",
+   "biz_id": "160",
+   "spu_id": 160,
+   "status": 1
+  },
+  "content": "约460g。WiFi版，晴空蓝、星夜灰双色可选。核心卖点10.4\" 2K护眼大屏 — 类纸模式阅读舒适骁龙6Gen1 — 够用不卡顿7500mAh — 13小时超长续航学生模式 — 家长管控+专注学习MicroSD扩展 1TB — 海量存储\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Tab Lite 10.4 · WiFi版 6G+128G / 网络:WiFi;内存:6G;存储:128G;颜色:晴空蓝 | ¥1299.00 | 250 |\n| 星耀 Tab Lite 10.4 · WiFi版 8G+256G / 网络:WiFi;内存:8G;存储:256G;颜色:星夜灰 | ¥1599.00 | 150 |\n| 星耀 Tab Lite 10.4 · WiFi版 6G+256G 星夜灰 / 网络:WiFi;内存:6G;存储:256G;颜色:星夜灰 | ¥1499.00 | 200 |\n| 星耀 Tab Lite 10.4 · WiFi版 8G+128G 晴空蓝 / 网络:WiFi;内存:8G;存储:128G;颜色:晴空蓝 | ¥1399.00 | 220 |"
+ },
+ {
+  "id": "mall_spu_129_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/laptop-creator14/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:4",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 12999.0,
+   "category_path": "笔记本电脑",
+   "name": "星耀 Creator 14 设计师本",
+   "spu_id": 129,
+   "biz_id": "129",
+   "status": 1
+  },
+  "content": "幕：14.5 寸 3200×2000 OLED，120Hz，100% DCI-P3，HDR500\n电池：76Wh\n重量：1.65kg\n接口：2×Thunderbolt 4, 1×USB-A, HDMI 2.1, SD Express 读卡器视频剪辑：Davinci Resolve 中 4K H.265 时间线流畅回放，导出速度提升 40%\n3D 渲染：Blender 中 BMW 场景渲染仅需 2 分 15 秒\nAI 绘画：Stable Diffusion 本地运行，512×512 出图约 3 秒/张\n平面设计：Photoshop 处理 1GB PSD 文件无卡顿\n\nQ: OLED 屏幕会烧屏吗？\nA: 内置像素位移、屏幕保护等防烧屏技术。正常使用 3 年内出现烧屏可免费更换屏幕。\n\nQ: 风扇噪音大吗？\nA: 办公场景约 28dB（几乎无声），满载渲染时约 45dB（可接受）。可在控制中心切换安静模式。\n\nQ: 可以打游戏吗？\nA: RTX 4070 移动端可以畅玩 3A 大作。赛博朋克 2077 2.5K 中高画质约 70fps。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |"
+ },
+ {
+  "id": "mall_spu_129_2",
+  "meta": {
+   "chunk_index": 2,
+   "main_image": "https://picsum.photos/seed/laptop-creator14/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:4",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 12999.0,
+   "category_path": "笔记本电脑",
+   "name": "星耀 Creator 14 设计师本",
+   "biz_id": "129",
+   "spu_id": 129,
+   "status": 1
+  },
+  "content": "游戏吗？\nA: RTX 4070 移动端可以畅玩 3A 大作。赛博朋克 2077 2.5K 中高画质约 70fps。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- || 星耀 Creator 14 · 深空灰 · 64GB+2TB / 颜色:深空灰;内存:64GB;存储:2TB | ¥12999.00 | 80 |\n| 星耀 Creator 14 · 月岩白 · 64GB+4TB / 颜色:月岩白;内存:64GB;存储:4TB | ¥14999.00 | 50 |\n| 星耀 Creator 14 · 月岩白 · 64GB+2TB / 颜色:月岩白;内存:64GB;存储:2TB | ¥13499.00 | 60 |\n| 星耀 Creator 14 · 深空灰 · 64GB+4TB / 颜色:深空灰;内存:64GB;存储:4TB | ¥14999.00 | 40 |"
+ },
+ {
+  "id": "mall_spu_20_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://picsum.photos/seed/band-8/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "on_shelf"
+   ],
+   "min_price": 249.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 Band 8 智能手环",
+   "biz_id": "20",
+   "spu_id": 20,
+   "status": 1
+  },
+  "content": "# 商品：星耀 Band 8 智能手环\n> AMOLED · 血氧监测 · 14 天续航\n**基本信息**：商品ID(SPU_ID)：20 | 分类：智能穿戴 | 参考最低价：¥249.00 | SKU 规格数：2 | 标签：mall_spu、cat:8、on_shelf\n\n## 详情描述\n屏幕：1.62 寸 AMOLED 彩色屏\n续航：14 天典型使用\n健康：心率 · 血氧 · 睡眠 · 压力\n运动：100+ 运动模式\n特色：支付宝离线支付 · 消息通知\n防水：5ATM 游泳级\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Band 8 · 午夜黑 / 颜色:午夜黑 | ¥249.00 | 75 |\n| 星耀 Band 8 · 珊瑚粉 / 颜色:珊瑚粉 | ¥299.00 | 75 |"
+ },
+ {
+  "id": "mall_spu_136_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/watch-ultra/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 3299.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 Watch 4 Ultra 旗舰手表",
+   "spu_id": 136,
+   "biz_id": "136",
+   "status": 1
+  },
+  "content": "S+北斗+GLONASS+Galileo+QZSS）\n传感器：心率(8通道)、血氧、ECG、体温、气压、地磁\n防水：10ATM（100米）+ IP68\n电池：590mAh（日常 14 天，重度 8 天）\n系统：Stellar Wear OS跑步：支持步频、步幅、触地时间、垂直振幅等高级跑步数据\n游泳：自动识别泳姿，记录 SWOLF 效率值\n滑雪：自动识别滑行/乘坐缆车，记录滑行轨迹和垂直落差\n高尔夫：内置全球 42000+ 球场地图，测距到果岭前后沿\n登山：气压计实时海拔，风暴预警\n\nECG 心电图：30 秒快速测量，可导出 PDF 报告\n睡眠分析：深睡、浅睡、REM、清醒时间，睡眠呼吸质量\n压力监测：全天候 HRV 监测，呼吸训练引导\n血氧：24 小时连续监测，低血氧提醒\n\nQ: 能脱离手机独立使用吗？\nA: 支持 eSIM 独立通话和上网（一号双终端），不带手机也能接打电话、听歌、导航。\n\nQ: 兼容 iPhone 吗？\nA: 完全兼容。iPhone 上安装\"星耀健康\"App 即可使用全部功能。\n\nQ: 表带可以换吗？\nA: 采用 22mm 快拆表带，兼容所有标准 22mm 表带。\n\n\n\n## 规格参数"
+ },
+ {
+  "id": "mall_spu_136_2",
+  "meta": {
+   "chunk_index": 2,
+   "main_image": "https://picsum.photos/seed/watch-ultra/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 3299.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 Watch 4 Ultra 旗舰手表",
+   "biz_id": "136",
+   "spu_id": 136,
+   "status": 1
+  },
+  "content": "兼容 iPhone 吗？\nA: 完全兼容。iPhone 上安装\"星耀健康\"App 即可使用全部功能。\n\nQ: 表带可以换吗？\nA: 采用 22mm 快拆表带，兼容所有标准 22mm 表带。\n\n\n\n## 规格参数| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Watch 4 Ultra · 钛金灰 / 颜色:钛金灰 | ¥3299.00 | 200 |"
+ },
+ {
+  "id": "mall_spu_137_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/band9/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "on_shelf"
+   ],
+   "min_price": 329.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 Band 9 智能手环",
+   "spu_id": 137,
+   "biz_id": "137",
+   "status": 1
+  },
+  "content": "天）\n充电：磁吸快充，15 分钟充 50%\n重量：18g（不含表带）\n系统：Stellar Lite OS\n\n运动爱好者（跑步、骑行、游泳数据记录）\n睡眠质量关注者（详细睡眠分析）\n预算有限的智能穿戴入门用户\n学生党（消息提醒、课程提醒）Q: 和星耀 Watch 系列有什么主要区别？\nA: Band 9 没有 GPS、ECG、eSIM 功能，屏幕更小。但续航更长、价格更低、佩戴更轻便。\n\nQ: 能不能接打电话？\nA: 支持蓝牙通话，但需要手机在附近。没有 eSIM 独立通话功能。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Band 9 · 午夜黑 / 颜色:午夜黑 | ¥329.00 | 400 |\n| 星耀 Band 9 · 星云粉 / 颜色:星云粉 | ¥349.00 | 300 |\n| 星耀 Band 9 · 深海蓝 / 颜色:深海蓝 | ¥379.00 | 250 |"
+ },
+ {
+  "id": "mall_spu_138_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/buds-pro3/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 1299.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 Buds Pro 3 降噪耳机",
+   "spu_id": 138,
+   "biz_id": "138",
+   "status": 1
+  },
+  "content": "5.4，支持 LE Audio\n音频编码：LDAC, AAC, SBC, LC3\n续航：耳机 9 小时 + 充电盒 27 小时（共 36 小时，ANC 开）\n充电：USB-C + Qi 无线充电\n防水：IP54（耳机）\n重量：单耳 5.2g强降噪：地铁、飞机等嘈杂环境\n均衡降噪：办公室、咖啡馆日常使用\n通透模式：不错过外界声音，与人交谈无需摘下耳机\n自适应：根据环境噪音自动切换降噪强度\n\nQ: 连接 iPhone 能用 LDAC 吗？\nA: iPhone 不支持 LDAC，会自动降级为 AAC。Android 手机可开启 LDAC。\n\nQ: 能同时连接两台设备吗？\nA: 支持蓝牙双设备连接。在手机和电脑间自动切换。\n\nQ: 降噪对耳朵有影响吗？\nA: ANC 降噪通过产生反向声波抵消噪音，对耳朵没有伤害。长时间佩戴建议开启通透模式让耳朵休息。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Buds Pro 3 · 陶瓷白 / 颜色:陶瓷白 | ¥1299.00 | 200 |\n| 星耀 Buds Pro 3 · 石墨黑 / 颜色:石墨黑 | ¥1499.00 | 150 |"
+ },
+ {
+  "id": "mall_spu_139_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/glass-ar/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 2799.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 AR Glasses Air 智能眼镜",
+   "biz_id": "139",
+   "spu_id": 139,
+   "status": 1
+  },
+  "content": "1080 每眼\nFOV：46°\n等效屏幕：4 米距离 201 寸\n亮度：入眼 600nit\n刷新率：120Hz\n连接：USB-C（DP Alt Mode）\n音频：双扬声器 + 双麦克风\n重量：49g\n近视适配：支持 0-600° 屈光度调节移动办公：连接笔记本，获得超大虚拟屏幕，在咖啡馆也能高效工作\n飞机高铁：在狭小空间享受影院级观影体验\n游戏：连接 Switch/Steam Deck/ROG Ally，201 寸巨幕沉浸游戏\n航拍：连接无人机，第一视角飞行\n\nQ: 需要什么手机？\nA: 需要支持 DP 视频输出的 USB-C 接口。大部分旗舰 Android 手机、iPhone 15/16 系列、iPad Pro 均支持。\n\nQ: 戴近视眼镜能用吗？\nA: 支持 0-600° 屈光度独立调节（左右眼分开），无需戴近视眼镜。\n\nQ: 长时间佩戴会晕吗？\nA: 120Hz 高刷新率 + 低延迟显示，大多数用户不会感到不适。建议首次使用每 30 分钟休息一下。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 AR Glasses Air · 墨镜灰 / 颜色:墨镜灰 | ¥2799.00 | 100 |"
+ },
+ {
+  "id": "mall_spu_139_2",
+  "meta": {
+   "chunk_index": 2,
+   "main_image": "https://picsum.photos/seed/glass-ar/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 2799.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 AR Glasses Air 智能眼镜",
+   "biz_id": "139",
+   "spu_id": 139,
+   "status": 1
+  },
+  "content": "息一下。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 AR Glasses Air · 墨镜灰 / 颜色:墨镜灰 | ¥2799.00 | 100 |"
+ },
+ {
+  "id": "mall_spu_140_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/ring-nova/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 999.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 SmartRing Nova 智能戒指",
+   "biz_id": "140",
+   "spu_id": 140,
+   "status": 1
+  },
+  "content": "9/10/11/12 号（美码）\n\n睡眠监测：戒指是睡眠监测的理想形态，比手表更无感\n静息心率：24 小时连续监测，异常心率提醒\n血氧：夜间自动监测，低血氧预警\n体温趋势：基础体温变化跟踪，女性生理周期预测\n活动记录：步数、卡路里、活动时长Q: 尺码怎么选？\nA: 购买后会邮寄一套试戴样品（7-12 号塑料环），确定尺码后再发货。建议戴在食指或中指。\n\nQ: 戒指会被刮花吗？\nA: 钛合金硬度高，日常使用不易刮花。但避免与钻石、砂纸等硬物接触。\n\nQ: 能戴着游泳吗？\nA: IP68 防水，可以戴着洗手、游泳。但潜水和热水浴不建议。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 SmartRing Nova · 钛金原色 / 颜色:钛金原色 | ¥999.00 | 300 |"
+ },
+ {
+  "id": "mall_spu_161_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://tse3-mm.cn.bing.net/th/id/OIP-C.xJc_OSqHNcbnlmQoDWtitAHaIN?w=148&h=180&c=7&r=0&o=7&pid=1.7&rm=3",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:281",
+    "on_shelf"
+   ],
+   "min_price": 129.0,
+   "category_path": "其他",
+   "name": "充电宝 20000mAh 大容量快充移动电源",
+   "spu_id": 161,
+   "biz_id": "161",
+   "status": 1
+  },
+  "content": "# 商品：充电宝 20000mAh 大容量快充移动电源\n**基本信息**：商品ID(SPU_ID)：161 | 分类：其他 | 参考最低价：¥129.00 | SKU 规格数：1 | 标签：mall_spu、cat:281、on_shelf\n\n## 详情描述\n20000mAh大容量移动电源，支持PD 3.0快充，三口输出，LED数显电量，多重安全保护，符合民航登机标准。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 充电宝 默认规格 | ¥129.00 | 200 |"
+ },
+ {
+  "id": "mall_spu_162_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://tse4-mm.cn.bing.net/th/id/OIP-C.7QU2NIIINZqilUQ7zXdJFAHaGO?w=233&h=196&c=7&r=0&o=7&pid=1.7&rm=3",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:281",
+    "on_shelf"
+   ],
+   "min_price": 249.0,
+   "category_path": "其他",
+   "name": "AX3000 Wi-Fi 6 双频千兆无线路由器",
+   "spu_id": 162,
+   "biz_id": "162",
+   "status": 1
+  },
+  "content": "# 商品：AX3000 Wi-Fi 6 双频千兆无线路由器\n**基本信息**：商品ID(SPU_ID)：162 | 分类：其他 | 参考最低价：¥249.00 | SKU 规格数：1 | 标签：mall_spu、cat:281、on_shelf\n\n## 详情描述\nWi-Fi 6 AX3000规格，双频并发3000Mbps，4根高增益天线，支持Mesh组网，智能QoS带宽管理，APP远程控制。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 路由器 默认规格 | ¥249.00 | 150 |"
+ },
+ {
+  "id": "mall_spu_163_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://tse4-mm.cn.bing.net/th/id/OIP-C.2vQi9qHY8uihjio62DGYQgHaHa?w=172&h=180&c=7&r=0&o=7&pid=1.7&rm=3",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:281",
+    "on_shelf"
+   ],
+   "min_price": 89.0,
+   "category_path": "其他",
+   "name": "65W GaN氮化镓快速充电器 三口输出",
+   "spu_id": 163,
+   "biz_id": "163",
+   "status": 1
+  },
+  "content": "# 商品：65W GaN氮化镓快速充电器 三口输出\n**基本信息**：商品ID(SPU_ID)：163 | 分类：其他 | 参考最低价：¥89.00 | SKU 规格数：1 | 标签：mall_spu、cat:281、on_shelf\n\n## 详情描述\n65W GaN氮化镓充电器，USB-C×2+USB-A三口设计，可折叠插脚，支持PD 3.0/QC 4.0+，兼容笔记本充电。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 充电器 默认规格 | ¥89.00 | 300 |"
+ },
+ {
+  "id": "mall_spu_122_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://picsum.photos/seed/aether-n8/800/800",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 4999.0,
+   "category_path": "智能手机",
+   "name": "苍穹 Aether N8 Max",
+   "biz_id": "122",
+   "spu_id": 122,
+   "status": 1
+  },
+  "content": "# 商品：苍穹 Aether N8 Max\n**基本信息**：商品ID(SPU_ID)：122 | 分类：智能手机 | 参考最低价：¥4999.00 | SKU 规格数：6 | 标签：mall_spu、cat:1、is_new、on_shelf\n\n## 详情描述\n苍穹 Aether N8 Max双远望四天目影像系统，3倍+6倍双远望覆盖全焦段。6.82英寸 2K 天穹钻石屏一英寸 Aether-S1 主摄5000mAh + 100W有线 + 50W无线IP68 + 苍穹大师模式\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 苍穹 Aether N8 Max · 12GB · 256GB / 内存:12GB;存储:256GB | ¥4999.00 | 0 |\n| 苍穹 Aether N8 Max · 12GB · 512GB / 内存:12GB;存储:512GB | ¥4999.00 | 0 |\n| 苍穹 Aether N8 Max · 12GB · 1TB / 内存:12GB;存储:1TB | ¥4999.00 | 0 |\n| 苍穹 Aether N8 Max · 16GB · 256GB / 内存:16GB;存储:256GB | ¥4999.00 | 0 |"
+ },
+ {
+  "id": "mall_spu_121_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://picsum.photos/seed/lumina-z9/800/800",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 5499.0,
+   "category_path": "智能手机",
+   "name": "灵耀 Lumina Z9 Ultra",
+   "spu_id": 121,
+   "biz_id": "121",
+   "status": 1
+  },
+  "content": "# 商品：灵耀 Lumina Z9 Ultra\n**基本信息**：商品ID(SPU_ID)：121 | 分类：智能手机 | 参考最低价：¥5499.00 | SKU 规格数：3 | 标签：mall_spu、cat:1、is_new、is_hot、on_shelf\n\n## 详情描述\n灵耀 Lumina Z9 Ultra搭载灵芯Photon Z1旗舰平台，灵眸全焦段四摄系统。6.73英寸 2K 全等深流光屏灵眸一英寸主摄，无级可变光圈5300mAh + 90W有线 + 80W无线IP68 + 双向卫星通信\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 灵耀 Lumina Z9 Ultra 12+256GB 灵光版 / 内存:12GB;存储:256GB | ¥5499.00 | 75 |\n| 灵耀 Lumina Z9 Ultra 16+512GB 灵耀版 / 内存:16GB;存储:512GB | ¥5999.00 | 75 |\n| 灵耀 Lumina Z9 Ultra 16+1TB 灵域版 / 内存:16GB;存储:1TB | ¥6499.00 | 75 |"
+ },
+ {
+  "id": "mall_spu_127_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/phone-flip/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 4999.0,
+   "category_path": "智能手机",
+   "name": "星耀 Flip 折叠屏",
+   "biz_id": "127",
+   "spu_id": 127,
+   "status": 1
+  },
+  "content": "12MP 超广角\n前置相机：32MP（内屏打孔）\n电池：4300mAh\n充电：67W 有线 + 15W 无线\n折叠厚度：15.8mm\n展开厚度：7.3mm\n重量：188g\n\n悬停拍照：半折叠状态下放在桌面上，解放双手进行自拍或延时摄影\n外屏快捷回复：在外屏上使用预设回复或语音输入快速回消息\n双屏预览：拍照时内外屏同时显示画面，被拍者也能看到构图\n分屏多任务：展开状态下支持上下分屏，边看视频边聊天Q: 折叠屏耐用吗？铰链寿命多长？\nA: 通过 50 万次折叠测试（莱茵认证），正常使用 5 年以上无问题。\n\nQ: 折痕明显吗？\nA: 采用超薄柔性玻璃(UTG)，折痕相比竞品更浅，正常使用几乎不可见。\n\nQ: 外屏能运行所有应用吗？\nA: 主流应用（微信、抖音、支付宝、地图等）均已适配外屏。未适配应用可在设置中开启强制显示。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Flip 折叠屏 · 香槟粉 · 12GB · 256GB / 颜色:香槟粉;内存:12GB;存储:256GB | ¥4999.00 | 111 |\n| 星耀 Flip 折叠屏 · 香槟粉 · 12GB · 512GB / 颜色:香槟粉;内存:12GB;存储:512GB | ¥4999.00 | 111 |\n| 星耀 Flip 折叠屏 · 曜石黑 · 12GB · 256GB / 颜色:曜石黑;内存:12GB;存储:256GB | ¥5999.00 | 110 |\n| 星耀 Flip 折叠屏 · 曜石黑 · 12GB · 512GB / 颜色:曜石黑;内存:12GB;存储:512GB | ¥5999.00 | 110 |"
+ },
+ {
+  "id": "mall_spu_124_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/phone-x200/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 4,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 5999.0,
+   "category_path": "智能手机",
+   "name": "星耀 X200 5G 影像旗舰",
+   "biz_id": "124",
+   "spu_id": 124,
+   "status": 1
+  },
+  "content": "：IP68 防水防尘\n重量：219g\n\n一英寸主摄：索尼 LYT-900 传感器，f/1.63 光圈，支持双原生 ISO Fusion，暗光画质提升 40%\n徕卡色彩科学：提供\"徕卡经典\"和\"徕卡鲜艳\"两种色彩风格\n大师人像：支持 23mm/35mm/50mm/75mm/90mm 五个经典焦段\n夜景视频：AI 降噪算法，4K 夜景视频噪点降低 60%\n8K 视频：支持 8K@30fps 全像素读取摄影爱好者、内容创作者首选\n需要顶级影像能力的用户\n对屏幕素质有高要求的用户\n\nQ: 是否支持卫星通信？\nA: 本机型支持北斗卫星消息（仅限中国境内使用，需开通服务）。\n\nQ: 是否带充电器和数据线？\nA: 包装内含 120W 氮化镓充电器、USB-C to USB-C 6A 数据线、透明保护壳。\n\nQ: 防水性能如何？\nA: IP68 等级，可在 1.5 米深清水中浸泡 30 分钟。但不建议在海水中使用。\n\nQ: 系统更新支持多久？\nA: 承诺 4 年 Android 大版本更新 + 5 年安全补丁。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 X200 5G 影像旗舰 · 钛灰 · 12GB · 256GB / 颜色:钛灰;内存:12GB;存储:256GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 钛灰 · 12GB · 512GB / 颜色:钛灰;内存:12GB;存储:512GB | ¥5999.00 | 90 |\n| 星耀 X200 5G 影像旗舰 · 钛灰 · 12GB · 1TB / 颜色:钛灰;内存:12GB;存储:1TB | ¥5999.00 | 90 |"
+ },
+ {
+  "id": "mall_spu_126_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/phone-a60/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 3,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 1299.0,
+   "category_path": "智能手机",
+   "name": "星耀 A60 5G 学生机",
+   "spu_id": 126,
+   "biz_id": "126",
+   "status": 1
+  },
+  "content": "应用白名单：家长可设置允许使用的应用\n屏幕时间管理：设置每日使用时长上限\n定位追踪：实时查看孩子位置\n学习模式：上课时间自动静音，仅允许学习类应用\n护眼提醒：距离过近、光线过暗自动提醒\n\nQ: 学生模式可以关闭吗？\nA: 需要家长密码才能关闭。如遗忘密码，可通过绑定手机号找回。\n\nQ: 打游戏流畅吗？\nA: 王者荣耀高帧率流畅运行，原神中低画质 40fps 左右。定位是学习和日常使用，非游戏手机。\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 A60 5G 学生机 · 薄荷绿 · 6GB · 128GB / 颜色:薄荷绿;内存:6GB;存储:128GB | ¥1299.00 | 90 |\n| 星耀 A60 5G 学生机 · 薄荷绿 · 6GB · 256GB / 颜色:薄荷绿;内存:6GB;存储:256GB | ¥1299.00 | 90 |\n| 星耀 A60 5G 学生机 · 星空黑 · 6GB · 128GB / 颜色:星空黑;内存:6GB;存储:128GB | ¥1299.00 | 90 |\n| 星耀 A60 5G 学生机 · 薄荷绿 · 8GB · 128GB / 颜色:薄荷绿;内存:8GB;存储:128GB | ¥1499.00 | 90 |\n| 星耀 A60 5G 学生机 · 薄荷绿 · 8GB · 256GB / 颜色:薄荷绿;内存:8GB;存储:256GB | ¥1699.00 | 90 |\n| 星耀 A60 5G 学生机 · 星空黑 · 6GB · 256GB / 颜色:星空黑;内存:6GB;存储:256GB | ¥1499.00 | 89 |"
+ },
+ {
+  "id": "mall_spu_125_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/phone-note14/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 4,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 2569.0,
+   "category_path": "智能手机",
+   "name": "星耀 Note 14 Pro",
+   "biz_id": "125",
+   "spu_id": 125,
+   "status": 1
+  },
+  "content": "20Hz |\n| 后置相机 | 200MP 主摄(OIS) + 8MP 超广角 + 2MP 微距 |\n| 前置相机 | 32MP |\n| 电池 | 5500mAh |\n| 充电 | 120W 有线 |\n| 厚度 | 7.8mm |\n| 重量 | 188g |\n\n## 使用场景\n- 日常拍照和社交媒体分享\n- 重度使用者（5500mAh 可满足一天半使用）\n- 预算 2500-3500 元的中端用户## 常见问题\n**Q: 2亿像素照片占用多少存储？**\nA: 单张约 30-50MB，建议 256GB 起步。日常使用建议用 12.5MP 像素融合模式，效果更好。\n\n**Q: 是否有耳机孔？**\nA: 没有 3.5mm 耳机孔，需使用 Type-C 耳机或蓝牙耳机。\n\n**Q: 快充对电池有损伤吗？**\nA: 内置电池健康引擎，经过 1600 次充放电循环后仍保留 80% 以上容量。\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Note 14 Pro · 子夜黑 · 8GB · 256GB / 颜色:子夜黑;内存:8GB;存储:256GB | ¥2600.00 | 90 |\n| 星耀 Note 14 Pro · 子夜黑 · 8GB · 512GB / 颜色:子夜黑;内存:8GB;存储:512GB | ¥2602.00 | 90 |\n| 星耀 Note 14 Pro · 子夜黑 · 12GB · 256GB / 颜色:子夜黑;内存:12GB;存储:256GB | ¥2603.00 | 90 |\n| 星耀 Note 14 Pro · 子夜黑 · 12GB · 512GB / 颜色:子夜黑;内存:12GB;存储:512GB | ¥2599.00 | 90 |"
+ },
+ {
+  "id": "mall_spu_19_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/1c5c65908d27cf4e68e187d5abb04464.jpg?thumb=1&w=211&h=553&f=webp&q=90",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:8",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 1999.0,
+   "category_path": "智能穿戴",
+   "name": "星耀 Watch 3 Pro 智能手表",
+   "biz_id": "19",
+   "spu_id": 19,
+   "status": 1
+  },
+  "content": "# 商品：星耀 Watch 3 Pro 智能手表\n> 钛合金 · 1.5 寸 LTPO · 14 天续航\n**基本信息**：商品ID(SPU_ID)：19 | 分类：智能穿戴 | 参考最低价：¥1999.00 | SKU 规格数：2 | 标签：mall_spu、cat:8、is_new、is_hot、on_shelf\n\n## 详情描述\n材质：钛合金表壳 + 蓝宝石玻璃\n屏幕：1.5 寸 LTPO OLED 常亮显示\n续航：14 天典型 / 5 天重度\n健康：心率 · 血氧 · 体温 · ECG 心电图\n运动：150+ 运动模式 · 双频 GPS\n防水：5ATM + IP68\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 Watch 3 Pro · 钛金属 运动表带 / 材质:钛金属;表带:运动 | ¥1999.00 | 75 |\n| 星耀 Watch 3 Pro · 钛金属 真皮表带 / 材质:钛金属;表带:真皮 | ¥2499.00 | 75 |"
+ },
+ {
+  "id": "mall_spu_4_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://picsum.photos/seed/laptop-airbook14/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:4",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 7299.0,
+   "category_path": "笔记本电脑",
+   "name": "清逸 AirBook 14 轻薄本",
+   "spu_id": 4,
+   "biz_id": "4",
+   "status": 1
+  },
+  "content": "# 商品：清逸 AirBook 14 轻薄本\n> 2.8K OLED · 1.1kg · 18h 续航\n**基本信息**：商品ID(SPU_ID)：4 | 分类：笔记本电脑 | 参考最低价：¥7299.00 | SKU 规格数：2 | 标签：mall_spu、cat:4、is_new、is_hot、on_shelf\n\n## 详情描述\n屏幕：14 寸 2.8K 120Hz OLED 100% DCI-P3\n平台：Intel Core Ultra 7 258H · 32GB LPDDR5X · 2TB PCIe 4.0\n重量/厚度：1.1kg · 13.9mm\n续航：75Wh 电池，本地视频 18 小时\n接口：双 Thunderbolt 4 · USB-A 3.2 · HDMI 2.1 · SD 读卡器\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 清逸 AirBook 14 轻薄本 · Ultra7 258H · 32G · 1T / CPU:Ultra7 258H;内存:32G;存储:1T | ¥7299.00 | 1110 |"
+ },
+ {
+  "id": "mall_spu_4_1",
+  "meta": {
+   "chunk_index": 1,
+   "main_image": "https://picsum.photos/seed/laptop-airbook14/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:4",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 7299.0,
+   "category_path": "笔记本电脑",
+   "name": "清逸 AirBook 14 轻薄本",
+   "spu_id": 4,
+   "biz_id": "4",
+   "status": 1
+  },
+  "content": "nderbolt 4 · USB-A 3.2 · HDMI 2.1 · SD 读卡器\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 清逸 AirBook 14 轻薄本 · Ultra7 258H · 32G · 1T / CPU:Ultra7 258H;内存:32G;存储:1T | ¥7299.00 | 1110 || 清逸 AirBook 14 轻薄本 · Ultra7 258H · 32G · 2T / CPU:Ultra7 258H;内存:32G;存储:2T | ¥7299.00 | 330 |"
+ },
+ {
+  "id": "mall_spu_120_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://picsum.photos/seed/stellar-x1/800/800",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 8999.0,
+   "category_path": "智能手机",
+   "name": "星域 Stellar X1 Pro",
+   "spu_id": 120,
+   "biz_id": "120",
+   "status": 1
+  },
+  "content": "# 商品：星域 Stellar X1 Pro\n**基本信息**：商品ID(SPU_ID)：120 | 分类：智能手机 | 参考最低价：¥8999.00 | SKU 规格数：6 | 标签：mall_spu、cat:1、is_new、is_hot、on_shelf\n\n## 详情描述\n星域 Stellar X1 Pro搭载自研星核Orion X1旗舰芯片，配备星瞳伸缩主摄与北斗卫星通信。6.78英寸 AMOLED 流光微曲屏星瞳影像系统，1英寸超大底5200mAh + 100W星闪快充IP68 + 卫星通话\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星域 Stellar X1 Pro · 12GB · 256GB / 内存:12GB;存储:256GB | ¥8999.00 | 1230 |\n| 星域 Stellar X1 Pro · 12GB · 512GB / 内存:12GB;存储:512GB | ¥9999.00 | 1230 |\n| 星域 Stellar X1 Pro · 12GB · 1TB / 内存:12GB;存储:1TB | ¥10999.00 | 1230 |"
+ },
+ {
+  "id": "mall_spu_123_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://tse1-mm.cn.bing.net/th/id/OIP-C.A3jO6NnCO8xvsBhiMFBbdQHaDt?w=295&h=180&c=7&r=0&o=7&pid=1.7&rm=3",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "on_shelf"
+   ],
+   "min_price": 2699.0,
+   "category_path": "智能手机",
+   "name": "玉米手机 10 Pro",
+   "biz_id": "123",
+   "spu_id": 123,
+   "status": 1
+  },
+  "content": "# 商品：玉米手机 10 Pro\n**基本信息**：商品ID(SPU_ID)：123 | 分类：智能手机 | 参考最低价：¥2699.00 | SKU 规格数：6 | 标签：mall_spu、cat:1、on_shelf\n\n## 详情描述\n\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 玉米手机 10 Pro · 黑色 · 12+256 / 颜色:黑色;内存:12+256 | ¥2699.00 | 77 |\n| 玉米手机 10 Pro · 黑色 · 16+256 / 颜色:黑色;内存:16+256 | ¥2899.00 | 77 |\n| 玉米手机 10 Pro · 黑色 · 16+512 / 颜色:黑色;内存:16+512 | ¥2999.00 | 77 |\n| 玉米手机 10 Pro · 白色 · 12+256 / 颜色:白色;内存:12+256 | ¥2699.00 | 77 |\n| 玉米手机 10 Pro · 白色 · 16+256 / 颜色:白色;内存:16+256 | ¥2899.00 | 77 |\n| 玉米手机 10 Pro · 白色 · 16+512 / 颜色:白色;内存:16+512 | ¥2999.00 | 77 |"
+ },
+ {
+  "id": "mall_spu_8_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://picsum.photos/seed/phone-x100-promax/400/400",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 1,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "is_hot",
+    "on_shelf"
+   ],
+   "min_price": 5999.0,
+   "category_path": "智能手机",
+   "name": "星耀 X100 Pro Max",
+   "biz_id": "8",
+   "spu_id": 8,
+   "status": 1
+  },
+  "content": "# 商品：星耀 X100 Pro Max\n> 骁龙 8 Gen4 · 2K LTPO · 卫星通信\n**基本信息**：商品ID(SPU_ID)：8 | 分类：智能手机 | 参考最低价：¥5999.00 | SKU 规格数：2 | 标签：mall_spu、cat:1、is_new、is_hot、on_shelf\n\n## 详情描述\n星耀 X100 Pro Max，骁龙 8 Gen4 旗舰芯片，200MP 潜望长焦，7500mAh 大电池，双向卫星通信。\n\n\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 X100 Pro Max · 16+512GB / 内存:16GB;存储:512GB | ¥5999.00 | 75 |\n| 星耀 X100 Pro Max · 16+1TB / 内存:16GB;存储:1TB | ¥7999.00 | 75 |"
+ },
+ {
+  "id": "mall_spu_7_0",
+  "meta": {
+   "chunk_index": 0,
+   "main_image": "https://www.oppo.com/content/dam/oppo_com/common/mkt/v2-2/oppo-reno16-series-cn/reno16/listpage/480-600-green.png",
+   "biz_type": "SPU",
+   "source": "mall_spu",
+   "total_chunks": 2,
+   "tags": [
+    "mall_spu",
+    "cat:1",
+    "is_new",
+    "on_shelf"
+   ],
+   "min_price": 1999.0,
+   "category_path": "智能手机",
+   "name": "星耀 X100 青春版",
+   "spu_id": 7,
+   "biz_id": "7",
+   "status": 1
+  },
+  "content": "# 商品：星耀 X100 青春版\n> 骁龙 7+ Gen3 · 5000mAh · 67W 快充\n**基本信息**：商品ID(SPU_ID)：7 | 分类：智能手机 | 参考最低价：¥1999.00 | SKU 规格数：4 | 标签：mall_spu、cat:1、is_new、on_shelf\n\n## 详情描述\n星耀 X100 青春版，骁龙 7+ Gen3 中端性能标杆，5000mAh 长续航 + 67W 快充。\n\n\n\n\n\n## 规格参数\n| 规格 | 价格 | 库存 |\n| --- | --- | --- |\n| 星耀 X100 青春版 · 8GB · 128GB / 内存:8GB;存储:128GB | ¥1999.00 | 33 |\n| 星耀 X100 青春版 · 8GB · 256GB / 内存:8GB;存储:256GB | ¥2599.00 | 27 |\n| 星耀 X100 青春版 · 12GB · 128GB / 内存:12GB;存储:128GB | ¥2599.00 | 77 |\n| 星耀 X100 青春版 · 12GB · 256GB / 内存:12GB;存储:256GB | ¥2999.00 | 330 |"
+ }
+]

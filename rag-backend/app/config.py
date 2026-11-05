@@ -120,8 +120,11 @@ class Settings(BaseSettings):
         return [e.strip().lower() for e in self.ALLOWED_EXTENSIONS.split(",") if e.strip()]
 
     # RAG
-    # 召回条数：20 → 12。Rerank 是 O(候选数) 次 CrossEncoder 前向，降候选数直接减半精排耗时；
-    # 精排目标仍是 top5，12 条召回的最终质量与 20 条差异极小（可用评测集回归验证）。
+    # 召回条数：20 → 12。消融实验（scripts/ablation/）做过 12/8/6 三档回归：
+    #   12: recall@12=0.854 MRR=0.729 nDCG@5=0.855（精排 ~8.4s）
+    #    8: 0.786 / 0.656 / 0.808（~5.7s）    6: 0.678 / 0.602 / 0.756（~4.5s）
+    # 砍候选省的精排时间远抵不过质量回退（RRF 第 9-12 名携带真实相关文档），
+    # 维持 12；延迟优化应走精排推理本身（fp16/ONNX/GPU），而非截断候选。
     RETRIEVER_TOP_K: int = 12
     RERANK_TOP_K: int = 5
     SIMILARITY_THRESHOLD: float = 0.4    # 与 .env 实际值保持一致（默认值仅在不带 .env 的环境生效）
