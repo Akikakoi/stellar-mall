@@ -513,6 +513,10 @@ async def _semantic_search(
     :param query_emb: 可选的预计算查询向量。调用方（如 retrieve 链路）若已算过同一
         query 的 embedding，应透传复用，避免重复调用云端 embedding（单次约 1.3s）。
     """
+    # 开关守卫：_get_semantic_collection 的单例只在首次初始化时检查开关，
+    # 运行时翻转 LLM_CACHE_SEMANTIC_ENABLED 后此处必须重新判断，否则开关失效
+    if not settings.LLM_CACHE_SEMANTIC_ENABLED:
+        return None
     col = _get_semantic_collection()
     if col is None:
         return None
@@ -632,6 +636,9 @@ def _semantic_search_sync(
     与 async 版的检索/过滤/精排逻辑保持一致；Chroma client 本身即同步调用，
     因此这里无需事件循环。二者返回值结构相同。
     """
+    # 开关守卫：与 async 版一致，关闭 L2 语义缓存时同步路径同样不再查询
+    if not settings.LLM_CACHE_SEMANTIC_ENABLED:
+        return None
     col = _get_semantic_collection()
     if col is None:
         return None
