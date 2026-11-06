@@ -115,7 +115,7 @@
         <div v-if="(stats.lowStockCount || 0) > 0" class="task-row clickable" @click="router.push('/admin/inventory')">
           <div class="task-main">
             <span class="task-dot dot-warn"></span>
-            <span class="task-title">{{ stats.lowStockCount }} 个 SKU 库存低于阈值</span>
+            <span class="task-title">{{ stats.lowStockCount }} 个规格库存低于阈值</span>
           </div>
           <div class="task-right">
             <span class="task-meta">出入库日志</span>
@@ -420,7 +420,7 @@ async function handleExport(type: any) {
 /* ===== 方案 D：高密度极简仪表盘 =====
  * 扁平实底卡片 + 发丝线边框，无投影无渐变；
  * 圆角/投影令牌已在 _Layout.vue 的 .admin-layout 子树覆写（radius≤12 / shadow=none）。 */
-.dashboard-page { display: flex; flex-direction: column; gap: 14px; }
+.dashboard-page { display: flex; flex-direction: column; gap: 18px; }
 
 /* 统计条：一个容器切四格，发丝线分隔，替代原来的四张独立大卡 */
 .stat-strip {
@@ -432,7 +432,7 @@ async function handleExport(type: any) {
   overflow: hidden;
 }
 .stat-cell {
-  padding: 14px 18px 12px;
+  padding: 20px 22px 16px;
   min-width: 0;
 }
 .stat-cell + .stat-cell { border-left: 1px solid var(--border-base); }
@@ -440,14 +440,14 @@ async function handleExport(type: any) {
 @media (hover: hover) {
   .stat-cell.clickable:hover { background: var(--bg-hover); }
 }
-.stat-label { color: var(--text-secondary); font-size: 12px; margin-bottom: 6px; }
+.stat-label { color: var(--text-secondary); font-size: 12px; margin-bottom: 8px; }
 .stat-value { font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
 .stat-value.value-warn { color: var(--el-color-danger, #d5304f); }
-.stat-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.stat-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
 
-.grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.panel-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
-.panel-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.grid-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.panel-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; }
+.panel-title { font-size: 15px; font-weight: 500; color: var(--text-primary); }
 .panel-sub { font-size: 12px; color: var(--text-muted); }
 
 /* 待处理事项流：发丝线分行，左状态点右动作，高信息密度 */
@@ -456,7 +456,7 @@ async function handleExport(type: any) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 2px;
+  padding: 14px 4px;
   border-top: 1px solid var(--border-base);
   font-size: 13px;
 }
@@ -481,13 +481,13 @@ async function handleExport(type: any) {
 }
 
 /* 快捷操作：发丝线小格子，中性 hover，不再按色系染色 */
-.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .action-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 14px 8px;
+  gap: 8px;
+  padding: 18px 10px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-base);
   cursor: pointer;
@@ -520,20 +520,20 @@ async function handleExport(type: any) {
   font-weight: 600;
   font-size: 14px;
   color: var(--text-primary);
-  margin-top: 12px;
+  margin-top: 16px;
 }
 .report-body .report-heading:first-child { margin-top: 0; }
 
 /* 近 7 天用户行为 */
-.behavior-summary { display: flex; gap: 36px; margin-bottom: 16px; }
+.behavior-summary { display: flex; gap: 40px; margin-bottom: 20px; }
 .behavior-num { display: flex; align-items: baseline; gap: 8px; }
 .behavior-label { font-size: 12px; color: var(--text-secondary); }
 .behavior-value { font-size: 24px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
-.behavior-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.behavior-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
 .behavior-block { min-width: 0; }
-.behavior-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+.behavior-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; }
 .behavior-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-.behavior-list { display: flex; flex-direction: column; gap: 8px; }
+.behavior-list { display: flex; flex-direction: column; gap: 10px; }
 .behavior-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .behavior-rank { width: 16px; flex-shrink: 0; color: var(--text-muted); }
 .behavior-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); }

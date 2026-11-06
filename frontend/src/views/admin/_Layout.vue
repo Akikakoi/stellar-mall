@@ -230,15 +230,15 @@ onMounted(async () => {
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 14px;
-  height: 48px;
+  gap: 10px;
+  padding: 0 16px;
+  height: 56px;
   border-bottom: 1px solid var(--border-base);
   cursor: pointer;
   flex-shrink: 0;
 }
 .brand-logo {
-  width: 26px; height: 26px;
+  width: 28px; height: 28px;
   background: var(--brand-primary);
   color: #fff;
   font-weight: 700;
@@ -256,17 +256,22 @@ onMounted(async () => {
 :deep(.el-menu) {
   border-right: none;
   background: transparent;
-  padding: 6px;
+  padding: 10px;
+}
+/* 折叠态下菜单只剩 64px：取消左右内边距，
+ * 否则 EP 的基础左内边距会把图标推到右侧、不再居中 */
+:deep(.el-menu--collapse) {
+  padding: 10px 0;
 }
 :deep(.el-menu-item) {
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
-  margin: 1px 0;
-  height: 34px;
-  line-height: 34px;
+  margin: 2px 0;
+  height: 40px;
+  line-height: 40px;
   font-size: 13px;
 }
-:deep(.el-menu-item .el-icon) { font-size: 15px; }
+:deep(.el-menu-item .el-icon) { font-size: 16px; }
 :deep(.el-menu-item:hover) {
   background: var(--bg-hover);
   color: var(--text-primary);
@@ -285,8 +290,8 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 6px;
-  padding: 7px 10px;
+  margin: 8px;
+  padding: 9px 12px;
   border: 1px solid var(--border-base);
   border-radius: var(--radius-sm);
   color: var(--text-muted);
@@ -295,7 +300,7 @@ onMounted(async () => {
   transition: background var(--transition-color), color var(--transition-color);
 }
 .side-search:hover { background: var(--bg-hover); color: var(--text-primary); }
-.side-search.collapsed { justify-content: center; padding: 7px 0; }
+.side-search.collapsed { justify-content: center; padding: 9px 0; }
 .side-search-text { flex: 1; }
 .kbd {
   font-size: 11px;
@@ -313,10 +318,10 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  height: 48px;
+  padding: 0 20px;
+  height: 56px;
 }
-.left { display: flex; align-items: center; gap: 12px; }
+.left { display: flex; align-items: center; gap: 14px; }
 .user-info {
   display: flex;
   align-items: center;
@@ -342,7 +347,8 @@ onMounted(async () => {
 
 .main-content {
   background: var(--bg-base);
-  padding: 20px 24px;
+  /* 纵向留白比横向多给：宽表格（订单/商品）已经没有余量，横向只在卡片内留白 */
+  padding: 26px 24px 32px;
   overflow: auto;
 }
 

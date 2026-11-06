@@ -22,45 +22,58 @@ body.area-admin {
   --radius-xl: 12px;
   --shadow-sm: none;
   --shadow-md: none;
+  /* 间距刻度：管理端统一走这一套，改宽松/紧凑只需调这三个值 */
+  --admin-gap: 18px;          /* 卡片之间、图表与卡片之间 */
+  --admin-pad-block: 20px;    /* 卡片内上下留白 */
+  --admin-pad-inline: 24px;   /* 卡片内左右留白 */
 }
 
 /* ===== 页面骨架与卡片 ===== */
 body.area-admin .admin-layout .mgmt-page,
 body.area-admin .admin-layout .inventory-page,
 body.area-admin .admin-layout .chatbi-page,
+body.area-admin .admin-layout .dashboard-page,
 body.area-admin .admin-layout .coupon-mgmt,
 body.area-admin .admin-layout .points-mgmt,
 body.area-admin .admin-layout .review-mgmt,
 body.area-admin .admin-layout .home-module-mgmt,
 body.area-admin .admin-layout .service-mgmt,
 body.area-admin .admin-layout .kb {
-  gap: 14px;
+  gap: var(--admin-gap);
 }
 
 body.area-admin .admin-layout .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-base);
-  padding: 16px 20px;
+  padding: var(--admin-pad-block) var(--admin-pad-inline);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
 body.area-admin .admin-layout .panel-head {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
-/* 页面标题从 18px/600 收到 14px/500：D 风格里"位置感"靠布局而非字重 */
+/* 页面标题从 18px/600 收到 15px/500：D 风格里"位置感"靠布局而非字重 */
 body.area-admin .admin-layout .panel-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
 }
 
+/* 筛选条：各页原本只是把 el-input / el-select / el-button 平铺在 div 里，
+ * el-input、el-select 都是 inline-block，Vue 模板换行产生的空白节点又被
+ * 编译器 condense 掉 —— 控件之间实际是零间距、紧贴在一起。
+ * 这里统一改成 flex + gap，窄屏自动换行。 */
 body.area-admin .admin-layout .filter-bar {
   background: var(--bg-card);
   border: 1px solid var(--border-base);
-  padding: 10px 14px;
-  margin-bottom: 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
   border-radius: var(--radius-md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
 }
 
 /* 批量操作条：品牌色只留淡底 + 半透明描边，不再用实色边框 */
@@ -71,7 +84,13 @@ body.area-admin .admin-layout .batch-toolbar {
 body.area-admin .admin-layout .pagination-wrap {
   display: flex;
   justify-content: flex-end;
-  margin-top: 14px;
+  margin-top: 18px;
+}
+
+/* 表单行距：非 inline 表单（系统设置、智能查数等）行与行之间多留 4px，
+ * inline 表单通常出现在筛选条里，保持单行高度不动 */
+body.area-admin .admin-layout .el-form:not(.el-form--inline) .el-form-item {
+  margin-bottom: 22px;
 }
 
 /* ===== el-table 密度与配色 =====
@@ -89,14 +108,14 @@ body.area-admin .admin-layout .el-table {
 
 body.area-admin .admin-layout .el-table th.el-table__cell {
   font-weight: 500;
-  padding: 8px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border-secondary, var(--border-base)) !important;
 }
 
-/* 表体：行间 8px 空隙，行内单元格上下 12px 内边距 */
+/* 表体：行间 10px 空隙，行内单元格上下 16px 内边距 */
 body.area-admin .admin-layout .el-table .el-table__body {
   border-collapse: separate;
-  border-spacing: 0 8px;
+  border-spacing: 0 10px;
 }
 
 /* EP 布局恒预留约 30px 纵向滚动条 gutter，导致表格右缘与容器之间留白，
@@ -110,7 +129,7 @@ body.area-admin .admin-layout .el-table.is-scrolling-none table.el-table__footer
 }
 
 body.area-admin .admin-layout .el-table td.el-table__cell {
-  padding: 12px 0;
+  padding: 16px 0;
   border: 1px solid var(--border-base);
   border-left: none;
   border-right: none;
@@ -138,8 +157,14 @@ body.area-admin .admin-layout .el-table .el-table__row:has(.el-checkbox.is-check
 
 /* ===== 弹窗 =====
  * 令牌已随 body.area-admin 生效（radius≤12 / shadow 无），
- * 这里只把标题字号对齐 panel-title 的层级。 */
+ * 这里只把标题字号对齐 panel-title 的层级，并放宽弹窗内边距与表单行距。 */
+body.area-admin .el-dialog {
+  --el-dialog-padding-primary: 20px;
+}
 body.area-admin .el-dialog .el-dialog__title {
   font-size: 15px;
   font-weight: 500;
+}
+body.area-admin .el-dialog .el-form-item {
+  margin-bottom: 20px;
 }

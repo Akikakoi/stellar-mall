@@ -44,6 +44,9 @@ class AdminService:
     def get_settings_from_env() -> dict:
         return {
             "llm_model_name": settings.LLM_MODEL_NAME,
+            # 端点回给前端只用于「提示当前接的是哪家」+ 决定可选模型列表；
+            # 不含密钥，且 SystemSettingsReq 没有这个字段，回传时会被忽略
+            "llm_base_url": settings.LLM_BASE_URL or settings.OPENAI_COMPATIBLE_BASE_URL,
             "llm_temperature": settings.LLM_TEMPERATURE,
             "llm_max_tokens": settings.LLM_MAX_TOKENS,
             "retriever_top_k": settings.RETRIEVER_TOP_K,
