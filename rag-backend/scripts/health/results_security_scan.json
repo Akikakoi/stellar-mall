@@ -1,0 +1,104 @@
+{
+ "groups": [
+  {
+   "group": "A_JWT 变造",
+   "checks": [
+    {
+     "name": "无 token 访问订单",
+     "expect": "401 拒绝",
+     "actual": "HTTP 401",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "过期 token",
+     "expect": "401 拒绝",
+     "actual": "HTTP 401",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "错误密钥签名",
+     "expect": "401 拒绝",
+     "actual": "HTTP 401",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "篡改签名",
+     "expect": "401 拒绝",
+     "actual": "HTTP 401",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "name": "合法签名但非资源属主",
+     "expect": "拒绝且不泄露数据（HTTP 4xx 或业务 code:0）",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":0,\"msg\":\"无权限执行此操作\",\"data\":null}"
+    }
+   ]
+  },
+  {
+   "group": "B_水平越权",
+   "checks": [
+    {
+     "name": "阳性对照：用户 6 访问自己的订单 86",
+     "expect": "200",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":1,\"msg\":\"success\",\"data\":{\"id\":86,\"orderNo\":\"SO20260909164438432B5E73C\",\"status\":\"COMPLETED\""
+    },
+    {
+     "name": "用户 4 访问用户 6 的订单 86",
+     "expect": "拒绝且不泄露数据",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":0,\"msg\":\"无权限执行此操作\",\"data\":null}"
+    },
+    {
+     "name": "阳性对照：用户 6 访问自己的地址 12",
+     "expect": "200",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":1,\"msg\":\"success\",\"data\":{\"id\":12,\"userId\":6,\"consignee\":\"张三\",\"phone\":\"13437239383\",\"provinc"
+    },
+    {
+     "name": "用户 4 访问用户 6 的地址 12",
+     "expect": "拒绝且不泄露数据",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":0,\"msg\":\"地址不存在或无权操作\",\"data\":null}"
+    },
+    {
+     "name": "用户 4 删除用户 6 的地址 12（写操作）",
+     "expect": "拒绝且不删除",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":0,\"msg\":\"地址不存在或无权操作\",\"data\":null}"
+    },
+    {
+     "name": "用户 4 的订单列表不含用户 6 的订单",
+     "expect": "200 且列表无订单 86",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":1,\"msg\":\"success\",\"data\":[]}"
+    }
+   ]
+  },
+  {
+   "group": "C_限流触发",
+   "checks": [
+    {
+     "name": "第 11 次起触发限流",
+     "expect": "10 次业务放行 + 5 次被限流",
+     "actual": "分布={429: 15}",
+     "ok": true,
+     "detail": "非 200 响应共 15 次"
+    }
+   ]
+  }
+ ],
+ "summary": "12/12 通过"
+}

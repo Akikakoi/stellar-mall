@@ -1,0 +1,1709 @@
+{
+ "model": "deepseek-chat",
+ "total": 160,
+ "overall_accuracy": 0.988,
+ "rule_fast_path_hits": 28,
+ "avg_latency_ms": 1468,
+ "per_intent": [
+  {
+   "intent": "product_consult",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "product_search",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "order_query",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "cancel_order",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "confirm_receipt",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "cart_query",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "cart_add",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "cart_clear",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "cart_delete",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "cart_update",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "after_sales",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "favorite_query",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "wallet_query",
+   "n": 10,
+   "correct": 9,
+   "accuracy": 0.9
+  },
+  {
+   "intent": "review_query",
+   "n": 10,
+   "correct": 9,
+   "accuracy": 0.9
+  },
+  {
+   "intent": "small_talk",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  },
+  {
+   "intent": "other",
+   "n": 10,
+   "correct": 10,
+   "accuracy": 1.0
+  }
+ ],
+ "top_confusions": [
+  {
+   "expected": "wallet_query",
+   "predicted": "other",
+   "count": 1
+  },
+  {
+   "expected": "review_query",
+   "predicted": "other",
+   "count": 1
+  }
+ ],
+ "matrix": {
+  "intents": [
+   "product_consult",
+   "product_search",
+   "order_query",
+   "cancel_order",
+   "confirm_receipt",
+   "cart_query",
+   "cart_add",
+   "cart_clear",
+   "cart_delete",
+   "cart_update",
+   "after_sales",
+   "favorite_query",
+   "wallet_query",
+   "review_query",
+   "small_talk",
+   "other"
+  ],
+  "rows_expected_cols_predicted": [
+   [
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    9,
+    0,
+    0,
+    1
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    9,
+    0,
+    1
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    10
+   ]
+  ]
+ },
+ "detail": [
+  {
+   "expected": "product_consult",
+   "query": "星耀 X100 Pro Max 的屏幕是什么材质",
+   "predicted": "product_consult",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 9101.34779999862
+  },
+  {
+   "expected": "product_consult",
+   "query": "清逸 AirBook 14 充满电要多久",
+   "predicted": "product_consult",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 8711.200499998085
+  },
+  {
+   "expected": "product_consult",
+   "query": "星耀 Buds Pro 3 支持无线充电吗",
+   "predicted": "product_consult",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 8849.302099999477
+  },
+  {
+   "expected": "product_consult",
+   "query": "七天无理由退货是怎么规定的",
+   "predicted": "product_consult",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 9103.608699999313
+  },
+  {
+   "expected": "product_consult",
+   "query": "星耀 Watch 4 Ultra 能戴着游泳吗",
+   "predicted": "product_consult",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 629.8469000030309
+  },
+  {
+   "expected": "product_consult",
+   "query": "玉米手机 10 Pro 的处理器是什么型号",
+   "predicted": "product_consult",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 990.1777000013681
+  },
+  {
+   "expected": "product_consult",
+   "query": "退换货的流程具体是怎么走的",
+   "predicted": "product_consult",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 982.5878999981796
+  },
+  {
+   "expected": "product_consult",
+   "query": "星耀 Tab Lite 10.4 支持手写笔吗",
+   "predicted": "product_consult",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 984.8928999999771
+  },
+  {
+   "expected": "product_consult",
+   "query": "会员积分的过期规则是什么",
+   "predicted": "product_consult",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1400.343299999804
+  },
+  {
+   "expected": "product_consult",
+   "query": "充电宝上飞机的容量限制是多少",
+   "predicted": "product_consult",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 913.7002999996184
+  },
+  {
+   "expected": "product_search",
+   "query": "帮我找一款两千元以内的手机",
+   "predicted": "product_search",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1071.9637999973202
+  },
+  {
+   "expected": "product_search",
+   "query": "有没有续航比较久的平板推荐",
+   "predicted": "product_search",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 841.7967999994289
+  },
+  {
+   "expected": "product_search",
+   "query": "哪款笔记本最适合打游戏",
+   "predicted": "product_search",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 702.5615999991714
+  },
+  {
+   "expected": "product_search",
+   "query": "搜索一下降噪耳机",
+   "predicted": "product_search",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 874.4325999978173
+  },
+  {
+   "expected": "product_search",
+   "query": "推荐几个适合学生的手环",
+   "predicted": "product_search",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1140.893200001301
+  },
+  {
+   "expected": "product_search",
+   "query": "有没有支持无线充电的折叠屏手机",
+   "predicted": "product_search",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 642.1717000011995
+  },
+  {
+   "expected": "product_search",
+   "query": "哪款手机拍照最好",
+   "predicted": "product_search",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 907.8136999996786
+  },
+  {
+   "expected": "product_search",
+   "query": "帮我看看有什么智能戒指",
+   "predicted": "product_search",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1011.8385999994643
+  },
+  {
+   "expected": "product_search",
+   "query": "三千块钱左右买什么平板好",
+   "predicted": "product_search",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1035.037999998167
+  },
+  {
+   "expected": "product_search",
+   "query": "店铺里最便宜的 5G 手机是哪款",
+   "predicted": "product_search",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1165.6306000004406
+  },
+  {
+   "expected": "order_query",
+   "query": "查一下我的订单",
+   "predicted": "order_query",
+   "confidence": 0.98,
+   "rule_hit": "order_query",
+   "latency_ms": 754.50070000079
+  },
+  {
+   "expected": "order_query",
+   "query": "我的订单什么时候发货",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 820.2845999985584
+  },
+  {
+   "expected": "order_query",
+   "query": "看看物流到哪了",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": "order_query",
+   "latency_ms": 1201.2312000006204
+  },
+  {
+   "expected": "order_query",
+   "query": "最近一单的快递单号是多少",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 925.018199999613
+  },
+  {
+   "expected": "order_query",
+   "query": "帮我查下订单详情",
+   "predicted": "order_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1256.6502999980003
+  },
+  {
+   "expected": "order_query",
+   "query": "我上个月买的手机到哪了",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 996.0482000024058
+  },
+  {
+   "expected": "order_query",
+   "query": "查下我的待发货订单",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1066.3101000027382
+  },
+  {
+   "expected": "order_query",
+   "query": "我的订单列表",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": "order_query",
+   "latency_ms": 1054.5485000002373
+  },
+  {
+   "expected": "order_query",
+   "query": "上次那个订单现在什么状态",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": "order_query",
+   "latency_ms": 1144.3341000012879
+  },
+  {
+   "expected": "order_query",
+   "query": "帮我看看有没有发货",
+   "predicted": "order_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1017.853000001196
+  },
+  {
+   "expected": "cancel_order",
+   "query": "帮我取消刚才那个订单",
+   "predicted": "cancel_order",
+   "confidence": 0.98,
+   "rule_hit": "cancel_order",
+   "latency_ms": 1078.6067000008188
+  },
+  {
+   "expected": "cancel_order",
+   "query": "不要了，把订单退了",
+   "predicted": "cancel_order",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 961.808200001542
+  },
+  {
+   "expected": "cancel_order",
+   "query": "取消我的待发货订单",
+   "predicted": "cancel_order",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1254.9723000011
+  },
+  {
+   "expected": "cancel_order",
+   "query": "那个订单帮我撤了",
+   "predicted": "cancel_order",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 992.4204000017198
+  },
+  {
+   "expected": "cancel_order",
+   "query": "我不想买了，取消掉",
+   "predicted": "cancel_order",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1029.5455000014044
+  },
+  {
+   "expected": "cancel_order",
+   "query": "把订单 86 取消掉",
+   "predicted": "cancel_order",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 928.2525000016904
+  },
+  {
+   "expected": "cancel_order",
+   "query": "帮我取消最后一笔订单",
+   "predicted": "cancel_order",
+   "confidence": 0.95,
+   "rule_hit": "cancel_order",
+   "latency_ms": 847.5758999993559
+  },
+  {
+   "expected": "cancel_order",
+   "query": "这个订单不要了帮我退单",
+   "predicted": "cancel_order",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1059.4181000014942
+  },
+  {
+   "expected": "cancel_order",
+   "query": "取消订单",
+   "predicted": "cancel_order",
+   "confidence": 0.98,
+   "rule_hit": "cancel_order",
+   "latency_ms": 1289.8086000022886
+  },
+  {
+   "expected": "cancel_order",
+   "query": "刚下单错了，麻烦取消一下",
+   "predicted": "cancel_order",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 827.3623000022781
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "货到了，帮我确认收货",
+   "predicted": "confirm_receipt",
+   "confidence": 0.98,
+   "rule_hit": "confirm_receipt",
+   "latency_ms": 720.1408000000811
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "确认收货",
+   "predicted": "confirm_receipt",
+   "confidence": 0.98,
+   "rule_hit": "confirm_receipt",
+   "latency_ms": 1118.03879999934
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "东西收到了",
+   "predicted": "confirm_receipt",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1166.8419999987236
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "帮我点一下收货",
+   "predicted": "confirm_receipt",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1187.6708999989205
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "已经拿到货了，确认一下",
+   "predicted": "confirm_receipt",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 710.0009999994654
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "收货没问题，帮我确认",
+   "predicted": "confirm_receipt",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1116.159000001062
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "帮我确认那个订单收货",
+   "predicted": "confirm_receipt",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 967.9747000009229
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "包裹收到了确认下",
+   "predicted": "confirm_receipt",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 963.8693000015337
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "确认收货吧",
+   "predicted": "confirm_receipt",
+   "confidence": 0.98,
+   "rule_hit": "confirm_receipt",
+   "latency_ms": 1709.9570000027597
+  },
+  {
+   "expected": "confirm_receipt",
+   "query": "货已签收，帮我确认",
+   "predicted": "confirm_receipt",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1124.0231999981916
+  },
+  {
+   "expected": "cart_query",
+   "query": "看看我的购物车",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 836.6944000008516
+  },
+  {
+   "expected": "cart_query",
+   "query": "购物车里有什么",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": "cart_query",
+   "latency_ms": 1042.724900002213
+  },
+  {
+   "expected": "cart_query",
+   "query": "我的购物车",
+   "predicted": "cart_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1043.1667000011657
+  },
+  {
+   "expected": "cart_query",
+   "query": "查一下购物车",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 881.7973000004713
+  },
+  {
+   "expected": "cart_query",
+   "query": "购物车里有几件东西",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 663.4776999999303
+  },
+  {
+   "expected": "cart_query",
+   "query": "帮我看看购物车商品",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 923.4360000009474
+  },
+  {
+   "expected": "cart_query",
+   "query": "看下购物车都加了啥",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1025.2604999986943
+  },
+  {
+   "expected": "cart_query",
+   "query": "我的购物车列表",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": "cart_query",
+   "latency_ms": 927.2371000006387
+  },
+  {
+   "expected": "cart_query",
+   "query": "购物车有什么",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": "cart_query",
+   "latency_ms": 1068.356899999344
+  },
+  {
+   "expected": "cart_query",
+   "query": "查购物车",
+   "predicted": "cart_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1222.3865000014484
+  },
+  {
+   "expected": "cart_add",
+   "query": "把星耀 Band 9 加进购物车",
+   "predicted": "cart_add",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 992.3254000023007
+  },
+  {
+   "expected": "cart_add",
+   "query": "帮我加购这款手机",
+   "predicted": "cart_add",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 622.5739999972575
+  },
+  {
+   "expected": "cart_add",
+   "query": "把这个加入购物车",
+   "predicted": "cart_add",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 901.6538000032597
+  },
+  {
+   "expected": "cart_add",
+   "query": "我想买这个，加一下购物车",
+   "predicted": "cart_add",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 742.7198000004864
+  },
+  {
+   "expected": "cart_add",
+   "query": "星耀 X100 Pro Max 12+512 加入购物车",
+   "predicted": "cart_add",
+   "confidence": 0.97,
+   "rule_hit": null,
+   "latency_ms": 1161.877500002447
+  },
+  {
+   "expected": "cart_add",
+   "query": "加购一个充电宝",
+   "predicted": "cart_add",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 960.4039999976521
+  },
+  {
+   "expected": "cart_add",
+   "query": "帮我把清凉喷雾加入购物车",
+   "predicted": "cart_add",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1072.3142999995616
+  },
+  {
+   "expected": "cart_add",
+   "query": "这个不错，加购物车",
+   "predicted": "cart_add",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1154.6680999999808
+  },
+  {
+   "expected": "cart_add",
+   "query": "下单买一个",
+   "predicted": "cart_add",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 643.6986000007892
+  },
+  {
+   "expected": "cart_add",
+   "query": "把 AirBook 14 放进购物车",
+   "predicted": "cart_add",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1428.1159000020125
+  },
+  {
+   "expected": "cart_clear",
+   "query": "清空购物车",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1135.8776000015496
+  },
+  {
+   "expected": "cart_clear",
+   "query": "把购物车清掉",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1095.2204000022903
+  },
+  {
+   "expected": "cart_clear",
+   "query": "购物车东西全删了",
+   "predicted": "cart_clear",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1098.6367000004975
+  },
+  {
+   "expected": "cart_clear",
+   "query": "清一下购物车",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1197.8277999987768
+  },
+  {
+   "expected": "cart_clear",
+   "query": "把购物车里的商品全部移除",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 917.7181000013661
+  },
+  {
+   "expected": "cart_clear",
+   "query": "帮我清空购物车",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1116.5972999988298
+  },
+  {
+   "expected": "cart_clear",
+   "query": "购物车太乱了全清掉",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1139.0909999972791
+  },
+  {
+   "expected": "cart_clear",
+   "query": "一键清空购物车",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 2084.8469999982626
+  },
+  {
+   "expected": "cart_clear",
+   "query": "把购物车清理干净",
+   "predicted": "cart_clear",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1954.9078000018199
+  },
+  {
+   "expected": "cart_clear",
+   "query": "清空吧",
+   "predicted": "cart_clear",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 1628.1608999997843
+  },
+  {
+   "expected": "cart_delete",
+   "query": "把购物车里的充电宝删了",
+   "predicted": "cart_delete",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1898.7192999993567
+  },
+  {
+   "expected": "cart_delete",
+   "query": "删除购物车里的星耀 Band 9",
+   "predicted": "cart_delete",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1478.3342000009725
+  },
+  {
+   "expected": "cart_delete",
+   "query": "把那个手环从购物车移除",
+   "predicted": "cart_delete",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 875.1262000005227
+  },
+  {
+   "expected": "cart_delete",
+   "query": "删掉购物车里第二个商品",
+   "predicted": "cart_delete",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1392.1417000019574
+  },
+  {
+   "expected": "cart_delete",
+   "query": "不要那个手机了，从购物车去掉",
+   "predicted": "cart_delete",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 781.8501000001561
+  },
+  {
+   "expected": "cart_delete",
+   "query": "帮我删掉购物车里的耳机",
+   "predicted": "cart_delete",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1262.0534999987285
+  },
+  {
+   "expected": "cart_delete",
+   "query": "移除购物车里的 AirBook 14",
+   "predicted": "cart_delete",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 822.7366999999504
+  },
+  {
+   "expected": "cart_delete",
+   "query": "把加错的那款从购物车删除",
+   "predicted": "cart_delete",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 717.1679999992193
+  },
+  {
+   "expected": "cart_delete",
+   "query": "购物车里那个戒指不要了",
+   "predicted": "cart_delete",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1021.8444999991334
+  },
+  {
+   "expected": "cart_delete",
+   "query": "删除购物车的平板",
+   "predicted": "cart_delete",
+   "confidence": 0.97,
+   "rule_hit": null,
+   "latency_ms": 941.9072999990021
+  },
+  {
+   "expected": "cart_update",
+   "query": "购物车里那个手机改成两件",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 883.0051999975694
+  },
+  {
+   "expected": "cart_update",
+   "query": "把充电宝数量改成 3",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1092.2319999990577
+  },
+  {
+   "expected": "cart_update",
+   "query": "帮我把购物车星耀 Band 9 改成 1 个",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1131.1988000015845
+  },
+  {
+   "expected": "cart_update",
+   "query": "数量改一下，要两个",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1036.563900001056
+  },
+  {
+   "expected": "cart_update",
+   "query": "把购物车里的平板数量改成 1",
+   "predicted": "cart_update",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1027.0042000011017
+  },
+  {
+   "expected": "cart_update",
+   "query": "修改购物车商品数量",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 946.0351999987324
+  },
+  {
+   "expected": "cart_update",
+   "query": "那个耳机改成 2 件",
+   "predicted": "cart_update",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 908.3447999983036
+  },
+  {
+   "expected": "cart_update",
+   "query": "购物车数量改错了帮我改成 5",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1007.8813000000082
+  },
+  {
+   "expected": "cart_update",
+   "query": "帮我改下数量",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1031.0566999978619
+  },
+  {
+   "expected": "cart_update",
+   "query": "把第二件商品的数量改成 4",
+   "predicted": "cart_update",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 980.2654999984952
+  },
+  {
+   "expected": "after_sales",
+   "query": "我要申请退货",
+   "predicted": "after_sales",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 979.3212000004132
+  },
+  {
+   "expected": "after_sales",
+   "query": "这个手机有质量问题，我要退款",
+   "predicted": "after_sales",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 952.3563000002468
+  },
+  {
+   "expected": "after_sales",
+   "query": "帮我发起售后",
+   "predicted": "after_sales",
+   "confidence": 0.98,
+   "rule_hit": "after_sales",
+   "latency_ms": 1294.1401999996742
+  },
+  {
+   "expected": "after_sales",
+   "query": "申请换货",
+   "predicted": "after_sales",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 936.9465999989188
+  },
+  {
+   "expected": "after_sales",
+   "query": "我要退了上周买的耳机",
+   "predicted": "after_sales",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1211.5597000010894
+  },
+  {
+   "expected": "after_sales",
+   "query": "发起投诉，商品破损",
+   "predicted": "after_sales",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 2181.2678999995114
+  },
+  {
+   "expected": "after_sales",
+   "query": "帮我申请售后维修",
+   "predicted": "after_sales",
+   "confidence": 0.98,
+   "rule_hit": "after_sales",
+   "latency_ms": 1651.8318000016734
+  },
+  {
+   "expected": "after_sales",
+   "query": "这东西是坏的，给我退款",
+   "predicted": "after_sales",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1242.9394999999204
+  },
+  {
+   "expected": "after_sales",
+   "query": "我要退货退款",
+   "predicted": "after_sales",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 999.6500000015658
+  },
+  {
+   "expected": "after_sales",
+   "query": "帮我办一下售后",
+   "predicted": "after_sales",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 749.1207999992184
+  },
+  {
+   "expected": "favorite_query",
+   "query": "看看我的收藏夹",
+   "predicted": "favorite_query",
+   "confidence": 0.98,
+   "rule_hit": "favorite_query",
+   "latency_ms": 1051.018899997871
+  },
+  {
+   "expected": "favorite_query",
+   "query": "我收藏了哪些商品",
+   "predicted": "favorite_query",
+   "confidence": 0.98,
+   "rule_hit": "favorite_query",
+   "latency_ms": 853.9761000029102
+  },
+  {
+   "expected": "favorite_query",
+   "query": "查看收藏",
+   "predicted": "favorite_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 617.1884000032151
+  },
+  {
+   "expected": "favorite_query",
+   "query": "收藏夹里有什么",
+   "predicted": "favorite_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 977.6439000015671
+  },
+  {
+   "expected": "favorite_query",
+   "query": "我的收藏列表",
+   "predicted": "favorite_query",
+   "confidence": 0.98,
+   "rule_hit": "favorite_query",
+   "latency_ms": 951.6016000015952
+  },
+  {
+   "expected": "favorite_query",
+   "query": "看看收藏的手机有哪些",
+   "predicted": "favorite_query",
+   "confidence": 0.95,
+   "rule_hit": "favorite_query",
+   "latency_ms": 927.278799998021
+  },
+  {
+   "expected": "favorite_query",
+   "query": "我之前收藏的平板还在吗",
+   "predicted": "favorite_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1197.3981000010099
+  },
+  {
+   "expected": "favorite_query",
+   "query": "查一下我的收藏",
+   "predicted": "favorite_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1229.4326000010187
+  },
+  {
+   "expected": "favorite_query",
+   "query": "收藏夹内容",
+   "predicted": "favorite_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1156.721800001833
+  },
+  {
+   "expected": "favorite_query",
+   "query": "帮我看看收藏的耳机",
+   "predicted": "favorite_query",
+   "confidence": 0.95,
+   "rule_hit": "favorite_query",
+   "latency_ms": 1015.0971000002755
+  },
+  {
+   "expected": "wallet_query",
+   "query": "我的钱包余额是多少",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": "wallet_query",
+   "latency_ms": 825.2823999973771
+  },
+  {
+   "expected": "wallet_query",
+   "query": "查下账户余额",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 765.5836000012641
+  },
+  {
+   "expected": "wallet_query",
+   "query": "钱包里还有多少钱",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": "wallet_query",
+   "latency_ms": 1031.4428000019689
+  },
+  {
+   "expected": "wallet_query",
+   "query": "看看余额",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 865.9464000011212
+  },
+  {
+   "expected": "wallet_query",
+   "query": "我的余额够吗",
+   "predicted": "other",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 1407.871100000193
+  },
+  {
+   "expected": "wallet_query",
+   "query": "查一下钱包",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1200.2981000005093
+  },
+  {
+   "expected": "wallet_query",
+   "query": "余额还剩多少",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": "wallet_query",
+   "latency_ms": 937.8737000006367
+  },
+  {
+   "expected": "wallet_query",
+   "query": "我的钱包还有多少钱",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": "wallet_query",
+   "latency_ms": 1014.4427999985055
+  },
+  {
+   "expected": "wallet_query",
+   "query": "帮我看下账户里有多少钱",
+   "predicted": "wallet_query",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 1182.961600003182
+  },
+  {
+   "expected": "wallet_query",
+   "query": "查余额",
+   "predicted": "wallet_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1065.4123999993317
+  },
+  {
+   "expected": "review_query",
+   "query": "这个手机的口碑怎么样",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 676.9394999973883
+  },
+  {
+   "expected": "review_query",
+   "query": "星耀 X100 Pro Max 的用户评价",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1214.8213000000396
+  },
+  {
+   "expected": "review_query",
+   "query": "看看这款耳机的好评差评",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 955.4611000021396
+  },
+  {
+   "expected": "review_query",
+   "query": "这款平板评价怎么样",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1074.2871000002197
+  },
+  {
+   "expected": "review_query",
+   "query": "查一下商品评价",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 2057.9674000000523
+  },
+  {
+   "expected": "review_query",
+   "query": "大家对这个手表的评价如何",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 2184.2109999997774
+  },
+  {
+   "expected": "review_query",
+   "query": "看看评价再决定买不买",
+   "predicted": "other",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 2868.022900001961
+  },
+  {
+   "expected": "review_query",
+   "query": "这款笔记本用户评价好吗",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 2922.675199999503
+  },
+  {
+   "expected": "review_query",
+   "query": "差评主要说什么",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 3269.773600000917
+  },
+  {
+   "expected": "review_query",
+   "query": "看看购物评价",
+   "predicted": "review_query",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 3832.0157999987714
+  },
+  {
+   "expected": "small_talk",
+   "query": "你好",
+   "predicted": "small_talk",
+   "confidence": 0.99,
+   "rule_hit": null,
+   "latency_ms": 2451.3399000024947
+  },
+  {
+   "expected": "small_talk",
+   "query": "在吗",
+   "predicted": "small_talk",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 3117.722599999979
+  },
+  {
+   "expected": "small_talk",
+   "query": "谢谢啦",
+   "predicted": "small_talk",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 3546.010499998374
+  },
+  {
+   "expected": "small_talk",
+   "query": "你们几点下班",
+   "predicted": "small_talk",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 3466.2099000015587
+  },
+  {
+   "expected": "small_talk",
+   "query": "你好呀",
+   "predicted": "small_talk",
+   "confidence": 0.99,
+   "rule_hit": null,
+   "latency_ms": 3185.267799999565
+  },
+  {
+   "expected": "small_talk",
+   "query": "嗨",
+   "predicted": "small_talk",
+   "confidence": 0.99,
+   "rule_hit": null,
+   "latency_ms": 3618.3354999993753
+  },
+  {
+   "expected": "small_talk",
+   "query": "辛苦了",
+   "predicted": "small_talk",
+   "confidence": 0.98,
+   "rule_hit": null,
+   "latency_ms": 2096.5747000009287
+  },
+  {
+   "expected": "small_talk",
+   "query": "再见",
+   "predicted": "small_talk",
+   "confidence": 0.99,
+   "rule_hit": null,
+   "latency_ms": 1619.2561999996542
+  },
+  {
+   "expected": "small_talk",
+   "query": "早上好",
+   "predicted": "small_talk",
+   "confidence": 0.99,
+   "rule_hit": null,
+   "latency_ms": 1530.9328000003006
+  },
+  {
+   "expected": "small_talk",
+   "query": "呵呵",
+   "predicted": "small_talk",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 2805.8249999994587
+  },
+  {
+   "expected": "other",
+   "query": "帮我看看收藏夹里哪款手机最便宜然后加购",
+   "predicted": "other",
+   "confidence": 0.95,
+   "rule_hit": "favorite_query",
+   "latency_ms": 2452.7390000002924
+  },
+  {
+   "expected": "other",
+   "query": "如果我把订单取消了我钱包里的钱会退回来吗还是原路返回到银行卡",
+   "predicted": "other",
+   "confidence": 0.9,
+   "rule_hit": null,
+   "latency_ms": 2817.7819999982603
+  },
+  {
+   "expected": "other",
+   "query": "对比一下星耀 X100 Pro Max 和玉米手机 10 Pro 哪个更值得买然后告诉我你现在推荐哪个",
+   "predicted": "other",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 2458.375400001387
+  },
+  {
+   "expected": "other",
+   "query": "先查我的订单有没有发货，没发货的话直接帮我取消",
+   "predicted": "other",
+   "confidence": 0.98,
+   "rule_hit": "cancel_order",
+   "latency_ms": 1518.3445000002393
+  },
+  {
+   "expected": "other",
+   "query": "我买了三件东西，帮我把最贵的那个退了其他两个确认收货",
+   "predicted": "other",
+   "confidence": 0.98,
+   "rule_hit": "confirm_receipt",
+   "latency_ms": 1574.8244999995222
+  },
+  {
+   "expected": "other",
+   "query": "帮我算算用积分抵扣之后还差多少钱，不够的话用钱包付",
+   "predicted": "other",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1563.3915999969759
+  },
+  {
+   "expected": "other",
+   "query": "查一下我收藏的耳机和购物车里的耳机哪个评价好",
+   "predicted": "other",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1208.159699999669
+  },
+  {
+   "expected": "other",
+   "query": "把我购物车里最便宜的两件清掉剩下的确认收货",
+   "predicted": "other",
+   "confidence": 0.95,
+   "rule_hit": "confirm_receipt",
+   "latency_ms": 1740.4973000011523
+  },
+  {
+   "expected": "other",
+   "query": "如果今天下单能不能赶在我生日前一天到，不能就别下单",
+   "predicted": "other",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1202.9930999997305
+  },
+  {
+   "expected": "other",
+   "query": "帮我把地址改成公司，然后把待发货的订单都改成新地址再看看哪些能合并发货",
+   "predicted": "other",
+   "confidence": 0.95,
+   "rule_hit": null,
+   "latency_ms": 1026.6967999996268
+  }
+ ]
+}

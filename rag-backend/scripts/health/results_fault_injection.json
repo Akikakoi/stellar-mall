@@ -1,0 +1,90 @@
+{
+ "scenarios": [
+  {
+   "scenario": "S1_ES_down",
+   "steps": [
+    {
+     "step": "搜索接口 /user/spu/page（60s 超时内）",
+     "expect": "200 且有数据（MySQL 降级）",
+     "actual": "HTTP 200, 783ms",
+     "ok": true,
+     "detail": "{\"code\":1,\"msg\":\"success\",\"data\":{\"total\":1,\"records\":[{\"id\":123,\"name\":\"玉米手机 10 Pro\",\"subTitle\":null,\"brandId\":null,\"categoryId\":1,\"category2Id\":null,\"description\":\"\",\"descriptionMd\":\"\\n\\n[KB_DOC_ID:"
+    },
+    {
+     "step": "搜索建议 /user/spu/suggest（ES 专用）",
+     "expect": "观察行为",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":1,\"msg\":\"success\",\"data\":{\"completions\":[],\"correction\":null}}"
+    },
+    {
+     "step": "ES 恢复后搜索",
+     "expect": "200",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":1,\"msg\":\"success\",\"data\":{\"total\":1,\"records\":[{\"id\":123,\"name\":\"玉米手机 10 Pro\",\"subTitle\":nul"
+    }
+   ]
+  },
+  {
+   "scenario": "S2_Redis_down",
+   "steps": [
+    {
+     "step": "限流拦截器（连续 5 次请求）",
+     "expect": "全部放行（降级不阻断）",
+     "actual": "codes=[200, 200, 200, 200, 200]",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "step": "JWT 黑名单校验（Redis 不可用）",
+     "expect": "降级放行 200",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": "{\"code\":1,\"msg\":\"success\",\"data\":{\"id\":86,\"orderNo\":\"SO20260909164438432B5E73C\",\"status\":\"COMPLETED\",\"statusCode\":5,\"tot"
+    },
+    {
+     "step": "登录接口（Redis 不可用）",
+     "expect": "期望降级可用，实测观察",
+     "actual": "HTTP 500",
+     "ok": false,
+     "detail": "发现：{\"code\":500,\"msg\":\"系统繁忙，请稍后再试\",\"data\":null}"
+    },
+    {
+     "step": "Redis 恢复后请求",
+     "expect": "200",
+     "actual": "HTTP 200",
+     "ok": true,
+     "detail": ""
+    }
+   ]
+  },
+  {
+   "scenario": "S3_mall_api_unreachable",
+   "steps": [
+    {
+     "step": "连续 6 次调用失败接口",
+     "expect": "第 6 次应 fail-fast（熔断打开）",
+     "actual": "末次消息含熔断=True",
+     "ok": true,
+     "detail": "总耗时 41490ms，末次=商城服务熔断中，已持续 0s，预计 30s 后恢复。请稍后重试。"
+    },
+    {
+     "step": "熔断后 fail-fast 生效",
+     "expect": "总耗时 << 5×超时时间",
+     "actual": "41490ms",
+     "ok": true,
+     "detail": ""
+    },
+    {
+     "step": "恢复窗口后 + 真实地址",
+     "expect": "调用放行且成功",
+     "actual": "见 detail",
+     "ok": true,
+     "detail": "ok=True"
+    }
+   ]
+  }
+ ],
+ "summary": "9/10 通过"
+}
