@@ -87,6 +87,35 @@ async def upload_and_index(
     return ok(doc)
 
 
+@router.get("/documents/match")
+async def match_document_by_name(
+    name: str,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """按商品名匹配知识库文档（商品弹窗「关联文档」状态同步用）。
+
+    注意：本路由必须声明在 /documents/{doc_id} 之前，否则 "match" 会被
+    当成 doc_id 走 int 解析并返回 422。
+    """
+    from app.services.kb_service import KbService
+    return ok(KbService(db).match_by_product_name(name))
+
+
+@router.post("/documents/match-batch")
+async def match_documents_batch(
+    body: dict,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    """批量按商品名匹配文档状态，供商品列表页一次性拉取整页状态。"""
+    from app.services.kb_service import KbService
+    names = (body or {}).get("names") or []
+    if not isinstance(names, list):
+        raise BizError("names 必须是数组", code=40020)
+    return ok(KbService(db).match_batch([str(n) for n in names]))
+
+
 @router.get("/documents/{doc_id}")
 async def get_doc(doc_id: int, current_user: User = Depends(require_admin),
                   db: Session = Depends(get_db)):

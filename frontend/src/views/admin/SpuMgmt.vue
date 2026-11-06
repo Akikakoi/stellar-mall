@@ -12,7 +12,9 @@
       </div>
 
       <div class="filter-bar">
-        <el-input v-model="query.name" placeholder="名称搜索" style="width: 240px" clearable :disabled="loading" @keyup.enter="loadPage" />
+        <!-- 输入即查（400ms 防抖）；回车立即查。不能绑 :disabled="loading"，
+             否则每敲一个字触发加载就会失焦、打不了下一个字 -->
+        <el-input v-model="query.name" placeholder="名称搜索，输入即查" style="width: 240px" clearable @keyup.enter="onQueryClick" />
         <el-select v-model="query.categoryId" placeholder="分类" clearable style="width: 160px;" :disabled="loading">
           <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
         </el-select>
@@ -74,6 +76,17 @@
             <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
               {{ row.status === 1 ? '上架中' : '已下架' }}
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="关联文档" width="118">
+          <template #default="{ row }">
+            <el-tag
+              v-if="kbDocOfRow(row)"
+              size="small"
+              :title="kbDocOfRow(row)!.filename"
+              :type="kbDocStatusTag(kbDocOfRow(row)!.status)"
+            >{{ kbDocStatusText(kbDocOfRow(row)!.status) }}</el-tag>
+            <span v-else class="kb-none-text">未关联</span>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="170" />
@@ -183,14 +196,20 @@
               <span class="hint-icon">ⓘ</span>
             </el-tooltip>
           </template>
+          <!-- 状态同步中 -->
+          <div v-if="kbDocLoading" class="kb-doc-state is-loading">
+            <el-icon class="is-loading"><Loading /></el-icon>
+            <span>正在同步知识库文档状态…</span>
+          </div>
           <!-- 已有文档预览 -->
-          <div v-if="kbExistingDoc" class="kb-existing-doc">
+          <div v-else-if="kbExistingDoc" class="kb-existing-doc">
             <div class="kb-existing-doc-info">
               <el-icon style="color:var(--brand-primary);font-size:22px;flex-shrink:0;"><Document /></el-icon>
               <div class="kb-existing-doc-detail">
                 <div class="kb-existing-doc-name">{{ kbExistingDoc.filename }}</div>
                 <div class="kb-existing-doc-meta">
                   <el-tag size="small" :type="kbDocStatusTag(kbExistingDoc.status)">{{ kbDocStatusText(kbExistingDoc.status) }}</el-tag>
+                  <el-tag v-if="kbDocSource === 'name'" size="small" type="info" effect="plain">按商品名匹配</el-tag>
                   <template v-if="kbExistingDoc.file_ext">
                     <span class="kb-existing-doc-meta-item">{{ kbExistingDoc.file_ext.toUpperCase() }}</span>
                   </template>
@@ -198,15 +217,23 @@
                     <span class="kb-existing-doc-meta-item">{{ humanFileSize(kbExistingDoc.file_size) }}</span>
                   </template>
                   <template v-if="kbExistingDoc.chunk_count != null">
-                    <span class="kb-existing-doc-meta-item">{{ kbExistingDoc.chunk_count }} Chunks</span>
+                    <span class="kb-existing-doc-meta-item">{{ kbExistingDoc.chunk_count }} 个片段</span>
                   </template>
                   <template v-if="kbExistingDoc.created_at">
                     <span class="kb-existing-doc-meta-item">上传于 {{ fmtTime(kbExistingDoc.created_at) }}</span>
                   </template>
                 </div>
+                <div v-if="kbExistingDoc.status === 'error' && kbExistingDoc.error_msg" class="kb-existing-doc-error">
+                  解析失败：{{ kbExistingDoc.error_msg }}
+                </div>
               </div>
             </div>
             <el-button type="danger" plain size="small" @click="removeExistingDoc">移除文档</el-button>
+          </div>
+          <!-- 未关联 -->
+          <div v-else class="kb-doc-state is-empty">
+            <el-icon><Document /></el-icon>
+            <span>{{ dialogMode === 'edit' ? '该商品暂未关联知识库文档，AI 助手无法回答它的咨询' : '新建商品需上传一份产品参数/说明文档' }}</span>
           </div>
           <!-- 分隔线 -->
           <el-divider v-if="kbExistingDoc" content-position="left" style="margin: 12px 0;">
@@ -232,11 +259,11 @@
             </el-upload>
             <div class="kb-params">
               <div class="kb-param-item">
-                <span class="kb-param-label">Chunk 大小</span>
+                <span class="kb-param-label">切分长度</span>
                 <el-input-number v-model="kbChunkSize" :min="128" :max="4096" :step="64" size="small" style="width:120px" />
               </div>
               <div class="kb-param-item">
-                <span class="kb-param-label">Overlap</span>
+                <span class="kb-param-label">重叠字符</span>
                 <el-input-number v-model="kbChunkOverlap" :min="0" :max="1024" :step="16" size="small" style="width:120px" />
               </div>
               <div class="kb-param-item">
@@ -250,8 +277,8 @@
           </div>
           <div v-if="kbPreviewResult != null" class="kb-preview-result">
             <div class="kb-preview-head">
-              <span>共 {{ kbPreviewResult.chunk_count }} 个 Chunk</span>
-              <span style="font-size:12px;color:var(--text-muted)">（chunk_size={{ kbChunkSize }}, overlap={{ kbChunkOverlap }}）</span>
+              <span>共 {{ kbPreviewResult.chunk_count }} 个片段</span>
+              <span style="font-size:12px;color:var(--text-muted)">（切分长度={{ kbChunkSize }}，重叠={{ kbChunkOverlap }}）</span>
             </div>
             <div v-for="(chunk, ci) in kbPreviewResult.chunks" :key="ci" class="kb-preview-chunk">
               <div class="kb-preview-chunk-idx">#{{ (ci as number) + 1 }}</div>
@@ -285,7 +312,7 @@
           <template #label>
             <span>规格组定义</span>
             <el-tooltip placement="top" effect="dark">
-              <template #content>规格组代表商品的可选维度，如「颜色」「存储容量」。<br/>添加多个规格组后，点击「生成 SKU 组合」会自动生成所有可能的规格组合。</template>
+              <template #content>规格组代表商品的可选维度，如「颜色」「存储容量」。<br/>添加多个规格组后，点击「生成规格组合」会自动生成所有可能的规格组合。</template>
               <span class="hint-icon">ⓘ</span>
             </el-tooltip>
           </template>
@@ -317,10 +344,10 @@
             <div class="spec-group-actions">
               <el-button size="small" @click="addSpecGroup">+ 添加规格组</el-button>
               <el-tooltip placement="top" effect="dark">
-                <template #content>根据规格组的所有组合自动生成 SKU 列表。<br/>例如：2 种颜色 x 3 种存储 = 6 个 SKU</template>
-                <el-button type="primary" size="small" @click="generateSkus" :disabled="!canGenerateSkus">生成 SKU 组合</el-button>
+                <template #content>根据规格组的所有组合自动生成规格列表。<br/>例如：2 种颜色 × 3 种存储 = 6 个规格</template>
+                <el-button type="primary" size="small" @click="generateSkus" :disabled="!canGenerateSkus">生成规格组合</el-button>
               </el-tooltip>
-              <span v-if="generatedCount" class="gen-hint">已生成 {{ generatedCount }} 个 SKU</span>
+              <span v-if="generatedCount" class="gen-hint">已生成 {{ generatedCount }} 个规格</span>
             </div>
           </div>
         </el-form-item>
@@ -330,7 +357,7 @@
           <template #label>
             <span>规格列表</span>
             <el-tooltip placement="top" effect="dark">
-              <template #content>每个 SKU 代表一种具体的规格组合。<br/>可通过上方「规格组定义」批量生成，也可手动添加。</template>
+              <template #content>每个规格代表一种具体的组合。<br/>可通过上方「规格组定义」批量生成，也可手动添加。</template>
               <span class="hint-icon">ⓘ</span>
             </el-tooltip>
           </template>
@@ -341,7 +368,7 @@
                 <el-button type="danger" size="small" @click="removeSku(index)" v-if="form.skuList.length > 1">删除</el-button>
               </div>
               <div class="sku-fields">
-                <el-tooltip placement="top" effect="dark" content="自动生成：SPU名 · 规格值1 · 规格值2。可手动修改">
+                <el-tooltip placement="top" effect="dark" content="自动生成：商品名 · 规格值1 · 规格值2。可手动修改">
                   <el-input v-model="sku.name" placeholder="规格名称" class="sku-field" />
                 </el-tooltip>
                 <el-tooltip placement="top" effect="dark" content="自动生成：规格1:值1;规格2:值2。可手动修改">
@@ -375,10 +402,10 @@
         <span>库存管理<template v-if="stockSpuName"> — {{ stockSpuName }}</template></span>
       </template>
       <el-table :data="stockSkuList" v-loading="stockLoading" size="small">
-        <el-table-column label="SKU" min-width="180">
+        <el-table-column label="规格名称" min-width="180">
           <template #default="{ row }">{{ row.name }}</template>
         </el-table-column>
-        <el-table-column label="规格" width="140" prop="specs" />
+        <el-table-column label="规格描述" width="140" prop="specs" />
         <el-table-column label="当前库存" width="100">
           <template #default="{ row }">
             <span :class="{ 'low-stock': (row.stock || 0) <= (row.warnStock || 10) }">
@@ -398,14 +425,14 @@
         </el-table-column>
       </el-table>
       <div v-if="!stockSkuList.length && !stockLoading" style="text-align: center; padding: 24px; color: var(--text-muted);">
-        该商品暂无 SKU 数据
+        该商品暂无规格数据
       </div>
     </el-dialog>
 
     <!-- 调整库存弹窗 -->
     <el-dialog v-model="adjustDialogVisible" title="调整库存" width="420px" destroy-on-close>
       <el-form :model="adjustForm" label-width="100px">
-        <el-form-item label="SKU 名称">
+        <el-form-item label="规格名称">
           <span>{{ adjustForm.skuName }}</span>
         </el-form-item>
         <el-form-item label="当前库存">
@@ -431,7 +458,7 @@
     <!-- 导入对话框 -->
     <el-dialog v-model="importVisible" title="批量导入商品" width="600px" destroy-on-close>
       <div style="margin-bottom: 16px;">
-        <p style="color: var(--text-secondary); margin-bottom: 12px;">请先下载模板，按格式填写后上传。同名 SPU 将复用已有商品，只追加 SKU。</p>
+        <p style="color: var(--text-secondary); margin-bottom: 12px;">请先下载模板，按格式填写后上传。同名商品将复用，只追加规格。</p>
         <el-button @click="downloadTemplate" size="small">下载模板</el-button>
       </div>
       <el-upload
@@ -453,7 +480,7 @@
           :closable="false"
         >
           <template v-if="importResult.success">
-            新建 SPU: {{ importResult.newSpuCount }} 个，新建 SKU: {{ importResult.newSkuCount }} 个<br/>
+            新建商品: {{ importResult.newSpuCount }} 个，新建规格: {{ importResult.newSkuCount }} 个<br/>
             跳过行数: {{ importResult.skippedRows }}
           </template>
         </el-alert>
@@ -471,12 +498,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batchSetSpuStatus, listAdminCategory, uploadImages, listEnabledServices } from '@/api/admin'
 import { adminRequest } from '@/api/request'
-import { apiKbUploadWithChunks, apiKbPreview, apiKbGet } from '@/api/rag'
+import { apiKbUploadWithChunks, apiKbPreview, apiKbGet, apiKbMatch, apiKbMatchBatch, apiKbDelete } from '@/api/rag'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, Search, Document } from '@element-plus/icons-vue'
+import { Upload, Search, Document, Loading } from '@element-plus/icons-vue'
 import { storage } from '@/utils/storage'
 
 const SORT_STORAGE_KEY = 'stellar:admin:spu-mgmt:sort:v1'
@@ -526,8 +553,38 @@ function onSortChange() {
   loadPage()
 }
 
-/** 点击查询按钮，重置到第1页并加载数据 */
+/* ===== 名称搜索：输入即查 =====
+ * 400ms 防抖，避免每个字符都打一次接口；回车 / 点「查询」立即触发。
+ * 另外用 requestSeq 丢弃过期响应——连续输入时先发的请求可能后回，
+ * 不做序号校验会把旧关键词的结果盖回表格。 */
+const NAME_DEBOUNCE_MS = 400
+let nameTimer: ReturnType<typeof setTimeout> | null = null
+let requestSeq = 0
+
+function cancelPendingNameSearch() {
+  if (nameTimer) {
+    clearTimeout(nameTimer)
+    nameTimer = null
+  }
+}
+
+watch(
+  () => query.name,
+  () => {
+    cancelPendingNameSearch()
+    nameTimer = setTimeout(() => {
+      nameTimer = null
+      query.page = 1
+      loadPage()
+    }, NAME_DEBOUNCE_MS)
+  }
+)
+
+onBeforeUnmount(cancelPendingNameSearch)
+
+/** 点击查询按钮（或回车），重置到第1页并立即加载 */
 function onQueryClick() {
+  cancelPendingNameSearch()
   query.page = 1
   loadPage()
 }
@@ -564,6 +621,13 @@ const kbPreviewResult = ref<any>(null)
 const kbUploadProgress = ref(0)
 const kbExistingDoc = ref<any>(null)
 const kbExistingDocId = ref<any>(null)
+/** 关联文档来源：marker=商品描述里的 [KB_DOC_ID] 显式绑定，name=按商品名自动匹配 */
+const kbDocSource = ref<'' | 'marker' | 'name'>('')
+const kbDocLoading = ref(false)
+/** 弹窗文档查询序号：快速切换商品时丢弃过期响应 */
+const kbReqSeq = ref(0)
+/** 列表页「关联文档」状态：商品名 -> 匹配结果 */
+const kbDocStatusMap = ref<Record<string, any>>({})
 
 // 图片上传
 const imageUploading = ref(false)
@@ -630,17 +694,41 @@ async function loadMeta() {
   } catch (e: any) {}
 }
 
-/** 加载商品分页列表，根据当前查询条件筛选 */
+/** 加载商品分页列表，根据当前查询条件筛选
+ * requestSeq 自增取号：输入即查时请求可能乱序返回，只认最后一次发起的结果 */
 async function loadPage() {
+  const seq = ++requestSeq
   loading.value = true
   try {
     const res = await pageSpu({ ...query })
+    if (seq !== requestSeq) return // 已有更新的请求在途，丢弃本次结果
     const d: any = res || {}
     records.value = d.records || d.list || []
     total.value = d.total || 0
   } finally {
-    loading.value = false
+    if (seq === requestSeq) loading.value = false
   }
+  // 文档状态单独异步拉取：不阻塞表格渲染，失败也只影响这一列的显示
+  loadKbDocStatus()
+}
+
+/** 批量同步当前页商品的「关联文档」状态（一次请求，避免 N+1） */
+async function loadKbDocStatus() {
+  const names = records.value.map((r: any) => r.name).filter(Boolean)
+  if (!names.length) { kbDocStatusMap.value = {}; return }
+  try {
+    const res: any = await apiKbMatchBatch(names)
+    const payload: any = res?.data || res
+    kbDocStatusMap.value = payload?.items || {}
+  } catch (e: any) {
+    kbDocStatusMap.value = {}
+  }
+}
+
+/** 列表行对应的知识库文档（未匹配返回 null） */
+function kbDocOfRow(row: any) {
+  const m = kbDocStatusMap.value[row?.name]
+  return m && m.matched ? m.document : null
 }
 
 /** 添加一个新的规格组 */
@@ -680,7 +768,7 @@ function generateSkus() {
     status: 1
   }))
   generatedCount.value = form.skuList.length
-  ElMessage.success(`已生成 ${form.skuList.length} 个 SKU 组合`)
+  ElMessage.success(`已生成 ${form.skuList.length} 个规格组合`)
 }
 
 /** 计算多个规格组的笛卡尔积，生成所有规格组合 */
@@ -824,6 +912,9 @@ async function openDialog(mode: any, row?: any) {
   kbTags.value = ''
   kbExistingDoc.value = null
   kbExistingDocId.value = null
+  kbDocSource.value = ''
+  kbDocLoading.value = false
+  kbReqSeq.value++
   if (mode === 'create') {
     Object.assign(form, { id: null, name: '', categoryId: null, price: 0, image: '', mainImage: '', subImages: '', description: '', status: 1, perUserLimit: 0, serviceIds: [], skuList: [] })
     uploadedImages.value = []
@@ -841,9 +932,32 @@ async function openDialog(mode: any, row?: any) {
         try {
           const docRes = await apiKbGet(kbExistingDocId.value)
           kbExistingDoc.value = docRes?.data || docRes
+          kbDocSource.value = 'marker'
         } catch (e: any) {
+          // 标记指向的文档已被删除：清掉标记信息，下面走按商品名回查
           kbExistingDocId.value = null
         }
+      }
+      if (!kbExistingDoc.value) {
+        // 从知识库管理页（或脚本）直接上传的文档不会往描述里写 [KB_DOC_ID]，
+        // 这里按商品名回查真实文档，保证「关联文档」一栏有状态可看。
+        // 异步执行：知识库服务慢/挂掉时不拖慢弹窗打开，用 seq 防止串商品。
+        const seq = ++kbReqSeq.value
+        kbDocLoading.value = true
+        apiKbMatch(detail.name)
+          .then((matched: any) => {
+            if (seq !== kbReqSeq.value) return
+            const payload: any = matched?.data || matched
+            if (payload?.matched && payload.document) {
+              kbExistingDoc.value = payload.document
+              kbExistingDocId.value = payload.document.id
+              kbDocSource.value = 'name'
+            }
+          })
+          .catch(() => { /* 知识库不可用时静默降级，不阻断商品编辑 */ })
+          .finally(() => {
+            if (seq === kbReqSeq.value) kbDocLoading.value = false
+          })
       }
       const cleanDescription = stripKbMarkers(mdText)
       Object.assign(form, {
@@ -1039,14 +1153,34 @@ async function handleImport() {
     const resp = await fetch('/admin/spu/import-export/import', { method: 'POST', headers: { token }, body: formData })
     const json = await resp.json(); importResult.value = json?.data || json
     if (importResult.value?.success) {
-      ElMessage.success(`导入成功：${importResult.value.newSpuCount} 个 SPU，${importResult.value.newSkuCount} 个 SKU`)
+      ElMessage.success(`导入成功：${importResult.value.newSpuCount} 个商品，${importResult.value.newSkuCount} 个规格`)
       loadPage(); importFile.value = null; uploadRef.value?.clearFiles()
     }
   } catch (e: any) { ElMessage.error('导入失败') } finally { importing.value = false }
 }
 
-function removeExistingDoc() { kbExistingDoc.value = null; kbExistingDocId.value = null }
-function kbDocStatusText(s: any) { return ({ uploading: '上传中', parsing: '解析中', indexing: '向量化中', ready: '就绪', error: '失败' } as Record<string, string>)[s] || s || '未知' }
+/** 从知识库删除该商品的文档（连带清空向量），并同步列表状态 */
+async function removeExistingDoc() {
+  const doc = kbExistingDoc.value
+  if (!doc) return
+  try {
+    await ElMessageBox.confirm(
+      `确定从知识库删除文档「${doc.filename}」？\n删除后 AI 助手将无法回答该商品的咨询，需要时可重新上传。`,
+      '移除关联文档', { type: 'warning', confirmButtonText: '确定删除', cancelButtonText: '取消' }
+    )
+  } catch (e: any) { return }
+  try {
+    await apiKbDelete(doc.id)
+    kbExistingDoc.value = null
+    kbExistingDocId.value = null
+    kbDocSource.value = ''
+    ElMessage.success('已从知识库移除')
+    loadKbDocStatus()
+  } catch (e: any) {
+    ElMessage.error(e?.message || '移除失败')
+  }
+}
+function kbDocStatusText(s: any) { return ({ uploading: '上传中', parsing: '解析中', indexing: '入库中', ready: '就绪', error: '失败' } as Record<string, string>)[s] || s || '未知' }
 function kbDocStatusTag(s: any) { return ({ ready: 'success', error: 'danger', parsing: 'warning', indexing: 'primary', uploading: 'info' } as Record<string, string>)[s] || 'info' }
 function humanFileSize(n: any) { if (!n) return '0 B'; const u = ['B', 'KB', 'MB', 'GB']; let i = 0; n = Number(n); while (n >= 1024 && i < u.length - 1) { n /= 1024; i++ }; return n.toFixed(i > 0 ? 1 : 0) + ' ' + u[i] }
 function fmtTime(v: any) { return v ? new Date(v).toLocaleString('zh-CN', { hour12: false }) : '' }
@@ -1169,6 +1303,11 @@ async function handleStockAdjust() {
 .kb-existing-doc-name { font-size: 14px; font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kb-existing-doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; }
 .kb-existing-doc-meta-item { font-size: 12px; color: var(--text-muted); margin-left: 8px; white-space: nowrap; }
+.kb-existing-doc-error { font-size: 12px; color: var(--status-error); word-break: break-all; }
+.kb-doc-state { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: var(--radius-md); font-size: 13px; border: 1px dashed var(--border-base); }
+.kb-doc-state.is-empty { color: var(--text-muted); background: transparent; }
+.kb-doc-state.is-loading { color: var(--text-secondary); background: var(--bg-hover); }
+.kb-none-text { font-size: 12px; color: var(--text-muted); }
 :deep(.row-off-shelf) { --el-table-tr-bg-color: var(--bg-hover, #fafafa); color: var(--text-muted, #999); }
 :deep(.row-off-shelf td) { color: var(--text-muted, #999); }
 :deep(.row-off-shelf .el-image) { opacity: 0.6; }

@@ -162,6 +162,88 @@ class KbService:
         log_operation(self.db, user=operator, action="kb_delete", resource=f"doc_id={doc_id} {doc.filename}",
                       request=request)
 
+    # ---------- 按商品名匹配（管理端「关联文档」状态同步） ----------
+    @staticmethod
+    def _match_key(filename: str) -> str:
+        """文档名归一化：与 kb_tool 的商品名归一化规则保持完全一致。"""
+        from app.agent.tools.kb_tool import _clean_product_name, _norm_name
+        return _norm_name(_clean_product_name(filename))
+
+    @staticmethod
+    def _doc_payload(doc: KbDocument, match_type: Optional[str]) -> dict:
+        return {
+            "matched": True,
+            "match_type": match_type,
+            "document": {
+                "id": doc.id,
+                "filename": doc.filename,
+                "status": doc.status,
+                "chunk_count": doc.chunk_count,
+                "file_ext": doc.file_ext,
+                "file_size": doc.file_size,
+                "tags": doc.tags,
+                "error_msg": doc.error_msg,
+                "created_at": doc.created_at.isoformat() if doc.created_at else None,
+            },
+        }
+
+    def match_by_product_name(self, name: str) -> dict:
+        """按商城商品名匹配知识库文档。
+
+        管理端商品弹窗原先只认 descriptionMd 里的 [KB_DOC_ID:n] 标记，而通过
+        知识库管理页上传的文档不会写标记，导致「关联文档」一栏对有文档的商品
+        也显示为空。这里按商品名做归一化匹配，把真实文档状态回给前端。
+
+        匹配优先级：归一化完全相等 > 双向子串（短边 >=4 字符且不短于长边一半，
+        与 kb_tool.kb_specs_for_products 的规则一致，避免「充电器」命中任意长名）。
+        """
+        from app.agent.tools.kb_tool import _norm_name
+        target = (name or "").strip()
+        if not target:
+            raise BizError("缺少商品名", code=40020)
+        tkey = _norm_name(target)
+        if not tkey:
+            return {"matched": False, "match_type": None, "document": None}
+
+        rows = self.db.query(KbDocument).order_by(KbDocument.created_at.desc()).all()
+        best: Optional[tuple] = None  # (len(key), doc)
+        relaxed: list = []            # 放宽匹配（短名如「充电器」）的候选
+        for doc in rows:
+            k = self._match_key(doc.filename)
+            if not k:
+                continue
+            if k == tkey:
+                return self._doc_payload(doc, "exact")
+            shorter, longer = (tkey, k) if len(tkey) <= len(k) else (k, tkey)
+            if len(shorter) >= 4 and len(shorter) * 2 >= len(longer) \
+                    and (tkey in k or k in tkey):
+                if best is None or len(k) > best[0]:
+                    best = (len(k), doc)
+            elif len(shorter) >= 2 and (tkey in k or k in tkey):
+                # 配件类文档名很短（如「充电宝.md」「路由器.md」），过不了上面的
+                # 长度守卫；这里单独收窄，只在候选唯一时采用，避免「手机」这类
+                # 短名把整类商品都匹配上
+                relaxed.append((len(k), doc))
+        if best:
+            return self._doc_payload(best[1], "fuzzy")
+        if len(relaxed) == 1:
+            return self._doc_payload(relaxed[0][1], "fuzzy")
+        return {"matched": False, "match_type": None, "document": None}
+
+    def match_batch(self, names: list) -> dict:
+        """批量按商品名匹配（商品列表页一次性拿整页的文档状态，避免 N+1 请求）。"""
+        items = {}
+        for name in (names or [])[:300]:
+            key = str(name or "")
+            if not key or key in items:
+                continue
+            try:
+                items[key] = self.match_by_product_name(key)
+            except Exception as e:  # noqa
+                logger.warning(f"按商品名匹配文档失败 name={key}: {e}")
+                items[key] = {"matched": False, "match_type": None, "document": None}
+        return {"items": items}
+
     def stats(self) -> dict:
         total_docs = self.db.query(KbDocument).count()
         total_chunks = sum((d.chunk_count or 0) for d in self.db.query(KbDocument).all())

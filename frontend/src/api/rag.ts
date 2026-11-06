@@ -95,6 +95,33 @@ export function apiKbGet(id: number): Promise<RagResponse<KbDocument>> {
   })
 }
 
+/** 按商品名匹配知识库文档（商品管理「关联文档」状态同步） */
+export interface KbDocMatchResult {
+  matched: boolean
+  match_type: 'exact' | 'fuzzy' | null
+  document: KbDocument | null
+}
+
+/** 单个商品名匹配文档状态 */
+export function apiKbMatch(name: string): Promise<RagResponse<KbDocMatchResult>> {
+  return ragRequest({
+    url: '/ragapi/api/kb/documents/match',
+    method: 'get',
+    params: { name }
+  })
+}
+
+/** 批量匹配整页商品的文档状态（避免列表页 N+1 请求） */
+export function apiKbMatchBatch(
+  names: string[]
+): Promise<RagResponse<{ items: Record<string, KbDocMatchResult> }>> {
+  return ragRequest({
+    url: '/ragapi/api/kb/documents/match-batch',
+    method: 'post',
+    data: { names }
+  })
+}
+
 /** 删除知识库文档 */
 export function apiKbDelete(id: number): Promise<RagResponse<any>> {
   return ragRequest({

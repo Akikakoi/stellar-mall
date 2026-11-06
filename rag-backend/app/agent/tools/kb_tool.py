@@ -48,8 +48,12 @@ def kb_search_tool(query: str, top_k: int = 5, tags_filter: Optional[List[str]] 
 
 
 def _norm_name(s: str) -> str:
-    """商品名归一化：去空白/连字符/下划线并转小写，用于 KB 文档名与商城商品名的宽松匹配。"""
-    return re.sub(r'[\s\-_·・]+', '', (s or '')).lower()
+    """商品名归一化：去空白/连字符/下划线并转小写，用于 KB 文档名与商城商品名的宽松匹配。
+
+    斜杠也要去掉：商城里存在「极净 IceBar 200 冰吧/红酒柜」这类含 "/" 的商品名，
+    而文件名不能带 "/"（会被当成路径分隔符），归一化时剔除才能对上。
+    """
+    return re.sub(r'[\s\-_·・/／\\]+', '', (s or '')).lower()
 
 
 def kb_specs_for_products(query: str, product_names: List[str],
