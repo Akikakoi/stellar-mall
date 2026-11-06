@@ -1,7 +1,7 @@
 <template>
   <div class="app-root">
     <NavHeader v-if="showHeader" />
-    <div :class="{ 'page-bg': !isAdmin && !isRag, 'page-bg--rag': isRag }">
+    <div :class="{ 'page-bg': !isAdmin && !isRag && !isStorefrontDemo, 'page-bg--rag': isRag, 'page-bg--demo': isStorefrontDemo }">
       <router-view />
     </div>
     <FloatingSidebar v-if="showFloatingSidebar" />
@@ -21,7 +21,9 @@ const isAdmin = computed(() => route.path.startsWith('/admin'))
 // 商品详情页隐藏顶部导航，沉浸式浏览
 const isSpuDetail = computed(() => route.path.startsWith('/spu/'))
 const isRag = computed(() => route.path.startsWith('/rag'))
-const showHeader = computed(() => !isAdmin.value && !isSpuDetail.value && !hideHeaderPaths.includes(route.path))
+// 重设计 Demo 使用独立的导航、背景和页脚，与现有商城视觉完全隔离
+const isStorefrontDemo = computed(() => route.path === '/demo/storefront')
+const showHeader = computed(() => !isAdmin.value && !isSpuDetail.value && !isStorefrontDemo.value && !hideHeaderPaths.includes(route.path))
 // AI 助手页面本身已有左侧会话栏，右侧浮动栏会遮挡聊天区，故隐藏；商品详情页同样隐藏
 const showFloatingSidebar = computed(() =>
   showHeader.value && !isRag.value
@@ -64,7 +66,7 @@ watchEffect(() => {
   const admin = route.path.startsWith('/admin')
   document.body.classList.toggle('area-admin', admin)
   document.body.classList.toggle('area-user', !admin)
-  if (!admin && !route.path.startsWith('/rag')) {
+  if (!admin && !route.path.startsWith('/rag') && !route.path.startsWith('/demo/storefront')) {
     const now = Date.now()
     if (now - lastBgFetch > 15000) {
       lastBgFetch = now
@@ -147,6 +149,11 @@ a {
 .page-bg--rag {
   min-height: auto;
   height: var(--rag-layout-height, calc(100vh - 64px));
+}
+
+/* 独立设计预览不继承原商城的全局背景图层 */
+.page-bg--demo {
+  min-height: 100vh;
 }
 
 /* 移动端：底部快捷条（FloatingSidebar）占据高度，页面底部预留空间避免内容被遮挡。

@@ -46,6 +46,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '星耀商城' }
   },
   {
+    path: '/demo/storefront',
+    name: 'StorefrontDemo',
+    component: () => import('@/views/demo/StorefrontDemo.vue'),
+    meta: { title: '商城重设计 Demo' }
+  },
+  {
     path: '/shop/search',
     name: 'ShopSearch',
     component: () => import('@/views/user/Shop.vue'),

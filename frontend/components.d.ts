@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AdminCommandPalette: typeof import('./src/components/AdminCommandPalette.vue')['default']
     ChatMessage: typeof import('./src/components/ChatMessage.vue')['default']
+    DemoProductVisual: typeof import('./src/components/demo/DemoProductVisual.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAutocomplete: typeof import('element-plus/es')['ElAutocomplete']
@@ -49,6 +50,7 @@ declare module 'vue' {
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElOption: typeof import('element-plus/es')['ElOption']
+    ElOptionGroup: typeof import('element-plus/es')['ElOptionGroup']
     ElPagination: typeof import('element-plus/es')['ElPagination']
     ElPopconfirm: typeof import('element-plus/es')['ElPopconfirm']
     ElProgress: typeof import('element-plus/es')['ElProgress']
