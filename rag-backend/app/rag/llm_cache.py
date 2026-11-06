@@ -102,6 +102,17 @@ def _sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _safe_load_suggestions(raw: Any) -> List[str]:
+    """解析 L2 metadata 中的 suggestions_json；空/损坏/老条目返回空列表。"""
+    if not raw:
+        return []
+    try:
+        data = json.loads(raw)
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
 # 这些 hash 在 import 时计算一次，变化时重启生效
 INTENT_PROMPT_HASH = ""  # 延迟计算，避免循环 import
 AGENT_PROMPT_HASH = ""
@@ -614,6 +625,8 @@ async def _semantic_search(
             "sources": json.loads(best_meta.get("sources_json", "[]")),
             "intent": best_meta.get("intent", ""),
             "tokens_used": int(best_meta.get("tokens_used", 0)),
+            # 老条目无 suggestions_json → 返回空列表，由调用方退回规则模板
+            "suggestions": _safe_load_suggestions(best_meta.get("suggestions_json")),
         }
     except Exception as e:
         logger.warning(f"[LLMCache] L2 语义检索异常: {e}")
@@ -729,6 +742,8 @@ def _semantic_search_sync(
             "sources": json.loads(best_meta.get("sources_json", "[]")),
             "intent": best_meta.get("intent", ""),
             "tokens_used": int(best_meta.get("tokens_used", 0)),
+            # 老条目无 suggestions_json → 返回空列表，由调用方退回规则模板
+            "suggestions": _safe_load_suggestions(best_meta.get("suggestions_json")),
         }
     except Exception as e:
         logger.warning(f"[LLMCache] L2 语义检索(sync)异常: {e}")
@@ -748,6 +763,7 @@ async def _semantic_put(
     tokens_used: int,
     product_ids: Optional[List[int]] = None,
     cache_type: str = "answer",
+    suggestions: Optional[List[str]] = None,
 ) -> bool:
     """写入 Chroma 语义缓存。"""
     col = _get_semantic_collection()
@@ -776,6 +792,7 @@ async def _semantic_put(
             "hit_count": 0,
             "product_ids": ",".join(str(p) for p in product_ids) if product_ids else "",
             "cache_type": cache_type,
+            "suggestions_json": json.dumps(suggestions or [], ensure_ascii=False),
         }
 
         col.add(
@@ -830,6 +847,7 @@ def _do_put_sync(
     tokens_used: int,
     product_ids: Optional[List[int]] = None,
     cache_type: str = "answer",
+    suggestions: Optional[List[str]] = None,
 ) -> None:
     """在后台线程池中真正执行 L1 + L2 写入。与 async put() 等价，只做写、不做读。"""
     try:
@@ -844,6 +862,7 @@ def _do_put_sync(
             "intent": intent,
             "tokens_used": tokens_used,
             "ts": int(time.time()),
+            "suggestions": suggestions or [],
         }
         _redis_put_sync(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type,
                         product_ids=product_ids)
@@ -854,7 +873,7 @@ def _do_put_sync(
                 system_prompt_hash=system_prompt_hash, context_hash=context_hash,
                 answer=answer, sources=sources, intent=intent,
                 tokens_used=tokens_used, product_ids=product_ids,
-                cache_type=cache_type,
+                cache_type=cache_type, suggestions=suggestions,
             ))
         except RuntimeError as e:
             # 后台写线程不应有运行中的事件循环；出现说明调用环境异常，记日志便于排查
@@ -916,6 +935,7 @@ class LLMCache:
         tokens_used: int,
         product_ids: Optional[List[int]] = None,
         cache_type: str = "answer",
+        suggestions: Optional[List[str]] = None,
     ) -> None:
         """异步写入 L1 + L2（不阻塞主流程）。"""
         if not settings.LLM_CACHE_ENABLED:
@@ -931,6 +951,7 @@ class LLMCache:
             "intent": intent,
             "tokens_used": tokens_used,
             "ts": int(time.time()),
+            "suggestions": suggestions or [],
         }
 
         # L1 写入
@@ -942,7 +963,7 @@ class LLMCache:
             system_prompt_hash=system_prompt_hash, context_hash=context_hash,
             answer=answer, sources=sources, intent=intent,
             tokens_used=tokens_used, product_ids=product_ids,
-            cache_type=cache_type,
+            cache_type=cache_type, suggestions=suggestions,
         )
 
     def get_sync(
@@ -995,6 +1016,7 @@ class LLMCache:
         tokens_used: int,
         product_ids: Optional[List[int]] = None,
         cache_type: str = "answer",
+        suggestions: Optional[List[str]] = None,
     ) -> None:
         """异步化写入 L1 + L2：提交到后台线程池，不阻塞主回答链路。
 
@@ -1005,6 +1027,7 @@ class LLMCache:
             _do_put_sync,
             query, model, temperature, system_prompt_hash, context_hash,
             answer, sources, intent, tokens_used, product_ids, cache_type,
+            suggestions,
         )
 
     async def invalidate_by_product_ids(self, product_ids: List[int]) -> int:
@@ -1117,12 +1140,14 @@ def put_cache_sync(
     system_prompt_hash: str, context_hash: Optional[str],
     answer: str, sources: List[dict], intent: str, tokens_used: int,
     product_ids: Optional[List[int]] = None, cache_type: str = "answer",
+    suggestions: Optional[List[str]] = None,
 ) -> None:
     """同步写入缓存（供 LangGraph 线程池节点使用）。"""
     try:
         get_llm_cache().put_sync(
             query, model, temperature, system_prompt_hash, context_hash,
             answer, sources, intent, tokens_used, product_ids, cache_type,
+            suggestions,
         )
     except Exception:
         pass

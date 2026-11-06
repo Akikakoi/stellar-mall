@@ -516,6 +516,8 @@ export interface ChatMessage {
   streaming?: boolean
   tokens_used?: number
   latency_ms?: number
+  /** 推荐追问（Suggestion Chips），仅最新一条助手消息展示 */
+  suggestions?: string[]
   [key: string]: any
 }
 

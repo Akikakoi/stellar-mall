@@ -15,6 +15,7 @@ from app.rag.llm_cache import get_cache_sync, put_cache_sync, single_flight_sync
 from app.rag.retriever import get_query_cache
 from app.agent.state import AgentState
 from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT, CONTEXT_REWRITE_PROMPT
+from app.agent.suggestions import gen_suggestions_sync, rule_suggestions
 from app.agent.tools import (
     kb_search_tool, kb_spec_compare, query_order_tool, apply_after_sales_tool,
     query_cart_tool, clear_cart_tool, delete_cart_item_tool, update_cart_item_tool,
@@ -1266,6 +1267,8 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                     "final_answer": faq_answer,
                     "stream_chunks": [faq_answer],
                     "sources": faq_sources,
+                    # FAQ 旁路不额外调 LLM，追问建议走意图模板兜底
+                    "suggestions": rule_suggestions("product_consult"),
                 }
         except Exception as e:  # noqa
             logger.warning(f"[FAQ] Agent 旁路查询异常: {e}")
@@ -1302,6 +1305,8 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
             "stream_chunks": list(cached["answer"]),
             "from_cache": True,
             "sources": cached.get("sources", []),
+            # 老缓存条目无 suggestions 字段 → 退回意图模板
+            "suggestions": cached.get("suggestions") or rule_suggestions(intent),
         }
 
     def _produce_answer():
@@ -1388,6 +1393,11 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                     except Exception as e:  # noqa
                         logger.warning(f"[FAQ] Agent 侧写入失败: {e}")
 
+            # === 生成推荐追问（LLM 为主 + 意图模板兜底，失败静默降级） ===
+            # 放在缓存写入之前，让建议随答案一起进三层缓存；
+            # 此时回答 token 已全部下发，仅 done 事件晚约 1s，用户无感。
+            suggestions = gen_suggestions_sync(query, full_answer, intent)
+
             # === 异步写入缓存 ===
             # 防缓存污染：kb_search「成功但 0 条 sources」的空结果不写缓存。
             # 空结果上下文的答案（如"没查到 XX"）一旦入缓存，后续同问即使
@@ -1412,6 +1422,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                         tokens_used=len(full_answer),
                         product_ids=product_ids,
                         cache_type="answer",
+                        suggestions=suggestions,
                     )
                 except Exception:
                     pass
@@ -1419,6 +1430,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
             return {
                 "final_answer": full_answer,
                 "stream_chunks": answer_chunks,
+                "suggestions": suggestions,
             }
         except Exception as e:
             logger.error(f"生成回答失败: {e}")
@@ -1444,9 +1456,16 @@ def _handle_small_talk(state: AgentState) -> Dict[str, Any]:
             HumanMessage(content=query),
         ])
         answer = resp.content if hasattr(resp, "content") else str(resp)
-        return {"final_answer": str(answer)}
+        return {
+            "final_answer": str(answer),
+            # 闲聊不额外调 LLM 生成建议，走通用模板池
+            "suggestions": rule_suggestions("small_talk"),
+        }
     except Exception:
-        return {"final_answer": "您好！请问有什么可以帮您的吗？"}
+        return {
+            "final_answer": "您好！请问有什么可以帮您的吗？",
+            "suggestions": rule_suggestions("small_talk"),
+        }
 
 
 def _sanitize_error_message(raw_msg: str) -> str:

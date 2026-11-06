@@ -90,6 +90,7 @@ class AgentChatService:
 
             # other 场景：图内仅打标记，走 ReAct 真流式
             if result.get("uses_react"):
+                react_answer_parts: list = []
                 try:
                     from app.agent.react_agent import astream_react
 
@@ -99,12 +100,26 @@ class AgentChatService:
                         mall_token=mall_token,
                         conversation_history=conversation_history or [],
                     ):
+                        if ev.get("type") == "token":
+                            react_answer_parts.append(ev.get("content", ""))
                         yield ev
                 except Exception as e:  # noqa: BLE001
                     logger.exception(f"ReAct 流式失败: {e}")
                     fallback = "（智能体服务暂时不可用，请稍后重试。）"
+                    react_answer_parts.append(fallback)
                     yield {"type": "token", "content": fallback}
                     yield {"type": "done", "tokens": len(fallback), "error": str(e)}
+
+                # ReAct 路径不写答案缓存，追问建议现生成（LLM 失败自动退回模板）
+                try:
+                    from app.agent.suggestions import gen_suggestions_sync
+                    suggestions = await asyncio.to_thread(
+                        gen_suggestions_sync, query, "".join(react_answer_parts), intent
+                    )
+                except Exception:  # noqa: BLE001
+                    from app.agent.suggestions import rule_suggestions
+                    suggestions = rule_suggestions(intent)
+                yield {"type": "suggestions", "data": suggestions}
                 return
 
             current_tool = result.get("current_tool")
@@ -126,6 +141,13 @@ class AgentChatService:
             missing_params = result.get("missing_params", [])
             if missing_params:
                 yield {"type": "missing_params", "data": missing_params}
+
+            # 推荐追问：图中已生成（缓存命中或随答案生成）；缺失时意图模板兜底
+            suggestions = result.get("suggestions") or []
+            if not suggestions:
+                from app.agent.suggestions import rule_suggestions
+                suggestions = rule_suggestions(intent)
+            yield {"type": "suggestions", "data": suggestions}
 
             yield {
                 "type": "done",

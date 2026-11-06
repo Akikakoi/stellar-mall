@@ -65,6 +65,7 @@ async def chat(
     async def event_generator():
         answer_parts = []
         sources_data = []
+        suggestions_data = []
         tokens = 0
         intent = "other"
         extra_meta = {}
@@ -95,6 +96,9 @@ async def chat(
                     yield _format_sse("agent_thought", {"content": ev.get("content", "")})
                 elif ev_type == "missing_params":
                     yield _format_sse("missing_params", {"params": ev.get("data", [])})
+                elif ev_type == "suggestions":
+                    suggestions_data = ev.get("data", []) or []
+                    yield _format_sse("suggestions", suggestions_data)
                 elif ev_type == "done":
                     tokens = ev.get("tokens", 0)
                     extra_meta = {
@@ -129,6 +133,7 @@ async def chat(
     if not req.stream:
         answer_parts: list[str] = []
         sources_data: list = []
+        suggestions_data: list = []
         tokens = 0
         extra_meta: dict = {}
         async for chunk in event_generator():
@@ -149,6 +154,8 @@ async def chat(
                             data = line[5:].strip()
                 if ev == "sources":
                     sources_data = data if isinstance(data, list) else []
+                elif ev == "suggestions":
+                    suggestions_data = data if isinstance(data, list) else []
                 elif ev == "token":
                     if isinstance(data, dict) and "content" in data:
                         answer_parts.append(data["content"])
@@ -163,6 +170,7 @@ async def chat(
         return ok({
             "answer": full_ans,
             "sources": sources_data,
+            "suggestions": suggestions_data,
             "tokens_used": tokens,
             "mode": "agent",
             **extra_meta,

@@ -168,6 +168,8 @@
             :key="m.id"
             :msg="m"
             :current-query="currentQueryOf(m)"
+            :show-suggestions="showSuggestionsOf(m)"
+            @suggest="send"
           />
         </template>
 
@@ -310,6 +312,19 @@ function currentQueryOf(m: any) {
     if (chatStore.messages[i]!.role === 'user') return chatStore.messages[i]!.content
   }
   return ''
+}
+
+/**
+ * 是否显示推荐追问 chips：仅最后一条消息、非流式中、且有建议数据时显示。
+ * 发送新问题后上一条的 chips 自动收起，避免界面堆砌。
+ * @param {Object} m - 消息对象
+ * @returns {boolean} 是否显示
+ */
+function showSuggestionsOf(m: any) {
+  if (m.role !== 'assistant' || m.streaming) return false
+  const msgs = chatStore.messages
+  const last = msgs[msgs.length - 1]
+  return last === m && Array.isArray(m.suggestions) && m.suggestions.length > 0
 }
 
 /**
@@ -609,6 +624,7 @@ async function send(text: any) {
     let buffer = ''
     let fullContent = ''
     let sourcesData: any[] = []
+    let suggestionsData: string[] = []
     let tokensUsed = 0
     let latencyMs = 0
     let mode = 'smart'
@@ -639,6 +655,9 @@ async function send(text: any) {
           scrollToBottom(stick)
         } else if (ev.event === 'sources') {
           sourcesData = Array.isArray(ev.data) ? ev.data : []
+        } else if (ev.event === 'suggestions') {
+          // 推荐追问：done 事件前到达，随最终消息一起落库到本地消息对象
+          suggestionsData = Array.isArray(ev.data) ? ev.data : []
         } else if (ev.event === 'agent_thought') {
           reactThinking = typeof ev.data === 'string' ? ev.data : (ev.data?.content || '')
           const stick = isNearBottom()
@@ -671,6 +690,7 @@ async function send(text: any) {
     chatStore.updateAssistant(asstId, {
       content: fullContent,
       sources: sourcesData,
+      suggestions: suggestionsData,
       tool_calls: toolCalls,
       thinking: '',
       streaming: false,

@@ -102,13 +102,27 @@
           </el-tooltip>
         </div>
       </div>
+
+      <!-- 推荐追问 chips：仅最新一条助手消息显示（由父组件控制） -->
+      <div v-if="showSuggestions && msg.suggestions && msg.suggestions.length" class="suggest-chips">
+        <button
+          v-for="(s, i) in msg.suggestions"
+          :key="i + '-' + s"
+          class="suggest-chip"
+          type="button"
+          @click="$emit('suggest', s)"
+        >
+          <span class="sc-text">{{ s }}</span>
+          <el-icon class="sc-arrow"><ArrowRight /></el-icon>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { CopyDocument, Document, Cpu, Loading, Setting, CircleCheck, CircleClose, ChatDotRound, ArrowDown } from '@element-plus/icons-vue'
+import { CopyDocument, Document, Cpu, Loading, Setting, CircleCheck, CircleClose, ChatDotRound, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
@@ -118,7 +132,11 @@ import { useUserStore } from '@/stores/user'
 const props = defineProps({
   msg: { type: Object, required: true },
   currentQuery: { type: String, default: '' },
+  /** 是否显示推荐追问 chips（仅最后一条消息为 true，由父组件计算） */
+  showSuggestions: { type: Boolean, default: false },
 })
+
+defineEmits<{ (e: 'suggest', text: string): void }>()
 
 const userStore = useUserStore()
 const renderedMd = ref('')
@@ -592,6 +610,66 @@ function toolName(tool: any) {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+}
+
+/* ===== 推荐追问 chips ===== */
+.suggest-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  animation: msgFadeIn 0.3s var(--ease-out);
+}
+
+.suggest-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-color), border-color var(--transition-color), color var(--transition-color), transform var(--transition-base), box-shadow var(--transition-color);
+
+  .sc-text {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sc-arrow {
+    font-size: 13px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: transform var(--transition-base), color var(--transition-color);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--glass-hover);
+      border-color: var(--brand-primary);
+      color: var(--brand-primary);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 113, 227, 0.12);
+
+      .sc-arrow {
+        transform: translateX(3px);
+        color: var(--brand-primary);
+      }
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 </style>
