@@ -370,12 +370,18 @@ public class MallUserServiceImpl implements MallUserService {
                 claims
         );
         // 单设备登录：新 refresh 覆盖旧 refresh
-        stringRedisTemplate.opsForValue().set(
-                REFRESH_KEY_PREFIX + user.getId(),
-                refreshToken,
-                jwtProperties.getUserRefreshTtl(),
-                TimeUnit.MILLISECONDS
-        );
+        // 降级：Redis 不可用时跳过覆盖（旧 refresh 不会被顶下线），不阻断登录
+        try {
+            stringRedisTemplate.opsForValue().set(
+                    REFRESH_KEY_PREFIX + user.getId(),
+                    refreshToken,
+                    jwtProperties.getUserRefreshTtl(),
+                    TimeUnit.MILLISECONDS
+            );
+        } catch (org.springframework.dao.DataAccessException e) {
+            log.warn("[Login] Redis 不可用，单设备 refresh 覆盖跳过: userId={}, error={}",
+                    user.getId(), e.getMessage());
+        }
         return MallUserLoginVO.builder()
                 .userId(user.getId())
                 .token(accessToken)
