@@ -13,9 +13,9 @@
           <el-select v-model="statusFilter" placeholder="状态筛选" clearable style="width:160px" @change="reload">
             <el-option value="" label="全部状态" />
             <el-option value="ready" label="就绪" />
-            <el-option value="error" label="向量化失败" />
+            <el-option value="error" label="入库失败" />
             <el-option value="parsing" label="解析中" />
-            <el-option value="indexing" label="向量化中" />
+            <el-option value="indexing" label="入库中" />
             <el-option value="uploading" label="上传中" />
           </el-select>
         </div>
@@ -29,7 +29,7 @@
         </div>
         <div class="stats">
           <el-statistic title="文档总数" :value="stats.total_docs || 0" />
-          <el-statistic title="总 Chunk 数" :value="stats.total_chunks || 0" />
+          <el-statistic title="文本片段总数" :value="stats.total_chunks || 0" />
           <el-statistic title="类型分布" :value="Object.keys(stats.by_ext || {}).length" />
           <el-statistic title="已就绪" :value="countReady" />
           <el-statistic title="失败待处理" :value="countError" />
@@ -50,7 +50,7 @@
           <el-table-column label="大小" width="110" align="right">
             <template #default="{row}">{{ humanSize(row.file_size) }}</template>
           </el-table-column>
-          <el-table-column label="Chunks" prop="chunk_count" width="90" align="center" />
+          <el-table-column label="片段数" prop="chunk_count" width="90" align="center" />
           <el-table-column label="状态" width="120" align="center">
             <template #default="{row}">
               <el-tooltip v-if="row.status === 'error' && row.error_msg" :content="row.error_msg" placement="top">
@@ -62,18 +62,18 @@
           <el-table-column label="上传时间" width="180">
             <template #default="{row}">{{ fmt(row.created_at) }}</template>
           </el-table-column>
-          <el-table-column label="操作" width="280" align="center" fixed="right">
+          <el-table-column label="操作" width="320" align="center" fixed="right">
             <template #default="{row}">
-              <el-button size="small" link type="primary" @click="viewChunks(row)">Chunks</el-button>
+              <el-button size="small" link type="primary" @click="viewChunks(row)">查看片段</el-button>
               <el-button size="small" link type="primary" @click="downloadFile(row)">下载</el-button>
               <el-button
                 size="small" link type="warning"
                 :disabled="!(row.status==='error' || row.status==='ready')"
                 @click="reindexOne(row)">
-                {{ row.status === 'error' ? '重新索引' : '重建索引' }}
+                {{ row.status === 'error' ? '重新处理' : '重新生成' }}
               </el-button>
               <el-button size="small" link type="primary" @click="editTags(row)">编辑</el-button>
-              <el-popconfirm title="删除后向量一并移除，确定？" @confirm="del(row)">
+              <el-popconfirm title="删除后其文本片段一并移除，确定？" @confirm="del(row)">
                 <template #reference><el-button size="small" link type="danger">删除</el-button></template>
               </el-popconfirm>
             </template>
@@ -92,7 +92,7 @@
 
       <el-dialog v-model="dlg" title="上传知识库文档" width="620px" :close-on-click-modal="false">
         <el-alert type="info" :closable="false" show-icon style="margin-bottom:14px">
-          支持 PDF / DOCX / TXT / MD / CSV，单文件 ≤ 20MB。上传后将自动向量化入库。
+          支持 PDF / DOCX / TXT / MD / CSV，单文件 ≤ 20MB。上传后会自动切分并建立索引。
         </el-alert>
         <el-form label-width="96px">
           <el-form-item label="文件">
@@ -116,16 +116,16 @@
             <el-input v-model="tags" placeholder="逗号分隔，如: 手机,旗舰,影像" />
           </el-form-item>
           <el-divider content-position="left">分块参数（可选，上传时临时生效）</el-divider>
-          <el-form-item label="Chunk 大小">
+          <el-form-item label="切分长度">
             <el-input-number v-model="chunkSize" :min="128" :max="4096" :step="64" style="width: 180px" />
             <span style="margin-left: 10px; color: var(--text-muted); font-size:12px;">
               默认 512 字符（越大块数越少，越小块语义越碎）
             </span>
           </el-form-item>
-          <el-form-item label="Overlap">
+          <el-form-item label="重叠字符">
             <el-input-number v-model="chunkOverlap" :min="0" :max="1024" :step="16" style="width: 180px" />
             <span style="margin-left: 10px; color: var(--text-muted); font-size:12px;">
-              默认 64 字符，相邻 chunk 重叠长度，避免切分丢失语义
+              默认 64 字符，相邻片段的重叠长度，避免切分后语义丢失
             </span>
           </el-form-item>
           <el-form-item label=" ">
@@ -144,7 +144,7 @@
         <el-card v-if="previewResult" class="preview-card" shadow="never">
           <template #header>
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span>切分预览（共 {{ previewResult.total_chunks }} 个 Chunk，显示前 {{ previewResult.chunks.length }} 个）</span>
+              <span>切分预览（共 {{ previewResult.total_chunks }} 个片段，显示前 {{ previewResult.chunks.length }} 个）</span>
               <el-button size="small" link @click="previewResult = null">关闭</el-button>
             </div>
           </template>
@@ -185,16 +185,16 @@
         </div>
         <template v-else>
           <div style="margin-bottom: 10px;">
-            <el-tag>共 {{ chunksTotal }} 个 Chunk</el-tag>
+            <el-tag>共 {{ chunksTotal }} 个片段</el-tag>
             <span style="margin-left: 12px; color: var(--text-muted);">
               文件名: {{ chunksFilename }}
             </span>
           </div>
-          <el-empty v-if="chunksList.length === 0" description="该文档暂无 Chunk 数据（可能未入库或已清除）" />
+          <el-empty v-if="chunksList.length === 0" description="该文档暂无可检索片段（可能未入库或已清除）" />
           <el-scrollbar v-else max-height="60vh">
             <div v-for="c in chunksList" :key="c.id || c.index" class="chunk-item">
               <div class="chunk-head">
-                <el-tag size="small">Chunk #{{ c.index }}</el-tag>
+                <el-tag size="small">片段 #{{ c.index }}</el-tag>
                 <span class="chunk-meta">{{ c.char_count }} 字</span>
                 <el-tag v-if="c.page != null" size="small" type="info" effect="plain" style="margin-left:6px;">
                   第 {{ c.page }} 页
@@ -251,7 +251,7 @@ function humanSize(n: any) {
 }
 function fmt(v: any) { return v ? new Date(v).toLocaleString('zh-CN', {hour12:false}) : '' }
 function statusText(s: any) {
-  return ({uploading:'上传中', parsing:'解析中', indexing:'向量化中', ready:'就绪', error:'失败'} as Record<string, string>)[s] || s
+  return ({uploading:'上传中', parsing:'解析中', indexing:'入库中', ready:'就绪', error:'失败'} as Record<string, string>)[s] || s
 }
 function tagType(s: any) {
   return ({ready:'success', error:'danger', parsing:'warning', indexing:'primary', uploading:'info'} as Record<string, string>)[s] || 'info'
@@ -290,7 +290,7 @@ async function doPreview() {
     fd.append('limit', 50 as any)
     const r = await apiKbPreview(fd)
     previewResult.value = r.data
-    ElMessage.success(`切分预览完成，共 ${r.data.total_chunks} 个 Chunk`)
+    ElMessage.success(`切分预览完成，共 ${r.data.total_chunks} 个片段`)
   } catch (e: any) {
   } finally { previewing.value = false }
 }
@@ -308,12 +308,12 @@ async function doUpload() {
     const doc = r.data
     uploadPct.value = 100
     if (doc.indexed) {
-      ElMessage.success(`上传并入库成功！切分 ${doc.chunk_count} 个 Chunk`)
+      ElMessage.success(`上传并入库成功！共生成 ${doc.chunk_count} 个片段`)
       closeUploadDlg()
     } else {
       const err = doc.error_msg || '未知错误'
       ElMessageBox.alert(
-        `文件已上传但向量化失败，您可点击"操作 → 重新索引"再次尝试。\n\n错误详情：\n${err}`,
+        `文件已上传但入库失败，您可点击“操作 → 重新处理”再次尝试。\n\n错误详情：\n${err}`,
         '上传成功但入库失败',
         { type: 'warning', confirmButtonText: '我知道了', dangerouslyUseHTMLString: false }
       )
@@ -346,21 +346,21 @@ async function del(row: any) {
 async function reindexOne(row: any) {
   try {
     await ElMessageBox.confirm(
-      `确定要"${row.status === 'error' ? '重新索引' : '重建索引'}"文档「${row.filename}」吗？\n旧的向量会被清除。`,
+      `确定要${row.status === 'error' ? '重新处理' : '重新生成'}文档「${row.filename}」吗？\n旧的片段数据会被清除并重新生成。`,
       '确认',
       { type: 'warning' }
     )
   } catch { return }
-  const loadingMask = ElMessage({ message: '索引处理中，请稍候...', type: 'info', duration: 0 })
+  const loadingMask = ElMessage({ message: '处理中，请稍候...', type: 'info', duration: 0 })
   try {
     const r = await apiKbReindex(row.id)
     const doc = r.data
     loadingMask.close()
     if (doc.indexed) {
-      ElMessage.success(`重建索引成功，切分 ${doc.chunk_count} 个 Chunk`)
+      ElMessage.success(`重新生成成功，共生成 ${doc.chunk_count} 个片段`)
     } else {
       const err = doc.error_msg || '未知错误'
-      ElMessageBox.alert(`索引失败：\n${err}`, '错误', { type: 'error' })
+      ElMessageBox.alert(`重新处理失败：\n${err}`, '错误', { type: 'error' })
     }
     reload(); loadStats()
   } catch (e: any) {
@@ -391,7 +391,7 @@ const chunksTotal = ref(0)
 const chunksList = ref<any[]>([])
 const chunksLoading = ref(false)
 async function viewChunks(row: any) {
-  chunksDlgTitle.value = `文档 Chunk 预览 —— ${row.filename}`
+  chunksDlgTitle.value = `文档片段预览 —— ${row.filename}`
   chunksFilename.value = row.filename
   chunksList.value = []
   chunksTotal.value = 0
