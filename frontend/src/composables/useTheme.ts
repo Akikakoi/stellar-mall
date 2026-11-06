@@ -25,8 +25,9 @@ function readInitialTheme(): Theme {
 
 /**
  * 将指定的主题应用到 DOM 上。
- * 通过操作 document.documentElement 的 class 和 style 来实现暗色/亮色模式的切换,
- * 切换瞬间加锁统一全站过渡时长（350ms），让所有颜色同步渐变、不闪烁。
+ * 通过操作 document.documentElement 的 class 和 style 来实现暗色/亮色模式的切换。
+ * 切换瞬间加 html.theme-switching 锁全局禁用过渡（与主题 class 同一次样式计算生效），
+ * 所有部件直接变色、无渐变动画；绘制完成后（双 rAF）移除锁，恢复 hover 反馈。
  */
 export function applyThemeToDOM(value: Theme) {
   if (typeof document === 'undefined') return
@@ -34,29 +35,30 @@ export function applyThemeToDOM(value: Theme) {
   const isDark = value === THEMES.DARK
 
   // 0) DOM 已是目标主题时直接跳过：避免每个组件挂载时都重放
-  //    「加锁→切换→解锁」流程（会对全站过渡时长做一次无意义干预）
+  //    「加锁→切换→解锁」流程（会对全站过渡做一次无意义干预）
   const alreadyApplied =
     root.classList.contains('theme-dark') === isDark &&
     root.classList.contains('theme-light') === !isDark &&
     root.style.colorScheme === (isDark ? 'dark' : 'light')
   if (alreadyApplied) return
 
-  // 1) 先加锁,统一过渡时长——此时浏览器尚未提交主题变更
-  root.classList.add('theme-transitioning')
+  // 1) 加锁（禁用全站过渡）并强制回流，确保锁先于主题变更提交到计算样式
+  root.classList.add('theme-switching')
+  void root.offsetWidth
   if (transitionLockTimer) clearTimeout(transitionLockTimer)
 
-  // 2) 在下一帧执行实际主题切换,确保锁先生效
-  requestAnimationFrame(() => {
-    root.classList.toggle('theme-dark', isDark)
-    root.classList.toggle('theme-light', !isDark)
-    root.classList.toggle('dark', isDark)
-    root.style.colorScheme = isDark ? 'dark' : 'light'
-    document.body?.setAttribute('data-theme', value)
+  // 2) 翻转主题：锁与主题 class 同帧生效 → 直接变色
+  root.classList.toggle('theme-dark', isDark)
+  root.classList.toggle('theme-light', !isDark)
+  root.classList.toggle('dark', isDark)
+  root.style.colorScheme = isDark ? 'dark' : 'light'
+  document.body?.setAttribute('data-theme', value)
 
-    // 3) 等 CSS 变量全部挂载后再解锁,恢复统一过渡
-    transitionLockTimer = setTimeout(() => {
-      root.classList.remove('theme-transitioning')
-    }, 0)
+  // 3) 双 rAF（翻转已绘制）后解锁，恢复常规 hover 过渡
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      root.classList.remove('theme-switching')
+    })
   })
 }
 

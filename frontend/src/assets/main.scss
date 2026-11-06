@@ -178,9 +178,9 @@ html.theme-light {
   box-sizing: border-box;
 }
 
-/* 全局颜色过渡：服务 hover 反馈与主题切换两个场景。
-   时长 160ms（高频 hover 反馈预算内）；切主题期间由下方
-   .theme-transitioning 统一改写为 350ms，保证全站颜色同步渐变。 */
+/* 全局颜色过渡：仅服务 hover 等高频交互反馈（160ms）。
+   主题切换不走此渐变——由 html.theme-switching 在切换瞬间全局禁用过渡，
+   所有部件直接变色、无渐变动画（产品决策，2026-11-06）。 */
 html,
 body,
 body * {
@@ -193,15 +193,14 @@ body * {
     stroke var(--transition-color);
 }
 
-/* 主题切换期间强制所有元素使用统一的过渡时长，避免不同部件不同步导致闪烁
-   （只改 duration/timing-function，不动 transition-property：
-   各元素保留自己声明的过渡属性，颜色类属性在此期间统一 350ms 渐变） */
-html.theme-transitioning,
-html.theme-transitioning *,
-html.theme-transitioning *::before,
-html.theme-transitioning *::after {
-  transition-duration: 350ms !important;
-  transition-timing-function: var(--ease-in-out) !important;
+/* 主题切换瞬间全局禁用过渡：锁与主题 class 在同一次样式计算中生效，
+   所有部件（含自带 transition 的组件类选择器）直接到达新主题颜色，
+   不产生任何渐变动画。锁在切换绘制完成后移除，恢复 hover 反馈。 */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
 }
 
 /* ===== 减少动态效果（系统级无障碍偏好）=====
