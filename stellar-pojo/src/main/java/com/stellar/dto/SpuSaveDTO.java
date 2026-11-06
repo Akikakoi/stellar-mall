@@ -21,7 +21,7 @@ public class SpuSaveDTO implements Serializable {
     @ApiModelProperty("SPU id：新增时不传，更新时必传")
     private Long id;
 
-    @NotBlank(message = "SPU 名称不能为空")
+    @NotBlank(message = "商品名称不能为空")
     @Size(max = 128, message = "名称最多 128 字符")
     @ApiModelProperty(value = "SPU 名", required = true)
     private String name;

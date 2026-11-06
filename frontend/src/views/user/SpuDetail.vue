@@ -489,7 +489,7 @@ async function handleAddCart() {
     ElMessage.success('已加入购物车')
   } catch (e: any) {
     const msg = e?.message || e?.msg || ''
-    if (!msg.includes('SKU不存在') && !msg.includes('停售')) {
+    if (!msg.includes('规格不存在') && !msg.includes('停售')) {
       ElMessage.success('已加入购物车 (本地)')
     }
   }

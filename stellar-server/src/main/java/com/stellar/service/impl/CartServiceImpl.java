@@ -62,7 +62,7 @@ public class CartServiceImpl implements CartService {
         Sku sku = skuMapper.getById(dto.getSkuId());
         if (sku == null) throw new BaseException(MessageConstant.SKU_NOT_FOUND);
         if (sku.getStatus() == null || sku.getStatus() != 1) {
-            throw new BaseException("该 SKU 已停售");
+            throw new BaseException("该商品规格已停售");
         }
 
         // 是否携带保障服务选择：serviceInfo 非 null 表示本次有明确的服务选择（含空数组=清空）

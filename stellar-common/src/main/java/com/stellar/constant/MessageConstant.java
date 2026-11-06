@@ -35,8 +35,8 @@ public class MessageConstant {
     public static final String CATEGORY_HAS_LINKED_SPUS = "该分类下还有商品，无法删除";
     public static final String CATEGORY_PARENT_NOT_FOUND = "父分类不存在";
     public static final String CATEGORY_PARENT_MUST_BE_LEVEL1 = "子分类的父分类必须是 1 级";
-    public static final String SPU_NOT_FOUND = "SPU 不存在";
-    public static final String SKU_NOT_FOUND = "SKU 不存在";
+    public static final String SPU_NOT_FOUND = "商品不存在";
+    public static final String SKU_NOT_FOUND = "该商品规格不存在";
 
     // -------- 售后域 --------
     public static final String AFTER_SALE_NOT_FOUND = "售后单不存在";

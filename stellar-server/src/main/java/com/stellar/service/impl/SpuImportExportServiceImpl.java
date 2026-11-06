@@ -37,9 +37,9 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
     private final SkuMapper skuMapper;
 
     private static final String[] HEADERS = {
-            "SPU名称", "副标题", "一级分类ID",
+            "商品名称", "副标题", "一级分类ID",
             "主图URL", "商品描述", "排序值", "状态",
-            "SKU规格名称", "SKU规格值", "价格(元)", "库存", "条码"
+            "规格名称", "规格值", "价格(元)", "库存", "条码"
     };
 
     private static final int COL_NAME = 0;
@@ -255,7 +255,7 @@ public class SpuImportExportServiceImpl implements SpuImportExportService {
                     continue;
                 }
                 if (er.skuName == null || er.skuName.trim().isEmpty()) {
-                    errors.add("第" + er.rowNum + "行：SKU规格名称不能为空");
+                    errors.add("第" + er.rowNum + "行：规格名称不能为空");
                     skippedRows++;
                     continue;
                 }

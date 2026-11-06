@@ -43,7 +43,7 @@
         <el-table-column label="商品" min-width="220">
           <template #default="{ row }">
             <div class="goods-cell">
-              <span class="goods-name">{{ row.skuName || `SKU#${row.skuId}` }}</span>
+              <span class="goods-name">{{ row.skuName || `规格#${row.skuId}` }}</span>
               <span v-if="row.specs" class="goods-specs">{{ row.specs }}</span>
             </div>
           </template>
@@ -100,7 +100,7 @@
             remote
             :remote-method="searchSku"
             :loading="skuSearching"
-            placeholder="输入 SKU 名称搜索"
+            placeholder="输入规格名称搜索"
             style="width: 100%"
           >
             <el-option
@@ -133,7 +133,7 @@
 
     <!-- 批量调整对话框 -->
     <el-dialog v-model="batchDialogVisible" title="批量调整库存" width="500px">
-      <p style="margin-bottom: 12px; color: var(--text-muted);">每行一个 SKU，格式：SKU_ID, 调整数量, 备注</p>
+      <p style="margin-bottom: 12px; color: var(--text-muted);">每行一个规格，格式：规格ID, 调整数量, 备注</p>
       <el-input
         v-model="batchInput"
         type="textarea"
@@ -285,7 +285,7 @@ function openBatchDialog() {
 
 async function handleBatchUpdate() {
   const lines = batchInput.value.trim().split('\n').filter(l => l.trim())
-  if (!lines.length) { ElMessage.warning('请输入要调整的 SKU 数据'); return }
+  if (!lines.length) { ElMessage.warning('请输入要调整的规格数据'); return }
   const items: any[] = []
   for (const line of lines) {
     const parts = line.split(',').map(s => s.trim())
