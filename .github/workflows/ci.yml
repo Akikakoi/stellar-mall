@@ -25,6 +25,36 @@ jobs:
       - name: Build & test
         run: mvn test -pl stellar-server -am --batch-mode
 
+  # ── RAG 后端：离线单元测试（不装 BGE/torch） ──
+  rag-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rag-backend
+    env:
+      SECRET_KEY: ci-secret-key-for-rag-tests-0123456789
+      STELLAR_ADMIN_SECRET_KEY: ci-admin-secret-key-for-tests-0123456789
+      STELLAR_USER_SECRET_KEY: ci-user-secret-key-for-tests-0123456789
+      STELLAR_RAG_INTERNAL_SYNC_SECRET: ci-rag-sync-secret-0123456789
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # 3.12 有 pinned 依赖的现成 wheel；本地开发仍可用 3.14
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: rag-backend/requirements-ci.txt
+
+      - name: Install CI test dependencies
+        run: pip install -r requirements-ci.txt
+
+      - name: Run RAG tests
+        run: python -m pytest tests -q
+
   # ── 前端：vitest 单测 ──
   frontend-test:
     runs-on: ubuntu-latest
@@ -56,4 +86,132 @@ jobs:
         with:
           name: frontend-coverage
           path: frontend/coverage/
+          if-no-files-found: ignore
+
+  # ── 前端 E2E：Playwright smoke，API 本地 mock（不依赖 Java/RAG/MySQL） ──
+  frontend-e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run CI smoke (mocked API)
+        run: npm run test:e2e:ci
+        env:
+          PLAYWRIGHT_VIDEO: "off"
+
+  # ── 真实后端链路：MySQL + Redis + 真实 HTTP API（下单/模拟支付/售后/退款） ──
+  backend-e2e:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: stellar_mall
+          MYSQL_USER: stellar
+          MYSQL_PASSWORD: stellar
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+      redis:
+        image: redis:7.2
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+    env:
+      STELLAR_ADMIN_SECRET_KEY: ci-admin-secret-key-for-tests-0123456789
+      STELLAR_USER_SECRET_KEY: ci-user-secret-key-for-tests-0123456789
+      STELLAR_RAG_INTERNAL_SYNC_SECRET: ci-rag-sync-secret-0123456789
+      CI_DB_HOST: 127.0.0.1
+      CI_DB_PORT: "3306"
+      CI_DB_USER: stellar
+      CI_DB_PASSWORD: stellar
+      CI_REDIS_HOST: 127.0.0.1
+      CI_REDIS_PORT: "6379"
+      # 本 job 不启动 ES：指向必然拒绝连接的端口，让搜索稳定走 MySQL 降级。
+      CI_ES_URI: http://127.0.0.1:9
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+          cache: maven
+
+      - name: Build backend jar
+        run: mvn -q -pl stellar-server -am -DskipTests package --batch-mode
+
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      - name: Import schema and seed
+        env:
+          MYSQL_PWD: stellar
+        run: |
+          mysql --default-character-set=utf8mb4 -h127.0.0.1 -ustellar stellar_mall < stellar-server/src/main/resources/sql/stellar_mall_schema_current.sql
+          mysql --default-character-set=utf8mb4 -h127.0.0.1 -ustellar stellar_mall < stellar-server/src/main/resources/sql/stellar_mall_init_data.sql
+          mysql --default-character-set=utf8mb4 -h127.0.0.1 -ustellar stellar_mall < scripts/ci_seed.sql
+
+      - name: Verify seed consistency
+        env:
+          MYSQL_PWD: stellar
+        run: |
+          orphan_sku=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+            "SELECT COUNT(*) FROM stellar_spu s LEFT JOIN stellar_sku k ON k.spu_id = s.id WHERE k.id IS NULL")
+          orphan_category=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+            "SELECT COUNT(*) FROM stellar_spu s LEFT JOIN stellar_category c ON c.id = s.category_id WHERE c.id IS NULL")
+          points_account=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+            "SELECT COUNT(*) FROM stellar_user_points WHERE user_id = 1 AND available_points = 5200")
+          expired_seed=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+            "SELECT COUNT(*) FROM stellar_points_record WHERE user_id = 1 AND biz_id = 'ci-expired-points'")
+          echo "spu_without_sku=$orphan_sku spu_without_category=$orphan_category points_account=$points_account expired_seed=$expired_seed"
+          test "$orphan_sku" = "0" && test "$orphan_category" = "0" \
+            && test "$points_account" = "1" && test "$expired_seed" = "1"
+
+      - name: Start backend
+        run: |
+          nohup java -jar stellar-server/target/stellar-server-*.jar --spring.profiles.active=ci > backend-e2e.log 2>&1 &
+          echo $! > backend.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8082/health > /dev/null; then
+              echo "backend ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "backend failed to start" >&2
+          cat backend-e2e.log >&2
+          exit 1
+
+      - name: Run backend e2e
+        run: python3 scripts/backend_e2e.py
+
+      - name: Upload backend log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-e2e-log
+          path: backend-e2e.log
           if-no-files-found: ignore

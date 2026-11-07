@@ -52,6 +52,16 @@ public class PointsAdminController {
         return Result.success();
     }
 
+    // ===== 积分过期 =====
+
+    @Idempotent(keyPrefix = "admin-points-expire-scan", windowSeconds = 60)
+    @PostMapping("/expire-scan")
+    @ApiOperation("手动触发积分过期扫描（与每日 02:00 定时任务同一逻辑），返回本次过期积分数")
+    @RequireRole({1, 2})
+    public Result<Integer> expireScan() {
+        return Result.success(pointsService.processExpiredPoints());
+    }
+
     // ===== 积分调整 =====
 
     @Idempotent(keyPrefix = "admin-points-adjust", windowSeconds = 300)

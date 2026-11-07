@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const channel = process.env.PLAYWRIGHT_CHANNEL || undefined
+const video = process.env.PLAYWRIGHT_VIDEO || 'retain-on-failure'
+
 export default defineConfig({
   testDir: './e2e',
   timeout: 30_000,
@@ -13,8 +16,9 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:5173',
     headless: true,
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
-    trace: 'on-first-retry'
+    video,
+    trace: 'on-first-retry',
+    ...(channel ? { channel } : {})
   },
 
   projects: [

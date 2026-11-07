@@ -3,6 +3,12 @@
 # application-dev.yml，并把下面的占位符改成你本地真实值）
 # =========================================================================
 
+# 新库以 sql/stellar_mall_schema_current.sql（V29 全量结构）+ stellar_mall_init_data.sql
+# 为 schema 来源；本地关闭 Flyway，避免对已建列重复 ADD COLUMN。
+spring:
+  flyway:
+    enabled: false
+
 # ---------- MySQL（主账号 stellar / 123456，库 stellar_mall） ----------
 stellar:
   datasource:

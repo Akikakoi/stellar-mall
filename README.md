@@ -108,9 +108,33 @@ docker compose up -d
 
 ### 2. 初始化数据库
 
-在本机 MySQL（默认 `127.0.0.1:3306`）中创建 `stellar_mall` 数据库，首次建库先执行基础表结构与初始化数据（各一次）：
-`stellar-server/src/main/resources/sql/stellar_mall_ddl.sql`、`stellar_mall_init_data.sql`。
-后续增量迁移由 Flyway 在应用启动时自动执行（`db/migration/` 下 V2 起的脚本），无需手工操作。
+在本机 MySQL（默认 `127.0.0.1:3306`）中创建 `stellar_mall` 数据库，然后依次导入：
+
+```bash
+mysql --default-character-set=utf8mb4 -uroot -p stellar_mall < stellar-server/src/main/resources/sql/stellar_mall_schema_current.sql
+mysql --default-character-set=utf8mb4 -uroot -p stellar_mall < stellar-server/src/main/resources/sql/stellar_mall_init_data.sql
+```
+
+`stellar_mall_schema_current.sql` 是从已升级到 V29 的库导出的完整结构（41 张表），也是 CI 与 `scripts/backend_e2e.py` 使用的 schema 来源。
+
+> **注意**：`stellar_mall_ddl.sql` 是历史基础结构，未包含 V18+ 的全部增量（如 `stellar_browse_history`、`stellar_service_item`、`stellar_site_config`），不能单独作为新库的完整 schema；也不要对同一新库同时执行完整 DDL 和 V2+ 迁移。`stellar_mall_init_data.sql` 为分类/SPU 显式指定了固定 id（分类 1–20、SPU 1–10），与 SKU 的 `spu_id` 对齐，避免新库自增 id 偏移导致商品查不到 SKU。
+
+### 2.1 已有库的 Flyway 基线
+
+实际库若已有完整 schema 但没有 `flyway_schema_history`，先运行检查脚本：
+
+```bash
+pip install pymysql
+DB_PASSWORD=... python scripts/check_flyway_baseline.py
+```
+
+本机实际库评估结果：41 张表、无 Flyway 历史，V2–V28 所需表和列齐全，`is_refunded` 已存在，因此可安全 baseline 到 **28**。脚本输出通过后，用一次性启动参数让 Flyway 建历史并执行 V29：
+
+```bash
+--spring.flyway.enabled=true --spring.flyway.baseline-on-migrate=true --spring.flyway.baseline-version=28
+```
+
+之后保持 Flyway 开启即可按 V29+ 增量升级；执行前请备份数据库。
 
 ### 3. 配置密钥
 
@@ -165,6 +189,18 @@ npm run dev
 | http://localhost:5173/admin/login | 管理后台 |
 | http://localhost:8082/doc.html | API 文档（Knife4j） |
 | http://localhost:8000/docs | RAG 服务文档（Swagger） |
+
+## 测试与 CI
+
+| 层 | 命令 | CI job |
+|----|------|--------|
+| 后端单测/集成测试 | `mvn test -pl stellar-server -am` | `backend-test` |
+| RAG 离线单测 | `pip install -r rag-backend/requirements-ci.txt && cd rag-backend && python -m pytest tests -q` | `rag-test` |
+| 前端类型检查 + 单测 | `cd frontend && npm run typecheck && npm test` | `frontend-test` |
+| 前端 mock E2E | `cd frontend && npm run test:e2e:ci` | `frontend-e2e` |
+| 真实后端全链路 | `BASE_URL=http://127.0.0.1:8082 python scripts/backend_e2e.py` | `backend-e2e` |
+
+`backend-e2e` 使用真实 MySQL + Redis 和 `ci` profile，覆盖：登录、积分过期扫描、管理端商品 CRUD、优惠券创建/领取/限领、优惠券+积分下单、模拟支付、发货/收货、评价与重复评价拦截、购物车下单与取消回滚、仅退款售后（钱包到账、优惠券退回、库存不回滚）、重复确认退款幂等、登出后 refresh/access 失效。运行前需导入 `stellar_mall_schema_current.sql`、`stellar_mall_init_data.sql`、`scripts/ci_seed.sql`。
 
 ## License
 

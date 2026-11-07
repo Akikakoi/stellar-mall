@@ -1,0 +1,33 @@
+# CI 真实后端链路专用配置：MySQL + Redis，ES 不可达时降级 MySQL，关闭 Flyway/邮件/定时任务。
+spring:
+  flyway:
+    enabled: false
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://${CI_DB_HOST:127.0.0.1}:${CI_DB_PORT:3306}/${CI_DB_NAME:stellar_mall}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&allowMultiQueries=true
+      username: ${CI_DB_USER:stellar}
+      password: ${CI_DB_PASSWORD:stellar}
+  data:
+    redis:
+      host: ${CI_REDIS_HOST:127.0.0.1}
+      port: ${CI_REDIS_PORT:6379}
+      database: 0
+
+stellar:
+  # 保持 ES 客户端 Bean 存在，但不提供 ES 服务：搜索按设计降级 MySQL。
+  # 不能设 enabled=false —— SpuSearchService/SpuEsSyncService/EsAdminController
+  # 无条件依赖 ElasticsearchOperations，关掉会导致上下文启动失败。
+  elasticsearch:
+    enabled: true
+    uris: ${CI_ES_URI:http://127.0.0.1:9200}
+    connect-timeout: 1000
+    socket-timeout: 3000
+  rag:
+    base-url: http://127.0.0.1:8000
+    internal-sync-secret: ${STELLAR_RAG_INTERNAL_SYNC_SECRET:ci-rag-sync-secret-0123456789}
+  mail:
+    enabled: false
+  order:
+    expire:
+      enabled: false

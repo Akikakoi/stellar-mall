@@ -1,0 +1,16 @@
+# CI 专用：只安装测试导入链需要的依赖，不安装 BGE/torch/文档解析等重型包。
+fastapi==0.115.0
+pydantic==2.9.2
+pydantic-settings==2.5.2
+# pydantic EmailStr 在应用导入期就需要该包，缺失会让测试收集阶段直接失败
+email-validator==2.3.0
+python-dotenv==1.0.1
+sqlalchemy==2.0.35
+langchain==1.3.13
+elasticsearch>=8.13,<9
+redis>=5.0.0,<6.0.0
+numpy>=1.26
+httpx==0.27.2
+pymysql>=1.1.0
+loguru==0.7.2
+pytest>=8.0
