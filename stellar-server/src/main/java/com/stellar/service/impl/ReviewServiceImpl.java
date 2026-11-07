@@ -80,6 +80,14 @@ public class ReviewServiceImpl implements ReviewService {
         if (bought <= 0) {
             throw new BaseException("仅购买过该商品的用户可评价");
         }
+        if (review.getOrderId() != null && review.getSkuId() != null) {
+            if (reviewMapper.countByUserOrderSku(userId, review.getOrderId(), review.getSkuId()) > 0) {
+                throw new BaseException("该商品已评价，请勿重复提交");
+            }
+        } else if (reviewMapper.countByUserIdAndSpuId(userId, review.getSpuId()) > 0) {
+            // 兼容旧客户端：缺少订单/规格时退化为“同一 SPU 只评价一次”，仍可防重复刷分
+            throw new BaseException("该商品已评价，请勿重复提交");
+        }
         review.setUserId(userId);
         review.setStatus(1);
         review.setCreateTime(LocalDateTime.now());

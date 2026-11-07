@@ -29,4 +29,9 @@ public interface ReviewMapper {
                   @Param("spuName") String spuName,
                   @Param("hasReply") Boolean hasReply, @Param("maxRating") Integer maxRating);
     long countByUserIdAndSpuId(@Param("userId") Long userId, @Param("spuId") Long spuId);
+
+    /** 统计用户对同一订单同一规格的已有评价数，防止重复评价刷积分。 */
+    long countByUserOrderSku(@Param("userId") Long userId,
+                             @Param("orderId") Long orderId,
+                             @Param("skuId") Long skuId);
 }

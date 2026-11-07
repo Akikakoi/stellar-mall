@@ -115,4 +115,9 @@
     <select id="countByUserIdAndSpuId" resultType="long">
         SELECT COUNT(*) FROM stellar_review WHERE user_id = #{userId} AND spu_id = #{spuId}
     </select>
+
+    <select id="countByUserOrderSku" resultType="long">
+        SELECT COUNT(*) FROM stellar_review
+        WHERE user_id = #{userId} AND order_id = #{orderId} AND sku_id = #{skuId}
+    </select>
 </mapper>
