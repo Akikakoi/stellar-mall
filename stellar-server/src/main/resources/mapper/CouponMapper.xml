@@ -191,7 +191,7 @@
         SELECT uc.*, c.name AS coupon_name, c.type AS coupon_type, c.condition_amount, c.discount_amount, c.start_time, c.end_time
         FROM stellar_user_coupon uc
         LEFT JOIN stellar_coupon c ON c.id = uc.coupon_id
-        WHERE uc.status = 0
+        WHERE uc.status = 1
           AND c.end_time IS NOT NULL
           AND c.end_time BETWEEN #{now} AND #{deadline}
         ORDER BY c.end_time ASC

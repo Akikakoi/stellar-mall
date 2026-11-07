@@ -3,6 +3,7 @@ package com.stellar.service.impl;
 import com.stellar.context.BaseContext;
 import com.stellar.entity.Coupon;
 import com.stellar.entity.UserCoupon;
+import com.stellar.exception.BaseException;
 import com.stellar.mapper.CouponMapper;
 import com.stellar.result.PageResult;
 import com.stellar.service.CouponService;
@@ -113,31 +114,31 @@ public class CouponServiceImpl implements CouponService {
      * @param couponId 优惠券ID
      * @param userId   领取用户ID
      * @return 用户优惠券记录ID
-     * @throws RuntimeException 优惠券不存在、已禁用、已领完或已达领取上限时抛出
+     * @throws BaseException 优惠券不存在、已禁用、已领完或已达领取上限时抛出
      */
     @Override
     @Transactional
     public Long claim(Long couponId, Long userId) {
         Coupon coupon = couponMapper.getCouponById(couponId);
-        if (coupon == null) throw new RuntimeException("优惠券不存在");
-        if (coupon.getStatus() != 1) throw new RuntimeException("优惠券已禁用");
+        if (coupon == null) throw new BaseException("优惠券不存在");
+        if (coupon.getStatus() != 1) throw new BaseException("优惠券已禁用");
         // 校验有效期：未开始或已过期的优惠券均不可领取
         LocalDateTime now = LocalDateTime.now();
         if (coupon.getStartTime() != null && now.isBefore(coupon.getStartTime())) {
-            throw new RuntimeException("优惠券未开始发放");
+            throw new BaseException("优惠券未开始发放");
         }
         if (coupon.getEndTime() != null && now.isAfter(coupon.getEndTime())) {
-            throw new RuntimeException("优惠券已过期");
+            throw new BaseException("优惠券已过期");
         }
-        if (coupon.getReceivedCount() >= coupon.getTotalCount()) throw new RuntimeException("优惠券已领完");
+        if (coupon.getReceivedCount() >= coupon.getTotalCount()) throw new BaseException("优惠券已领完");
         long count = couponMapper.countUserCouponByCouponId(userId, couponId);
         if (coupon.getPerUserLimit() != null && coupon.getPerUserLimit() > 0 && count >= coupon.getPerUserLimit()) {
-            throw new RuntimeException("已达领取上限");
+            throw new BaseException("已达领取上限");
         }
         // 条件更新原子扣减库存：received_count < total_count 才 +1，返回 0 行说明已被并发领完
         int rows = couponMapper.incrReceivedCount(couponId);
         if (rows == 0) {
-            throw new RuntimeException("优惠券已领完");
+            throw new BaseException("优惠券已领完");
         }
         UserCoupon uc = new UserCoupon();
         uc.setUserId(userId);
@@ -188,7 +189,7 @@ public class CouponServiceImpl implements CouponService {
         // SQL 带 AND status = 1 条件，返回 0 行说明已被核销/退还过，防止并发重复核销
         int rows = couponMapper.updateUserCouponStatus(userCouponId, 2, orderId, LocalDateTime.now());
         if (rows == 0) {
-            throw new RuntimeException("优惠券状态异常，无法使用（可能已被核销或退还）");
+            throw new BaseException("优惠券状态异常，无法使用（可能已被核销或退还）");
         }
         UserCoupon uc = couponMapper.getUserCouponById(userCouponId);
         if (uc != null && uc.getCouponId() != null) {
