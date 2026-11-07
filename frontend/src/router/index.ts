@@ -217,6 +217,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '员工管理', requiresAdminAuth: true, requiresRole: [1] }
       },
       {
+        path: 'user',
+        name: 'AdminUserMgmt',
+        component: () => import('@/views/admin/UserMgmt.vue'),
+        meta: { title: '用户管理', requiresAdminAuth: true, requiresRole: [1] }
+      },
+      {
         path: 'kb',
         name: 'AdminKb',
         component: () => import('@/views/admin/KnowledgeBase.vue'),

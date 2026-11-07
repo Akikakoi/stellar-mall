@@ -26,4 +26,18 @@ public interface MallUserMapper {
 
     /** 导出：查询全部用户。 */
     List<MallUser> listAllForExport();
+
+    /** 管理端分页查询 C 端用户（keyword 匹配邮箱/昵称）。 */
+    List<MallUser> page(@Param("keyword") String keyword,
+                        @Param("status") Integer status,
+                        @Param("offset") int offset,
+                        @Param("limit") int limit);
+
+    /** 管理端统计 C 端用户数量。 */
+    long count(@Param("keyword") String keyword, @Param("status") Integer status);
+
+    /** 管理端启用/锁定用户。 */
+    int updateStatus(@Param("id") Long id,
+                     @Param("status") Integer status,
+                     @Param("updateUser") Long updateUser);
 }

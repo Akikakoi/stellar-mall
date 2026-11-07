@@ -62,4 +62,36 @@
         SELECT * FROM stellar_mall_user ORDER BY id ASC
     </select>
 
+    <!-- 管理端分页：只查列表所需字段，不加载密码 -->
+    <select id="page" resultMap="MallUserMap">
+        SELECT id, email, nickname, status, create_time, create_user, update_time, update_user
+        FROM stellar_mall_user
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (email LIKE CONCAT('%', #{keyword}, '%')
+                     OR nickname LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM stellar_mall_user
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (email LIKE CONCAT('%', #{keyword}, '%')
+                     OR nickname LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+    </select>
+
+    <update id="updateStatus">
+        UPDATE stellar_mall_user
+        SET status = #{status}, update_time = NOW(), update_user = #{updateUser}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

@@ -65,6 +65,10 @@
           <el-icon><User /></el-icon>
           <template #title>员工管理</template>
         </el-menu-item>
+        <el-menu-item index="/admin/user">
+          <el-icon><User /></el-icon>
+          <template #title>用户管理</template>
+        </el-menu-item>
         <el-menu-item index="/admin/home-module">
           <el-icon><Stamp /></el-icon>
           <template #title>首页装修</template>

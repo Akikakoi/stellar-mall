@@ -453,3 +453,31 @@ export function deleteService(id: number): Promise<any> {
     method: 'delete'
   })
 }
+
+// =========================== C 端用户管理 ===========================
+
+export interface AdminUser {
+  id: number
+  email: string
+  nickname?: string
+  status: number
+  createTime?: string
+}
+
+/** 分页查询 C 端用户 */
+export function pageUsers(params: PageParams & { keyword?: string; status?: number }): Promise<PageResult<AdminUser>> {
+  return adminRequest({
+    url: '/admin/user/page',
+    method: 'get',
+    params
+  })
+}
+
+/** 启用/锁定用户：status=1 正常，status=0 锁定 */
+export function setUserStatus(id: number, status: number): Promise<void> {
+  return adminRequest({
+    url: `/admin/user/${id}/status`,
+    method: 'post',
+    params: { status }
+  })
+}
