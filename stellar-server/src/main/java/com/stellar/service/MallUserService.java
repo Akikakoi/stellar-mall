@@ -23,6 +23,9 @@ public interface MallUserService {
      */
     MallUserLoginVO refresh(String refreshToken);
 
+    /** 登出：删除该用户的 refresh token，使已登出的 refresh 不能再次换取 access token。 */
+    void logout(Long userId);
+
     /** 根据 id 查询用户（已锁定的也返回，由调用方判断）。 */
     MallUser getById(Long id);
 

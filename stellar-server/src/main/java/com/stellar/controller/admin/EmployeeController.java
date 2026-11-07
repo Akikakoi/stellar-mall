@@ -71,7 +71,7 @@ public class EmployeeController {
         if (req != null && req.getRefreshToken() != null && !req.getRefreshToken().isEmpty()) {
             tokenBlacklistService.blacklist(req.getRefreshToken());
         }
-        employeeService.logout();
+        employeeService.logout(BaseContext.getCurrentId());
         return Result.success();
     }
 

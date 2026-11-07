@@ -225,7 +225,7 @@ class TokenBlacklistTest {
         assertDoesNotThrow(() -> employeeController.logout(null, null, null));
 
         // employeeService.logout 仍被调用
-        verify(employeeService, times(1)).logout();
+        verify(employeeService, times(1)).logout(any());
     }
 
     @Test

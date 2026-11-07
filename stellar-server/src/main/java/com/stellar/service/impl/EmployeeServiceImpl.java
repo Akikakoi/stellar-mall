@@ -204,6 +204,17 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .build();
     }
 
+    @Override
+    public void logout(Long empId) {
+        if (empId == null) return;
+        try {
+            stringRedisTemplate.delete(REFRESH_KEY_PREFIX + empId);
+        } catch (Exception e) {
+            // 登出主流程不因 Redis 异常失败；access token 仍已进入黑名单
+            log.warn("[EmployeeService] 删除 refresh token 失败: empId={}, error={}", empId, e.getMessage());
+        }
+    }
+
     /**
      * 分页查询员工列表。
      * <p>

@@ -23,6 +23,9 @@ public interface EmployeeService {
     /** 员工登出（主要用于日志/审计，目前清 BaseContext 即可） */
     default void logout() { /* no-op, JWT 无状态，前端清 localstorage 即可 */ }
 
+    /** 员工登出：删除该员工的 refresh token，使已登出的 refresh 不能再次换取 access token。 */
+    void logout(Long empId);
+
     /** 分页查询员工 */
     PageResult page(String name, Integer status, Integer role, int page, int pageSize);
 

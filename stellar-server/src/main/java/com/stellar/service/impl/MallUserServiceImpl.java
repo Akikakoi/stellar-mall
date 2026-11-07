@@ -421,4 +421,15 @@ public class MallUserServiceImpl implements MallUserService {
 
         return issueTokens(user);
     }
+
+    @Override
+    public void logout(Long userId) {
+        if (userId == null) return;
+        try {
+            stringRedisTemplate.delete(REFRESH_KEY_PREFIX + userId);
+        } catch (Exception e) {
+            // 登出主流程不因 Redis 异常失败；access token 仍已进入黑名单
+            log.warn("[Logout] 删除 refresh token 失败: userId={}, error={}", userId, e.getMessage());
+        }
+    }
 }

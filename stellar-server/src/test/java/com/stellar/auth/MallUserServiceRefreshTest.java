@@ -106,4 +106,10 @@ class MallUserServiceRefreshTest {
     void refresh_invalidTokenShouldReject() {
         assertThrows(Exception.class, () -> userService.refresh("invalid.token.here"));
     }
+
+    @Test
+    void logout_shouldDeleteStoredRefreshToken() {
+        userService.logout(105L);
+        verify(stringRedisTemplate).delete("refresh:mall_user:105");
+    }
 }

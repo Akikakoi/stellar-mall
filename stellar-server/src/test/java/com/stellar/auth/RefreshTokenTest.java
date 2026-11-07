@@ -182,4 +182,11 @@ class RefreshTokenTest {
         assertThrows(BaseException.class, () -> employeeService.refresh(user1.getRefreshToken()));
         assertThrows(BaseException.class, () -> employeeService.refresh(user2.getRefreshToken()));
     }
+
+    @Test
+    @DisplayName("登出：删除 Redis 中的员工 refresh token")
+    void logout_shouldDeleteStoredRefreshToken() {
+        employeeService.logout(9L);
+        verify(stringRedisTemplate).delete("refresh:employee:9");
+    }
 }

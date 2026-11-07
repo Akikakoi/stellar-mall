@@ -85,6 +85,8 @@ public class UserController {
         if (req != null && req.getRefreshToken() != null && !req.getRefreshToken().isEmpty()) {
             tokenBlacklistService.blacklist(req.getRefreshToken());
         }
+        // 删除 Redis 中该用户的 refresh token，确保已登出的 refresh 不能再次换取 access token
+        mallUserService.logout(BaseContext.getCurrentId());
         return Result.success();
     }
 
