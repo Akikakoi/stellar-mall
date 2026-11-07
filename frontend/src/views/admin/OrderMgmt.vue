@@ -152,9 +152,9 @@ const STATUS_MAP: Record<string, any> = {
 }
 
 /** 获取订单状态的中文标签 */
-/** 支付方式文案，与后端 OrderServiceImpl.pay 对齐：1-微信 2-支付宝 3-银行卡 4-钱包 */
+/** 支付方式文案，与后端 OrderServiceImpl.pay 对齐：1-模拟微信 2-模拟支付宝 3-模拟银行卡 4-站内钱包 */
 function payMethodLabel(m: any) {
-  const map: Record<number, string> = { 1: '微信', 2: '支付宝', 3: '银行卡', 4: '钱包' }
+  const map: Record<number, string> = { 1: '模拟微信', 2: '模拟支付宝', 3: '模拟银行卡', 4: '钱包（站内余额）' }
   return map[m] || '-'
 }
 

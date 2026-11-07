@@ -130,10 +130,11 @@
       <div class="card pay-card">
         <div class="card-title">支付方式</div>
         <el-radio-group v-model="form.payMethod">
-          <el-radio value="WECHAT">微信支付</el-radio>
-          <el-radio value="ALIPAY">支付宝</el-radio>
-          <el-radio value="WALLET" :disabled="walletBalance < finalAmount">钱包支付 <span class="wallet-balance">（余额 ¥{{ Number(walletBalance || 0).toFixed(2) }}）</span><span v-if="walletBalance < finalAmount" class="wallet-insufficient">（余额不足）</span></el-radio>
+          <el-radio value="WECHAT">模拟微信支付（不扣款）</el-radio>
+          <el-radio value="ALIPAY">模拟支付宝（不扣款）</el-radio>
+          <el-radio value="WALLET" :disabled="walletBalance < finalAmount">钱包支付（扣站内余额） <span class="wallet-balance">（余额 ¥{{ Number(walletBalance || 0).toFixed(2) }}）</span><span v-if="walletBalance < finalAmount" class="wallet-insufficient">（余额不足）</span></el-radio>
         </el-radio-group>
+        <div class="pay-sim-tip">个人学习项目：微信/支付宝为模拟支付；钱包扣减站内虚拟余额，均不涉及真实资金。</div>
       </div>
 
       <div class="card remark-card">
@@ -283,7 +284,7 @@ const walletBalance = ref(0)
 
 const finalAmount = computed(() => Math.max(0, orderAmount.value - couponDiscount.value - pointsDeduction.value))
 
-// 钱包余额不足以覆盖应付金额时，自动从钱包支付切回微信支付
+// 钱包余额不足以覆盖应付金额时，自动从钱包支付切回模拟微信支付
 watch(
   () => [walletBalance.value, finalAmount.value],
   () => {
@@ -552,6 +553,7 @@ async function handleSubmit() {
   submitting.value = true
   try {
     const payMethodMap: Record<string, any> = { WECHAT: 1, ALIPAY: 2, WALLET: 4 }
+    const payMethodCode = payMethodMap[form.payMethod] || 1
     const items = orderItems.value.map((it: any) => {
       const skuId = Number(it.skuId || it.id)
       const quantity = Number(it.quantity || 1)
@@ -567,7 +569,7 @@ async function handleSubmit() {
       address: addr ? `${addr.province || ''}${addr.city || ''}${addr.district || ''} ${addr.detail || ''}` : form.address,
       consignee: addr?.consignee || form.consignee,
       phone: addr?.phone || form.phone,
-      payMethod: payMethodMap[form.payMethod] || 1,
+      payMethod: payMethodCode,
       remark: form.remark,
       userCouponId: selectedCouponId.value || undefined,
       discountAmount: couponDiscount.value ? Number(couponDiscount.value.toFixed(2)) : undefined,
@@ -605,13 +607,17 @@ async function handleSubmit() {
 
     if (orderId) {
       try {
+        const isWalletPay = payMethodCode === 4
+        const confirmText = isWalletPay
+          ? `订单已生成，应付金额：¥${payAmount.toFixed(2)}。将扣减站内虚拟钱包余额，不涉及真实支付渠道。是否继续？`
+          : `订单已生成，应付金额：¥${payAmount.toFixed(2)}。当前为学习演示项目，将模拟支付并标记为已支付，不产生真实扣款。是否继续？`
         await ElMessageBox.confirm(
-          `订单已生成，应付金额：¥${payAmount.toFixed(2)}。当前为演示环境，确认后将直接标记为已支付，不会真实扣款。是否继续？`,
-          '模拟支付',
-          { type: 'info', confirmButtonText: '确认模拟支付', cancelButtonText: '暂不支付' }
+          confirmText,
+          isWalletPay ? '钱包支付' : '模拟支付',
+          { type: 'info', confirmButtonText: '确认支付', cancelButtonText: '暂不支付' }
         )
-        await (payOrder as any)(orderId)
-        ElMessage.success('支付成功（模拟），订单已提交')
+        await payOrder(orderId, payMethodCode)
+        ElMessage.success(isWalletPay ? '钱包支付成功，订单已提交' : '模拟支付成功，订单已提交')
       } catch (e: any) {
         if (e !== 'cancel' && e?.message) {
           ElMessage.error(e?.response?.data?.msg || e?.message || '支付失败')
@@ -719,6 +725,7 @@ onMounted(async () => {
 .service-row { font-size: 11px; color: var(--brand-primary); margin-top: 2px; font-weight: 400; }
 .wallet-balance { color: var(--brand-primary); font-size: 12px; margin-left: 2px; }
 .wallet-insufficient { color: var(--el-color-danger, #f56c6c); font-size: 12px; margin-left: 2px; }
+.pay-sim-tip { margin-top: 10px; font-size: 12px; line-height: 1.6; color: var(--el-text-color-secondary, #909399); }
 .amount { color: var(--text-primary); font-weight: 600; }
 
 .summary-bar {

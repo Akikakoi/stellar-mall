@@ -77,16 +77,16 @@
     <el-dialog class="glass-dialog" modal-class="glass-overlay" v-model="payDialogVisible" title="选择支付方式" width="420px" :close-on-click-modal="false">
       <div class="pay-dialog-body">
         <p class="pay-dialog-tip">订单 {{ pendingOrder?.orderNo || pendingOrder?.id }}，应付 ¥{{ Number(pendingOrder?.payAmount || pendingOrder?.amount || 0).toFixed(2) }}</p>
-        <p class="pay-dialog-sim-tip">演示环境：模拟支付，不会产生真实扣款</p>
+        <p class="pay-dialog-sim-tip">个人学习项目：微信/支付宝为模拟支付；钱包扣减站内虚拟余额，均不涉及真实资金</p>
         <el-radio-group v-model="selectedPayMethod" class="pay-method-group">
-          <el-radio value="1" class="pay-method-radio">微信支付</el-radio>
-          <el-radio value="2" class="pay-method-radio">支付宝</el-radio>
-          <el-radio value="4" class="pay-method-radio">钱包支付</el-radio>
+          <el-radio value="1" class="pay-method-radio">模拟微信支付（不扣款）</el-radio>
+          <el-radio value="2" class="pay-method-radio">模拟支付宝（不扣款）</el-radio>
+          <el-radio value="4" class="pay-method-radio">钱包支付（扣站内余额）</el-radio>
         </el-radio-group>
       </div>
       <template #footer>
         <el-button @click="payDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="paying" @click="doPay">确认模拟支付</el-button>
+        <el-button type="primary" :loading="paying" @click="doPay">{{ selectedPayMethod === '4' ? '确认钱包支付' : '确认模拟支付' }}</el-button>
       </template>
     </el-dialog>
 
@@ -260,7 +260,7 @@ async function doPay() {
   paying.value = true
   try {
     await payOrder(pendingOrder.value.id, parseInt(selectedPayMethod.value))
-    ElMessage.success('支付成功（模拟）')
+    ElMessage.success(selectedPayMethod.value === '4' ? '钱包支付成功' : '模拟支付成功')
     payDialogVisible.value = false
     loadOrders()
   } catch (e: any) {

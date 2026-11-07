@@ -65,7 +65,7 @@ public class OrderController {
 
     @Idempotent(keyPrefix = "order-pay", windowSeconds = 300)
     @PostMapping("/{id}/pay")
-    @ApiOperation("模拟支付：状态 PENDING → PAID。payMethod: 1微信 2支付宝 4钱包")
+    @ApiOperation("模拟支付：状态 PENDING → PAID。payMethod: 1模拟微信 2模拟支付宝 3模拟银行卡 4站内钱包")
     public Result<String> pay(@PathVariable Long id,
                               @RequestBody(required = false) java.util.Map<String, Object> body) {
         Integer payMethod = null;

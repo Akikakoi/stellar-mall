@@ -32,7 +32,7 @@ public class WalletController {
 
     @Idempotent(keyPrefix = "wallet-recharge", windowSeconds = 600)
     @PostMapping("/recharge")
-    @ApiOperation("模拟充值")
+    @ApiOperation("模拟充值（仅增加站内虚拟余额）")
     public Result<WalletVO> recharge(@RequestBody WalletRechargeDTO dto) {
         Long userId = BaseContext.getCurrentId();
         return Result.success(walletService.recharge(userId, dto));

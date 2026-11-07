@@ -280,7 +280,7 @@ export function getOrder(id: number): Promise<Order> {
 /**
  * 支付订单
  * @param id 订单 ID
- * @param payMethod 支付方式:1-微信 2-支付宝 3-银行卡 4-钱包（C 端下单页仅提供 1/2/4）
+ * @param payMethod 支付方式:1-模拟微信 2-模拟支付宝 3-模拟银行卡 4-站内钱包（C 端下单页仅提供 1/2/4）
  */
 export function payOrder(id: number, payMethod: number): Promise<any> {
   return userRequest({

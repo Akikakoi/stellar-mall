@@ -60,11 +60,11 @@
         </el-form-item>
         <el-form-item label="充值方式" required>
           <el-radio-group v-model="rechargeForm.channel">
-            <el-radio value="WECHAT">微信支付</el-radio>
-            <el-radio value="ALIPAY">支付宝</el-radio>
+            <el-radio value="WECHAT">模拟微信支付</el-radio>
+            <el-radio value="ALIPAY">模拟支付宝</el-radio>
           </el-radio-group>
         </el-form-item>
-        <div class="recharge-hint">模拟充值，无需真实支付</div>
+        <div class="recharge-hint">模拟充值：仅增加站内虚拟余额，不涉及真实支付渠道</div>
       </el-form>
       <template #footer>
         <el-button @click="rechargeVisible = false">取消</el-button>
@@ -154,7 +154,7 @@ async function doRecharge() {
   recharging.value = true
   try {
     await rechargeWallet(rechargeForm.value)
-    ElMessage.success('充值成功')
+    ElMessage.success('模拟充值成功，站内余额已更新')
     rechargeVisible.value = false
     await loadWallet()
     txPage.value = 1

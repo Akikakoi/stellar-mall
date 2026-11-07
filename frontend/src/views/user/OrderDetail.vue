@@ -341,8 +341,8 @@ function isReviewable(statusCode: any) {
 
 function payMethodText(m: any) {
   if (m == null) return '—'
-  // 与后端 OrderServiceImpl.pay 对齐：1-微信 2-支付宝 3-银行卡 4-钱包
-  const map: Record<string, any> = { 1: '微信支付', 2: '支付宝', 3: '银行卡', 4: '钱包支付' }
+  // 与后端 OrderServiceImpl.pay 对齐：1-模拟微信 2-模拟支付宝 3-模拟银行卡 4-站内钱包
+  const map: Record<string, any> = { 1: '模拟微信支付', 2: '模拟支付宝', 3: '模拟银行卡', 4: '钱包支付（站内余额）' }
   return map[m] || `方式${m}`
 }
 
@@ -395,14 +395,20 @@ function parseServiceInfo(info: any): any[] {
  * 支付订单，弹出确认框后调用支付接口
  */
 async function onPay() {
+  if (!order.value) return
   try {
+    const payMethod = Number(order.value.payMethod || 1)
+    const isWalletPay = payMethod === 4
+    const confirmText = isWalletPay
+      ? '将从站内虚拟钱包余额扣款，不涉及真实支付渠道。是否继续？'
+      : '当前为学习演示项目，将模拟支付并标记为已支付，不产生真实扣款。是否继续？'
     await ElMessageBox.confirm(
-      '当前为演示环境，确认后仅将订单标记为已支付，不会产生真实扣款。是否继续？',
-      '模拟支付',
-      { type: 'info', confirmButtonText: '确认模拟支付', cancelButtonText: '取消' }
+      confirmText,
+      isWalletPay ? '钱包支付' : '模拟支付',
+      { type: 'info', confirmButtonText: '确认支付', cancelButtonText: '取消' }
     )
-    await (apiPayOrder as any)(order.value.id)
-    ElMessage.success('支付成功（模拟）')
+    await apiPayOrder(order.value.id, payMethod)
+    ElMessage.success(isWalletPay ? '钱包支付成功' : '模拟支付成功')
     load()
   } catch (e: any) { /* 用户取消不提示 */ }
 }

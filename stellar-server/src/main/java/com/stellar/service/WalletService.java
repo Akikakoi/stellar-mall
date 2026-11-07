@@ -12,7 +12,7 @@ public interface WalletService {
     /** 获取或创建用户钱包 */
     WalletVO getOrCreateWallet(Long userId);
 
-    /** 模拟充值（微信/支付宝） */
+    /** 模拟充值（仅增加站内虚拟余额，不接入真实支付渠道） */
     WalletVO recharge(Long userId, WalletRechargeDTO dto);
 
     /** 钱包支付（扣减余额） */
