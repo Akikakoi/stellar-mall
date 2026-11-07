@@ -1,0 +1,4957 @@
+{
+ "harness": "service/agent (not HTTP)",
+ "seed": 20261101,
+ "repeats": 2,
+ "limit": null,
+ "started_at": "2026-11-07T02:46:36.400591+00:00",
+ "cache_policy": "LLM/FAQ/query-embedding/docs bypass; reversible process-local patches",
+ "latency_scope": "graph + ReAct; excludes BGE warmup and judge; no HTTP/auth/DB/SSE",
+ "rerank_count_scope": "attempts=compute_score invocations; real_rerank_calls=validated BGE results; identity=0",
+ "interpretation": "Non-KB and zero-rerank rows are not evidence that retrieval ablation ran. Seed controls order only.",
+ "reference_conflicts_excluded_from_primary_scores": {
+  "A03": "产品规格文档称90Hz；另一知识库片段称14寸2.8K 120Hz OLED，真实值未确认。",
+  "D06": "产品规格文档称ANC开5.5h、关8h、充电盒额外28h；另一片段称ANC开9h+27h，真实值未确认。"
+ },
+ "schedule": [
+  {
+   "order": 1,
+   "repeat": 1,
+   "group": "R",
+   "id": "C03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   }
+  },
+  {
+   "order": 2,
+   "repeat": 1,
+   "group": "R",
+   "id": "C03",
+   "variant": "full",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   }
+  },
+  {
+   "order": 3,
+   "repeat": 1,
+   "group": "D",
+   "id": "D10",
+   "variant": "full",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   }
+  },
+  {
+   "order": 4,
+   "repeat": 1,
+   "group": "D",
+   "id": "D10",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   }
+  },
+  {
+   "order": 5,
+   "repeat": 1,
+   "group": "D",
+   "id": "D06",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   }
+  },
+  {
+   "order": 6,
+   "repeat": 1,
+   "group": "D",
+   "id": "D06",
+   "variant": "full",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   }
+  },
+  {
+   "order": 7,
+   "repeat": 1,
+   "group": "D",
+   "id": "D01",
+   "variant": "full",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   }
+  },
+  {
+   "order": 8,
+   "repeat": 1,
+   "group": "D",
+   "id": "D01",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   }
+  },
+  {
+   "order": 9,
+   "repeat": 1,
+   "group": "D",
+   "id": "D02",
+   "variant": "full",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   }
+  },
+  {
+   "order": 10,
+   "repeat": 1,
+   "group": "D",
+   "id": "D02",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   }
+  },
+  {
+   "order": 11,
+   "repeat": 1,
+   "group": "R",
+   "id": "B06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   }
+  },
+  {
+   "order": 12,
+   "repeat": 1,
+   "group": "R",
+   "id": "B06",
+   "variant": "full",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   }
+  },
+  {
+   "order": 13,
+   "repeat": 1,
+   "group": "R",
+   "id": "A03",
+   "variant": "full",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   }
+  },
+  {
+   "order": 14,
+   "repeat": 1,
+   "group": "R",
+   "id": "A03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   }
+  },
+  {
+   "order": 15,
+   "repeat": 1,
+   "group": "R",
+   "id": "B02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   }
+  },
+  {
+   "order": 16,
+   "repeat": 1,
+   "group": "R",
+   "id": "B02",
+   "variant": "full",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   }
+  },
+  {
+   "order": 17,
+   "repeat": 1,
+   "group": "R",
+   "id": "A09",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   }
+  },
+  {
+   "order": 18,
+   "repeat": 1,
+   "group": "R",
+   "id": "A09",
+   "variant": "full",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   }
+  },
+  {
+   "order": 19,
+   "repeat": 1,
+   "group": "D",
+   "id": "D09",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   }
+  },
+  {
+   "order": 20,
+   "repeat": 1,
+   "group": "D",
+   "id": "D09",
+   "variant": "full",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   }
+  },
+  {
+   "order": 21,
+   "repeat": 1,
+   "group": "D",
+   "id": "D03",
+   "variant": "full",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   }
+  },
+  {
+   "order": 22,
+   "repeat": 1,
+   "group": "D",
+   "id": "D03",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   }
+  },
+  {
+   "order": 23,
+   "repeat": 1,
+   "group": "D",
+   "id": "D08",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   }
+  },
+  {
+   "order": 24,
+   "repeat": 1,
+   "group": "D",
+   "id": "D08",
+   "variant": "full",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   }
+  },
+  {
+   "order": 25,
+   "repeat": 1,
+   "group": "D",
+   "id": "D07",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   }
+  },
+  {
+   "order": 26,
+   "repeat": 1,
+   "group": "D",
+   "id": "D07",
+   "variant": "full",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   }
+  },
+  {
+   "order": 27,
+   "repeat": 1,
+   "group": "D",
+   "id": "D04",
+   "variant": "full",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   }
+  },
+  {
+   "order": 28,
+   "repeat": 1,
+   "group": "D",
+   "id": "D04",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   }
+  },
+  {
+   "order": 29,
+   "repeat": 1,
+   "group": "R",
+   "id": "A02",
+   "variant": "full",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   }
+  },
+  {
+   "order": 30,
+   "repeat": 1,
+   "group": "R",
+   "id": "A02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   }
+  },
+  {
+   "order": 31,
+   "repeat": 1,
+   "group": "D",
+   "id": "D05",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   }
+  },
+  {
+   "order": 32,
+   "repeat": 1,
+   "group": "D",
+   "id": "D05",
+   "variant": "full",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   }
+  },
+  {
+   "order": 33,
+   "repeat": 1,
+   "group": "R",
+   "id": "A06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   }
+  },
+  {
+   "order": 34,
+   "repeat": 1,
+   "group": "R",
+   "id": "A06",
+   "variant": "full",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   }
+  },
+  {
+   "order": 35,
+   "repeat": 1,
+   "group": "R",
+   "id": "A04",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   }
+  },
+  {
+   "order": 36,
+   "repeat": 1,
+   "group": "R",
+   "id": "A04",
+   "variant": "full",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   }
+  },
+  {
+   "order": 37,
+   "repeat": 2,
+   "group": "R",
+   "id": "A09",
+   "variant": "full",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   }
+  },
+  {
+   "order": 38,
+   "repeat": 2,
+   "group": "R",
+   "id": "A09",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   }
+  },
+  {
+   "order": 39,
+   "repeat": 2,
+   "group": "R",
+   "id": "B02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   }
+  },
+  {
+   "order": 40,
+   "repeat": 2,
+   "group": "R",
+   "id": "B02",
+   "variant": "full",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   }
+  },
+  {
+   "order": 41,
+   "repeat": 2,
+   "group": "D",
+   "id": "D04",
+   "variant": "full",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   }
+  },
+  {
+   "order": 42,
+   "repeat": 2,
+   "group": "D",
+   "id": "D04",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   }
+  },
+  {
+   "order": 43,
+   "repeat": 2,
+   "group": "D",
+   "id": "D05",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   }
+  },
+  {
+   "order": 44,
+   "repeat": 2,
+   "group": "D",
+   "id": "D05",
+   "variant": "full",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   }
+  },
+  {
+   "order": 45,
+   "repeat": 2,
+   "group": "R",
+   "id": "A04",
+   "variant": "full",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   }
+  },
+  {
+   "order": 46,
+   "repeat": 2,
+   "group": "R",
+   "id": "A04",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   }
+  },
+  {
+   "order": 47,
+   "repeat": 2,
+   "group": "R",
+   "id": "A03",
+   "variant": "full",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   }
+  },
+  {
+   "order": 48,
+   "repeat": 2,
+   "group": "R",
+   "id": "A03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   }
+  },
+  {
+   "order": 49,
+   "repeat": 2,
+   "group": "D",
+   "id": "D07",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   }
+  },
+  {
+   "order": 50,
+   "repeat": 2,
+   "group": "D",
+   "id": "D07",
+   "variant": "full",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   }
+  },
+  {
+   "order": 51,
+   "repeat": 2,
+   "group": "D",
+   "id": "D10",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   }
+  },
+  {
+   "order": 52,
+   "repeat": 2,
+   "group": "D",
+   "id": "D10",
+   "variant": "full",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   }
+  },
+  {
+   "order": 53,
+   "repeat": 2,
+   "group": "D",
+   "id": "D08",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   }
+  },
+  {
+   "order": 54,
+   "repeat": 2,
+   "group": "D",
+   "id": "D08",
+   "variant": "full",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   }
+  },
+  {
+   "order": 55,
+   "repeat": 2,
+   "group": "D",
+   "id": "D09",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   }
+  },
+  {
+   "order": 56,
+   "repeat": 2,
+   "group": "D",
+   "id": "D09",
+   "variant": "full",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   }
+  },
+  {
+   "order": 57,
+   "repeat": 2,
+   "group": "R",
+   "id": "A02",
+   "variant": "full",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   }
+  },
+  {
+   "order": 58,
+   "repeat": 2,
+   "group": "R",
+   "id": "A02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   }
+  },
+  {
+   "order": 59,
+   "repeat": 2,
+   "group": "D",
+   "id": "D01",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   }
+  },
+  {
+   "order": 60,
+   "repeat": 2,
+   "group": "D",
+   "id": "D01",
+   "variant": "full",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   }
+  },
+  {
+   "order": 61,
+   "repeat": 2,
+   "group": "R",
+   "id": "B06",
+   "variant": "full",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   }
+  },
+  {
+   "order": 62,
+   "repeat": 2,
+   "group": "R",
+   "id": "B06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   }
+  },
+  {
+   "order": 63,
+   "repeat": 2,
+   "group": "R",
+   "id": "C03",
+   "variant": "full",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   }
+  },
+  {
+   "order": 64,
+   "repeat": 2,
+   "group": "R",
+   "id": "C03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   }
+  },
+  {
+   "order": 65,
+   "repeat": 2,
+   "group": "R",
+   "id": "A06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   }
+  },
+  {
+   "order": 66,
+   "repeat": 2,
+   "group": "R",
+   "id": "A06",
+   "variant": "full",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   }
+  },
+  {
+   "order": 67,
+   "repeat": 2,
+   "group": "D",
+   "id": "D03",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   }
+  },
+  {
+   "order": 68,
+   "repeat": 2,
+   "group": "D",
+   "id": "D03",
+   "variant": "full",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   }
+  },
+  {
+   "order": 69,
+   "repeat": 2,
+   "group": "D",
+   "id": "D02",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   }
+  },
+  {
+   "order": 70,
+   "repeat": 2,
+   "group": "D",
+   "id": "D02",
+   "variant": "full",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   }
+  },
+  {
+   "order": 71,
+   "repeat": 2,
+   "group": "D",
+   "id": "D06",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   }
+  },
+  {
+   "order": 72,
+   "repeat": 2,
+   "group": "D",
+   "id": "D06",
+   "variant": "full",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   }
+  }
+ ],
+ "rows": [
+  {
+   "order": 1,
+   "repeat": 1,
+   "group": "R",
+   "id": "C03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   },
+   "reference_conflict": null,
+   "answer": "您问的是折叠屏手机，但知识库里明确标注为折叠屏的只有一款：**星耀 Flip 折叠屏**。不过这次检索返回的资料里，没有它的充电规格详情，所以它是否支持无线充电，我暂时查不到，不能瞎说。\n\n其余几款支持无线充电的机型（供参考，均非折叠屏）：\n\n| 机型 | 无线快充 | 反向无线充电 |\n|------|---------|------------|\n| 星耀X100ProMax | 80W | 20W |\n| 星域 Stellar X1 Pro | 80W | 20W |\n| 灵耀 Lumina Z9 Ultra | 80W | 10W |\n| 玉米手机 10 Pro | 50W | 15W |\n| 苍穹 Aether N8 Max | 50W | 10W |\n\n另外提醒一句：**星耀 Note 14 Pro 不支持无线充电**，只有 120W 有线。\n\n如果您锁定折叠屏，我可以再帮您单独查一下 **星耀 Flip 折叠屏** 的详细充电参数，确认它到底支不支持无线充，要查吗？",
+   "score": 2,
+   "reason": "回答正确识别了折叠屏机型为星耀Flip，但遗漏了参考事实中明确给出的15W无线充电支持，反而声称查不到，属于明显遗漏关键信息。",
+   "judge_raw": "{\"score\": 2, \"reason\": \"回答正确识别了折叠屏机型为星耀Flip，但遗漏了参考事实中明确给出的15W无线充电支持，反而声称查不到，属于明显遗漏关键信息。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 7553.915800000141,
+   "judge_latency_ms": 1118.4965999996166,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 27,
+   "sources_head": [
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 4.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 3.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 2.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 247,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 446
+  },
+  {
+   "order": 2,
+   "repeat": 1,
+   "group": "R",
+   "id": "C03",
+   "variant": "full",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   },
+   "reference_conflict": null,
+   "answer": "我查了一下，知识库里**折叠屏只有一款**：**星耀 Flip 折叠屏**。不过它的详细参数（包括是否支持无线充电）在知识库中暂无收录，所以暂时无法确认它是否支持无线充电。\n\n另外要提醒一下：知识库里支持无线充电的机型（如星耀X100ProMax、星域 Stellar X1 Pro、灵耀 Lumina Z9 Ultra 等）都是**直板机**，不是折叠屏。\n\n如果你对折叠屏感兴趣，我可以帮你搜一下星耀 Flip 折叠屏的商品信息和价格；或者你更看重无线充电的话，也可以告诉我预算，我帮你从支持无线充电的机型里挑。",
+   "score": 2,
+   "reason": "回答正确识别了星耀 Flip 折叠屏，但遗漏了参考事实中明确给出的 15W 无线充电支持，反而声称无法确认，属于明显遗漏关键信息。",
+   "judge_raw": "{\"score\": 2, \"reason\": \"回答正确识别了星耀 Flip 折叠屏，但遗漏了参考事实中明确给出的 15W 无线充电支持，反而声称无法确认，属于明显遗漏关键信息。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 3819.7066999996423,
+   "judge_latency_ms": 1065.070999999989,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 27,
+   "sources_head": [
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 4.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 3.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 2.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 147,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 258
+  },
+  {
+   "order": 3,
+   "repeat": 1,
+   "group": "D",
+   "id": "D10",
+   "variant": "full",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   },
+   "reference_conflict": null,
+   "answer": "可以戴着游泳，但要看具体是哪款产品：\n\n**星耀 SmartRing Nova 智能戒指**\n- **IP68 防水**，官方明确说明可戴着洗手、游泳\n- ⚠️ 但**潜水和热水浴不建议**——热水会让密封圈加速老化\n\n**星耀 Band 8 智能手环**\n- **5ATM 游泳级防水**，游泳没问题\n\n**星耀 Flip 折叠屏**（如果你问的是手机）\n- 仅 **IPX8 清水防水**，日常雨淋、洗手溅水可以，但**不建议在泳池或海水里用**\n\n一句话总结：戒指和手环游泳都能戴，手机不行。你问的是哪一款？我可以再帮你细看。",
+   "score": 5,
+   "reason": "回答准确覆盖IP68可游泳佩戴的要点，并补充了潜水/热水浴的注意事项，信息完整正确。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确覆盖IP68可游泳佩戴的要点，并补充了潜水/热水浴的注意事项，信息完整正确。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13512.969500000054,
+   "judge_latency_ms": 1212.5777000001108,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.7350318502940639
+    },
+    {
+     "doc_name": "星耀 SmartRing Nova 智能戒指",
+     "score": 0.3390843171939705
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.2587744948054673
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 158,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 266
+  },
+  {
+   "order": 4,
+   "repeat": 1,
+   "group": "D",
+   "id": "D10",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   },
+   "reference_conflict": null,
+   "answer": "**可以戴着游泳，但别潜水、别泡热水澡。**\n\n星耀 SmartRing Nova 是 **IP68 防水**，官方明确支持洗手和游泳佩戴。不过有两点要注意：\n\n- ❌ **潜水**不建议\n- ❌ **热水浴**不建议（高温会影响密封和电池）\n\n顺带一提，如果你更看重游泳场景的运动记录，**星耀 Band 8 智能手环**是 **5ATM 游泳级**防水，还带 100+ 运动模式，¥249 起，泳池里用更省心。戒指胜在无感佩戴、24 小时健康监测，两者定位不同。\n\n需要我帮你对比一下这两款的详细参数吗？",
+   "score": 5,
+   "reason": "准确回答IP68可游泳佩戴，并补充潜水、热水浴注意事项，与参考事实一致且覆盖要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"准确回答IP68可游泳佩戴，并补充潜水、热水浴注意事项，与参考事实一致且覆盖要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13376.845599999797,
+   "judge_latency_ms": 1008.7290000001303,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.7350318502940639
+    },
+    {
+     "doc_name": "星耀 SmartRing Nova 智能戒指",
+     "score": 0.3390843171939705
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.2587744948054673
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 149,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 254
+  },
+  {
+   "order": 5,
+   "repeat": 1,
+   "group": "D",
+   "id": "D06",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   },
+   "reference_conflict": "产品规格文档称ANC开5.5h、关8h、充电盒额外28h；另一片段称ANC开9h+27h，真实值未确认。",
+   "answer": "关于星耀 Buds Pro 3 降噪耳机的续航，**开降噪**时的数据是这样的：\n\n| 使用场景 | 续航时间 |\n|---------|---------|\n| 耳机单独（ANC 开） | **5.5 小时** |\n| 配合充电盒（ANC 开） | **总计 36 小时**（耳机 + 充电盒） |\n\n补充几个实用点：\n- 关掉降噪的话，耳机单独能用 **8 小时**\n- 支持快充：**充 10 分钟可听 2 小时**\n- 充电盒额外提供约 28 小时电量，通勤党基本一周一充\n\n**小建议**：如果你经常地铁、飞机长途使用，5.5 小时单次续航够一趟跨城高铁；要是全天戴，中途放回充电盒补电就行，10 分钟快充很顶用。\n\n需要我帮你看看这款的配色和库存吗？",
+   "score": 5,
+   "reason": "准确回答开降噪单次续航5.5小时，并正确补充关降噪8小时、充电盒额外28小时及综合36小时等参考要点，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"准确回答开降噪单次续航5.5小时，并正确补充关降噪8小时、充电盒额外28小时及综合36小时等参考要点，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14448.820299999625,
+   "judge_latency_ms": 1387.3457999998209,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.19774898838909155
+    },
+    {
+     "doc_name": "星耀 Buds Pro 3 降噪耳机",
+     "score": 0.08183925850444228
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.08081973597852764
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 207,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 331
+  },
+  {
+   "order": 6,
+   "repeat": 1,
+   "group": "D",
+   "id": "D06",
+   "variant": "full",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   },
+   "reference_conflict": "产品规格文档称ANC开5.5h、关8h、充电盒额外28h；另一片段称ANC开9h+27h，真实值未确认。",
+   "answer": "关于星耀 Buds Pro 3 的降噪续航，我查到的资料里有两个口径，得跟你说清楚：\n\n| 数据来源 | 开降噪单次续航 |\n|---------|--------------|\n| 商品详情页 | 耳机 9 小时（ANC 开） |\n| 产品规格说明书 | 耳机 5.5 小时（ANC 开） |\n\n**保守按 5.5 小时算**，配合充电盒总续航 36 小时。另外说明书里提到快充：**充 10 分钟可听 2 小时**，通勤路上补一下电很实用。\n\n两份资料数字对不上，建议下单前找客服确认一下实际标称值——这种关键参数还是以官方最终页面为准比较稳妥。\n\n顺带一句：长时间开降噪戴着，建议隔段时间切通透模式让耳朵歇歇。需要我帮你看看这款的实时价格和库存吗？",
+   "score": 3,
+   "reason": "回答给出了5.5小时并说明资料冲突，但未明确覆盖关ANC 8小时及充电盒28小时等参考要点，且引入未确认的9小时口径，部分正确但明显遗漏。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"回答给出了5.5小时并说明资料冲突，但未明确覆盖关ANC 8小时及充电盒28小时等参考要点，且引入未确认的9小时口径，部分正确但明显遗漏。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 15552.285499999925,
+   "judge_latency_ms": 1640.0425000001633,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.19774898838909155
+    },
+    {
+     "doc_name": "星耀 Buds Pro 3 降噪耳机",
+     "score": 0.08183925850444228
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.08081973597852764
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 201,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 327
+  },
+  {
+   "order": 7,
+   "repeat": 1,
+   "group": "D",
+   "id": "D01",
+   "variant": "full",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   },
+   "reference_conflict": null,
+   "answer": "拍照这块，两台走的是完全不同的路子，直接上对比：\n\n| 维度 | 星耀 X200 | 星耀 X100 Pro Max |\n|------|-----------|-------------------|\n| 主摄 | 1 英寸大底传感器 | 200MP 潜望长焦（三星 HP9，1/1.4 英寸） |\n| 影像合作 | 与徕卡联合研发光学系统 | 自研影像方案 |\n| 视频 | 全焦段 4K 120fps | 暂无明确数据 |\n| 长焦 | 暂无明确数据 | 3.7× 原生光变，10× 无损，最高 120× 数字变焦 |\n\n**结论：**\n\n- **拍人、拍日常、拍视频** → 选 **X200**。1 英寸大底 + 徕卡调校，暗光和色彩是它的主场，4K 120fps 全焦段对拍视频的人很友好。\n- **拍远景、演唱会、打鸟** → 选 **X100 Pro Max**。200MP 潜望长焦是目前手机长焦里传感器尺寸最大的方案之一，远摄画质行业领先。\n\n一句话：**X200 是\"全能影像旗舰\"，X100 Pro Max 是\"长焦怪兽\"**。你平时拍远景多还是拍人像/视频多？告诉我使用场景，我帮你定。",
+   "score": 3,
+   "reason": "对比方向基本正确，但把X100 Pro Max的主摄错标为200MP潜望长焦，遗漏其1英寸主摄，且未提骁龙8Gen4，属明显遗漏与事实偏差。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"对比方向基本正确，但把X100 Pro Max的主摄错标为200MP潜望长焦，遗漏其1英寸主摄，且未提骁龙8Gen4，属明显遗漏与事实偏差。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 21374.314900000172,
+   "judge_latency_ms": 1479.3457000000672,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.9310090850210165
+    },
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.9081731347021735
+    },
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.8877847585762647
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 304,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 506
+  },
+  {
+   "order": 8,
+   "repeat": 1,
+   "group": "D",
+   "id": "D01",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   },
+   "reference_conflict": null,
+   "answer": "您好，您说的\"它\"我这边不太确定具体指哪款机型，方便说一下您正在对比的是哪一款吗？比如是星耀 Note 14 Pro、星耀 X100 Pro Max，还是其他型号？\n\n不过我可以先把 **星耀 X200** 的影像实力摆出来，您对照着看：\n\n## 星耀 X200 影像配置\n\n| 项目 | 规格 |\n|------|------|\n| 主摄 | 50MP 一英寸索尼 LYT-900，f/1.63，OIS，双原生 ISO Fusion |\n| 超广角 | 50MP |\n| 长焦 | 50MP 3.2x（OIS） |\n| 潜望长焦 | 50MP 5x（OIS） |\n| 前置 | 32MP |\n| 视频 | 全焦段 4K 120fps、8K@30fps |\n| 特色 | 徕卡联合研发，徕卡经典/鲜艳双色彩风格；大师人像 23/35/50/75/90mm 五焦段 |\n\n**一句话总结**：一英寸大底 + 四摄全 50MP + 徕卡调校，暗光画质官方称提升 40%，属于影像旗舰里的第一梯队。\n\n您告诉我对比的另一款型号，我马上给您拉个逐项对比表，帮您选。",
+   "score": 2,
+   "reason": "回答未直接对比两款机型，反而追问'它'指哪款，虽列出X200影像参数但遗漏X100 Pro Max的1英寸主摄与200MP潜望长焦，未完成拍照对比，方向大致对但关键信息缺失。",
+   "judge_raw": "{\"score\": 2, \"reason\": \"回答未直接对比两款机型，反而追问'它'指哪款，虽列出X200影像参数但遗漏X100 Pro Max的1英寸主摄与200MP潜望长焦，未完成拍照对比，方向大致对但关键信息缺失。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 19183.98900000011,
+   "judge_latency_ms": 1348.055899999963,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.8154670092984043
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.7421487477601388
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5230089691154239
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 302,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 478
+  },
+  {
+   "order": 9,
+   "repeat": 1,
+   "group": "D",
+   "id": "D02",
+   "variant": "full",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   },
+   "reference_conflict": null,
+   "answer": "玉米手机 10 Pro 的续航和快充表现，直接上数据：\n\n| 项目 | 参数 |\n|------|------|\n| 电池容量 | 5500mAh 高密度电芯 |\n| 有线快充 | 120W 谷闪快充 |\n| 充电速度 | 0→100% 约 **19 分钟**，充 5 分钟可用 4 小时 |\n| 无线充电 | 50W 谷闪无线快充 |\n| 反向充电 | 15W 无线反向充电（可给耳机、手表应急） |\n| 日常续航 | 正常使用约 **1.5 天** |\n\n**一句话总结**：5500mAh 大电池 + 120W 快充，属于\"早上洗漱的功夫就能回血大半\"的水平，重度用一天没问题，轻度用能撑到一天半。无线和反向充电也都配齐了，出门给耳机应急挺方便。\n\n如果你经常出差或懒得插线，50W 无线充是个加分项；如果只关心\"充得快不快\"，19 分钟满电这个成绩在同价位里相当能打。",
+   "score": 4,
+   "reason": "核心参数（5500mAh、120W、19分钟充满）与参考事实一致，但额外补充了无线充电、反向充电和日常续航等参考中未提及的细节，存在信息超出参考范围的风险。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"核心参数（5500mAh、120W、19分钟充满）与参考事实一致，但额外补充了无线充电、反向充电和日常续航等参考中未提及的细节，存在信息超出参考范围的风险。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 12252.150799999981,
+   "judge_latency_ms": 1164.2102000000705,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.9916163442435895
+    },
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.7482480047056748
+    },
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.4956433394842172
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 247,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 388
+  },
+  {
+   "order": 10,
+   "repeat": 1,
+   "group": "D",
+   "id": "D02",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   },
+   "reference_conflict": null,
+   "answer": "你问的应该是 **星耀 A60 5G 学生机** 吧？它的续航和快充数据如下：\n\n| 项目 | 参数 |\n|------|------|\n| 电池容量 | 5000mAh |\n| 快充功率 | 33W |\n| 充电速度 | 30 分钟充至 50%，70 分钟充满 |\n| 续航表现 | 轻度使用约 2 天，中度约 1.5 天 |\n| 应急能力 | 超级省电模式下，5% 电量可待机 12 小时 |\n\n**一句话总结**：5000mAh 大电池 + 33W 快充，属于\"够用且耐用\"的组合。电池容量给力，中度用一天半没问题；但 33W 在当下属于入门级快充，充满要 70 分钟，不算快。\n\n**适合谁**：学生党、日常轻度使用、看重续航多过充电速度的人。如果你更在意\"充电几分钟就回血\"，那这款不是最优解。\n\n另外提醒一句：如果你问的其实是别的型号（比如星耀 Note 14 Pro 是 5500mAh + 120W，星耀 X100 青春版是 5000mAh + 67W），告诉我具体型号，我再帮你对比～",
+   "score": 0,
+   "reason": "回答将玉米手机10 Pro错误替换为星耀A60 5G，参数与参考事实完全不符，属于答非所问。",
+   "judge_raw": "{\"score\": 0, \"reason\": \"回答将玉米手机10 Pro错误替换为星耀A60 5G，参数与参考事实完全不符，属于答非所问。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 12134.90610000008,
+   "judge_latency_ms": 1127.5983000000451,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 A60 5G 学生机",
+     "score": 0.4354944414421922
+    },
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.3331980573421799
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.32306426995798
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 284,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 451
+  },
+  {
+   "order": 11,
+   "repeat": 1,
+   "group": "R",
+   "id": "B06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   },
+   "reference_conflict": null,
+   "answer": "# 能测心电图 + 血压趋势的智能手表\n\n从搜索结果看，符合\"手表/手环\"形态的有这几款，但**具体是否支持心电图和血压趋势，需要看详细规格**。我先按定位给你梳理一下：\n\n| 商品 | 价格 | 定位 | 销量 |\n|---|---|---|---|\n| **星耀 Watch 4 Ultra 旗舰手表** | ¥3299 | 旗舰 | 2 |\n| **星耀 Watch 3 Pro 智能手表** | ¥1999~¥2499 | 中高端 | 3 |\n| **星耀 Band 9 智能手环** | ¥329~¥379 | 入门手环 | 0 |\n| **星耀 Band 8 智能手环** | ¥249~¥299 | 入门手环 | 2 |\n\n## 我的建议\n\n- **要心电图 + 血压趋势这类专业健康监测**：优先看 **星耀 Watch 4 Ultra 旗舰手表**（¥3299）和 **星耀 Watch 3 Pro 智能手表**（¥1999 起）。旗舰款通常健康传感器最全，Watch 3 Pro 性价比更高。\n- **手环（Band 8 / Band 9）**：价格便宜，但手环形态做心电图和血压趋势的能力一般有限，建议别抱太高期待。\n\n⚠️ 需要说明：当前搜索结果只给了价格和库存，**没有具体标注哪款支持心电图、哪款支持血压趋势**。如果你告诉我更看重哪一项（比如必须要心电图），我可以帮你查一下这两款旗舰的详细规格再确认，避免买错。\n\n要我帮你查 **Watch 4 Ultra** 和 **Watch 3 Pro** 的具体健康功能参数吗？",
+   "score": 3,
+   "reason": "推荐了正确的两款手表，但明确表示不确定是否支持心电图和血压趋势，遗漏了参考事实中的确认信息，回答不够肯定。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"推荐了正确的两款手表，但明确表示不确定是否支持心电图和血压趋势，遗漏了参考事实中的确认信息，回答不够肯定。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 6205.50460000004,
+   "judge_latency_ms": 1196.0205999998834,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 9,
+   "sources_head": [
+    {
+     "name": "星耀 Band 8 智能手环"
+    },
+    {
+     "name": "星耀 Watch 3 Pro 智能手表"
+    },
+    {
+     "name": "星耀 SmartRing Nova 智能戒指"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 368,
+   "graph_intent": "product_search",
+   "graph_answer_len": 676
+  },
+  {
+   "order": 12,
+   "repeat": 1,
+   "group": "R",
+   "id": "B06",
+   "variant": "full",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   },
+   "reference_conflict": null,
+   "answer": "搜索结果里没有直接标注\"心电图/血压趋势\"功能的商品信息，我先把可能符合的智能穿戴设备列出来，但**具体是否支持心电图和血压趋势，需要进一步核实**：\n\n| 商品 | 价格 | 类型 |\n|---|---|---|\n| 星耀 Band 8 智能手环 | ¥249 ~ ¥299 | 手环 |\n| 星耀 Band 9 智能手环 | ¥329 ~ ¥379 | 手环 |\n| 星耀 Watch 3 Pro 智能手表 | ¥1999 ~ ¥2499 | 手表 |\n| 星耀 Watch 4 Ultra 旗舰手表 | ¥3299 | 手表 |\n| 星耀 SmartRing Nova 智能戒指 | ¥999 | 戒指 |\n\n其余几件（电视、音箱、耳机、智能眼镜）与健康监测无关，已排除。\n\n**说明一下**：目前搜索返回的结果里没有各款的详细健康功能参数，我无法确认哪几款真正支持心电图和血压趋势测量，不能凭空给你下结论。\n\n要不要我帮你**查一下这几款手表/手环的详细规格**，确认哪些带心电图和血压趋势功能？确认后我再给你做精准对比推荐。",
+   "score": 2,
+   "reason": "回答列出了正确型号但明确表示无法确认心电图和血压趋势功能，遗漏了参考事实中的关键功能信息，方向大致对但未给出确定答案。",
+   "judge_raw": "{\"score\": 2, \"reason\": \"回答列出了正确型号但明确表示无法确认心电图和血压趋势功能，遗漏了参考事实中的关键功能信息，方向大致对但未给出确定答案。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 5319.026300000132,
+   "judge_latency_ms": 1504.1502999997647,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 9,
+   "sources_head": [
+    {
+     "name": "星耀 Band 8 智能手环"
+    },
+    {
+     "name": "星耀 Watch 3 Pro 智能手表"
+    },
+    {
+     "name": "星耀 SmartRing Nova 智能戒指"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 255,
+   "graph_intent": "product_search",
+   "graph_answer_len": 467
+  },
+  {
+   "order": 13,
+   "repeat": 1,
+   "group": "R",
+   "id": "A03",
+   "variant": "full",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   },
+   "reference_conflict": "产品规格文档称90Hz；另一知识库片段称14寸2.8K 120Hz OLED，真实值未确认。",
+   "answer": "清逸 AirBook 14 的屏幕是它的一大卖点，参数如下：\n\n| 项目 | 规格 |\n|------|------|\n| 尺寸 | 14 英寸 |\n| 面板 | OLED |\n| 分辨率 | 2.8K（2880 × 1800） |\n| 刷新率 | 90Hz |\n| 峰值亮度 | 600nit（HDR 1000nit） |\n| 色域 | 100% DCI-P3，Delta E < 1 |\n| 比例 | 16:10 |\n| 认证 | HDR True Black 500、莱茵 TÜV 低蓝光、SGS 护眼 |\n\n**一句话点评**：OLED + 2.8K + 100% P3 色域 + Delta E < 1，这套组合在轻薄本里属于第一梯队——黑色纯净、色彩准，修图看片都够用。600nit 峰值亮度室内很充裕，HDR 内容能到 1000nit。\n\n**小提醒**：部分商品页描述里刷新率写的是 120Hz，与规格说明书的 90Hz 不一致，建议下单前跟客服确认一下实际版本。另外 OLED 屏长期显示静态画面有轻微烧屏风险，日常用问题不大，介意的话可以留意。",
+   "score": 5,
+   "reason": "回答完整覆盖参考事实的全部屏幕参数，并合理提示刷新率描述不一致，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答完整覆盖参考事实的全部屏幕参数，并合理提示刷新率描述不一致，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 18611.534699999993,
+   "judge_latency_ms": 1019.3835000000036,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "清逸 AirBook 14 轻薄本",
+     "score": 0.9966770984615057
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.9902706330228713
+    },
+    {
+     "doc_name": "清逸 AirBook 14 轻薄本",
+     "score": 0.9438840980862745
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 282,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 482
+  },
+  {
+   "order": 14,
+   "repeat": 1,
+   "group": "R",
+   "id": "A03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   },
+   "reference_conflict": "产品规格文档称90Hz；另一知识库片段称14寸2.8K 120Hz OLED，真实值未确认。",
+   "answer": "清逸 AirBook 14 的屏幕是它的一大卖点，参数如下：\n\n| 项目 | 规格 |\n| --- | --- |\n| 尺寸 | 14 英寸 |\n| 面板 | OLED |\n| 分辨率 | 2.8K（2880 × 1800） |\n| 刷新率 | 90Hz |\n| 峰值亮度 | 600nit（HDR 1000nit） |\n| 色域 | 100% DCI-P3，Delta E < 1 |\n| 认证 | HDR True Black 500、莱茵 TÜV 低蓝光、SGS 护眼 |\n| 比例 | 16:10 |\n\n**一句话点评**：这块屏属于轻薄本里的第一梯队——2.8K 分辨率够细腻，OLED 带来纯黑对比度和高色准（Delta E < 1），修图、看片都够用；90Hz 比普通 60Hz 顺滑，但没上 120Hz 算个小遗憾。\n\n如果你对屏幕素质要求高、主要用来办公和内容消费，这块屏完全撑得住。需要我帮你看看它的其他配置或价格吗？",
+   "score": 5,
+   "reason": "回答完整覆盖参考事实的全部屏幕参数（尺寸、面板、分辨率、刷新率、亮度、色域、色准、比例），并额外补充认证信息，与参考事实一致，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答完整覆盖参考事实的全部屏幕参数（尺寸、面板、分辨率、刷新率、亮度、色域、色准、比例），并额外补充认证信息，与参考事实一致，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 5727.992799999811,
+   "judge_latency_ms": 1284.0538999998898,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "清逸 AirBook 13 极致轻薄",
+     "score": 0.5
+    },
+    {
+     "doc_name": "清逸 AirBook 14 轻薄本",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 251,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 419
+  },
+  {
+   "order": 15,
+   "repeat": 1,
+   "group": "R",
+   "id": "B02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   },
+   "reference_conflict": null,
+   "answer": "# 千元档 5G 学生机推荐\n\n按您的预算（一千多）和\"孩子第一部 5G 手机\"的需求，搜索结果里真正对得上的只有一款：\n\n| 商品 | 价格区间 | 库存 | 销量 |\n|---|---|---|---|\n| **星耀 A60 5G 学生机** | ¥1299.0 ~ ¥1699.0 | 719 | 0 |\n\n**推荐理由：**\n- 价格正好落在\"一千多\"区间，¥1299 起，预算可控\n- 定位就是学生机，作为孩子第一部手机比较合适\n- 库存充足（719 件），不用担心抢不到\n\n**需要说明的：**\n- 这款目前销量为 0，暂时没有用户评价可以参考，具体配置（芯片、屏幕、电池等）我这边查不到详细参数，建议下单前再确认一下\n- 搜索结果里其他手机要么超预算（如星耀 X100 青春版 ¥1999 起、玉米手机 10 Pro ¥2699 起），要么不是手机（平板、空调、电视等），所以千元档 5G 手机目前就这一款可选\n\n需要我帮您查一下这款的详细规格，或者直接加入购物车吗？",
+   "score": 4,
+   "reason": "推荐了正确的星耀 A60 5G 学生机且价格准确，但遗漏了参考事实中的家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"推荐了正确的星耀 A60 5G 学生机且价格准确，但遗漏了参考事实中的家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 6208.45989999998,
+   "judge_latency_ms": 1304.2734999999084,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "星耀 A60 5G 学生机"
+    },
+    {
+     "name": "星耀 X100 青春版"
+    },
+    {
+     "name": "玉米手机 10 Pro"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 270,
+   "graph_intent": "product_search",
+   "graph_answer_len": 441
+  },
+  {
+   "order": 16,
+   "repeat": 1,
+   "group": "R",
+   "id": "B02",
+   "variant": "full",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   },
+   "reference_conflict": null,
+   "answer": "# 给孩子挑第一部 5G 手机，预算一千多\n\n先说实话：这次搜索结果里，**真正符合「5G 手机 + 一千多预算」的只有一款**，其余要么超预算，要么不是手机。\n\n## 符合条件的选择\n\n| 商品 | 价格区间 | 库存 | 销量 |\n|---|---|---|---|\n| **星耀 A60 5G 学生机** | ¥1299 ~ ¥1699 | 719 | 0 |\n\n**星耀 A60 5G 学生机** 是这次唯一对得上的：5G、学生定位、起价 1299 元，正好卡在「一千多」的区间里。给孩子当第一部手机，学生机这个定位本身也比较省心。\n\n## 其他搜到的，为什么不太合适\n\n- **星耀 X100 青春版**（¥1999~¥2999）：5G 手机没错，但起价就 1999，超预算了。\n- **玉米手机 10 Pro**（¥2699~¥2999）：同样超预算。\n- 剩下的星耀 Tab Lite 10.4（平板）、星耀 Book 14（笔记本）、空调、冰箱、充电宝、电视等，都不是手机，直接排除。\n\n## 小提醒\n\n- 这款目前**销量显示为 0**，属于比较新的商品，暂时没有用户评价可以参考。如果你在意口碑，可以先看看实机或等评价积累。\n- 具体配置参数（芯片、屏幕、电池等）这次没有查到，我不瞎编。你要是想了解，我可以帮你再查一下详细规格。\n\n**建议**：预算卡在一千多、又要 5G，星耀 A60 5G 学生机基本是当前唯一解。要不要我帮你查查它的详细参数，或者直接加进购物车？",
+   "score": 4,
+   "reason": "正确推荐星耀 A60 5G 学生机并说明价格与定位，但遗漏了家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"正确推荐星耀 A60 5G 学生机并说明价格与定位，但遗漏了家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 6624.2786000002525,
+   "judge_latency_ms": 1464.0678999999182,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "星耀 A60 5G 学生机"
+    },
+    {
+     "name": "星耀 X100 青春版"
+    },
+    {
+     "name": "玉米手机 10 Pro"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 391,
+   "graph_intent": "product_search",
+   "graph_answer_len": 645
+  },
+  {
+   "order": 17,
+   "repeat": 1,
+   "group": "R",
+   "id": "A09",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   },
+   "reference_conflict": null,
+   "answer": "星耀 Band 9 支持 **120 种运动模式**，还带 5ATM 防水（50 米），游泳、跑步、骑行都能记录。\n\n小提示：它没有独立 GPS，轨迹记录需要连接手机。对比上一代 Band 8 的 100 种，这代多了 20 种。\n\n需要我帮你看看配色和价格吗？",
+   "score": 5,
+   "reason": "回答准确给出120种运动模式，并补充防水等次要信息，与参考事实一致。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确给出120种运动模式，并补充防水等次要信息，与参考事实一致。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4706.527899999855,
+   "judge_latency_ms": 1208.0776999996488,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Band 9 智能手环",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 83,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 131
+  },
+  {
+   "order": 18,
+   "repeat": 1,
+   "group": "R",
+   "id": "A09",
+   "variant": "full",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   },
+   "reference_conflict": null,
+   "answer": "星耀 Band 9 支持 **120 种运动模式**，覆盖跑步、骑行、游泳等常见项目，还支持 5ATM 防水（50 米），游泳时戴着记录数据没问题。\n\n补充几个运动相关的点：\n- **无独立 GPS**，需要连接手机 GPS 来记录轨迹\n- 定位是入门级运动手环，日常健身、跑步够用；专业训练需求建议看 Watch 系列\n\n需要我帮你查下价格或库存吗？",
+   "score": 4,
+   "reason": "核心答案120种运动模式正确，但补充了参考事实未提及的防水、GPS、定位等细节，属次要信息扩展，未造成事实冲突。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"核心答案120种运动模式正确，但补充了参考事实未提及的防水、GPS、定位等细节，属次要信息扩展，未造成事实冲突。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13437.666900000295,
+   "judge_latency_ms": 1500.2902999999606,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Band 9 智能手环",
+     "score": 0.9969160600667
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.9929080522786753
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5359930943396597
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 106,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 176
+  },
+  {
+   "order": 19,
+   "repeat": 1,
+   "group": "D",
+   "id": "D09",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   },
+   "reference_conflict": null,
+   "answer": "12+512 版本的价格要看颜色，**星耀 Note 14 Pro** 三个颜色不一样：\n\n| 颜色 | 12+512 售价 |\n|------|------------|\n| 子夜黑 | ¥2,599 |\n| 冰川蓝 | ¥2,599 |\n| 香槟金 | ¥2,699 |\n\n**子夜黑和冰川蓝都是 ¥2,599**，香槟金贵 100 块。三款库存都充足（各 90 台）。\n\n如果你不挑颜色，直接选子夜黑或冰川蓝最划算。需要我帮你加购吗？",
+   "score": 5,
+   "reason": "价格与颜色对应关系完全正确，并补充了库存和选购建议，覆盖全部要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"价格与颜色对应关系完全正确，并补充了库存和选购建议，覆盖全部要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13946.233099999972,
+   "judge_latency_ms": 1180.0952000003235,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Note 14 Pro",
+     "score": 0.881759351732092
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.7222499285651491
+    },
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.7161682340484382
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 132,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 220
+  },
+  {
+   "order": 20,
+   "repeat": 1,
+   "group": "D",
+   "id": "D09",
+   "variant": "full",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   },
+   "reference_conflict": null,
+   "answer": "12+512 版本的价格要看颜色，**星耀 Note 14 Pro** 三个配色不一样：\n\n| 颜色 | 12+512 售价 |\n|------|------------|\n| 子夜黑 | ¥2,599 |\n| 冰川蓝 | ¥2,599 |\n| 香槟金 | ¥2,699 |\n\n**建议**：子夜黑和冰川蓝同价 ¥2,599，比香槟金便宜 100 块。如果不是特别中意金色，选前两个更划算。三款库存都充足（各 90 台）。\n\n需要我帮你把某个颜色加进购物车吗？",
+   "score": 4,
+   "reason": "价格与参考事实完全一致，但额外编造了库存信息（各90台），属于参考事实外的虚构细节。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"价格与参考事实完全一致，但额外编造了库存信息（各90台），属于参考事实外的虚构细节。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14499.651900000117,
+   "judge_latency_ms": 1136.0823999998502,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Note 14 Pro",
+     "score": 0.881759351732092
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.7222499285651491
+    },
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.7161682340484382
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 137,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 230
+  },
+  {
+   "order": 21,
+   "repeat": 1,
+   "group": "D",
+   "id": "D03",
+   "variant": "full",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   },
+   "reference_conflict": null,
+   "answer": "你说的\"屏幕最大那款\"，在平板里就是 **星耀 Tab Max 14.6**（14.6 英寸）。它的笔支持情况如下：\n\n| 项目 | 参数 |\n|---|---|\n| 配套笔 | 星耀笔 Pro（随包装附赠） |\n| 压感级别 | **8192 级** |\n| 延迟 | **1ms** |\n| 屏幕 | 14.6\" 3K OLED |\n\n**结论：这支笔是这款平板的强项。** 8192 级压感 + 1ms 延迟，属于目前手写笔里的第一梯队——简单说，压感级别越高，你下笔轻重被识别的层次越细，画线时粗细过渡越自然；1ms 延迟则意味着笔尖划过屏幕，线条几乎同步跟上，不会\"拖影\"。\n\n另外它出厂就带星耀笔 Pro，不用另买，专业软件（Clip Studio Paint、Concepts 等）也做了深度适配，画画、记笔记都合适。\n\n小提醒：笔属于配件，质保 1 年（主机 2 年），日常注意别摔笔尖。\n\n需要我帮你查一下这款的具体版本和价格吗？",
+   "score": 3,
+   "reason": "正确识别星耀 Tab Max 14.6 并确认支持专业触控笔，但遗漏参考中的 480Hz 笔模式触控采样率，且补充的 8192 级压感、1ms 延迟、附赠星耀笔 Pro 等参数未在参考事实中体现，存在未经核实的细节。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"正确识别星耀 Tab Max 14.6 并确认支持专业触控笔，但遗漏参考中的 480Hz 笔模式触控采样率，且补充的 8192 级压感、1ms 延迟、附赠星耀笔 Pro 等参数未在参考事实中体现，存在未经核实的细节。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 23975.559299999986,
+   "judge_latency_ms": 1672.3853000003146,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Creator 14 设计师本",
+     "score": 0.1431662629912691
+    },
+    {
+     "doc_name": "星耀 Tab Pro 12.4",
+     "score": 0.059040429932284026
+    },
+    {
+     "doc_name": "星耀 Tab Max 14.6",
+     "score": 0.019300291156493357
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 262,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 424
+  },
+  {
+   "order": 22,
+   "repeat": 1,
+   "group": "D",
+   "id": "D03",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   },
+   "reference_conflict": null,
+   "answer": "屏幕最大的是 **星耀 Tab Max 14.6**（14.6 英寸 3K OLED），它的触控笔支持情况如下：\n\n**星耀笔 Pro（标配，随机器附带）**\n- 8192 级压感 —— 绘画时线条粗细过渡细腻，适合插画、素描\n- 1ms 低延迟 —— 落笔跟手，画线不拖尾\n- 倾角感应 —— 侧锋涂抹、铅笔笔触效果自然\n- 悬空笔触预览 —— 笔尖未落屏即可预览落点，勾线更精准\n\n**屏幕本身也很适合画画**\n- 14.6\" 3K OLED（3000×2000），120Hz 自适应刷新\n- P3 广色域，Delta E < 1 出厂校色，10bit 色深 —— 色彩准确，作品导出不易偏色\n\n**其他参考**\n- 天玑 9300 + 16GB LPDDR5T，跑绘画类 App 无压力\n- 12000mAh 电池 + 65W 快充\n- 雷电 4 ×2，可外接 4K 显示器做扩展画布\n- 机身 6.8mm / 约 720g，14.6 寸里算轻薄，但单手握持偏重，建议搭配支架或键盘使用\n- 价格区间 ¥6299–7499（可选 5G 版）\n\n对比一下：Tab Air 11 配的是星耀笔（4096 级压感），Tab Lite 10.4 是星耀笔 Lite（2048 级压感），画画体验差距明显，Max 14.6 的星耀笔 Pro 是这几款里最强的。\n\n需要我帮您把 Tab Max 14.6 加入购物车，或者查一下它的具体规格版本和评价吗？",
+   "score": 4,
+   "reason": "正确识别最大屏型号并覆盖触控笔支持要点，但未提及参考中的480Hz笔模式触控采样率，且部分参数（如标配笔、价格）为参考外信息。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"正确识别最大屏型号并覆盖触控笔支持要点，但未提及参考中的480Hz笔模式触控采样率，且部分参数（如标配笔、价格）为参考外信息。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "other",
+   "latency_ms": 16199.118500000168,
+   "judge_latency_ms": 1355.8506000003945,
+   "tool_used": null,
+   "uses_react": true,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Tab Air 11",
+     "score": 0.48419661439687584
+    },
+    {
+     "doc_name": "星耀 Creator 14 设计师本",
+     "score": 0.3146727165375592
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.15915652103070368
+    }
+   ],
+   "tool_path": [
+    "_product_search_tool",
+    "product_search_tool",
+    "_kb_search_tool",
+    "kb_search_tool"
+   ],
+   "events_count": 0,
+   "graph_intent": "other",
+   "graph_answer_len": 0
+  },
+  {
+   "order": 23,
+   "repeat": 1,
+   "group": "D",
+   "id": "D08",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   },
+   "reference_conflict": null,
+   "answer": "你问的应该是**逸彩 The Wall 120 寸巨幕电视**吧？它的峰值亮度是 **3000nits**。\n\n| 参数项 | 规格 |\n|--------|------|\n| 面板 | MicroLED（模块化拼接） |\n| 峰值亮度 | **3000nits** |\n| 色域 | 100% DCI-P3 |\n| 对比度 | 无限（像素级控光） |\n| 寿命 | 100000 小时 |\n\n3000nits 是什么概念？普通客厅电视大概 500–1000nits，这个亮度白天不拉窗帘也能看清画面。\n\n另外提一句：同品牌的**逸彩 75 寸 QD-MiniLED 电视**峰值亮度也是 3000nits，但那是 75 寸的机型，价格 ¥6999，跟这台 120 寸巨幕不是一回事，别搞混了。\n\n需要我帮你对比这两款的差异，或者查一下库存和购买方式吗？",
+   "score": 0,
+   "reason": "回答将产品错误识别为逸彩 The Wall 120 寸电视并给出3000nits，与参考事实（苍穹 Aether N8 Max 峰值亮度4500nit）完全不符，属于编造。",
+   "judge_raw": "{\"score\": 0, \"reason\": \"回答将产品错误识别为逸彩 The Wall 120 寸电视并给出3000nits，与参考事实（苍穹 Aether N8 Max 峰值亮度4500nit）完全不符，属于编造。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13899.324999999862,
+   "judge_latency_ms": 1004.543200000171,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "逸彩 The Wall 120 寸巨幕电视",
+     "score": 0.38196072391009295
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.3090885221038713
+    },
+    {
+     "doc_name": "逸彩 75 寸 QD MiniLED 电视",
+     "score": 0.1558116739954398
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 215,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 377
+  },
+  {
+   "order": 24,
+   "repeat": 1,
+   "group": "D",
+   "id": "D08",
+   "variant": "full",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   },
+   "reference_conflict": null,
+   "answer": "苍穹 Aether N8 Max 的屏幕亮度数据如下：\n\n| 亮度类型 | 数值 |\n|---------|------|\n| **峰值亮度** | **4500nit** |\n| 全局亮度 | 1600nit |\n\n简单说：峰值 4500nit 是局部极限亮度，日常全屏看内容时是 1600nit——这个全局亮度在户外大太阳下看屏幕也够清晰了。\n\n需要我帮你对比一下其他机型，或者看看这款的具体配置和价格吗？",
+   "score": 5,
+   "reason": "回答准确给出峰值亮度4500nit和全局亮度1600nit，与参考事实完全一致，并补充了通俗解释，覆盖要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确给出峰值亮度4500nit和全局亮度1600nit，与参考事实完全一致，并补充了通俗解释，覆盖要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 11512.831699999879,
+   "judge_latency_ms": 1108.1371999998737,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "苍穹 Aether N8 Max",
+     "score": 0.856186593864984
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.4163684468207744
+    },
+    {
+     "doc_name": "苍穹 Aether N8 Max",
+     "score": 0.351120675865612
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 110,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 205
+  },
+  {
+   "order": 25,
+   "repeat": 1,
+   "group": "D",
+   "id": "D07",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   },
+   "reference_conflict": null,
+   "answer": "您好，您问的\"这台机器\"具体是哪一款呢？我这边没有看到您指的是哪件商品，麻烦告诉我商品名称，我好帮您查散热规格。\n\n不过先说明一下：从目前能查到的资料看，**御风 2 匹一级变频挂机**和**御风 1.5 匹一级变频挂机**这两款空调的说明里，只提到\"外机周围保持 1m 无遮挡，散热好才省电\"这类安装建议，**并没有标注具体的散热器规格参数**（比如冷凝器排数、翅片面积等）。\n\n如果您问的是笔记本那款（14.5 寸 OLED 屏、RTX 4070 那台），资料里只提到风扇噪音——办公约 28dB、满载渲染约 45dB，可切换安静模式，**同样没有散热模组的具体规格**。\n\n方便的话告诉我具体型号，我再帮您精准查一下～",
+   "score": 1,
+   "reason": "用户已指明星耀 GamePro 16，回答却反复追问型号并答非所问地讨论空调和噪音，未给出任何散热规格，属严重错误。",
+   "judge_raw": "{\"score\": 1, \"reason\": \"用户已指明星耀 GamePro 16，回答却反复追问型号并答非所问地讨论空调和噪音，未给出任何散热规格，属严重错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13804.720000000088,
+   "judge_latency_ms": 1183.9141999998901,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "御风 2 匹一级变频挂机",
+     "score": 0.0690319215789966
+    },
+    {
+     "doc_name": "极净 HeatChef 空气炸锅",
+     "score": 0.06291256235695944
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.0421043408742997
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 205,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 312
+  },
+  {
+   "order": 26,
+   "repeat": 1,
+   "group": "D",
+   "id": "D07",
+   "variant": "full",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   },
+   "reference_conflict": null,
+   "answer": "星耀 GamePro 16 的散热规格如下：\n\n| 项目 | 规格 |\n| --- | --- |\n| 风扇 | 双风扇 |\n| 热管 | 6 热管 |\n| 导热介质 | 液态金属 |\n| 出风口 | 四出风口 |\n| 强冷模式 | 支持一键强冷（风扇全速） |\n\n简单说：**双风扇 + 6 热管 + 液态金属 + 四出风口**，这套组合在游戏本里属于比较扎实的配置——液态金属导热效率比普通硅脂高不少，四出风口也能让热量排得更快。配合一键强冷模式，玩 3A 大作时压住 i9-14900HX + RTX 4060 这套配置问题不大，代价是风扇全速时噪音会明显一些。\n\n如果你还想对比其他机型的散热，或者关心具体某款的价格和库存，告诉我～",
+   "score": 5,
+   "reason": "完整准确覆盖双风扇、6热管、液态金属、四出风口和一键强冷全部要点，并补充合理说明。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"完整准确覆盖双风扇、6热管、液态金属、四出风口和一键强冷全部要点，并补充合理说明。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 15172.355199999856,
+   "judge_latency_ms": 1163.5315000003175,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 GamePro 16 游戏本",
+     "score": 0.9856120054917151
+    },
+    {
+     "doc_name": "清逸 ProBook 16 高性能本",
+     "score": 0.16550810581098058
+    },
+    {
+     "doc_name": "星耀 ThinkBook 16 商务本",
+     "score": 0.08708393657965695
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 203,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 320
+  },
+  {
+   "order": 27,
+   "repeat": 1,
+   "group": "D",
+   "id": "D04",
+   "variant": "full",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   },
+   "reference_conflict": null,
+   "answer": "抱歉，这次搜索没有返回这两款笔记本的重量参数，我暂时没法告诉你具体轻多少。\n\n从搜索结果能确认的是这两款都在售：\n\n| 型号 | 价格 | 库存 |\n|---|---|---|\n| 清逸 AirBook 14 轻薄本 | ¥7299 | 1440 |\n| 清逸 AirBook 13 极致轻薄 | ¥5499 ~ ¥6499 | 150 |\n\n如果你想对比重量，可以告诉我具体想了解哪方面，我再帮你查一下商品详情里的规格参数。",
+   "score": 1,
+   "reason": "回答声称无法提供重量对比，但参考事实明确给出AirBook 13轻120g，属于答非所问且遗漏核心信息。",
+   "judge_raw": "{\"score\": 1, \"reason\": \"回答声称无法提供重量对比，但参考事实明确给出AirBook 13轻120g，属于答非所问且遗漏核心信息。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 6362.177499999689,
+   "judge_latency_ms": 1043.6065999997481,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "清逸 AirBook 14 轻薄本"
+    },
+    {
+     "name": "清逸 AirBook 13 极致轻薄"
+    },
+    {
+     "name": "清逸 ProBook 16 高性能本"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 112,
+   "graph_intent": "product_search",
+   "graph_answer_len": 213
+  },
+  {
+   "order": 28,
+   "repeat": 1,
+   "group": "D",
+   "id": "D04",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   },
+   "reference_conflict": null,
+   "answer": "您好，关于重量对比，目前搜索到的商品信息里只有价格、销量和库存，**没有包含各款产品的重量参数**，所以暂时无法算出具体轻多少。\n\n如果您能告诉我具体想对比的是哪两款（比如「清逸 AirBook 13」和「清逸 AirBook 14」），我可以帮您查一下这两款的详细规格，看看有没有重量数据。",
+   "score": 1,
+   "reason": "参考事实已明确给出两款重量及差值120g，回答却称无重量参数无法计算，属于答非所问且遗漏核心信息。",
+   "judge_raw": "{\"score\": 1, \"reason\": \"参考事实已明确给出两款重量及差值120g，回答却称无重量参数无法计算，属于答非所问且遗漏核心信息。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 4242.0084000000315,
+   "judge_latency_ms": 963.679499999671,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "清逸 AirBook 14 轻薄本"
+    },
+    {
+     "name": "清逸 AirBook 13 极致轻薄"
+    },
+    {
+     "name": "星耀 Book 14 学生本"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 85,
+   "graph_intent": "product_search",
+   "graph_answer_len": 146
+  },
+  {
+   "order": 29,
+   "repeat": 1,
+   "group": "R",
+   "id": "A02",
+   "variant": "full",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   },
+   "reference_conflict": null,
+   "answer": "支持，而且支持得挺全。\n\n**星耀 X100 Pro Max** 的卫星通信能力：\n\n| 功能 | 支持情况 |\n| --- | --- |\n| 天通卫星通话 | ✅ 支持 |\n| 北斗卫星消息 | ✅ 支持 |\n\n简单说：在山区、海洋、沙漠这类没有地面信号的地方，它照样能**打卫星电话、发卫星消息**——相当于手机自带了一根\"应急天线\"。\n\n两个小提醒：\n- 卫星通话需要开通**中国电信天通卫星业务**才能用\n- 购机权益里含 **天通卫星通话体验包（12 个月免费）**，等于第一年不用额外掏钱\n\n另外这机器本身是骁龙 8 Gen4 + 200MP 潜望长焦 + 7500mAh 的配置，16+512GB 版 ¥5999、16+1TB 版 ¥7999。需要我帮你对比一下两个版本，或者看看别的机型吗？",
+   "score": 5,
+   "reason": "回答明确支持双向卫星通信（天通通话+北斗消息），与参考事实一致且信息更完整，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答明确支持双向卫星通信（天通通话+北斗消息），与参考事实一致且信息更完整，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13801.644600000145,
+   "judge_latency_ms": 1288.1413000000066,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.9998053994294015
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.9949145158069159
+    },
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.9907903514224667
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 213,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 354
+  },
+  {
+   "order": 30,
+   "repeat": 1,
+   "group": "R",
+   "id": "A02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   },
+   "reference_conflict": null,
+   "answer": "支持。**星耀 X100 Pro Max** 的卫星通信能力如下：\n\n| 功能 | 说明 |\n| --- | --- |\n| 天通卫星通话 | ✅ 支持，无地面网络时可拨打卫星电话 |\n| 北斗卫星消息 | ✅ 支持，可发送卫星消息 |\n| 适用场景 | 山区、海洋、沙漠等无信号覆盖区域 |\n\n**两点提醒：**\n- 卫星通话需开通**中国电信天通卫星业务**才能使用\n- 购机附赠**天通卫星通话体验包（12 个月免费）**，可以先体验再决定是否续订\n\n简单说：这机器是\"双向卫星通信\"，既能打电话也能发消息，不是只能发求救短信的那种。经常跑野外、登山、出海的话，这个功能挺实用。",
+   "score": 5,
+   "reason": "回答明确支持双向卫星通信，并详细说明天通通话与北斗消息，与参考事实完全一致且覆盖要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答明确支持双向卫星通信，并详细说明天通通话与北斗消息，与参考事实完全一致且覆盖要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 5726.889000000028,
+   "judge_latency_ms": 891.82239999991,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 173,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 292
+  },
+  {
+   "order": 31,
+   "repeat": 1,
+   "group": "D",
+   "id": "D05",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   },
+   "reference_conflict": null,
+   "answer": "您问的应该是支持 eSIM 独立通话的那款手表。从资料看，符合\"能独立插卡打电话\"的是 **星耀 Watch 系列**（支持 eSIM 独立通话和上网，一号双终端，不带手机也能接打电话）。\n\n它的续航数据：\n\n| 项目 | 数据 |\n| --- | --- |\n| 电池容量 | 590mAh |\n| 日常使用 | 约 **14 天** |\n| 重度使用 | 约 **8 天** |\n\n补充一句：如果您看到的是 **星耀 Band 9**，那款只能蓝牙通话（需手机在附近），**不支持 eSIM 独立通话**，续航更长但功能不同——别买错型号哦。\n\n需要我帮您对比这两款的详细参数吗？",
+   "score": 4,
+   "reason": "正确识别eSIM独立通话型号并给出14天典型续航，但未明确具体型号（Watch 3 Pro/4 Ultra）且遗漏GPS 100小时和探险模式40天等次要细节。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"正确识别eSIM独立通话型号并给出14天典型续航，但未明确具体型号（Watch 3 Pro/4 Ultra）且遗漏GPS 100小时和探险模式40天等次要细节。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13470.059599999786,
+   "judge_latency_ms": 942.2598000001017,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.023372283572240124
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.02269261170454428
+    },
+    {
+     "doc_name": "星耀 Note 14 Pro",
+     "score": 0.020084937201025114
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 167,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 292
+  },
+  {
+   "order": 32,
+   "repeat": 1,
+   "group": "D",
+   "id": "D05",
+   "variant": "full",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   },
+   "reference_conflict": null,
+   "answer": "支持独立插卡（eSIM 独立通话）的是这两款手表，续航数据如下：\n\n| 型号 | 典型续航 | 重度使用 | GPS 模式 |\n| --- | --- | --- | --- |\n| **星耀 Watch 3 Pro** | 14 天 | 7 天 | 40 小时 |\n| **星耀 Watch 4 Ultra** | 14 天 | — | 100 小时（探险模式 40 天） |\n\n两款日常用都是 **14 天**，差别在重度场景：\n\n- **Watch 3 Pro**：505mAh，重度 7 天，GPS 40 小时，磁吸快充 0-100% 约 75 分钟\n- **Watch 4 Ultra**：530mAh，GPS 能撑 100 小时，探险模式 40 天，更适合长时间户外\n\n**建议**：日常通勤、偶尔运动选 Watch 3 Pro 就够；常跑长线徒步、越野，Watch 4 Ultra 的 GPS 续航优势明显。\n\n需要我帮你查下这两款的价格和库存吗？",
+   "score": 5,
+   "reason": "回答准确覆盖了支持eSIM独立通话的两款手表及其典型续航14天，并补充了GPS模式和探险模式等细节，与参考事实一致。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确覆盖了支持eSIM独立通话的两款手表及其典型续航14天，并补充了GPS模式和探险模式等细节，与参考事实一致。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 12869.320199999947,
+   "judge_latency_ms": 1031.6918999997142,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Watch 3 Pro 智能手表",
+     "score": 0.7264412445152133
+    },
+    {
+     "doc_name": "星耀 Watch 4 Ultra 旗舰手表",
+     "score": 0.48416679910489474
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.23414395246171088
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 242,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 431
+  },
+  {
+   "order": 33,
+   "repeat": 1,
+   "group": "R",
+   "id": "A06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   },
+   "reference_conflict": null,
+   "answer": "可以带，这款是符合民航登机标准的。\n\n**关键数据：**\n\n| 项目 | 数值 | 民航规定 |\n| --- | --- | --- |\n| 容量 | 20000mAh | — |\n| **额定能量** | **74Wh** | ≤100Wh 可随身携带 |\n| 重量 | 约380g | — |\n\n**划重点：**\n- 民航看的是**额定能量（Wh）**，不是 mAh。这款 74Wh，低于 100Wh 的上限，**可以直接随身带上飞机，不需要航空公司批准**。\n- 但**必须随身携带，不能托运**——锂电池托运是禁止的。\n- 建议飞行途中不要使用，各航司规定略有差异。\n\n顺带一提，这款售价 ¥129，三口输出、22.5W 快充、LED 数显电量，出门带着挺实用。需要我帮你加入购物车吗？",
+   "score": 5,
+   "reason": "回答正确说明20000mAh约74Wh符合民航≤100Wh可随身携带标准，并补充了不可托运等要点，信息准确完整。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答正确说明20000mAh约74Wh符合民航≤100Wh可随身携带标准，并补充了不可托运等要点，信息准确完整。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4970.481800000016,
+   "judge_latency_ms": 933.9829999998983,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "充电宝",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 198,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 347
+  },
+  {
+   "order": 34,
+   "repeat": 1,
+   "group": "R",
+   "id": "A06",
+   "variant": "full",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   },
+   "reference_conflict": null,
+   "answer": "可以带上飞机 ✅\n\n这款 **充电宝 20000mAh 大容量快充移动电源** 的额定能量是 **74Wh**，低于民航规定的 **100Wh** 上限，符合民航登机标准，可以随身携带上飞机。\n\n几个小提醒：\n- **必须随身携带**，不能托运\n- 飞行途中一般不允许使用，各航司规定略有差异，登机前可再确认一下\n- 这款还支持 PD 3.0 快充、三口输出，¥129，出门带着挺实用\n\n需要我帮你加入购物车吗？",
+   "score": 5,
+   "reason": "回答正确说明20000mAh约74Wh低于100Wh可登机，并补充随身携带、不能托运等要点，与参考事实一致。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答正确说明20000mAh约74Wh低于100Wh可登机，并补充随身携带、不能托运等要点，与参考事实一致。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 12764.633199999935,
+   "judge_latency_ms": 984.2348000001948,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.9795997670400479
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 0.9781584788378873
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 0.007589622072606966
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 128,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 206
+  },
+  {
+   "order": 35,
+   "repeat": 1,
+   "group": "R",
+   "id": "A04",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   },
+   "reference_conflict": null,
+   "answer": "AX3000 路由器（Wi-Fi 6 双频千兆无线路由器）支持的无线协议如下：\n\n| 项目 | 规格 |\n|------|------|\n| 无线标准 | IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6） |\n| 频段 | 2.4GHz + 5GHz 双频并发 |\n| 无线速率 | 2.4GHz 574Mbps + 5GHz 2402Mbps，合计 3000Mbps |\n| MU-MIMO | 支持 2×2 MU-MIMO |\n| OFDMA | 支持 |\n\n简单说：它把从老到新的 Wi-Fi 协议（a/b/g/n/ac）全兼容了，最新的是 **802.11ax，也就是 Wi-Fi 6**——好比一条路既跑得了老款小车，也能让新款车跑出高速。搭配 MU-MIMO 和 OFDMA，多设备同时上网时不容易互相抢带宽。\n\n需要我帮你查查这款路由器的价格或库存吗？",
+   "score": 5,
+   "reason": "回答准确列出IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6）及双频速率3000Mbps，完全覆盖参考事实要点，附加信息无误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确列出IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6）及双频速率3000Mbps，完全覆盖参考事实要点，附加信息无误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4344.0857999999025,
+   "judge_latency_ms": 1124.3761999999151,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 4,
+   "sources_head": [
+    {
+     "doc_name": "充电器",
+     "score": 6.0
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 5.0
+    },
+    {
+     "doc_name": "极净 HeatChef 空气炸锅",
+     "score": 6.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 228,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 392
+  },
+  {
+   "order": 36,
+   "repeat": 1,
+   "group": "R",
+   "id": "A04",
+   "variant": "full",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   },
+   "reference_conflict": null,
+   "answer": "AX3000 路由器（Wi-Fi 6 双频千兆无线路由器）支持的无线协议如下：\n\n| 项目 | 规格 |\n|------|------|\n| 无线标准 | IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6） |\n| 频段 | 2.4GHz + 5GHz 双频并发 |\n| 无线速率 | 2.4GHz 574Mbps + 5GHz 2402Mbps，合计 3000Mbps |\n| MU-MIMO | 支持 2×2 MU-MIMO |\n| OFDMA | 支持 |\n\n简单说：它把老协议（a/b/g/n/ac）全都兼容了，同时支持最新的 **Wi-Fi 6（802.11ax）**，还带 MU-MIMO 和 OFDMA 这两项 Wi-Fi 6 的关键特性——多设备同时上网时不容易互相抢带宽，就像从单车道升级成了多车道。\n\n需要我帮你查价格、库存或用户评价吗？",
+   "score": 5,
+   "reason": "回答完整覆盖参考事实中的无线协议（802.11a/b/g/n/ac/ax）及双频速率，并补充MU-MIMO、OFDMA等正确细节，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答完整覆盖参考事实中的无线协议（802.11a/b/g/n/ac/ax）及双频速率，并补充MU-MIMO、OFDMA等正确细节，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 3805.8350999999675,
+   "judge_latency_ms": 1104.252699999961,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 4,
+   "sources_head": [
+    {
+     "doc_name": "充电器",
+     "score": 6.0
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 5.0
+    },
+    {
+     "doc_name": "极净 HeatChef 空气炸锅",
+     "score": 6.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 224,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 387
+  },
+  {
+   "order": 37,
+   "repeat": 2,
+   "group": "R",
+   "id": "A09",
+   "variant": "full",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   },
+   "reference_conflict": null,
+   "answer": "星耀 Band 9 支持 **120 种运动模式**，覆盖跑步、骑行、游泳等常见项目，配合 5ATM 防水（50 米），游泳时也能正常记录数据。\n\n补充两个实用点：\n- **无独立 GPS**，运动轨迹需连接手机 GPS 获取\n- 定位是入门款，没有 ECG、eSIM 功能，但胜在轻便、续航长、价格友好\n\n需要的话我可以帮你对比一下它和 Watch 系列的差异，或者直接看下三个配色的价格。",
+   "score": 5,
+   "reason": "准确回答120种运动模式，补充信息与参考事实不冲突且无错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"准确回答120种运动模式，补充信息与参考事实不冲突且无错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13194.457100000363,
+   "judge_latency_ms": 792.2524000000521,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Band 9 智能手环",
+     "score": 0.9969160600667
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.9929080522786753
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5359930943396597
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 117,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 196
+  },
+  {
+   "order": 38,
+   "repeat": 2,
+   "group": "R",
+   "id": "A09",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A09",
+    "query": "星耀 Band 9 支持多少种运动模式",
+    "reference": "星耀 Band 9 支持 120 种运动模式。"
+   },
+   "reference_conflict": null,
+   "answer": "星耀 Band 9 支持 **120 种运动模式**，还带 5ATM 防水（50 米），跑步、骑行、游泳的数据都能记录。\n\n小提示：它没有独立 GPS，定位要靠连接手机。如果你主要是在健身房或小区跑步，这个够用；要是经常户外越野、想脱离手机记录轨迹，就得考虑带 GPS 的型号了。",
+   "score": 5,
+   "reason": "准确回答120种运动模式，并补充相关细节，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"准确回答120种运动模式，并补充相关细节，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4496.368200000234,
+   "judge_latency_ms": 1254.762000000028,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Band 9 智能手环",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 85,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 140
+  },
+  {
+   "order": 39,
+   "repeat": 2,
+   "group": "R",
+   "id": "B02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   },
+   "reference_conflict": null,
+   "answer": "# 千元档 5G 手机推荐（给孩子第一部手机）\n\n先说实话：这次搜出来的结果里，**真正符合\"一千多 + 5G 手机\"的只有一款**，其余要么超预算，要么不是手机。\n\n## ✅ 最匹配：星耀 A60 5G 学生机\n\n| 项目 | 信息 |\n|---|---|\n| 价格 | **¥1299 ~ ¥1699** |\n| 定位 | 学生机（正好对上\"第一部手机\"） |\n| 网络 | 5G |\n| 库存 | 719 件，充足 |\n\n**推荐理由**：价格卡在千元出头，定位就是学生机，5G 网络齐全，作为孩子第一部手机很合适——预算不超、功能不将就。\n\n## ⚠️ 其他结果说明\n\n- **星耀 X100 青春版**（¥1999 起）：5G 手机，但起步价已接近两千，超预算了。\n- **星耀 Tab Lite 10.4**（¥1299 起）：这是**平板**，不是手机，别买错。\n- 其余为空调、充电宝、笔记本、电视、冰箱等，与需求无关。\n\n## 小建议\n\n孩子第一部手机，重点其实不是参数堆料，而是**够用 + 好管理**。A60 这个价位段，日常通讯、学习、拍照都能覆盖，摔了丢了也不至于太心疼——第一部手机，稳比强重要。\n\n需要我帮你看看 A60 的具体配置，或者直接加进购物车吗？",
+   "score": 4,
+   "reason": "推荐星耀 A60 5G 学生机、价格和 5G 定位均正确，但遗漏了参考事实中家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"推荐星耀 A60 5G 学生机、价格和 5G 定位均正确，但遗漏了参考事实中家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 5499.015699999745,
+   "judge_latency_ms": 1191.5580999998383,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "星耀 A60 5G 学生机"
+    },
+    {
+     "name": "星耀 X100 青春版"
+    },
+    {
+     "name": "玉米手机 10 Pro"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 337,
+   "graph_intent": "product_search",
+   "graph_answer_len": 543
+  },
+  {
+   "order": 40,
+   "repeat": 2,
+   "group": "R",
+   "id": "B02",
+   "variant": "full",
+   "item": {
+    "id": "B02",
+    "query": "预算一千多，给孩子买的第一部 5G 手机有什么推荐",
+    "reference": "星耀 A60 5G 学生机，¥1,299 起，内置家长管控（护眼模式、应用时长管理、定位追踪），适合作为第一部 5G 手机。"
+   },
+   "reference_conflict": null,
+   "answer": "# 千元档 5G 手机推荐（给孩子第一部手机）\n\n先说实话：这轮搜索结果里，**真正符合\"一千多 + 5G 手机\"的只有一款**，其他要么超预算，要么不是手机。\n\n## 符合条件的选择\n\n| 商品 | 价格 | 库存 | 销量 |\n|---|---|---|---|\n| **星耀 A60 5G 学生机** | ¥1299 ~ ¥1699 | 719 | 0 |\n\n**星耀 A60 5G 学生机** 是这次唯一对得上需求的：价格卡在千元出头，名字里就带\"学生机\"定位，5G 也齐全。销量显示 0，说明是新品或新上架，暂时没有真实用户口碑可参考——这点我得如实告诉你。\n\n## 预算内的其他选项（但不是手机）\n\n- **星耀 Tab Lite 10.4**（¥1299~¥1599）：平板，不是手机\n- **充电宝 20000mAh**（¥129）：配件\n\n## 超预算的参考项\n\n- **星耀 X100 青春版**：¥1999 起，超了\n- **玉米手机 10 Pro**：¥2699 起，超了\n\n## 我的建议\n\n如果预算严格卡在\"一千多\"，**直接看星耀 A60 5G 学生机**，¥1299 的入门配置就够孩子日常用。想了解它的具体参数（屏幕、电池、内存版本差异），我可以帮你查详细规格——毕竟给孩子买第一部手机，续航和屏幕护眼这两点值得多问一句。\n\n需要我拉一下它的详细参数吗？",
+   "score": 4,
+   "reason": "正确推荐星耀A60 5G学生机并说明价格，但遗漏了家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点，仅笼统提及护眼。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"正确推荐星耀A60 5G学生机并说明价格，但遗漏了家长管控（护眼模式、应用时长管理、定位追踪）这一关键卖点，仅笼统提及护眼。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 6006.2143999998625,
+   "judge_latency_ms": 1231.992700000319,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "星耀 A60 5G 学生机"
+    },
+    {
+     "name": "星耀 X100 青春版"
+    },
+    {
+     "name": "玉米手机 10 Pro"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 360,
+   "graph_intent": "product_search",
+   "graph_answer_len": 594
+  },
+  {
+   "order": 41,
+   "repeat": 2,
+   "group": "D",
+   "id": "D04",
+   "variant": "full",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   },
+   "reference_conflict": null,
+   "answer": "抱歉，目前查不到这两款的具体重量数据，暂时无法算出轻多少。\n\n从搜索结果能确认的是这两款机型：\n\n| 型号 | 价格 | 库存 |\n|---|---|---|\n| 清逸 AirBook 14 轻薄本 | ¥7299 | 1440 |\n| 清逸 AirBook 13 极致轻薄 | ¥5499 ~ ¥6499 | 150 |\n\n如果你需要，我可以帮你查一下这两款的详细规格参数，看看有没有标注重量。要查吗？",
+   "score": 0,
+   "reason": "回答声称查不到重量数据，但参考事实明确给出两款重量及差值，属于拒答且未提供正确信息。",
+   "judge_raw": "{\"score\": 0, \"reason\": \"回答声称查不到重量数据，但参考事实明确给出两款重量及差值，属于拒答且未提供正确信息。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 5358.108400000219,
+   "judge_latency_ms": 1088.0071000001408,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "清逸 AirBook 14 轻薄本"
+    },
+    {
+     "name": "清逸 AirBook 13 极致轻薄"
+    },
+    {
+     "name": "清逸 ProBook 16 高性能本"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 108,
+   "graph_intent": "product_search",
+   "graph_answer_len": 202
+  },
+  {
+   "order": 42,
+   "repeat": 2,
+   "group": "D",
+   "id": "D04",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D04",
+    "context": "清逸 AirBook 13 什么价格",
+    "query": "它比 AirBook 14 轻多少",
+    "reference": "清逸 AirBook 13 重 980g，清逸 AirBook 14 重 1.1kg（1100g），AirBook 13 轻 120g。"
+   },
+   "reference_conflict": null,
+   "answer": "您问的“它”具体是指哪款商品呢？我这边没看到您之前提到的型号，麻烦补充一下～\n\n另外，目前搜到的商品信息里只有价格、销量和库存，**没有重量参数**，所以暂时没法直接对比重量差。您可以告诉我具体型号，我再帮您查查详细规格。",
+   "score": 1,
+   "reason": "回答未利用参考事实中的重量数据，反而声称没有重量参数，且未回答轻多少，属于答非所问。",
+   "judge_raw": "{\"score\": 1, \"reason\": \"回答未利用参考事实中的重量数据，反而声称没有重量参数，且未回答轻多少，属于答非所问。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 3485.4246999998395,
+   "judge_latency_ms": 987.420800000109,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 10,
+   "sources_head": [
+    {
+     "name": "清逸 AirBook 14 轻薄本"
+    },
+    {
+     "name": "清逸 AirBook 13 极致轻薄"
+    },
+    {
+     "name": "星耀 Book 14 学生本"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 72,
+   "graph_intent": "product_search",
+   "graph_answer_len": 111
+  },
+  {
+   "order": 43,
+   "repeat": 2,
+   "group": "D",
+   "id": "D05",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   },
+   "reference_conflict": null,
+   "answer": "您问的应该是支持 eSIM 独立通话的那款手表吧？从资料看，符合\"能独立插卡打电话\"的是 **星耀 Watch 系列**（支持 eSIM 独立通话和上网，一号双终端，不带手机也能接打电话）。\n\n它的续航数据是：\n\n| 项目 | 数据 |\n| --- | --- |\n| 电池容量 | 590mAh |\n| 日常使用 | 约 **14 天** |\n| 重度使用 | 约 **8 天** |\n\n顺带提醒一下：**星耀 Band 9** 虽然也能通话，但只是蓝牙通话、需要手机在附近，没有 eSIM 独立通话功能，别买错啦。\n\n如果您说的\"独立插卡\"是指别的型号，告诉我具体名字，我再帮您核实～",
+   "score": 4,
+   "reason": "正确识别eSIM独立通话型号并给出14天典型续航，但未明确区分星耀Watch 3 Pro与Watch 4 Ultra，且遗漏Watch 4 Ultra的GPS/探险模式续航细节。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"正确识别eSIM独立通话型号并给出14天典型续航，但未明确区分星耀Watch 3 Pro与Watch 4 Ultra，且遗漏Watch 4 Ultra的GPS/探险模式续航细节。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13875.044499999603,
+   "judge_latency_ms": 1011.8597000000591,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.023372283572240124
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.02269261170454428
+    },
+    {
+     "doc_name": "星耀 Note 14 Pro",
+     "score": 0.020084937201025114
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 172,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 294
+  },
+  {
+   "order": 44,
+   "repeat": 2,
+   "group": "D",
+   "id": "D05",
+   "variant": "full",
+   "item": {
+    "id": "D05",
+    "context": "店里有哪些智能手表",
+    "query": "能独立插卡打电话的那款续航多久",
+    "reference": "支持 eSIM 独立通话的是星耀 Watch 3 Pro / Watch 4 Ultra，典型续航 14 天（Watch 4 Ultra GPS 模式 100 小时、探险模式 40 天）。"
+   },
+   "reference_conflict": null,
+   "answer": "支持独立插卡（eSIM 独立通话）的两款手表续航如下：\n\n| 型号 | 典型续航 | 重度使用 | 特殊模式 |\n| --- | --- | --- | --- |\n| **星耀 Watch 3 Pro** | 14 天 | 7 天 | GPS 模式 40h |\n| **星耀 Watch 4 Ultra** | 14 天 | — | GPS 100h / 探险模式 40 天 |\n\n两款日常都是 **14 天**，电池容量也接近（505mAh vs 530mAh）。\n\n**怎么选：**\n- 只是日常戴、偶尔运动 → **Watch 3 Pro** 够用，重度 7 天也标得清楚\n- 常跑户外、长途徒步或探险 → **Watch 4 Ultra**，GPS 100h、探险模式 40 天，续航优势明显\n\n另外提醒一句：星耀 Band 9 虽然续航更长，但**没有 eSIM**，只能蓝牙通话（需手机在附近），不符合你\"独立插卡打电话\"的需求。",
+   "score": 5,
+   "reason": "准确覆盖两款eSIM独立通话手表及14天典型续航，并正确补充Watch 4 Ultra的GPS 100小时和探险模式40天等关键细节，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"准确覆盖两款eSIM独立通话手表及14天典型续航，并正确补充Watch 4 Ultra的GPS 100小时和探险模式40天等关键细节，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13597.672100000182,
+   "judge_latency_ms": 1300.0451999996585,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Watch 3 Pro 智能手表",
+     "score": 0.7264412445152133
+    },
+    {
+     "doc_name": "星耀 Watch 4 Ultra 旗舰手表",
+     "score": 0.48416679910489474
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.23414395246171088
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 234,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 422
+  },
+  {
+   "order": 45,
+   "repeat": 2,
+   "group": "R",
+   "id": "A04",
+   "variant": "full",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   },
+   "reference_conflict": null,
+   "answer": "AX3000 路由器支持的无线协议如下：\n\n| 项目 | 规格 |\n|------|------|\n| 无线标准 | IEEE 802.11a/b/g/n/ac/ax（**Wi-Fi 6**） |\n| 频段 | 2.4GHz + 5GHz 双频并发 |\n| 无线速率 | 2.4GHz 574Mbps + 5GHz 2402Mbps（合计 3000Mbps） |\n| MU-MIMO | 支持 2×2 |\n| OFDMA | 支持 |\n\n简单说：它把从老到新的 Wi-Fi 协议（a/b/g/n/ac）全兼容了，主力是 **Wi-Fi 6（802.11ax）**，双频并发能跑到 3000Mbps 级别——这也是\"AX3000\"这个名字的由来。\n\n如果你家里有支持 Wi-Fi 6 的手机或笔记本，能吃到更低的延迟和多设备并发优势；老设备也照样能连，不用担心兼容性。需要我帮你看看这款的价格和库存吗？",
+   "score": 5,
+   "reason": "回答完整覆盖参考事实中的无线协议、双频并发速率及Wi-Fi 6要点，并补充MU-MIMO/OFDMA等次要信息，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答完整覆盖参考事实中的无线协议、双频并发速率及Wi-Fi 6要点，并补充MU-MIMO/OFDMA等次要信息，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4344.363499999872,
+   "judge_latency_ms": 1159.721499999705,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 4,
+   "sources_head": [
+    {
+     "doc_name": "充电器",
+     "score": 6.0
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 5.0
+    },
+    {
+     "doc_name": "极净 HeatChef 空气炸锅",
+     "score": 6.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 229,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 400
+  },
+  {
+   "order": 46,
+   "repeat": 2,
+   "group": "R",
+   "id": "A04",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A04",
+    "query": "AX3000 路由器支持哪些无线协议",
+    "reference": "IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6），双频并发 3000Mbps（2.4GHz 574Mbps + 5GHz 2402Mbps）。"
+   },
+   "reference_conflict": null,
+   "answer": "AX3000 路由器（Wi-Fi 6 双频千兆无线路由器）支持的无线协议如下：\n\n| 项目 | 规格 |\n|------|------|\n| 无线标准 | IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6） |\n| 频段 | 2.4GHz + 5GHz 双频并发 |\n| 无线速率 | 2.4GHz 574Mbps + 5GHz 2402Mbps，合计 3000Mbps |\n| MU-MIMO | 支持 2×2 MU-MIMO |\n| OFDMA | 支持 |\n\n简单说：它把老协议（a/b/g/n/ac）全都兼容了，同时支持最新的 **Wi-Fi 6（802.11ax）**，还带 MU-MIMO 和 OFDMA 这两项 Wi-Fi 6 的关键特性——多设备同时上网时不容易互相抢带宽，就像从\"单车道轮流过\"升级成\"多车道并行\"。\n\n需要我帮你查下这款路由器的价格和库存吗？",
+   "score": 5,
+   "reason": "回答完整列出IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6）及双频3000Mbps速率，与参考事实完全一致，并补充MU-MIMO、OFDMA等次要信息，无错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答完整列出IEEE 802.11a/b/g/n/ac/ax（Wi-Fi 6）及双频3000Mbps速率，与参考事实完全一致，并补充MU-MIMO、OFDMA等次要信息，无错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4101.426700000047,
+   "judge_latency_ms": 1441.451600000164,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 4,
+   "sources_head": [
+    {
+     "doc_name": "充电器",
+     "score": 6.0
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 5.0
+    },
+    {
+     "doc_name": "极净 HeatChef 空气炸锅",
+     "score": 6.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 232,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 397
+  },
+  {
+   "order": 47,
+   "repeat": 2,
+   "group": "R",
+   "id": "A03",
+   "variant": "full",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   },
+   "reference_conflict": "产品规格文档称90Hz；另一知识库片段称14寸2.8K 120Hz OLED，真实值未确认。",
+   "answer": "清逸 AirBook 14 的屏幕是它的一大卖点，参数如下：\n\n| 项目 | 规格 |\n|------|------|\n| 尺寸 | 14 英寸 |\n| 面板 | OLED |\n| 分辨率 | 2.8K（2880 × 1800） |\n| 刷新率 | 90Hz |\n| 峰值亮度 | 600nit（HDR 1000nit） |\n| 色域 | 100% DCI-P3，Delta E < 1 |\n| 比例 | 16:10 |\n| 认证 | HDR True Black 500、莱茵 TÜV 低蓝光、SGS 护眼 |\n\n**一句话点评**：OLED + 2.8K + 100% P3 色域 + Delta E < 1，这块屏在轻薄本里属于第一梯队——色彩准、黑得下去、对比度高，修图剪片都够用。90Hz 比常见的 60Hz 顺滑，但没到电竞级的 120Hz。\n\n**小提醒**：部分商品详情页标注刷新率为 120Hz，与规格说明书的 90Hz 存在出入，建议下单前以实际商品页或客服确认为准。\n\n如果你主要用来办公、看片、轻度创作，这块屏完全够打；要是想拿它打高帧游戏，90Hz 会稍显保守。需要我帮你对比其他机型吗？",
+   "score": 5,
+   "reason": "回答完整覆盖参考事实的全部屏幕参数，并合理提示90Hz与120Hz的标注出入，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答完整覆盖参考事实的全部屏幕参数，并合理提示90Hz与120Hz的标注出入，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 19721.140500000274,
+   "judge_latency_ms": 1195.0043000001642,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "清逸 AirBook 14 轻薄本",
+     "score": 0.9966770984615057
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.9902706330228713
+    },
+    {
+     "doc_name": "清逸 AirBook 14 轻薄本",
+     "score": 0.9438840980862745
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 307,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 507
+  },
+  {
+   "order": 48,
+   "repeat": 2,
+   "group": "R",
+   "id": "A03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A03",
+    "query": "清逸 AirBook 14 的屏幕参数怎么样",
+    "reference": "14 英寸 OLED，2.8K（2880×1800），90Hz 刷新率，峰值亮度 600nit（HDR 1000nit），100% DCI-P3，Delta E<1，16:10 比例。"
+   },
+   "reference_conflict": "产品规格文档称90Hz；另一知识库片段称14寸2.8K 120Hz OLED，真实值未确认。",
+   "answer": "清逸 AirBook 14 的屏幕是它的一大卖点，参数如下：\n\n| 项目 | 规格 |\n| --- | --- |\n| 尺寸 | 14 英寸 |\n| 面板 | OLED |\n| 分辨率 | 2.8K（2880 × 1800） |\n| 刷新率 | 90Hz |\n| 峰值亮度 | 600nit（HDR 1000nit） |\n| 色域 | 100% DCI-P3，Delta E < 1 |\n| 认证 | HDR True Black 500、莱茵 TÜV 低蓝光、SGS 护眼 |\n| 比例 | 16:10 |\n\n**一句话点评**：2.8K OLED + 100% DCI-P3 + Delta E < 1，这块屏的色彩准确度和对比度在同价位轻薄本里属于第一梯队，修图、看片都很能打。OLED 的黑色是\"真黑\"，暗部细节比 LCD 通透得多。\n\n**小提醒**：刷新率是 90Hz，不是 120Hz——日常办公、刷网页足够顺滑，但如果你追求极致高刷（比如打游戏），这点要留意。另外 OLED 长期显示静态画面有烧屏风险，好在它带了护眼认证和电池健康管理，正常使用不用太担心。\n\n需要我帮你看看这款的配置和价格吗？",
+   "score": 5,
+   "reason": "回答完整覆盖参考事实中的全部屏幕参数（尺寸、面板、分辨率、刷新率、亮度、色域、色准、比例），并额外补充认证信息，与参考事实一致，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答完整覆盖参考事实中的全部屏幕参数（尺寸、面板、分辨率、刷新率、亮度、色域、色准、比例），并额外补充认证信息，与参考事实一致，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 5568.979099999979,
+   "judge_latency_ms": 1034.1128000000026,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "清逸 AirBook 13 极致轻薄",
+     "score": 0.5
+    },
+    {
+     "doc_name": "清逸 AirBook 14 轻薄本",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 297,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 506
+  },
+  {
+   "order": 49,
+   "repeat": 2,
+   "group": "D",
+   "id": "D07",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   },
+   "reference_conflict": null,
+   "answer": "您好，关于散热规格，我需要先确认一下您问的是哪台机器——从您的提问看，可能是空调、笔记本或电视中的某一款。\n\n不过要先跟您说明：**目前查到的资料里，没有单独列出\"散热规格\"这一项参数**。能查到的相关信息如下：\n\n**如果是空调（御风系列）**，资料里只提到安装层面的散热要求：\n- 外机周围保持 **1m 无遮挡**，散热好才省电\n- 外机翅片每年清理一次灰尘，可提升 **5%-10%** 效率\n\n**如果是笔记本**，资料里有风扇噪音数据：\n- 办公场景约 **28dB**（几乎无声）\n- 满载渲染时约 **45dB**，可在控制中心切换安静模式\n\n**如果是电视（逸彩 50 寸）**，仅提到每季度清理背部散热孔。\n\n麻烦您告诉我具体是哪款商品（比如\"御风 2 匹挂机\"或某款笔记本），我再帮您查更准确的散热信息。如果该型号确实没有标注散热规格，我会如实告诉您\"暂无\"，不会编造数据。",
+   "score": 0,
+   "reason": "用户已明确问星耀 GamePro 16，回答却未识别该型号，反而列举空调、电视等无关内容，并称无散热规格，与参考事实完全矛盾。",
+   "judge_raw": "{\"score\": 0, \"reason\": \"用户已明确问星耀 GamePro 16，回答却未识别该型号，反而列举空调、电视等无关内容，并称无散热规格，与参考事实完全矛盾。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14861.036400000103,
+   "judge_latency_ms": 1477.5767000000997,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "御风 2 匹一级变频挂机",
+     "score": 0.0690319215789966
+    },
+    {
+     "doc_name": "极净 HeatChef 空气炸锅",
+     "score": 0.06291256235695944
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.0421043408742997
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 246,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 398
+  },
+  {
+   "order": 50,
+   "repeat": 2,
+   "group": "D",
+   "id": "D07",
+   "variant": "full",
+   "item": {
+    "id": "D07",
+    "context": "帮我看看星耀 GamePro 16",
+    "query": "这台机器的散热规格怎么样",
+    "reference": "星耀 GamePro 16：双风扇 6 热管 + 液态金属导热，四出风口，一键强冷模式。"
+   },
+   "reference_conflict": null,
+   "answer": "星耀 GamePro 16 的散热规格如下：\n\n| 项目 | 规格 |\n| --- | --- |\n| 风扇 | 双风扇 |\n| 热管 | 6 热管 |\n| 导热介质 | 液态金属 |\n| 出风口 | 四出风口 |\n| 附加功能 | 一键强冷模式（风扇全速） |\n\n简单说：**双风扇 + 6 热管 + 液态金属 + 四出风口**，这套组合在游戏本里属于比较扎实的配置。液态金属的导热效率比普通硅脂高不少，压 i9-14900HX + 140W 满血 RTX 4060 这种发热大户，底气是够的。打游戏时开一键强冷，风扇全速能把热量快速排出去。\n\n如果你还想对比其他机型的散热，或者关心噪音表现，可以告诉我～",
+   "score": 5,
+   "reason": "完整准确覆盖双风扇、6热管、液态金属、四出风口和一键强冷模式，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"完整准确覆盖双风扇、6热管、液态金属、四出风口和一键强冷模式，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 15323.129000000336,
+   "judge_latency_ms": 1263.388599999871,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 GamePro 16 游戏本",
+     "score": 0.9856120054917151
+    },
+    {
+     "doc_name": "清逸 ProBook 16 高性能本",
+     "score": 0.16550810581098058
+    },
+    {
+     "doc_name": "星耀 ThinkBook 16 商务本",
+     "score": 0.08708393657965695
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 192,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 304
+  },
+  {
+   "order": 51,
+   "repeat": 2,
+   "group": "D",
+   "id": "D10",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   },
+   "reference_conflict": null,
+   "answer": "**可以戴着游泳，但有两个\"不建议\"要记牢。**\n\n星耀 SmartRing Nova 是 **IP68 防水**，官方说明明确写了可游泳佩戴。日常洗手、泳池游泳都没问题。\n\n不过要注意：\n- ❌ **不建议潜水**（水压超出 IP68 承受范围）\n- ❌ **不建议热水浴**（高温+水汽容易影响密封）\n\n另外顺带提一句，如果你在对比手环类产品，**星耀 Band 8** 是 **5ATM 游泳级**防水，同样支持游泳场景，价格 ¥249 起，比戒指更适合运动党。\n\n一句话总结：**游泳能戴，潜水和泡澡请摘下来。**",
+   "score": 5,
+   "reason": "回答准确确认IP68可游泳佩戴，并补充潜水、热水浴等合理注意事项，完全覆盖参考要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确确认IP68可游泳佩戴，并补充潜水、热水浴等合理注意事项，完全覆盖参考要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13547.851099999662,
+   "judge_latency_ms": 647.3190000001523,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.7350318502940639
+    },
+    {
+     "doc_name": "星耀 SmartRing Nova 智能戒指",
+     "score": 0.3390843171939705
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.2587744948054673
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 150,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 261
+  },
+  {
+   "order": 52,
+   "repeat": 2,
+   "group": "D",
+   "id": "D10",
+   "variant": "full",
+   "item": {
+    "id": "D10",
+    "context": "我想要一个能监测睡眠的智能戒指",
+    "query": "防水等级能戴着游泳吗",
+    "reference": "星耀 SmartRing Nova 为 IP68 防水，可游泳佩戴。"
+   },
+   "reference_conflict": null,
+   "answer": "**可以戴着游泳，但有两个\"别\"要注意。**\n\n以 **星耀 SmartRing Nova** 为例：\n\n| 项目 | 说明 |\n| --- | --- |\n| 防水等级 | **IP68** |\n| 可游泳 | ✅ 支持 |\n| 洗手/淋雨 | ✅ 没问题 |\n| 潜水 | ❌ 不建议 |\n| 热水浴/桑拿 | ❌ 不建议 |\n\n简单说：泳池里游几圈、日常洗手完全没问题；但**潜水**和**热水浴**就别戴了——前者水压太大，后者高温会让密封材料加速老化。\n\n另外顺带提一句，如果你在看的是 **星耀 Band 8 智能手环**，它是 **5ATM 游泳级**防水，游泳同样可以戴。\n\n需要我帮你对比这两款的其它参数吗？",
+   "score": 5,
+   "reason": "准确回答IP68可游泳佩戴，并补充潜水、热水浴等注意事项，与参考事实完全一致。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"准确回答IP68可游泳佩戴，并补充潜水、热水浴等注意事项，与参考事实完全一致。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13291.386200000034,
+   "judge_latency_ms": 1263.9079000000493,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.7350318502940639
+    },
+    {
+     "doc_name": "星耀 SmartRing Nova 智能戒指",
+     "score": 0.3390843171939705
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.2587744948054673
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 176,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 313
+  },
+  {
+   "order": 53,
+   "repeat": 2,
+   "group": "D",
+   "id": "D08",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   },
+   "reference_conflict": null,
+   "answer": "逸彩 The Wall 120 寸巨幕电视的峰值亮度是 **3000nits**。\n\n简单说，这个亮度白天不拉窗帘也能看清画面。它用的是 MicroLED 面板，像素级控光，对比度是无限的，色域覆盖 100% DCI-P3。\n\n不过要提醒一句：这机器**不含音响**，得自己配独立音响系统；安装也需要专业团队上门拼接调试，电源要求 380V 三相电独立回路。买之前先确认下家里的电和墙能不能扛住。",
+   "score": 0,
+   "reason": "回答的是逸彩 The Wall 电视，与用户询问的苍穹 Aether N8 Max 完全无关，且亮度数值错误。",
+   "judge_raw": "{\"score\": 0, \"reason\": \"回答的是逸彩 The Wall 电视，与用户询问的苍穹 Aether N8 Max 完全无关，且亮度数值错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13268.381099999715,
+   "judge_latency_ms": 1127.6287000000593,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "逸彩 The Wall 120 寸巨幕电视",
+     "score": 0.38196072391009295
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.3090885221038713
+    },
+    {
+     "doc_name": "逸彩 75 寸 QD MiniLED 电视",
+     "score": 0.1558116739954398
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 118,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 198
+  },
+  {
+   "order": 54,
+   "repeat": 2,
+   "group": "D",
+   "id": "D08",
+   "variant": "full",
+   "item": {
+    "id": "D08",
+    "context": "苍穹 Aether N8 Max 屏幕多大",
+    "query": "它的峰值亮度能到多少",
+    "reference": "苍穹 Aether N8 Max 峰值亮度 4500nit，全局 1600nit。"
+   },
+   "reference_conflict": null,
+   "answer": "苍穹 Aether N8 Max 的屏幕亮度数据如下：\n\n| 项目 | 数值 |\n|------|------|\n| **峰值亮度** | **4500nit** |\n| 全局亮度 | 1600nit |\n\n简单说：4500nit 是局部峰值，比如看 HDR 视频里太阳、灯光这类高光点时会瞬间拉满，画面更通透；日常刷网页、看文档时是 1600nit 的全局亮度，这个水平在户外大太阳下也够看清屏幕了。\n\n需要我再帮你对比一下其他机型，或者看看这款的影像、充电参数吗？",
+   "score": 5,
+   "reason": "回答准确给出峰值亮度4500nit和全局亮度1600nit，与参考事实完全一致，并补充了通俗解释，覆盖要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确给出峰值亮度4500nit和全局亮度1600nit，与参考事实完全一致，并补充了通俗解释，覆盖要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 12038.718900000276,
+   "judge_latency_ms": 1156.5952000000834,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "苍穹 Aether N8 Max",
+     "score": 0.856186593864984
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.4163684468207744
+    },
+    {
+     "doc_name": "苍穹 Aether N8 Max",
+     "score": 0.351120675865612
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 133,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 234
+  },
+  {
+   "order": 55,
+   "repeat": 2,
+   "group": "D",
+   "id": "D09",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   },
+   "reference_conflict": null,
+   "answer": "你说的应该是**星耀 Note 14 Pro** 的 12+512 版本，价格按颜色分三档：\n\n| 颜色 | 12+512 售价 |\n|------|------------|\n| 子夜黑 | ¥2,599 |\n| 冰川蓝 | ¥2,599 |\n| 香槟金 | ¥2,699 |\n\n**子夜黑和冰川蓝都是 ¥2,599，香槟金贵 ¥100。**\n\n顺带说一句，这个版本比同系列 12+256 的冰川蓝（¥2,579）只贵 20 块，存储翻倍，性价比挺高——如果你在这两个容量之间犹豫，直接上 512 更划算。\n\n需要我帮你加购或者对比其他机型吗？",
+   "score": 5,
+   "reason": "准确列出12+512各颜色价格，与参考事实完全一致，并补充合理对比建议，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"准确列出12+512各颜色价格，与参考事实完全一致，并补充合理对比建议，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 13691.847099999904,
+   "judge_latency_ms": 1141.6943999997784,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Note 14 Pro",
+     "score": 0.881759351732092
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.7222499285651491
+    },
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.7161682340484382
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 163,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 273
+  },
+  {
+   "order": 56,
+   "repeat": 2,
+   "group": "D",
+   "id": "D09",
+   "variant": "full",
+   "item": {
+    "id": "D09",
+    "context": "看看星耀 Note 14 Pro 吧",
+    "query": "12 加 512 那个版本现在卖多少",
+    "reference": "星耀 Note 14 Pro 12GB+512GB 版本：子夜黑 ¥2,599、冰川蓝 ¥2,599、香槟金 ¥2,699。"
+   },
+   "reference_conflict": null,
+   "answer": "12+512 版本的价格要看颜色，**星耀 Note 14 Pro** 三个颜色不一样：\n\n| 颜色 | 12+512 售价 |\n|------|------------|\n| 子夜黑 | ¥2,599 |\n| 冰川蓝 | ¥2,599 |\n| 香槟金 | ¥2,699 |\n\n**建议**：子夜黑和冰川蓝同价 ¥2,599，比香槟金便宜 100 块。不挑颜色的话，前两个随便选，香槟金就看你愿不愿意为配色多花这 100 了。\n\n需要我帮你查下这款的库存或者直接加购吗？",
+   "score": 5,
+   "reason": "完整准确列出三个颜色对应价格，与参考事实完全一致，并补充了合理的购买建议。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"完整准确列出三个颜色对应价格，与参考事实完全一致，并补充了合理的购买建议。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14783.854499999961,
+   "judge_latency_ms": 1237.8591000001506,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Note 14 Pro",
+     "score": 0.881759351732092
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.7222499285651491
+    },
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.7161682340484382
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 142,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 235
+  },
+  {
+   "order": 57,
+   "repeat": 2,
+   "group": "R",
+   "id": "A02",
+   "variant": "full",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   },
+   "reference_conflict": null,
+   "answer": "支持。**星耀 X100 Pro Max** 具备双向卫星通信能力，具体包括：\n\n- **天通卫星通话**：无地面网络时可拨打卫星电话\n- **北斗卫星消息**：无信号区域可发送卫星消息\n\n适用场景：山区、海洋、沙漠等无地面网络覆盖的偏远地区。\n\n⚠️ 小提醒：卫星通话需开通中国电信天通卫星业务。另外购机附赠**天通卫星通话体验包（12 个月免费）**，可以先体验再决定是否续订。\n\n需要我帮你对比一下它和其他旗舰的差异，或者直接看下两个存储版本的价格吗？",
+   "score": 5,
+   "reason": "回答明确支持双向卫星通信，并补充天通通话和北斗消息等细节，与参考事实完全一致且覆盖要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答明确支持双向卫星通信，并补充天通通话和北斗消息等细节，与参考事实完全一致且覆盖要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14595.120500000121,
+   "judge_latency_ms": 1059.49099999998,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.9998053994294015
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.9949145158069159
+    },
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.9907903514224667
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 138,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 229
+  },
+  {
+   "order": 58,
+   "repeat": 2,
+   "group": "R",
+   "id": "A02",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A02",
+    "query": "星耀 X100 Pro Max 支持卫星通信吗",
+    "reference": "星耀 X100 Pro Max 支持双向卫星通信。"
+   },
+   "reference_conflict": null,
+   "answer": "支持。星耀 X100 Pro Max 具备**双向卫星通信**能力：\n\n- **天通卫星通话**：无地面网络时可直接拨打卫星电话\n- **北斗卫星消息**：发送卫星短信\n\n适用场景是山区、海洋、沙漠等无信号覆盖的偏远地区。\n\n两个小提醒：\n1. 卫星通话需开通**中国电信天通卫星业务**才能使用\n2. 购机附赠**天通卫星通话体验包（12 个月免费）**，相当于第一年不用额外掏钱\n\n简单说：这功能平时用不上，但真到了没信号的地方，就是救命的东西。",
+   "score": 5,
+   "reason": "回答明确支持双向卫星通信，并补充天通通话和北斗消息细节，与参考事实完全一致且覆盖要点。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答明确支持双向卫星通信，并补充天通通话和北斗消息细节，与参考事实完全一致且覆盖要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4688.607200000206,
+   "judge_latency_ms": 1197.1145000002252,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 137,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 225
+  },
+  {
+   "order": 59,
+   "repeat": 2,
+   "group": "D",
+   "id": "D01",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   },
+   "reference_conflict": null,
+   "answer": "你问的\"它\"是指哪款机型呢？我这边没看到你之前提到的具体型号，方便补充一下吗？\n\n不过如果你是想对比 **星耀 X200** 和 **星耀 X100 Pro Max** 的拍照，我可以先给你甩个表：\n\n| 影像项 | 星耀 X200 | 星耀 X100 Pro Max |\n| --- | --- | --- |\n| 主摄 | 50MP 索尼 LYT-900，1 英寸，f/1.63，OIS | 50MP 索尼 LYT-900，1 英寸，f/1.6-f/4.0 无级可变光圈，OIS |\n| 超广角 | 50MP | 50MP 三星 JN5，122°，支持 2.5cm 微距 |\n| 长焦 | 50MP 3.2x + 50MP 5x 潜望，均 OIS | 200MP 三星 HP9 潜望（3.7x）+ 50MP 人像长焦（2.6x），均 OIS |\n| 视频 | 全焦段 4K 120fps、8K@30fps | 8K@30fps、4K@120fps、4K 杜比视界、10bit Log |\n\n**我的看法：**\n- **X200**：徕卡色彩科学 + 双原生 ISO Fusion，暗光画质提升 40%，五大人像焦段（23/35/50/75/90mm），拍人像和日常出片更省心。\n- **X100 Pro Max**：200MP 潜望长焦是硬实力，10x 无损、最高 120x 数字变焦，远景碾压；可变光圈 + 10bit Log 更适合专业创作。\n\n**一句话建议**：拍人像、日常随手出片选 **X200**；爱拍远景、玩专业视频选 **X100 Pro Max**。\n\n你具体想对比的是哪两款？告诉我型号，我给你精准拉表。",
+   "score": 4,
+   "reason": "回答正确对比了两款机型拍照并给出合理建议，但开头误称未看到具体型号且表格中部分参数（如主摄传感器型号、超广角规格）与参考事实不完全一致，属次要细节偏差。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"回答正确对比了两款机型拍照并给出合理建议，但开头误称未看到具体型号且表格中部分参数（如主摄传感器型号、超广角规格）与参考事实不完全一致，属次要细节偏差。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 20188.384999999926,
+   "judge_latency_ms": 1459.4284999998308,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.8154670092984043
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.7421487477601388
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5230089691154239
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 448,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 715
+  },
+  {
+   "order": 60,
+   "repeat": 2,
+   "group": "D",
+   "id": "D01",
+   "variant": "full",
+   "item": {
+    "id": "D01",
+    "context": "星耀 X100 Pro Max 卖多少钱",
+    "query": "它和 X200 哪个拍照更好",
+    "reference": "星耀 X100 Pro Max：骁龙8Gen4，1 英寸超大底主摄 + 200MP 潜望长焦；星耀 X200：徕卡联合研发光学系统、1 英寸大底主摄，全焦段 4K 120fps。两者均为影像旗舰。"
+   },
+   "reference_conflict": null,
+   "answer": "拍照这块，两台走的是完全不同的路线，先看关键差异：\n\n| 对比项 | 星耀 X200 | 星耀 X100 Pro Max |\n|---|---|---|\n| 主摄 | 1 英寸大底传感器 | 200MP 潜望长焦（三星 HP9，1/1.4 英寸） |\n| 影像合作 | 与徕卡联合研发光学系统 | — |\n| 长焦能力 | 全焦段 4K 120fps 视频 | 3.7× 原生光变，10× 无损，最高 120× 数字变焦 |\n| 视频 | 全焦段 4K 120fps | — |\n\n**结论：**\n- **拍人、拍日常、要色彩味道** → 选 **X200**。1 英寸大底 + 徕卡调校，暗光和色彩是它的主场。\n- **拍远景、演唱会、打鸟** → 选 **X100 Pro Max**。200MP 潜望长焦是目前手机长焦里传感器尺寸最大的方案之一，远景画质行业领先。\n\n一句话：**X200 是\"主摄党\"的菜，X100 Pro Max 是\"长焦党\"的菜。**\n\n不过说实话，X200 的完整参数我这边只查到概述部分，长焦具体规格暂无，如果你特别在意长焦，建议以 X100 Pro Max 为准更稳妥。要不要我帮你查一下 X200 的详细规格或用户评价？",
+   "score": 3,
+   "reason": "回答方向正确且对比了拍照差异，但表格中将200MP潜望长焦错标为X100 Pro Max的主摄，且遗漏了X100 Pro Max的1英寸主摄，存在事实错误和明显遗漏。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"回答方向正确且对比了拍照差异，但表格中将200MP潜望长焦错标为X100 Pro Max的主摄，且遗漏了X100 Pro Max的1英寸主摄，存在事实错误和明显遗漏。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 21367.314100000385,
+   "judge_latency_ms": 1203.632700000071,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.9310090850210165
+    },
+    {
+     "doc_name": "星耀 X200 5G 影像旗舰",
+     "score": 0.9081731347021735
+    },
+    {
+     "doc_name": "星耀X100ProMax",
+     "score": 0.8877847585762647
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 324,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 528
+  },
+  {
+   "order": 61,
+   "repeat": 2,
+   "group": "R",
+   "id": "B06",
+   "variant": "full",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   },
+   "reference_conflict": null,
+   "answer": "# 能测心电图和血压趋势的智能手表\n\n从搜索结果看，符合\"手表/手环\"形态的产品有这几款，但**具体是否支持心电图和血压趋势，需要看详细规格**——当前搜索结果只返回了价格和库存，没有标注健康功能参数。我先帮你把候选范围缩小：\n\n| 商品 | 价格 | 形态 | 定位 |\n|---|---|---|---|\n| **星耀 Band 8 智能手环** | ¥249 ~ ¥299 | 手环 | 入门 |\n| **星耀 Band 9 智能手环** | ¥329 ~ ¥379 | 手环 | 入门升级 |\n| **星耀 Watch 3 Pro 智能手表** | ¥1999 ~ ¥2499 | 手表 | 中高端 |\n| **星耀 Watch 4 Ultra 旗舰手表** | ¥3299 | 手表 | 旗舰 |\n\n另外还有 **星耀 SmartRing Nova 智能戒指**（¥999），戒指形态通常也带健康监测，但测心电的可行性一般不如手表。\n\n## 我的建议\n\n- **要心电图 + 血压趋势，优先看手表**：**星耀 Watch 4 Ultra 旗舰手表**（¥3299）和 **星耀 Watch 3 Pro 智能手表**（¥1999 起）是功能最全的两款，旗舰款通常健康传感器配置最高。\n- **预算有限**：手环也能做基础心率/血氧，但心电和血压趋势这类功能，手环受形态限制往往不支持或精度有限。\n\n要不要我帮你**查一下这几款的详细规格**，确认哪款真正支持心电图和血压趋势？确认后可以直接给你做参数对比表。",
+   "score": 3,
+   "reason": "回答正确列出了星耀 Watch 3 Pro 和 Watch 4 Ultra 两款符合条件的手表，但未明确确认其支持心电图和血压趋势，反而表示需查详细规格，遗漏了参考事实中的关键认证与功能要点。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"回答正确列出了星耀 Watch 3 Pro 和 Watch 4 Ultra 两款符合条件的手表，但未明确确认其支持心电图和血压趋势，反而表示需查详细规格，遗漏了参考事实中的关键认证与功能要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 5874.544799999967,
+   "judge_latency_ms": 1456.8438000001152,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 9,
+   "sources_head": [
+    {
+     "name": "星耀 Band 8 智能手环"
+    },
+    {
+     "name": "星耀 Watch 3 Pro 智能手表"
+    },
+    {
+     "name": "星耀 SmartRing Nova 智能戒指"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 361,
+   "graph_intent": "product_search",
+   "graph_answer_len": 659
+  },
+  {
+   "order": 62,
+   "repeat": 2,
+   "group": "R",
+   "id": "B06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "B06",
+    "query": "能测心电图和血压趋势的智能手表有哪些",
+    "reference": "星耀 Watch 3 Pro（ECG 心电图医疗器械认证 + 血压趋势）和星耀 Watch 4 Ultra（ECG + 血压趋势）。"
+   },
+   "reference_conflict": null,
+   "answer": "# 能测心电图 + 血压趋势的智能手表\n\n先说实话：搜索结果里**没有标注具体健康功能参数**，我无法确认哪几款真的支持心电图和血压趋势监测。不过从品类和定位看，这几款最值得进一步核实：\n\n| 商品 | 价格 | 定位 | 销量 | 库存 |\n|---|---|---|---|---|\n| **星耀 Watch 4 Ultra 旗舰手表** | ¥3299 | 旗舰，健康功能通常最全 | 2 | 200 |\n| **星耀 Watch 3 Pro 智能手表** | ¥1999~¥2499 | 中高端主力 | 3 | 150 |\n| **星耀 Band 9 智能手环** | ¥329~¥379 | 入门手环 | 0 | 950 |\n| **星耀 Band 8 智能手环** | ¥249~¥299 | 入门手环 | 2 | 150 |\n\n**我的建议：**\n- 要**心电图**这类医疗级功能，基本只有旗舰款（Watch 4 Ultra）才可能配备，手环一般做不到。\n- **血压趋势**监测在手表上更常见，Watch 3 Pro 和 Watch 4 Ultra 都值得确认。\n- 手环（Band 8/9）价格便宜，但通常只有心率、血氧，心电图和血压趋势大概率不支持。\n\n要不要我帮你**查一下这几款的详细规格参数**，确认到底哪款支持心电图和血压趋势？这样能给你更准的答案。",
+   "score": 2,
+   "reason": "回答虽提及星耀 Watch 3 Pro 和 Watch 4 Ultra 并建议核实，但未确认参考事实中两款均支持 ECG 和血压趋势，反而称无法确认，且引入无关手环，信息不完整且方向偏保守。",
+   "judge_raw": "{\"score\": 2, \"reason\": \"回答虽提及星耀 Watch 3 Pro 和 Watch 4 Ultra 并建议核实，但未确认参考事实中两款均支持 ECG 和血压趋势，反而称无法确认，且引入无关手环，信息不完整且方向偏保守。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_search",
+   "latency_ms": 5557.44709999999,
+   "judge_latency_ms": 2342.695300000287,
+   "tool_used": "product_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": false,
+   "nonempty_without_kb": true,
+   "rerank_exercised": false,
+   "sources_count": 9,
+   "sources_head": [
+    {
+     "name": "星耀 Band 8 智能手环"
+    },
+    {
+     "name": "星耀 Watch 3 Pro 智能手表"
+    },
+    {
+     "name": "星耀 SmartRing Nova 智能戒指"
+    }
+   ],
+   "tool_path": [
+    "product_search_tool"
+   ],
+   "events_count": 325,
+   "graph_intent": "product_search",
+   "graph_answer_len": 590
+  },
+  {
+   "order": 63,
+   "repeat": 2,
+   "group": "R",
+   "id": "C03",
+   "variant": "full",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   },
+   "reference_conflict": null,
+   "answer": "你问的折叠屏里支持无线充电的，目前知识库里只有一款折叠屏机型——**星耀 Flip 折叠屏**，但它的充电规格资料里暂时查不到无线充电相关信息，暂无明确数据。\n\n不过要提醒一下：知识库里支持无线充电的机型都是直板机，比如：\n\n| 机型 | 无线快充 | 反向无线充电 |\n|------|---------|------------|\n| 星耀X100ProMax | 80W | 20W |\n| 灵耀 Lumina Z9 Ultra | 80W | 10W |\n| 星域 Stellar X1 Pro | 80W | 20W |\n| 玉米手机 10 Pro | 50W | 15W |\n| 苍穹 Aether N8 Max | 50W | 10W |\n\n如果你就是想要折叠屏 + 无线充电，建议先确认下星耀 Flip 折叠屏的具体充电规格，我可以帮你再查一次详细参数。或者你更看重折叠形态还是无线充电？告诉我优先级，我帮你缩小范围。",
+   "score": 2,
+   "reason": "回答正确识别了星耀 Flip 折叠屏，但遗漏了参考事实中明确的 15W 无线充电规格，反而称查不到无线充电信息，属于事实遗漏。",
+   "judge_raw": "{\"score\": 2, \"reason\": \"回答正确识别了星耀 Flip 折叠屏，但遗漏了参考事实中明确的 15W 无线充电规格，反而称查不到无线充电信息，属于事实遗漏。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 4707.002300000113,
+   "judge_latency_ms": 1193.2903000001716,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 27,
+   "sources_head": [
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 4.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 3.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 2.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 226,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 417
+  },
+  {
+   "order": 64,
+   "repeat": 2,
+   "group": "R",
+   "id": "C03",
+   "variant": "no_rerank",
+   "item": {
+    "id": "C03",
+    "query": "支持无线充电的折叠屏手机是哪款",
+    "reference": "星耀 Flip 折叠屏，67W 有线 + 15W 无线充电。"
+   },
+   "reference_conflict": null,
+   "answer": "根据知识库信息，**星耀 Flip 折叠屏**是唯一一款折叠屏机型，但知识库中暂无它的详细充电规格数据，无法确认是否支持无线充电。\n\n不过，如果你对\"无线充电\"本身更看重，这几款直板旗舰都支持，且功率不低：\n\n| 机型 | 无线快充 | 反向无线充电 |\n|------|---------|------------|\n| 星耀X100ProMax | **80W** | 20W |\n| 星域 Stellar X1 Pro | **80W** | 20W |\n| 灵耀 Lumina Z9 Ultra | **80W** | 10W |\n| 玉米手机 10 Pro | 50W | 15W |\n| 苍穹 Aether N8 Max | 50W | 10W |\n\n**建议**：如果你一定要\"折叠屏 + 无线充电\"两个条件同时满足，目前知识库里查不到确切匹配的机型，建议先确认星耀 Flip 折叠屏的具体规格再下单。如果无线充电是刚需、折叠形态可以妥协，那 **星耀X100ProMax** 和 **星域 Stellar X1 Pro** 的 80W 无线快充是这批里最强的——80W 无线大概半小时出头就能充满，基本可以告别睡前插线了。\n\n需要我帮你查一下星耀 Flip 折叠屏的完整参数吗？",
+   "score": 2,
+   "reason": "回答正确识别了星耀 Flip 折叠屏机型，但错误声称知识库无充电规格数据，遗漏了参考事实中明确支持的15W无线充电，导致核心问题未准确回答。",
+   "judge_raw": "{\"score\": 2, \"reason\": \"回答正确识别了星耀 Flip 折叠屏机型，但错误声称知识库无充电规格数据，遗漏了参考事实中明确支持的15W无线充电，导致核心问题未准确回答。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 5222.075600000153,
+   "judge_latency_ms": 1283.1820000001244,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": false,
+   "sources_count": 27,
+   "sources_head": [
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 4.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 3.0
+    },
+    {
+     "doc_name": "星域 Stellar X1 Pro",
+     "score": 2.0
+    }
+   ],
+   "tool_path": [
+    "kb_spec_compare"
+   ],
+   "events_count": 300,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 547
+  },
+  {
+   "order": 65,
+   "repeat": 2,
+   "group": "R",
+   "id": "A06",
+   "variant": "no_rerank",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   },
+   "reference_conflict": null,
+   "answer": "可以带，这款完全符合登机标准。\n\n**关键数据：**\n\n| 项目 | 数值 |\n| --- | --- |\n| 容量 | 20000mAh（**74Wh**） |\n| 民航标准 | ＜100Wh 可随身携带 |\n| 参考价 | ¥129.00 |\n\n**结论：** 74Wh 远低于 100Wh 的上限，**可以随身带上飞机**。\n\n**两个提醒：**\n1. 充电宝**必须随身携带，不能托运**——这是民航的硬规定。\n2. 飞行途中一般不允许使用充电宝给设备充电，各航司执行略有差异，登机前可再确认一下。\n\n顺带说一句，这款三口输出、22.5W 快充、LED 数显电量，380g 的重量塞包里也不累赘，出差党挺合适。需要我帮你加购吗？",
+   "score": 5,
+   "reason": "回答正确指出20000mAh约74Wh符合民航<100Wh登机标准，并补充随身携带、不可托运等要点，信息完整准确。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答正确指出20000mAh约74Wh符合民航<100Wh登机标准，并补充随身携带、不可托运等要点，信息完整准确。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 5562.89519999973,
+   "judge_latency_ms": 1333.8603000001967,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "充电宝",
+     "score": 0.5
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.5
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 0.5
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 194,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 318
+  },
+  {
+   "order": 66,
+   "repeat": 2,
+   "group": "R",
+   "id": "A06",
+   "variant": "full",
+   "item": {
+    "id": "A06",
+    "query": "20000mAh 移动电源可以带上飞机吗",
+    "reference": "20000mAh 约 74Wh，符合民航登机标准（<100Wh），可以带上飞机。"
+   },
+   "reference_conflict": null,
+   "answer": "可以带上飞机 ✅\n\n这款 **充电宝 20000mAh 大容量快充移动电源** 的额定能量是 **74Wh**，低于民航规定的 **100Wh** 上限，符合登机标准，可以随身携带上飞机。\n\n几个小提醒：\n- **必须随身携带**，不能托运\n- 建议飞行途中不要使用，各航司规定略有差异\n- 机身标注清晰（容量、能量值）更利于安检通过\n\n顺便说下这货的参数：20000mAh / 74Wh，三口输出（USB-C × 1 + USB-A × 2），最高 22.5W，支持 PD 3.0、QC 3.0，约 380g，售价 ¥129。出差旅行带着挺合适。",
+   "score": 5,
+   "reason": "回答正确确认20000mAh/74Wh符合民航<100Wh登机标准，并补充随身携带、不可托运等要点，信息准确完整。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答正确确认20000mAh/74Wh符合民航<100Wh登机标准，并补充随身携带、不可托运等要点，信息准确完整。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14002.891799999816,
+   "judge_latency_ms": 1286.8063999999322,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.9795997670400479
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 0.9781584788378873
+    },
+    {
+     "doc_name": "充电宝",
+     "score": 0.007589622072606966
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 168,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 274
+  },
+  {
+   "order": 67,
+   "repeat": 2,
+   "group": "D",
+   "id": "D03",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   },
+   "reference_conflict": null,
+   "answer": "屏幕最大的那款是 **星耀 Tab Max 14.6**（14.6 英寸），它的触控笔支持情况如下：\n\n| 项目 | 参数 |\n| --- | --- |\n| 配套笔 | 星耀笔 Pro（随包装附赠） |\n| 压感级别 | **8192 级** |\n| 延迟 | **1ms** |\n| 屏幕 | 14.6\" 3K OLED |\n\n**一句话总结**：8192 级压感 + 1ms 延迟，这是目前星耀产品线里笔体验最强的一档——压感越细腻，画线条时的粗细过渡越自然，1ms 延迟基本做到\"笔尖到哪，线到哪\"，画画、记笔记都不会有拖沓感。\n\n另外提醒一下：星耀笔 Pro 属于配件，**质保 1 年**（主机是 2 年），日常使用注意别摔笔尖。\n\n需要我帮你查一下这款的具体价格和库存吗？",
+   "score": 4,
+   "reason": "正确识别星耀 Tab Max 14.6 并覆盖笔支持要点，但未提及参考中的480Hz触控采样率，且额外参数（8192级压感、1ms延迟、附赠笔）无法从参考验证。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"正确识别星耀 Tab Max 14.6 并覆盖笔支持要点，但未提及参考中的480Hz触控采样率，且额外参数（8192级压感、1ms延迟、附赠笔）无法从参考验证。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 20693.518499999755,
+   "judge_latency_ms": 1574.6137999999519,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Creator 14 设计师本",
+     "score": 0.1431662629912691
+    },
+    {
+     "doc_name": "星耀 Tab Pro 12.4",
+     "score": 0.059040429932284026
+    },
+    {
+     "doc_name": "星耀 Tab Max 14.6",
+     "score": 0.019300291156493357
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 217,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 343
+  },
+  {
+   "order": 68,
+   "repeat": 2,
+   "group": "D",
+   "id": "D03",
+   "variant": "full",
+   "item": {
+    "id": "D03",
+    "context": "我想买台平板用来画画",
+    "query": "屏幕最大那款对触控笔的支持怎么样",
+    "reference": "屏幕最大的是星耀 Tab Max 14.6（14.6 英寸），触控采样率 480Hz（笔模式），支持专业触控笔，OLED 3K 屏。"
+   },
+   "reference_conflict": null,
+   "answer": "屏幕最大的是 **星耀 Tab Max 14.6**（14.6 英寸），它的触控笔支持情况如下：\n\n| 项目 | 参数 |\n| --- | --- |\n| 配套笔 | 星耀笔 Pro（随包装附赠） |\n| 压感级别 | **8192 级** |\n| 延迟 | **1ms** |\n| 屏幕 | 14.6\" 3K OLED |\n\n**简单说**：8192 级压感 + 1ms 延迟，是目前平板里的顶配水平——压感越高，画线粗细过渡越细腻；1ms 延迟基本就是\"笔尖到哪，线到哪\"，画画、记笔记不会有拖影感。\n\n另外它预装/深度适配了 Clip Studio Paint、Concepts 等专业绘画软件，笔的体验是配套调好的，不用自己折腾。\n\n**小提醒**：星耀笔 Pro 作为配件质保 1 年（主机 2 年），日常注意别摔笔尖。\n\n需要我帮你查一下它的具体版本和价格吗？",
+   "score": 3,
+   "reason": "正确识别星耀 Tab Max 14.6 并覆盖屏幕与笔支持，但压感、延迟、附赠笔等关键参数参考事实未提及，存在编造风险且遗漏触控采样率要点。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"正确识别星耀 Tab Max 14.6 并覆盖屏幕与笔支持，但压感、延迟、附赠笔等关键参数参考事实未提及，存在编造风险且遗漏触控采样率要点。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 23704.03860000033,
+   "judge_latency_ms": 880.9541000000536,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 20,
+   "sources_head": [
+    {
+     "doc_name": "星耀 Creator 14 设计师本",
+     "score": 0.1431662629912691
+    },
+    {
+     "doc_name": "星耀 Tab Pro 12.4",
+     "score": 0.059040429932284026
+    },
+    {
+     "doc_name": "星耀 Tab Max 14.6",
+     "score": 0.019300291156493357
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 234,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 386
+  },
+  {
+   "order": 69,
+   "repeat": 2,
+   "group": "D",
+   "id": "D02",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   },
+   "reference_conflict": null,
+   "answer": "你问的应该是 **星耀 A60 5G 学生机** 吧？它的续航和快充表现如下：\n\n| 项目 | 参数 |\n|------|------|\n| 电池容量 | **5000mAh** |\n| 快充功率 | **33W** |\n| 充电速度 | 30 分钟充至 50%，70 分钟充满 |\n| 续航表现 | 轻度使用约 2 天，中度约 1.5 天 |\n| 应急能力 | 超级省电模式下，5% 电量可待机 12 小时 |\n\n**一句话总结**：5000mAh 大电池 + 33W 快充，属于\"够用且耐用\"的组合。轻度用两天没问题，33W 充半小时能到一半，日常通勤、上课完全扛得住。\n\n**小提醒**：33W 在现在算中规中矩，不算快充里的第一梯队——如果你对充电速度特别在意，同价位还有 67W、120W 的机型可选。但如果你更看重\"充一次用两天\"的省心感，这台挺合适。\n\n需要我帮你对比一下其他机型的续航快充吗？",
+   "score": 0,
+   "reason": "回答将机型错误识别为星耀 A60 5G，完全未提供玉米手机 10 Pro 的 5500mAh 电池和 120W 快充信息，属于答非所问。",
+   "judge_raw": "{\"score\": 0, \"reason\": \"回答将机型错误识别为星耀 A60 5G，完全未提供玉米手机 10 Pro 的 5500mAh 电池和 120W 快充信息，属于答非所问。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 11433.514100000139,
+   "judge_latency_ms": 1253.7045999997645,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "星耀 A60 5G 学生机",
+     "score": 0.4354944414421922
+    },
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.3331980573421799
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.32306426995798
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 259,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 404
+  },
+  {
+   "order": 70,
+   "repeat": 2,
+   "group": "D",
+   "id": "D02",
+   "variant": "full",
+   "item": {
+    "id": "D02",
+    "context": "介绍一下玉米手机 10 Pro",
+    "query": "这款手机的续航和快充表现怎么样",
+    "reference": "玉米手机 10 Pro：5500mAh 谷能高密度电池，120W 谷闪极速快充（19 分钟充满）。"
+   },
+   "reference_conflict": null,
+   "answer": "玉米手机 10 Pro 的续航和快充表现如下：\n\n**续航**\n- 电池容量：**5500mAh** 高密度电芯\n- 正常使用续航可达 **1.5 天**\n\n**快充**\n- 有线：**120W 谷闪快充**，**19 分钟**从 0 充到 100%，充电 **5 分钟**可用 **4 小时**\n- 无线：支持 **50W 谷闪无线快充**，还有 **15W 无线反向充电**，能给耳机、手表应急补电\n\n一句话总结：5500mAh 大电池配 120W 快充，属于\"充得快、用得久\"的组合，早上洗漱的功夫充一会儿就够撑大半天。包装里还直接附赠 120W 充电器，不用另买。\n\n需要我帮你对比一下不同内存版本的价格吗？",
+   "score": 4,
+   "reason": "核心参数5500mAh和120W快充及19分钟充满均正确，但额外补充的1.5天续航、5分钟用4小时、无线充电等细节参考事实未提及，属于次要信息扩展，整体正确。",
+   "judge_raw": "{\"score\": 4, \"reason\": \"核心参数5500mAh和120W快充及19分钟充满均正确，但额外补充的1.5天续航、5分钟用4小时、无线充电等细节参考事实未提及，属于次要信息扩展，整体正确。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 12133.698999999979,
+   "judge_latency_ms": 1164.2876000000797,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.9916163442435895
+    },
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.7482480047056748
+    },
+    {
+     "doc_name": "玉米手机 10 Pro",
+     "score": 0.4956433394842172
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 197,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 308
+  },
+  {
+   "order": 71,
+   "repeat": 2,
+   "group": "D",
+   "id": "D06",
+   "variant": "no_rewrite",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   },
+   "reference_conflict": "产品规格文档称ANC开5.5h、关8h、充电盒额外28h；另一片段称ANC开9h+27h，真实值未确认。",
+   "answer": "关于星耀 Buds Pro 3 降噪耳机的续航，**开降噪**的情况下：\n\n| 使用方式 | 续航时间 |\n|---------|---------|\n| 单耳机（ANC 开） | **5.5 小时** |\n| 配合充电盒（总续航） | **36 小时** |\n\n简单说：**一次充满，开着降噪能连续听 5.5 小时**；电量用完后放回充电盒补电，加起来总共能撑 36 小时。另外它支持快充，充 10 分钟能听 2 小时，通勤路上临时补电很够用。\n\n小提醒：如果关掉降噪，单次续航能到 8 小时。长时间佩戴的话，建议偶尔切到通透模式让耳朵歇一歇～",
+   "score": 5,
+   "reason": "回答准确给出开降噪单次续航5.5小时，并补充总续航36小时和关降噪8小时，覆盖参考事实要点，无事实错误。",
+   "judge_raw": "{\"score\": 5, \"reason\": \"回答准确给出开降噪单次续航5.5小时，并补充总续航36小时和关降噪8小时，覆盖参考事实要点，无事实错误。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14116.243299999951,
+   "judge_latency_ms": 1091.5337999999792,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.19774898838909155
+    },
+    {
+     "doc_name": "星耀 Buds Pro 3 降噪耳机",
+     "score": 0.08183925850444228
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.08081973597852764
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 177,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 273
+  },
+  {
+   "order": 72,
+   "repeat": 2,
+   "group": "D",
+   "id": "D06",
+   "variant": "full",
+   "item": {
+    "id": "D06",
+    "context": "星耀 Buds Pro 3 降噪深度是多少",
+    "query": "开着降噪能连续用几个小时",
+    "reference": "星耀 Buds Pro 3 开 ANC 续航 5.5 小时（关 ANC 8 小时），充电盒额外 28 小时，综合 36 小时。"
+   },
+   "reference_conflict": "产品规格文档称ANC开5.5h、关8h、充电盒额外28h；另一片段称ANC开9h+27h，真实值未确认。",
+   "answer": "关于星耀 Buds Pro 3 降噪耳机的续航，我查到的资料里有两处说法不太一致，先跟你说明：\n\n| 场景 | 说法一（商品详情） | 说法二（规格说明书） |\n|------|------|------|\n| 单耳续航（开降噪） | 9 小时 | 5.5 小时 |\n| 单耳续航（关降噪） | — | 8 小时 |\n| 含充电盒总续航 | 36 小时（ANC 开） | 36 小时 |\n\n**保守估计：开着降噪单耳能连续用 5.5～9 小时**，配合充电盒总共约 36 小时。快充也很给力——充 10 分钟能听 2 小时。\n\n生活化一点说：通勤来回加一整天办公，单耳基本够用；出差旅行靠充电盒续命，一周不用找插座。\n\n小提醒：长时间开降噪建议偶尔切到通透模式，让耳朵歇一歇。\n\n如果你想要更精确的数字，我可以帮你查一下这款商品的用户评价，看看大家实测反馈如何？",
+   "score": 3,
+   "reason": "回答覆盖了开降噪5.5小时和总续航36小时等要点，但引入未经确认的9小时说法并给出5.5～9小时的模糊区间，未明确以5.5小时为准，存在明显遗漏和不确定性。",
+   "judge_raw": "{\"score\": 3, \"reason\": \"回答覆盖了开降噪5.5小时和总续航36小时等要点，但引入未经确认的9小时说法并给出5.5～9小时的模糊区间，未明确以5.5小时为准，存在明显遗漏和不确定性。\"}",
+   "status": "ok",
+   "errors": [],
+   "intent": "product_consult",
+   "latency_ms": 14567.212899999959,
+   "judge_latency_ms": 1268.7691000000996,
+   "tool_used": "kb_search",
+   "uses_react": false,
+   "rerank_attempts": 1,
+   "real_rerank_calls": 1,
+   "kb_tool_used": true,
+   "nonempty_without_kb": false,
+   "rerank_exercised": true,
+   "sources_count": 5,
+   "sources_head": [
+    {
+     "doc_name": "未知文档",
+     "score": 0.19774898838909155
+    },
+    {
+     "doc_name": "星耀 Buds Pro 3 降噪耳机",
+     "score": 0.08183925850444228
+    },
+    {
+     "doc_name": "未知文档",
+     "score": 0.08081973597852764
+    }
+   ],
+   "tool_path": [
+    "kb_search_tool"
+   ],
+   "events_count": 248,
+   "graph_intent": "product_consult",
+   "graph_answer_len": 381
+  }
+ ],
+ "completed": true,
+ "row_count": 72,
+ "expected_row_count": 72,
+ "error_count": 0,
+ "rerank_attempts": 44,
+ "real_rerank_calls": 44,
+ "summary": [
+  {
+   "variant": "R_full",
+   "n": 16,
+   "expected_n": 16,
+   "error_count": 0,
+   "reference_conflict_count": 2,
+   "scored_n": 14,
+   "avg_score": 4.0,
+   "kb_scored_n": 10,
+   "kb_avg_score": 4.3,
+   "latency_avg_ms": 8735.527557142892,
+   "nonempty_without_kb": 4,
+   "rerank_attempts": 8,
+   "real_rerank_calls": 8
+  },
+  {
+   "variant": "R_no_rerank",
+   "n": 16,
+   "expected_n": 16,
+   "error_count": 0,
+   "reference_conflict_count": 2,
+   "scored_n": 14,
+   "avg_score": 4.071428571428571,
+   "kb_scored_n": 10,
+   "kb_avg_score": 4.4,
+   "latency_avg_ms": 5345.978607142862,
+   "nonempty_without_kb": 4,
+   "rerank_attempts": 0,
+   "real_rerank_calls": 0
+  },
+  {
+   "variant": "D_full",
+   "n": 20,
+   "expected_n": 20,
+   "error_count": 0,
+   "reference_conflict_count": 2,
+   "scored_n": 18,
+   "avg_score": 3.888888888888889,
+   "kb_scored_n": 16,
+   "kb_avg_score": 4.3125,
+   "latency_avg_ms": 14618.291766666742,
+   "nonempty_without_kb": 2,
+   "rerank_attempts": 18,
+   "real_rerank_calls": 18
+  },
+  {
+   "variant": "D_no_rewrite",
+   "n": 20,
+   "expected_n": 20,
+   "error_count": 0,
+   "reference_conflict_count": 2,
+   "scored_n": 18,
+   "avg_score": 2.5,
+   "kb_scored_n": 16,
+   "kb_avg_score": 2.6875,
+   "latency_avg_ms": 13627.900433333252,
+   "nonempty_without_kb": 2,
+   "rerank_attempts": 18,
+   "real_rerank_calls": 18
+  }
+ ],
+ "paired_by_repeat": [
+  {
+   "repeat": 1,
+   "group": "R",
+   "expected_pairs": 8,
+   "valid_pairs": 7,
+   "error_or_missing_pairs": 0,
+   "reference_conflict_pairs": 1,
+   "avg_score_full_minus_ablated": -0.2857142857142857,
+   "avg_latency_ms_full_minus_ablated": 2836.703800000058,
+   "rerank_exercised_pairs": 3,
+   "rerank_exercised_score_delta": -0.3333333333333333,
+   "differences": [
+    {
+     "id": "C03",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": -3734.2091000004984,
+     "both_kb": true,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "B06",
+     "status": "ok",
+     "score_full_minus_ablated": -1,
+     "latency_ms_full_minus_ablated": -886.4782999999079,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "A03",
+     "status": "reference_conflict",
+     "score_full_minus_ablated": null,
+     "latency_ms_full_minus_ablated": null,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "B02",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 415.81870000027266,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "A09",
+     "status": "ok",
+     "score_full_minus_ablated": -1,
+     "latency_ms_full_minus_ablated": 8731.13900000044,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "A02",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 8074.755600000117,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "A06",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 7794.151399999919,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "A04",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": -538.250699999935,
+     "both_kb": true,
+     "both_rerank_exercised": false
+    }
+   ]
+  },
+  {
+   "repeat": 1,
+   "group": "D",
+   "expected_pairs": 10,
+   "valid_pairs": 9,
+   "error_or_missing_pairs": 0,
+   "reference_conflict_pairs": 1,
+   "avg_score_full_minus_ablated": 1.4444444444444444,
+   "avg_latency_ms_full_minus_ablated": 1252.6806333333095,
+   "rerank_exercised_pairs": 8,
+   "rerank_exercised_score_delta": 1.625,
+   "differences": [
+    {
+     "id": "D10",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 136.12390000025698,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D06",
+     "status": "reference_conflict",
+     "score_full_minus_ablated": null,
+     "latency_ms_full_minus_ablated": null,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "D01",
+     "status": "ok",
+     "score_full_minus_ablated": 1,
+     "latency_ms_full_minus_ablated": 2190.3259000000617,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D02",
+     "status": "ok",
+     "score_full_minus_ablated": 4,
+     "latency_ms_full_minus_ablated": 117.24469999990106,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D09",
+     "status": "ok",
+     "score_full_minus_ablated": -1,
+     "latency_ms_full_minus_ablated": 553.418800000145,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D03",
+     "status": "ok",
+     "score_full_minus_ablated": -1,
+     "latency_ms_full_minus_ablated": 7776.440799999818,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D08",
+     "status": "ok",
+     "score_full_minus_ablated": 5,
+     "latency_ms_full_minus_ablated": -2386.4932999999837,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D07",
+     "status": "ok",
+     "score_full_minus_ablated": 4,
+     "latency_ms_full_minus_ablated": 1367.6351999997678,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D04",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 2120.169099999657,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "D05",
+     "status": "ok",
+     "score_full_minus_ablated": 1,
+     "latency_ms_full_minus_ablated": -600.7393999998385,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    }
+   ]
+  },
+  {
+   "repeat": 2,
+   "group": "R",
+   "expected_pairs": 8,
+   "valid_pairs": 7,
+   "error_or_missing_pairs": 0,
+   "reference_conflict_pairs": 1,
+   "avg_score_full_minus_ablated": 0.14285714285714285,
+   "avg_latency_ms_full_minus_ablated": 3942.3941000000013,
+   "rerank_exercised_pairs": 3,
+   "rerank_exercised_score_delta": 0.0,
+   "differences": [
+    {
+     "id": "A09",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 8698.08890000013,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "B02",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 507.19870000011724,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "A04",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 242.93679999982487,
+     "both_kb": true,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "A03",
+     "status": "reference_conflict",
+     "score_full_minus_ablated": null,
+     "latency_ms_full_minus_ablated": null,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "A02",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 9906.513299999915,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "B06",
+     "status": "ok",
+     "score_full_minus_ablated": 1,
+     "latency_ms_full_minus_ablated": 317.0976999999766,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "C03",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": -515.07330000004,
+     "both_kb": true,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "A06",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 8439.996600000086,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    }
+   ]
+  },
+  {
+   "repeat": 2,
+   "group": "D",
+   "expected_pairs": 10,
+   "valid_pairs": 9,
+   "error_or_missing_pairs": 0,
+   "reference_conflict_pairs": 1,
+   "avg_score_full_minus_ablated": 1.3333333333333333,
+   "avg_latency_ms_full_minus_ablated": 728.102033333673,
+   "rerank_exercised_pairs": 8,
+   "rerank_exercised_score_delta": 1.625,
+   "differences": [
+    {
+     "id": "D04",
+     "status": "ok",
+     "score_full_minus_ablated": -1,
+     "latency_ms_full_minus_ablated": 1872.6837000003798,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    },
+    {
+     "id": "D05",
+     "status": "ok",
+     "score_full_minus_ablated": 1,
+     "latency_ms_full_minus_ablated": -277.37239999942176,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D07",
+     "status": "ok",
+     "score_full_minus_ablated": 5,
+     "latency_ms_full_minus_ablated": 462.0926000002328,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D10",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": -256.46489999962796,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D08",
+     "status": "ok",
+     "score_full_minus_ablated": 5,
+     "latency_ms_full_minus_ablated": -1229.6621999994386,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D09",
+     "status": "ok",
+     "score_full_minus_ablated": 0,
+     "latency_ms_full_minus_ablated": 1092.0074000000568,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D01",
+     "status": "ok",
+     "score_full_minus_ablated": -1,
+     "latency_ms_full_minus_ablated": 1178.9291000004596,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D03",
+     "status": "ok",
+     "score_full_minus_ablated": -1,
+     "latency_ms_full_minus_ablated": 3010.5201000005763,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D02",
+     "status": "ok",
+     "score_full_minus_ablated": 4,
+     "latency_ms_full_minus_ablated": 700.1848999998401,
+     "both_kb": true,
+     "both_rerank_exercised": true
+    },
+    {
+     "id": "D06",
+     "status": "reference_conflict",
+     "score_full_minus_ablated": null,
+     "latency_ms_full_minus_ablated": null,
+     "both_kb": false,
+     "both_rerank_exercised": false
+    }
+   ]
+  }
+ ],
+ "models": {
+  "LLM_MODEL_NAME": "deepseek-chat",
+  "LLM_TEMPERATURE": 0.3,
+  "RERANKER_MODEL_NAME": "./data/models/bge-reranker-v2-m3",
+  "RERANKER_DEVICE": "cpu",
+  "RERANKER_USE_FP16": false,
+  "RERANKER_BATCH_SIZE": 16,
+  "RETRIEVER_TOP_K": 12,
+  "RERANK_TOP_K": 5
+ },
+ "warmup_ms": 8644.290499999897,
+ "finished_at": "2026-11-07T03:01:53.304493+00:00",
+ "compacted": "去掉 sources/tool_trace/events/graph_result/tool_results 全量过程快照，保留指标与调用链摘要"
+}

@@ -1,0 +1,2198 @@
+{
+ "run_id": "1d581156f8264bbb92176420a144056d",
+ "created_at": "20261107T033511_823646Z",
+ "output": "D:\\Desktop\\stellar-mall\\rag-backend\\scripts\\ablation\\results_cache_20261107_v3_limit3c.json",
+ "dry_run": false,
+ "passed": false,
+ "phases": [
+  {
+   "phase": "P0_cache_off",
+   "target": {
+    "run_id": "1d581156f8264bbb92176420a144056d",
+    "label": "seed",
+    "uid": "7a5a75d481ae438bb42a8b0557b3c5bb",
+    "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:7a5a75d481ae438bb42a8b0557b3c5bb:",
+    "es_index": "stellar_ablation_cache_7a5a75d481ae438bb42a8b0557b3c5bb"
+   },
+   "n": 3,
+   "n_attempted": 3,
+   "n_success": 3,
+   "n_failed": 0,
+   "latency_avg_ms": 13077.70580000033,
+   "latency_min_ms": 4715.614800000367,
+   "latency_max_ms": 19677.55070000021,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 0,
+    "write_oks": 0,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": null,
+   "switches": {
+    "LLM_CACHE_ENABLED": false,
+    "LLM_CACHE_REDIS_ENABLED": false,
+    "LLM_CACHE_SEMANTIC_ENABLED": false
+   },
+   "detail": [
+    {
+     "query": "星耀 X100 Pro Max 支持卫星通信吗",
+     "ok": true,
+     "elapsed_ms": 14839.951900000415,
+     "latency_ms": 14839.951900000415,
+     "drain_ms": 3.1879999996817787,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "清逸 AirBook 14 的屏幕参数怎么样",
+     "ok": true,
+     "elapsed_ms": 19677.55070000021,
+     "latency_ms": 19677.55070000021,
+     "drain_ms": 3.6511999996946543,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "AX3000 路由器支持哪些无线协议",
+     "ok": true,
+     "elapsed_ms": 4715.614800000367,
+     "latency_ms": 4715.614800000367,
+     "drain_ms": 2.9291999999259133,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "cache-off: no hits or writes",
+     "passed": true
+    },
+    {
+     "criterion": "L2 disabled: no actual reads/writes",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P0b_cold_populate",
+   "target": {
+    "run_id": "1d581156f8264bbb92176420a144056d",
+    "label": "seed",
+    "uid": "7a5a75d481ae438bb42a8b0557b3c5bb",
+    "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:7a5a75d481ae438bb42a8b0557b3c5bb:",
+    "es_index": "stellar_ablation_cache_7a5a75d481ae438bb42a8b0557b3c5bb"
+   },
+   "n": 3,
+   "n_attempted": 3,
+   "n_success": 3,
+   "n_failed": 0,
+   "latency_avg_ms": 12185.78269999974,
+   "latency_min_ms": 4378.287399999863,
+   "latency_max_ms": 18783.913700000085,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 6,
+    "write_oks": 12,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": true
+   },
+   "detail": [
+    {
+     "query": "星耀 X100 Pro Max 支持卫星通信吗",
+     "ok": true,
+     "elapsed_ms": 13395.14699999927,
+     "latency_ms": 13395.14699999927,
+     "drain_ms": 44.51689999950759,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "清逸 AirBook 14 的屏幕参数怎么样",
+     "ok": true,
+     "elapsed_ms": 18783.913700000085,
+     "latency_ms": 18783.913700000085,
+     "drain_ms": 33.49489999982325,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "AX3000 路由器支持哪些无线协议",
+     "ok": true,
+     "elapsed_ms": 4378.287399999863,
+     "latency_ms": 4378.287399999863,
+     "drain_ms": 32.69499999987602,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "cold seed exercised misses",
+     "passed": true
+    },
+    {
+     "criterion": "l1 answer seed written (not merely intent)",
+     "passed": true
+    },
+    {
+     "criterion": "l2 answer seed written (not merely intent)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P1_l1_exact",
+   "target": {
+    "run_id": "1d581156f8264bbb92176420a144056d",
+    "label": "seed",
+    "uid": "7a5a75d481ae438bb42a8b0557b3c5bb",
+    "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:7a5a75d481ae438bb42a8b0557b3c5bb:",
+    "es_index": "stellar_ablation_cache_7a5a75d481ae438bb42a8b0557b3c5bb"
+   },
+   "n": 3,
+   "n_attempted": 3,
+   "n_success": 3,
+   "n_failed": 0,
+   "latency_avg_ms": 7551.045666666444,
+   "latency_min_ms": 10.901699999521952,
+   "latency_max_ms": 13712.044699999751,
+   "delta": {
+    "l1_hits": 6,
+    "l2_hits": 0,
+    "misses": 0,
+    "write_oks": 0,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 3,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 3,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 1.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": false
+   },
+   "detail": [
+    {
+     "query": "星耀 X100 Pro Max 支持卫星通信吗",
+     "ok": true,
+     "elapsed_ms": 8930.19060000006,
+     "latency_ms": 8930.19060000006,
+     "drain_ms": 2.4739999998928397,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "清逸 AirBook 14 的屏幕参数怎么样",
+     "ok": true,
+     "elapsed_ms": 13712.044699999751,
+     "latency_ms": 13712.044699999751,
+     "drain_ms": 2.4714000001040404,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "AX3000 路由器支持哪些无线协议",
+     "ok": true,
+     "elapsed_ms": 10.901699999521952,
+     "latency_ms": 10.901699999521952,
+     "drain_ms": 2.8652000000874978,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "at least one L1 ANSWER hit",
+     "passed": true
+    },
+    {
+     "criterion": "L2 disabled: no actual reads/writes",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P2_l2_on",
+   "target": {
+    "run_id": "1d581156f8264bbb92176420a144056d",
+    "label": "l2_on",
+    "uid": "34de106718cc4791b974b794a45ef077",
+    "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:34de106718cc4791b974b794a45ef077:",
+    "es_index": "stellar_ablation_cache_34de106718cc4791b974b794a45ef077"
+   },
+   "n": 3,
+   "n_attempted": 3,
+   "n_success": 3,
+   "n_failed": 0,
+   "latency_avg_ms": 6549.394399999983,
+   "latency_min_ms": 3721.938399999999,
+   "latency_max_ms": 11816.5355000001,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 2,
+    "misses": 5,
+    "write_oks": 10,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 1,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 2,
+      "misses": 1,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 1,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 1,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.2857142857142857,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": true
+   },
+   "detail": [
+    {
+     "query": "请问一下，星耀 X100 Pro Max 支不支持卫星通信呢？",
+     "ok": true,
+     "elapsed_ms": 11816.5355000001,
+     "latency_ms": 11816.5355000001,
+     "drain_ms": 28.449100000216276,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "想了解下清逸 AirBook 14 这款笔记本的屏幕参数",
+     "ok": true,
+     "elapsed_ms": 4109.7092999998495,
+     "latency_ms": 4109.7092999998495,
+     "drain_ms": 34.24840000025142,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "路由器 AX3000 都兼容什么无线协议呀",
+     "ok": true,
+     "elapsed_ms": 3721.938399999999,
+     "latency_ms": 3721.938399999999,
+     "drain_ms": 28.8845000004585,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "at least one L2 ANSWER hit; zero hits is NOT success",
+     "passed": false
+    }
+   ],
+   "passed": false
+  },
+  {
+   "phase": "P2b_l2_off",
+   "target": {
+    "run_id": "1d581156f8264bbb92176420a144056d",
+    "label": "l2_off",
+    "uid": "6dcce080c6bd45df95a9743e6792e466",
+    "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:6dcce080c6bd45df95a9743e6792e466:",
+    "es_index": "stellar_ablation_cache_6dcce080c6bd45df95a9743e6792e466"
+   },
+   "n": 3,
+   "n_attempted": 3,
+   "n_success": 3,
+   "n_failed": 0,
+   "latency_avg_ms": 7660.541466666776,
+   "latency_min_ms": 4468.270100000154,
+   "latency_max_ms": 13051.185500000429,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 7,
+    "write_oks": 6,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 1,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 3,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 3
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 3,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 3
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 1,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": false
+   },
+   "detail": [
+    {
+     "query": "请问一下，星耀 X100 Pro Max 支不支持卫星通信呢？",
+     "ok": true,
+     "elapsed_ms": 13051.185500000429,
+     "latency_ms": 13051.185500000429,
+     "drain_ms": 6.154799999421812,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "想了解下清逸 AirBook 14 这款笔记本的屏幕参数",
+     "ok": true,
+     "elapsed_ms": 5462.168799999745,
+     "latency_ms": 5462.168799999745,
+     "drain_ms": 5.920900000091933,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "路由器 AX3000 都兼容什么无线协议呀",
+     "ok": true,
+     "elapsed_ms": 4468.270100000154,
+     "latency_ms": 4468.270100000154,
+     "drain_ms": 5.878699999811943,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "no paraphrase L1 answer hits from previous variant",
+     "passed": true
+    },
+    {
+     "criterion": "L2 disabled: no actual reads/writes",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P3_novel",
+   "target": {
+    "run_id": "1d581156f8264bbb92176420a144056d",
+    "label": "novel",
+    "uid": "ea150a1f3d414c58abc6a36eb0b94dcd",
+    "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:ea150a1f3d414c58abc6a36eb0b94dcd:",
+    "es_index": "stellar_ablation_cache_ea150a1f3d414c58abc6a36eb0b94dcd"
+   },
+   "n": 3,
+   "n_attempted": 3,
+   "n_success": 3,
+   "n_failed": 0,
+   "latency_avg_ms": 13122.075833333232,
+   "latency_min_ms": 13063.56820000019,
+   "latency_max_ms": 13215.158199999678,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 6,
+    "write_oks": 12,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 3,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 3,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": true
+   },
+   "detail": [
+    {
+     "query": "星耀 Watch 4 Ultra 的防水等级是多少",
+     "ok": true,
+     "elapsed_ms": 13063.56820000019,
+     "latency_ms": 13063.56820000019,
+     "drain_ms": 31.353399999716203,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Creator 14 用什么处理器",
+     "ok": true,
+     "elapsed_ms": 13087.501099999827,
+     "latency_ms": 13087.501099999827,
+     "drain_ms": 33.396199999515375,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Tab Pro 12.4 电池多大",
+     "ok": true,
+     "elapsed_ms": 13215.158199999678,
+     "latency_ms": 13215.158199999678,
+     "drain_ms": 31.259000000318338,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "novel really missed (unexpected hits invalidate all-miss claim)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P4_single_flight_on",
+   "boundary": "unit probe only; synthetic producer, no Agent/API throughput claim",
+   "key": "ablation:sf:d6f1d2b9215c41bf9e1b426b2a3b5ec7",
+   "n": 6,
+   "n_success": 6,
+   "producer_calls": 1,
+   "expected_producer_calls": 1,
+   "observed_waiters": 5,
+   "detail": [
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.15500000063184416,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.2418000003672205,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.167199999850709,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.16179999965970637,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.1601999992999481,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.14800000008108327,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P4_single_flight_off",
+   "boundary": "unit probe only; synthetic producer, no Agent/API throughput claim",
+   "key": "ablation:sf:d4baa0fa41374d0cb677991bf1c271d2",
+   "n": 6,
+   "n_success": 6,
+   "producer_calls": 6,
+   "expected_producer_calls": 6,
+   "observed_waiters": 0,
+   "detail": [
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.01340000017080456,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.14100000043981709,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.14689999989059288,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.14559999999619322,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.14090000058786245,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.13299999955052044,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    }
+   ],
+   "passed": true
+  }
+ ],
+ "queries": [
+  "星耀 X100 Pro Max 支持卫星通信吗",
+  "清逸 AirBook 14 的屏幕参数怎么样",
+  "AX3000 路由器支持哪些无线协议"
+ ],
+ "paraphrases": [
+  "请问一下，星耀 X100 Pro Max 支不支持卫星通信呢？",
+  "想了解下清逸 AirBook 14 这款笔记本的屏幕参数",
+  "路由器 AX3000 都兼容什么无线协议呀"
+ ],
+ "novel": [
+  "星耀 Watch 4 Ultra 的防水等级是多少",
+  "星耀 Creator 14 用什么处理器",
+  "星耀 Tab Pro 12.4 电池多大"
+ ],
+ "plan": [
+  "P0_cache_off",
+  "P0b_cold_populate",
+  "P1_l1_exact",
+  "P2_l2_on",
+  "P2b_l2_off",
+  "P3_novel",
+  "P4_single_flight_on",
+  "P4_single_flight_off"
+ ],
+ "boundary": "full synchronous Agent including uses_react; FAQ/Bloom off; SF off except paired unit probe",
+ "comparison": "P2/P2b independent clones of drained P0b seed; L2 read+write on/off; intra-variant backfills retained",
+ "caveats": [
+  "BGE and all input embeddings warmed before P0; derived tool queries may still differ",
+  "tool context_hash may change; zero answer hits fail criteria",
+  "latencies exclude drain; failed/fallback answers excluded; full answers and warnings retained",
+  "P3 starts in an empty separate target, not a warm-cache novel-query test",
+  "ES indexes retained; experiment Redis keys have TTL; no cache deletion",
+  "drain timeout aborts; teardown waits for workers before restoring patches"
+ ],
+ "targets": [
+  {
+   "run_id": "1d581156f8264bbb92176420a144056d",
+   "label": "seed",
+   "uid": "7a5a75d481ae438bb42a8b0557b3c5bb",
+   "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:7a5a75d481ae438bb42a8b0557b3c5bb:",
+   "es_index": "stellar_ablation_cache_7a5a75d481ae438bb42a8b0557b3c5bb"
+  },
+  {
+   "run_id": "1d581156f8264bbb92176420a144056d",
+   "label": "l2_on",
+   "uid": "34de106718cc4791b974b794a45ef077",
+   "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:34de106718cc4791b974b794a45ef077:",
+   "es_index": "stellar_ablation_cache_34de106718cc4791b974b794a45ef077"
+  },
+  {
+   "run_id": "1d581156f8264bbb92176420a144056d",
+   "label": "l2_off",
+   "uid": "6dcce080c6bd45df95a9743e6792e466",
+   "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:6dcce080c6bd45df95a9743e6792e466:",
+   "es_index": "stellar_ablation_cache_6dcce080c6bd45df95a9743e6792e466"
+  },
+  {
+   "run_id": "1d581156f8264bbb92176420a144056d",
+   "label": "novel",
+   "uid": "ea150a1f3d414c58abc6a36eb0b94dcd",
+   "redis_prefix": "ablation:1d581156f8264bbb92176420a144056d:ea150a1f3d414c58abc6a36eb0b94dcd:",
+   "es_index": "stellar_ablation_cache_ea150a1f3d414c58abc6a36eb0b94dcd"
+  }
+ ],
+ "settings": {
+  "LLM_MODEL_NAME": "deepseek-chat",
+  "LLM_TEMPERATURE": 0.3,
+  "LLM_CACHE_SEMANTIC_RERANK_THRESHOLD": 0.9,
+  "LLM_CACHE_SEMANTIC_K": 5,
+  "LLM_CACHE_SEMANTIC_MAXSIZE": 5000
+ },
+ "ttl_seconds": 7200,
+ "warmup": {
+  "latency_ms": 15979.745200000252,
+  "embedding_queries": 9,
+  "bge_ready": true
+ },
+ "seed": {
+  "sha256": "37e4ab08e9a888d7a739ca9b7d2eea0b675d740cc2e5ef9979a8efa9f71d179c",
+  "source": "P0b QUERIES only; before P1 or PARAPHRASES",
+  "snapshot_bytes": 256077,
+  "snapshot_omitted": true
+ },
+ "clone_hashes": {
+  "l2_on": "37e4ab08e9a888d7a739ca9b7d2eea0b675d740cc2e5ef9979a8efa9f71d179c",
+  "l2_off": "37e4ab08e9a888d7a739ca9b7d2eea0b675d740cc2e5ef9979a8efa9f71d179c"
+ },
+ "variant_start_hashes": {
+  "l2_on": "37e4ab08e9a888d7a739ca9b7d2eea0b675d740cc2e5ef9979a8efa9f71d179c",
+  "l2_off": "37e4ab08e9a888d7a739ca9b7d2eea0b675d740cc2e5ef9979a8efa9f71d179c"
+ },
+ "final_metrics_snapshot": {
+  "l1_hits": 6,
+  "l2_hits": 2,
+  "misses": 24,
+  "hit_ratio": 0.25,
+  "write_oks": 40,
+  "write_fails": 0,
+  "avg_l1_latency_ms": 1.04,
+  "avg_l2_latency_ms": 20.22
+ },
+ "compacted": "seed.snapshot 与 phases[].detail[].result 已省略，保留分层命中与耗时"
+}

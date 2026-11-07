@@ -1,0 +1,5579 @@
+{
+ "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+ "created_at": "20261107T030155_363537Z",
+ "output": "D:\\Desktop\\stellar-mall\\rag-backend\\scripts\\ablation\\results_cache_20261107_v2.json",
+ "dry_run": false,
+ "passed": false,
+ "phases": [
+  {
+   "phase": "P0_cache_off",
+   "target": {
+    "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+    "label": "seed",
+    "uid": "335144b2c45d48c3bfcdf05ce5d6e1ac",
+    "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:335144b2c45d48c3bfcdf05ce5d6e1ac:",
+    "es_index": "stellar_ablation_cache_335144b2c45d48c3bfcdf05ce5d6e1ac"
+   },
+   "n": 12,
+   "n_attempted": 12,
+   "n_success": 12,
+   "n_failed": 0,
+   "latency_avg_ms": 8715.184224999954,
+   "latency_min_ms": 4278.658499999892,
+   "latency_max_ms": 18771.431099999973,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 0,
+    "write_oks": 0,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": null,
+   "switches": {
+    "LLM_CACHE_ENABLED": false,
+    "LLM_CACHE_REDIS_ENABLED": false,
+    "LLM_CACHE_SEMANTIC_ENABLED": false
+   },
+   "detail": [
+    {
+     "query": "星耀 X100 Pro Max 支持卫星通信吗",
+     "ok": true,
+     "elapsed_ms": 14141.042799999923,
+     "latency_ms": 14141.042799999923,
+     "drain_ms": 2.7765999998337065,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "清逸 AirBook 14 的屏幕参数怎么样",
+     "ok": true,
+     "elapsed_ms": 18771.431099999973,
+     "latency_ms": 18771.431099999973,
+     "drain_ms": 3.0369999999493302,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "AX3000 路由器支持哪些无线协议",
+     "ok": true,
+     "elapsed_ms": 4278.658499999892,
+     "latency_ms": 4278.658499999892,
+     "drain_ms": 3.13079999978072,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "20000mAh 移动电源可以带上飞机吗",
+     "ok": true,
+     "elapsed_ms": 12638.076400000045,
+     "latency_ms": 12638.076400000045,
+     "drain_ms": 3.0249000001276727,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Band 9 支持多少种运动模式",
+     "ok": true,
+     "elapsed_ms": 12530.525399999988,
+     "latency_ms": 12530.525399999988,
+     "drain_ms": 3.0312999997477164,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "天玑 9300 芯片的平板有哪些",
+     "ok": true,
+     "elapsed_ms": 6662.842500000352,
+     "latency_ms": 6662.842500000352,
+     "drain_ms": 3.2787000000098487,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "能测心电图和血压趋势的智能手表",
+     "ok": true,
+     "elapsed_ms": 6389.225099999749,
+     "latency_ms": 6389.225099999749,
+     "drain_ms": 3.309199999876,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "戴着睡觉也没感觉的健康监测设备",
+     "ok": true,
+     "elapsed_ms": 7172.772599999917,
+     "latency_ms": 7172.772599999917,
+     "drain_ms": 2.993199999764329,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "5500mAh 电池配 120W 快充的手机",
+     "ok": true,
+     "elapsed_ms": 6241.261099999974,
+     "latency_ms": 6241.261099999974,
+     "drain_ms": 3.2863999999790394,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "支持无线充电的折叠屏手机",
+     "ok": true,
+     "elapsed_ms": 5193.223499999931,
+     "latency_ms": 5193.223499999931,
+     "drain_ms": 4.543000000012398,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "可以插存储卡扩容的平板电脑",
+     "ok": true,
+     "elapsed_ms": 5338.172400000076,
+     "latency_ms": 5338.172400000076,
+     "drain_ms": 2.9824000002918183,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "带 eSIM 独立打电话的智能手表",
+     "ok": true,
+     "elapsed_ms": 5224.979299999632,
+     "latency_ms": 5224.979299999632,
+     "drain_ms": 3.0166000001372595,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "cache-off: no hits or writes",
+     "passed": true
+    },
+    {
+     "criterion": "L2 disabled: no actual reads/writes",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P0b_cold_populate",
+   "target": {
+    "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+    "label": "seed",
+    "uid": "335144b2c45d48c3bfcdf05ce5d6e1ac",
+    "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:335144b2c45d48c3bfcdf05ce5d6e1ac:",
+    "es_index": "stellar_ablation_cache_335144b2c45d48c3bfcdf05ce5d6e1ac"
+   },
+   "n": 12,
+   "n_attempted": 12,
+   "n_success": 12,
+   "n_failed": 0,
+   "latency_avg_ms": 8406.701933333352,
+   "latency_min_ms": 4232.199200000196,
+   "latency_max_ms": 18421.655399999963,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 24,
+    "write_oks": 48,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": true
+   },
+   "detail": [
+    {
+     "query": "星耀 X100 Pro Max 支持卫星通信吗",
+     "ok": true,
+     "elapsed_ms": 13201.69050000004,
+     "latency_ms": 13201.69050000004,
+     "drain_ms": 66.75859999995737,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "清逸 AirBook 14 的屏幕参数怎么样",
+     "ok": true,
+     "elapsed_ms": 18421.655399999963,
+     "latency_ms": 18421.655399999963,
+     "drain_ms": 67.60329999997339,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "AX3000 路由器支持哪些无线协议",
+     "ok": true,
+     "elapsed_ms": 4355.98280000022,
+     "latency_ms": 4355.98280000022,
+     "drain_ms": 63.41599999996106,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "20000mAh 移动电源可以带上飞机吗",
+     "ok": true,
+     "elapsed_ms": 12610.880599999746,
+     "latency_ms": 12610.880599999746,
+     "drain_ms": 63.51139999969746,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Band 9 支持多少种运动模式",
+     "ok": true,
+     "elapsed_ms": 13436.714299999949,
+     "latency_ms": 13436.714299999949,
+     "drain_ms": 79.97030000024097,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "天玑 9300 芯片的平板有哪些",
+     "ok": true,
+     "elapsed_ms": 6263.784400000077,
+     "latency_ms": 6263.784400000077,
+     "drain_ms": 38.89939999999115,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "能测心电图和血压趋势的智能手表",
+     "ok": true,
+     "elapsed_ms": 4232.199200000196,
+     "latency_ms": 4232.199200000196,
+     "drain_ms": 66.2105999999767,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "戴着睡觉也没感觉的健康监测设备",
+     "ok": true,
+     "elapsed_ms": 5815.360699999928,
+     "latency_ms": 5815.360699999928,
+     "drain_ms": 53.37580000013986,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "5500mAh 电池配 120W 快充的手机",
+     "ok": true,
+     "elapsed_ms": 5283.593900000142,
+     "latency_ms": 5283.593900000142,
+     "drain_ms": 36.187600000175735,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "支持无线充电的折叠屏手机",
+     "ok": true,
+     "elapsed_ms": 4675.477300000239,
+     "latency_ms": 4675.477300000239,
+     "drain_ms": 41.057200000068406,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "可以插存储卡扩容的平板电脑",
+     "ok": true,
+     "elapsed_ms": 7519.167699999798,
+     "latency_ms": 7519.167699999798,
+     "drain_ms": 44.59520000000339,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "带 eSIM 独立打电话的智能手表",
+     "ok": true,
+     "elapsed_ms": 5063.9163999999255,
+     "latency_ms": 5063.9163999999255,
+     "drain_ms": 38.32139999985884,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "cold seed exercised misses",
+     "passed": true
+    },
+    {
+     "criterion": "l1 answer seed written (not merely intent)",
+     "passed": true
+    },
+    {
+     "criterion": "l2 answer seed written (not merely intent)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P1_l1_exact",
+   "target": {
+    "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+    "label": "seed",
+    "uid": "335144b2c45d48c3bfcdf05ce5d6e1ac",
+    "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:335144b2c45d48c3bfcdf05ce5d6e1ac:",
+    "es_index": "stellar_ablation_cache_335144b2c45d48c3bfcdf05ce5d6e1ac"
+   },
+   "n": 12,
+   "n_attempted": 12,
+   "n_success": 12,
+   "n_failed": 0,
+   "latency_avg_ms": 3445.507416666677,
+   "latency_min_ms": 11.683199999879434,
+   "latency_max_ms": 13654.982999999902,
+   "delta": {
+    "l1_hits": 24,
+    "l2_hits": 0,
+    "misses": 0,
+    "write_oks": 0,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 12,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 12,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 1.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": false
+   },
+   "detail": [
+    {
+     "query": "星耀 X100 Pro Max 支持卫星通信吗",
+     "ok": true,
+     "elapsed_ms": 8748.953799999981,
+     "latency_ms": 8748.953799999981,
+     "drain_ms": 2.4300999998558837,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "清逸 AirBook 14 的屏幕参数怎么样",
+     "ok": true,
+     "elapsed_ms": 13654.982999999902,
+     "latency_ms": 13654.982999999902,
+     "drain_ms": 2.805099999932281,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "AX3000 路由器支持哪些无线协议",
+     "ok": true,
+     "elapsed_ms": 11.683199999879434,
+     "latency_ms": 11.683199999879434,
+     "drain_ms": 3.060499999719468,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "20000mAh 移动电源可以带上飞机吗",
+     "ok": true,
+     "elapsed_ms": 8526.622600000337,
+     "latency_ms": 8526.622600000337,
+     "drain_ms": 2.8284999998504645,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Band 9 支持多少种运动模式",
+     "ok": true,
+     "elapsed_ms": 9025.355700000091,
+     "latency_ms": 9025.355700000091,
+     "drain_ms": 2.6481999998395622,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "天玑 9300 芯片的平板有哪些",
+     "ok": true,
+     "elapsed_ms": 265.45020000003205,
+     "latency_ms": 265.45020000003205,
+     "drain_ms": 2.811599999859027,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "能测心电图和血压趋势的智能手表",
+     "ok": true,
+     "elapsed_ms": 222.42060000007768,
+     "latency_ms": 222.42060000007768,
+     "drain_ms": 2.656399999978021,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "戴着睡觉也没感觉的健康监测设备",
+     "ok": true,
+     "elapsed_ms": 243.91300000024785,
+     "latency_ms": 243.91300000024785,
+     "drain_ms": 2.906600000187609,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "5500mAh 电池配 120W 快充的手机",
+     "ok": true,
+     "elapsed_ms": 230.35989999971207,
+     "latency_ms": 230.35989999971207,
+     "drain_ms": 2.820400000018708,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "支持无线充电的折叠屏手机",
+     "ok": true,
+     "elapsed_ms": 14.55309999983001,
+     "latency_ms": 14.55309999983001,
+     "drain_ms": 2.901800000017829,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "可以插存储卡扩容的平板电脑",
+     "ok": true,
+     "elapsed_ms": 207.40139999998064,
+     "latency_ms": 207.40139999998064,
+     "drain_ms": 2.9676000003746594,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "带 eSIM 独立打电话的智能手表",
+     "ok": true,
+     "elapsed_ms": 194.39250000004904,
+     "latency_ms": 194.39250000004904,
+     "drain_ms": 3.081399999700807,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "at least one L1 ANSWER hit",
+     "passed": true
+    },
+    {
+     "criterion": "L2 disabled: no actual reads/writes",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P2_l2_on",
+   "target": {
+    "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+    "label": "l2_on",
+    "uid": "9e16df9ffc084467ae29d7b16fa91310",
+    "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:9e16df9ffc084467ae29d7b16fa91310:",
+    "es_index": "stellar_ablation_cache_9e16df9ffc084467ae29d7b16fa91310"
+   },
+   "n": 12,
+   "n_attempted": 12,
+   "n_success": 12,
+   "n_failed": 0,
+   "latency_avg_ms": 6098.065249999952,
+   "latency_min_ms": 3541.8282999999064,
+   "latency_max_ms": 13677.523400000155,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 6,
+    "misses": 20,
+    "write_oks": 42,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 2,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 6,
+      "misses": 6,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 6,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 2,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.23076923076923078,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": true
+   },
+   "detail": [
+    {
+     "query": "请问一下，星耀 X100 Pro Max 支不支持卫星通信呢？",
+     "ok": true,
+     "elapsed_ms": 11765.392999999676,
+     "latency_ms": 11765.392999999676,
+     "drain_ms": 32.76369999957751,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "想了解下清逸 AirBook 14 这款笔记本的屏幕参数",
+     "ok": true,
+     "elapsed_ms": 4239.391000000069,
+     "latency_ms": 4239.391000000069,
+     "drain_ms": 42.634500000076514,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "路由器 AX3000 都兼容什么无线协议呀",
+     "ok": true,
+     "elapsed_ms": 4398.917099999835,
+     "latency_ms": 4398.917099999835,
+     "drain_ms": 33.84700000015073,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "两万毫安的移动电源登机的时候能带吗",
+     "ok": true,
+     "elapsed_ms": 13677.523400000155,
+     "latency_ms": 13677.523400000155,
+     "drain_ms": 40.4753000002529,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Band 9 这款手环一共有多少种运动模式？",
+     "ok": true,
+     "elapsed_ms": 4972.09120000025,
+     "latency_ms": 4972.09120000025,
+     "drain_ms": 45.896000000084314,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "用的天玑 9300 芯片的平板电脑有哪几款",
+     "ok": true,
+     "elapsed_ms": 4399.399500000072,
+     "latency_ms": 4399.399500000072,
+     "drain_ms": 44.30189999993672,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "有没有能测心电图、看血压趋势的智能手表推荐",
+     "ok": true,
+     "elapsed_ms": 3682.6367999997274,
+     "latency_ms": 3682.6367999997274,
+     "drain_ms": 36.75599999996848,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "睡觉戴着基本没感觉的健康监测设备有哪些",
+     "ok": true,
+     "elapsed_ms": 5615.9020999998575,
+     "latency_ms": 5615.9020999998575,
+     "drain_ms": 35.189599999739585,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "手机电池 5500 毫安还配 120W 快充的有哪些",
+     "ok": true,
+     "elapsed_ms": 6353.859199999988,
+     "latency_ms": 6353.859199999988,
+     "drain_ms": 39.5488999997724,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "折叠屏手机里面支持无线充电的是哪款",
+     "ok": true,
+     "elapsed_ms": 3541.8282999999064,
+     "latency_ms": 3541.8282999999064,
+     "drain_ms": 37.64329999967231,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "哪些平板电脑可以插存储卡来扩容？",
+     "ok": true,
+     "elapsed_ms": 5824.102099999891,
+     "latency_ms": 5824.102099999891,
+     "drain_ms": 40.629399999943416,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 1,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "智能手表里带 eSIM 能独立打电话的有哪些",
+     "ok": true,
+     "elapsed_ms": 4705.739300000005,
+     "latency_ms": 4705.739300000005,
+     "drain_ms": 40.66240000020116,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "at least one L2 ANSWER hit; zero hits is NOT success",
+     "passed": false
+    }
+   ],
+   "passed": false
+  },
+  {
+   "phase": "P2b_l2_off",
+   "target": {
+    "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+    "label": "l2_off",
+    "uid": "0623151061584250a6090e77bf2992cd",
+    "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:0623151061584250a6090e77bf2992cd:",
+    "es_index": "stellar_ablation_cache_0623151061584250a6090e77bf2992cd"
+   },
+   "n": 12,
+   "n_attempted": 12,
+   "n_success": 12,
+   "n_failed": 0,
+   "latency_avg_ms": 6479.803158333387,
+   "latency_min_ms": 4195.54190000008,
+   "latency_max_ms": 13536.481399999957,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 26,
+    "write_oks": 24,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 12,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 12,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 2,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 12,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 12
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 12,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 12
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 2,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": false
+   },
+   "detail": [
+    {
+     "query": "请问一下，星耀 X100 Pro Max 支不支持卫星通信呢？",
+     "ok": true,
+     "elapsed_ms": 13249.085299999933,
+     "latency_ms": 13249.085299999933,
+     "drain_ms": 5.153799999789044,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "想了解下清逸 AirBook 14 这款笔记本的屏幕参数",
+     "ok": true,
+     "elapsed_ms": 5369.949100000213,
+     "latency_ms": 5369.949100000213,
+     "drain_ms": 6.266999999752443,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "路由器 AX3000 都兼容什么无线协议呀",
+     "ok": true,
+     "elapsed_ms": 4236.879600000066,
+     "latency_ms": 4236.879600000066,
+     "drain_ms": 6.353100000069389,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "两万毫安的移动电源登机的时候能带吗",
+     "ok": true,
+     "elapsed_ms": 13536.481399999957,
+     "latency_ms": 13536.481399999957,
+     "drain_ms": 6.682799999907729,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Band 9 这款手环一共有多少种运动模式？",
+     "ok": true,
+     "elapsed_ms": 4646.996200000103,
+     "latency_ms": 4646.996200000103,
+     "drain_ms": 6.205600000157574,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "用的天玑 9300 芯片的平板电脑有哪几款",
+     "ok": true,
+     "elapsed_ms": 5616.152300000067,
+     "latency_ms": 5616.152300000067,
+     "drain_ms": 6.3628999996581115,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "有没有能测心电图、看血压趋势的智能手表推荐",
+     "ok": true,
+     "elapsed_ms": 5263.448000000153,
+     "latency_ms": 5263.448000000153,
+     "drain_ms": 5.3117000002202985,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "睡觉戴着基本没感觉的健康监测设备有哪些",
+     "ok": true,
+     "elapsed_ms": 6719.638000000032,
+     "latency_ms": 6719.638000000032,
+     "drain_ms": 6.181700000070123,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "手机电池 5500 毫安还配 120W 快充的有哪些",
+     "ok": true,
+     "elapsed_ms": 4807.154000000082,
+     "latency_ms": 4807.154000000082,
+     "drain_ms": 6.179099999826576,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "折叠屏手机里面支持无线充电的是哪款",
+     "ok": true,
+     "elapsed_ms": 4195.54190000008,
+     "latency_ms": 4195.54190000008,
+     "drain_ms": 6.983400000081019,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "哪些平板电脑可以插存储卡来扩容？",
+     "ok": true,
+     "elapsed_ms": 4478.845799999817,
+     "latency_ms": 4478.845799999817,
+     "drain_ms": 6.401399999958812,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "智能手表里带 eSIM 能独立打电话的有哪些",
+     "ok": true,
+     "elapsed_ms": 5637.466300000142,
+     "latency_ms": 5637.466300000142,
+     "drain_ms": 5.736200000228564,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 1,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 1
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "no paraphrase L1 answer hits from previous variant",
+     "passed": true
+    },
+    {
+     "criterion": "L2 disabled: no actual reads/writes",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P3_novel",
+   "target": {
+    "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+    "label": "novel",
+    "uid": "21fa6f2f1de347a192fea4e9a332bd79",
+    "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:21fa6f2f1de347a192fea4e9a332bd79:",
+    "es_index": "stellar_ablation_cache_21fa6f2f1de347a192fea4e9a332bd79"
+   },
+   "n": 6,
+   "n_attempted": 6,
+   "n_success": 6,
+   "n_failed": 0,
+   "latency_avg_ms": 12776.290816666688,
+   "latency_min_ms": 12218.547200000103,
+   "latency_max_ms": 13195.978300000206,
+   "delta": {
+    "l1_hits": 0,
+    "l2_hits": 0,
+    "misses": 12,
+    "write_oks": 24,
+    "write_fails": 0
+   },
+   "layers": {
+    "l1": {
+     "answer": {
+      "hits": 0,
+      "misses": 6,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 6,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 6,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 6,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    },
+    "l2": {
+     "answer": {
+      "hits": 0,
+      "misses": 6,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 6,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "intent": {
+      "hits": 0,
+      "misses": 6,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 6,
+      "write_fails": 0,
+      "write_skips": 0
+     },
+     "rewrite": {
+      "hits": 0,
+      "misses": 0,
+      "read_errors": 0,
+      "read_skips": 0,
+      "write_oks": 0,
+      "write_fails": 0,
+      "write_skips": 0
+     }
+    }
+   },
+   "hit_ratio": 0.0,
+   "switches": {
+    "LLM_CACHE_ENABLED": true,
+    "LLM_CACHE_REDIS_ENABLED": true,
+    "LLM_CACHE_SEMANTIC_ENABLED": true
+   },
+   "detail": [
+    {
+     "query": "星耀 Watch 4 Ultra 的防水等级是多少",
+     "ok": true,
+     "elapsed_ms": 13008.579299999838,
+     "latency_ms": 13008.579299999838,
+     "drain_ms": 50.20190000004732,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Creator 14 用什么处理器",
+     "ok": true,
+     "elapsed_ms": 12845.827899999676,
+     "latency_ms": 12845.827899999676,
+     "drain_ms": 56.82630000001154,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Tab Pro 12.4 电池多大",
+     "ok": true,
+     "elapsed_ms": 12304.95289999999,
+     "latency_ms": 12304.95289999999,
+     "drain_ms": 31.31729999995514,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 Buds Pro 3 降噪深度多少分贝",
+     "ok": true,
+     "elapsed_ms": 13195.978300000206,
+     "latency_ms": 13195.978300000206,
+     "drain_ms": 54.09190000000308,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "清逸 ProBook 16 的显卡是什么型号",
+     "ok": true,
+     "elapsed_ms": 12218.547200000103,
+     "latency_ms": 12218.547200000103,
+     "drain_ms": 58.326599999873,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    },
+    {
+     "query": "星耀 SmartRing Nova 续航几天",
+     "ok": true,
+     "elapsed_ms": 13083.859300000313,
+     "latency_ms": 13083.859300000313,
+     "drain_ms": 47.841300000072806,
+     "layers": {
+      "l1": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      },
+      "l2": {
+       "answer": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "intent": {
+        "hits": 0,
+        "misses": 1,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 1,
+        "write_fails": 0,
+        "write_skips": 0
+       },
+       "rewrite": {
+        "hits": 0,
+        "misses": 0,
+        "read_errors": 0,
+        "read_skips": 0,
+        "write_oks": 0,
+        "write_fails": 0,
+        "write_skips": 0
+       }
+      }
+     },
+     "errors": [],
+     "warnings": [],
+     "result_omitted": true
+    }
+   ],
+   "drain_failed": false,
+   "checks": [
+    {
+     "criterion": "all requested answers succeeded",
+     "passed": true
+    },
+    {
+     "criterion": "no layer/native write failures",
+     "passed": true
+    },
+    {
+     "criterion": "novel really missed (unexpected hits invalidate all-miss claim)",
+     "passed": true
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P4_single_flight_on",
+   "boundary": "unit probe only; synthetic producer, no Agent/API throughput claim",
+   "key": "ablation:sf:5b46c564d1b045e7a06e711b3357035a",
+   "n": 6,
+   "n_success": 6,
+   "producer_calls": 1,
+   "expected_producer_calls": 1,
+   "observed_waiters": 5,
+   "detail": [
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.14870000040900777,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.10560000009718351,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.18159999990530196,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.13110000008964562,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.13070000022707973,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.17190000016853446,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    }
+   ],
+   "passed": true
+  },
+  {
+   "phase": "P4_single_flight_off",
+   "boundary": "unit probe only; synthetic producer, no Agent/API throughput claim",
+   "key": "ablation:sf:1ccaee5894694a0dbf06ad1491b7b2cd",
+   "n": 6,
+   "n_success": 6,
+   "producer_calls": 6,
+   "expected_producer_calls": 6,
+   "observed_waiters": 0,
+   "detail": [
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.01849999989644857,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.1422999998794694,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.15179999991232762,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.17759999991540099,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.220299999909912,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    },
+    {
+     "query": null,
+     "ok": null,
+     "elapsed_ms": null,
+     "latency_ms": 0.15299999995477265,
+     "drain_ms": null,
+     "layers": null,
+     "errors": null,
+     "warnings": null,
+     "result_omitted": false
+    }
+   ],
+   "passed": true
+  }
+ ],
+ "queries": [
+  "星耀 X100 Pro Max 支持卫星通信吗",
+  "清逸 AirBook 14 的屏幕参数怎么样",
+  "AX3000 路由器支持哪些无线协议",
+  "20000mAh 移动电源可以带上飞机吗",
+  "星耀 Band 9 支持多少种运动模式",
+  "天玑 9300 芯片的平板有哪些",
+  "能测心电图和血压趋势的智能手表",
+  "戴着睡觉也没感觉的健康监测设备",
+  "5500mAh 电池配 120W 快充的手机",
+  "支持无线充电的折叠屏手机",
+  "可以插存储卡扩容的平板电脑",
+  "带 eSIM 独立打电话的智能手表"
+ ],
+ "paraphrases": [
+  "请问一下，星耀 X100 Pro Max 支不支持卫星通信呢？",
+  "想了解下清逸 AirBook 14 这款笔记本的屏幕参数",
+  "路由器 AX3000 都兼容什么无线协议呀",
+  "两万毫安的移动电源登机的时候能带吗",
+  "星耀 Band 9 这款手环一共有多少种运动模式？",
+  "用的天玑 9300 芯片的平板电脑有哪几款",
+  "有没有能测心电图、看血压趋势的智能手表推荐",
+  "睡觉戴着基本没感觉的健康监测设备有哪些",
+  "手机电池 5500 毫安还配 120W 快充的有哪些",
+  "折叠屏手机里面支持无线充电的是哪款",
+  "哪些平板电脑可以插存储卡来扩容？",
+  "智能手表里带 eSIM 能独立打电话的有哪些"
+ ],
+ "novel": [
+  "星耀 Watch 4 Ultra 的防水等级是多少",
+  "星耀 Creator 14 用什么处理器",
+  "星耀 Tab Pro 12.4 电池多大",
+  "星耀 Buds Pro 3 降噪深度多少分贝",
+  "清逸 ProBook 16 的显卡是什么型号",
+  "星耀 SmartRing Nova 续航几天"
+ ],
+ "plan": [
+  "P0_cache_off",
+  "P0b_cold_populate",
+  "P1_l1_exact",
+  "P2_l2_on",
+  "P2b_l2_off",
+  "P3_novel",
+  "P4_single_flight_on",
+  "P4_single_flight_off"
+ ],
+ "boundary": "full synchronous Agent including uses_react; FAQ/Bloom off; SF off except paired unit probe",
+ "comparison": "P2/P2b independent clones of drained P0b seed; L2 read+write on/off; intra-variant backfills retained",
+ "caveats": [
+  "BGE and all input embeddings warmed before P0; derived tool queries may still differ",
+  "tool context_hash may change; zero answer hits fail criteria",
+  "latencies exclude drain; failed/fallback answers excluded; full answers and warnings retained",
+  "P3 starts in an empty separate target, not a warm-cache novel-query test",
+  "ES indexes retained; experiment Redis keys have TTL; no cache deletion",
+  "drain timeout aborts; teardown waits for workers before restoring patches"
+ ],
+ "targets": [
+  {
+   "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+   "label": "seed",
+   "uid": "335144b2c45d48c3bfcdf05ce5d6e1ac",
+   "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:335144b2c45d48c3bfcdf05ce5d6e1ac:",
+   "es_index": "stellar_ablation_cache_335144b2c45d48c3bfcdf05ce5d6e1ac"
+  },
+  {
+   "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+   "label": "l2_on",
+   "uid": "9e16df9ffc084467ae29d7b16fa91310",
+   "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:9e16df9ffc084467ae29d7b16fa91310:",
+   "es_index": "stellar_ablation_cache_9e16df9ffc084467ae29d7b16fa91310"
+  },
+  {
+   "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+   "label": "l2_off",
+   "uid": "0623151061584250a6090e77bf2992cd",
+   "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:0623151061584250a6090e77bf2992cd:",
+   "es_index": "stellar_ablation_cache_0623151061584250a6090e77bf2992cd"
+  },
+  {
+   "run_id": "1bd649f76efc46d494f8b6cd67d11320",
+   "label": "novel",
+   "uid": "21fa6f2f1de347a192fea4e9a332bd79",
+   "redis_prefix": "ablation:1bd649f76efc46d494f8b6cd67d11320:21fa6f2f1de347a192fea4e9a332bd79:",
+   "es_index": "stellar_ablation_cache_21fa6f2f1de347a192fea4e9a332bd79"
+  }
+ ],
+ "settings": {
+  "LLM_MODEL_NAME": "deepseek-chat",
+  "LLM_TEMPERATURE": 0.3,
+  "LLM_CACHE_SEMANTIC_RERANK_THRESHOLD": 0.9,
+  "LLM_CACHE_SEMANTIC_K": 5,
+  "LLM_CACHE_SEMANTIC_MAXSIZE": 5000
+ },
+ "ttl_seconds": 7200,
+ "warmup": {
+  "latency_ms": 24810.26910000037,
+  "embedding_queries": 30,
+  "bge_ready": true
+ },
+ "seed": {
+  "sha256": "22285c73844dc17491045121434b62c159f4287cff3bc9d06ef7885d17b8c806",
+  "source": "P0b QUERIES only; before P1 or PARAPHRASES",
+  "snapshot_bytes": 975857,
+  "snapshot_omitted": true
+ },
+ "clone_hashes": {
+  "l2_on": "22285c73844dc17491045121434b62c159f4287cff3bc9d06ef7885d17b8c806",
+  "l2_off": "22285c73844dc17491045121434b62c159f4287cff3bc9d06ef7885d17b8c806"
+ },
+ "variant_start_hashes": {
+  "l2_on": "22285c73844dc17491045121434b62c159f4287cff3bc9d06ef7885d17b8c806",
+  "l2_off": "22285c73844dc17491045121434b62c159f4287cff3bc9d06ef7885d17b8c806"
+ },
+ "final_metrics_snapshot": {
+  "l1_hits": 24,
+  "l2_hits": 6,
+  "misses": 82,
+  "hit_ratio": 0.2679,
+  "write_oks": 138,
+  "write_fails": 0,
+  "avg_l1_latency_ms": 1.04,
+  "avg_l2_latency_ms": 28.13
+ },
+ "compacted": "seed.snapshot 与 phases[].detail[].result 已省略，保留分层命中与耗时"
+}

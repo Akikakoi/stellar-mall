@@ -102,6 +102,12 @@ rag-backend/.env
 rag-backend/.env.*
 !rag-backend/.env.example
 
+# ---------- 消融实验原始产物 ----------
+# 入库的只留 compact_results.py 压过的精简版（几百 KB）；
+# 原始 trace / 全量快照单份可达数 MB，留在本地 _raw/ 不入库。
+rag-backend/scripts/ablation/_raw/
+rag-backend/scripts/ablation/*_full.json
+
 # ---------- Agent 本地通行证 & 临时产物（trae / pre-commit 检查目录）----------
 .trae/
 

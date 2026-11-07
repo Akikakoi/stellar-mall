@@ -1,0 +1,2714 @@
+{
+  "raw": [
+    {
+      "id": "D01",
+      "query": "它和 X200 哪个拍照更好",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.8772153153380493,
+      "hit_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "ranked_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Flip 折叠屏.md",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md"
+      ],
+      "embed_ms": 510.5151999998725,
+      "retrieve_ms": 20.666300000129922,
+      "rerank_ms": 8397.601899999927,
+      "latency_ms": 8928.78339999993,
+      "chunk_doc_keys": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Flip 折叠屏.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "星耀X100ProMax-产品参数.md",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D02",
+      "query": "这款手机的续航和快充表现怎么样",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "玉米手机 10 Pro.md"
+      ],
+      "ranked_docs": [
+        "星耀 A60 5G 学生机.md",
+        "玉米手机 10 Pro.md",
+        "SPU:星耀 X100 青春版",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 Note 14 Pro.md",
+        "灵耀 Lumina Z9 Ultra.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Band 9 智能手环 产品规格.md",
+        "充电宝.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "embed_ms": 589.6425999999337,
+      "retrieve_ms": 15.040900000258262,
+      "rerank_ms": 6101.8320000000585,
+      "latency_ms": 6706.5155000002505,
+      "chunk_doc_keys": [
+        "星耀 A60 5G 学生机.md",
+        "玉米手机 10 Pro.md",
+        "SPU:星耀 X100 青春版",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 Note 14 Pro.md",
+        "灵耀 Lumina Z9 Ultra.md",
+        "星耀X100ProMax-产品参数.md",
+        "玉米手机 10 Pro.md",
+        "星耀 Note 14 Pro.md",
+        "星耀 Band 9 智能手环 产品规格.md",
+        "充电宝.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D03",
+      "query": "屏幕最大那款对触控笔的支持怎么样",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Tab Max 14.6 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 Creator 14 设计师本 产品规格.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 65 寸 4K Mini-LED 智能电视 Max 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "embed_ms": 505.9499000001324,
+      "retrieve_ms": 14.303299999710362,
+      "rerank_ms": 8317.935000000034,
+      "latency_ms": 8838.188199999877,
+      "chunk_doc_keys": [
+        "星耀 Creator 14 设计师本 产品规格.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 65 寸 4K Mini-LED 智能电视 Max 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D04",
+      "query": "它比 AirBook 14 轻多少",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6934264036172708,
+      "hit_docs": [
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 AirBook 13 极致轻薄 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Book 14 学生本 产品规格.md",
+        "星耀 Note 14 Pro.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Note 14 Pro"
+      ],
+      "embed_ms": 548.0473000000075,
+      "retrieve_ms": 16.60119999996823,
+      "rerank_ms": 9463.154499999973,
+      "latency_ms": 10027.802999999949,
+      "chunk_doc_keys": [
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Book 14 学生本 产品规格.md",
+        "星耀 Note 14 Pro.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D05",
+      "query": "能独立插卡打电话的那款续航多久",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "御风 SmartCool 2匹挂机 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md",
+        "充电宝.md",
+        "御风 3 匹一级变频柜机空调 产品规格.md"
+      ],
+      "embed_ms": 551.0458000001108,
+      "retrieve_ms": 15.862299999980678,
+      "rerank_ms": 9367.508599999837,
+      "latency_ms": 9934.416699999929,
+      "chunk_doc_keys": [
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "御风 SmartCool 2匹挂机 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md",
+        "充电宝.md",
+        "星耀 Note 14 Pro.md",
+        "御风 3 匹一级变频柜机空调 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D06",
+      "query": "开着降噪能连续用几个小时",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "极净 SteamPro 手持挂烫机 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "御风 EcoSilence 3匹柜机 产品规格.md",
+        "逸彩 VividBar Ultra 旗舰回音壁 产品规格.md"
+      ],
+      "embed_ms": 527.3373999998512,
+      "retrieve_ms": 14.986099999987346,
+      "rerank_ms": 8828.541400000177,
+      "latency_ms": 9370.864900000015,
+      "chunk_doc_keys": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "极净 SteamPro 手持挂烫机 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "御风 EcoSilence 3匹柜机 产品规格.md",
+        "逸彩 VividBar Ultra 旗舰回音壁 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D07",
+      "query": "这台机器的散热规格怎么样",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "御风 2 匹一级变频挂机 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "极净 3 匹 立柜式变频冷暖空调 产品规格.md",
+        "御风 PureAir Pro 空气净化器 产品规格.md",
+        "极净 1 匹 变频冷暖空调 青春版 产品规格.md",
+        "玉米手机 10 Pro.md",
+        "极净 2 匹 壁挂式变频冷暖空调 产品规格.md",
+        "极净 AutoClean X1 扫地机器人 产品规格.md",
+        "极净 CleanBot S1 扫拖一体机器人 产品规格.md"
+      ],
+      "embed_ms": 631.6234000000804,
+      "retrieve_ms": 13.907599999583908,
+      "rerank_ms": 8906.690700000127,
+      "latency_ms": 9552.22169999979,
+      "chunk_doc_keys": [
+        "御风 2 匹一级变频挂机 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "极净 3 匹 立柜式变频冷暖空调 产品规格.md",
+        "御风 PureAir Pro 空气净化器 产品规格.md",
+        "极净 1 匹 变频冷暖空调 青春版 产品规格.md",
+        "玉米手机 10 Pro.md",
+        "极净 2 匹 壁挂式变频冷暖空调 产品规格.md",
+        "极净 AutoClean X1 扫地机器人 产品规格.md",
+        "极净 CleanBot S1 扫拖一体机器人 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D08",
+      "query": "它的峰值亮度能到多少",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "逸彩 The Wall 120 寸巨幕电视 产品规格.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "逸彩 75 寸 QD-MiniLED 电视 产品规格.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Note 14 Pro.md",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md"
+      ],
+      "embed_ms": 580.4594000001089,
+      "retrieve_ms": 13.329299999895738,
+      "rerank_ms": 8985.44979999997,
+      "latency_ms": 9579.238499999974,
+      "chunk_doc_keys": [
+        "逸彩 The Wall 120 寸巨幕电视 产品规格.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "逸彩 75 寸 QD-MiniLED 电视 产品规格.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Note 14 Pro.md",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md",
+        "SPU:星耀 Note 14 Pro"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D09",
+      "query": "12 加 512 那个版本现在卖多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 Note 14 Pro.md"
+      ],
+      "ranked_docs": [
+        "星耀 Note 14 Pro.md",
+        "SPU:灵耀 Lumina Z9 Ultra",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Flip 折叠屏",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:苍穹 Aether N8 Max",
+        "御风 CoolMate 移动空调 产品规格.md",
+        "SPU:星耀 X100 青春版",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "embed_ms": 522.7141999998821,
+      "retrieve_ms": 13.576100000136648,
+      "rerank_ms": 8966.738799999803,
+      "latency_ms": 9503.029099999821,
+      "chunk_doc_keys": [
+        "星耀 Note 14 Pro.md",
+        "SPU:灵耀 Lumina Z9 Ultra",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Flip 折叠屏",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:苍穹 Aether N8 Max",
+        "SPU:星耀 Note 14 Pro",
+        "御风 CoolMate 移动空调 产品规格.md",
+        "SPU:星耀 X100 青春版",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D10",
+      "query": "防水等级能戴着游泳吗",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 SmartRing Nova 智能戒指 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "embed_ms": 535.1169000000482,
+      "retrieve_ms": 13.766600000053586,
+      "rerank_ms": 8574.620400000185,
+      "latency_ms": 9123.503900000287,
+      "chunk_doc_keys": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D01",
+      "query": "它和 X200 哪个拍照更好",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.8772153153380493,
+      "hit_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "ranked_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Flip 折叠屏.md",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md"
+      ],
+      "embed_ms": 508.7862000000314,
+      "retrieve_ms": 14.146699999855628,
+      "rerank_ms": 8587.129600000026,
+      "latency_ms": 9110.062499999913,
+      "chunk_doc_keys": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Flip 折叠屏.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "星耀X100ProMax-产品参数.md",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D02",
+      "query": "这款手机的续航和快充表现怎么样",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "玉米手机 10 Pro.md"
+      ],
+      "ranked_docs": [
+        "星耀 A60 5G 学生机.md",
+        "玉米手机 10 Pro.md",
+        "SPU:星耀 X100 青春版",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 Note 14 Pro.md",
+        "灵耀 Lumina Z9 Ultra.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Band 9 智能手环 产品规格.md",
+        "充电宝.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "embed_ms": 560.9275000001617,
+      "retrieve_ms": 14.459999999871798,
+      "rerank_ms": 6201.6475999998875,
+      "latency_ms": 6777.035099999921,
+      "chunk_doc_keys": [
+        "星耀 A60 5G 学生机.md",
+        "玉米手机 10 Pro.md",
+        "SPU:星耀 X100 青春版",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 Note 14 Pro.md",
+        "灵耀 Lumina Z9 Ultra.md",
+        "星耀X100ProMax-产品参数.md",
+        "玉米手机 10 Pro.md",
+        "星耀 Note 14 Pro.md",
+        "星耀 Band 9 智能手环 产品规格.md",
+        "充电宝.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D03",
+      "query": "屏幕最大那款对触控笔的支持怎么样",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Tab Max 14.6 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 Creator 14 设计师本 产品规格.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 65 寸 4K Mini-LED 智能电视 Max 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "embed_ms": 490.91520000001765,
+      "retrieve_ms": 14.15080000015223,
+      "rerank_ms": 8601.893300000029,
+      "latency_ms": 9106.959300000199,
+      "chunk_doc_keys": [
+        "星耀 Creator 14 设计师本 产品规格.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 65 寸 4K Mini-LED 智能电视 Max 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D04",
+      "query": "它比 AirBook 14 轻多少",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6934264036172708,
+      "hit_docs": [
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 AirBook 13 极致轻薄 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Book 14 学生本 产品规格.md",
+        "星耀 Note 14 Pro.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Note 14 Pro"
+      ],
+      "embed_ms": 521.2467999999717,
+      "retrieve_ms": 13.711999999941327,
+      "rerank_ms": 8850.216399999681,
+      "latency_ms": 9385.175199999594,
+      "chunk_doc_keys": [
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Book 14 学生本 产品规格.md",
+        "星耀 Note 14 Pro.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D05",
+      "query": "能独立插卡打电话的那款续航多久",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "御风 SmartCool 2匹挂机 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md",
+        "充电宝.md",
+        "御风 3 匹一级变频柜机空调 产品规格.md"
+      ],
+      "embed_ms": 482.7592999999979,
+      "retrieve_ms": 14.252200000100856,
+      "rerank_ms": 9082.040600000255,
+      "latency_ms": 9579.052100000354,
+      "chunk_doc_keys": [
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Note 14 Pro.md",
+        "玉米手机 10 Pro.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "御风 SmartCool 2匹挂机 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md",
+        "充电宝.md",
+        "星耀 Note 14 Pro.md",
+        "御风 3 匹一级变频柜机空调 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D06",
+      "query": "开着降噪能连续用几个小时",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "极净 SteamPro 手持挂烫机 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "御风 EcoSilence 3匹柜机 产品规格.md",
+        "逸彩 VividBar Ultra 旗舰回音壁 产品规格.md"
+      ],
+      "embed_ms": 491.61720000029163,
+      "retrieve_ms": 13.472499999807042,
+      "rerank_ms": 8991.490699999758,
+      "latency_ms": 9496.580399999857,
+      "chunk_doc_keys": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "极净 SteamPro 手持挂烫机 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "御风 EcoSilence 3匹柜机 产品规格.md",
+        "逸彩 VividBar Ultra 旗舰回音壁 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D07",
+      "query": "这台机器的散热规格怎么样",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "御风 2 匹一级变频挂机 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "极净 3 匹 立柜式变频冷暖空调 产品规格.md",
+        "御风 PureAir Pro 空气净化器 产品规格.md",
+        "极净 1 匹 变频冷暖空调 青春版 产品规格.md",
+        "玉米手机 10 Pro.md",
+        "极净 2 匹 壁挂式变频冷暖空调 产品规格.md",
+        "极净 AutoClean X1 扫地机器人 产品规格.md",
+        "极净 CleanBot S1 扫拖一体机器人 产品规格.md"
+      ],
+      "embed_ms": 521.0754999998244,
+      "retrieve_ms": 14.945500000067113,
+      "rerank_ms": 9017.609600000014,
+      "latency_ms": 9553.630599999906,
+      "chunk_doc_keys": [
+        "御风 2 匹一级变频挂机 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "御风 1.5 匹一级变频挂机 产品规格.md",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "极净 3 匹 立柜式变频冷暖空调 产品规格.md",
+        "御风 PureAir Pro 空气净化器 产品规格.md",
+        "极净 1 匹 变频冷暖空调 青春版 产品规格.md",
+        "玉米手机 10 Pro.md",
+        "极净 2 匹 壁挂式变频冷暖空调 产品规格.md",
+        "极净 AutoClean X1 扫地机器人 产品规格.md",
+        "极净 CleanBot S1 扫拖一体机器人 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D08",
+      "query": "它的峰值亮度能到多少",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "逸彩 The Wall 120 寸巨幕电视 产品规格.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "逸彩 75 寸 QD-MiniLED 电视 产品规格.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Note 14 Pro.md",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md"
+      ],
+      "embed_ms": 525.1342000001387,
+      "retrieve_ms": 14.815799999723822,
+      "rerank_ms": 8994.552699999986,
+      "latency_ms": 9534.502699999848,
+      "chunk_doc_keys": [
+        "逸彩 The Wall 120 寸巨幕电视 产品规格.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "逸彩 75 寸 QD-MiniLED 电视 产品规格.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀X100ProMax-产品参数.md",
+        "星耀 Note 14 Pro.md",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Note 14 Pro",
+        "极净 FreshBox 500 十字对开冰箱 产品规格.md",
+        "SPU:星耀 Note 14 Pro"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D09",
+      "query": "12 加 512 那个版本现在卖多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 Note 14 Pro.md"
+      ],
+      "ranked_docs": [
+        "星耀 Note 14 Pro.md",
+        "SPU:灵耀 Lumina Z9 Ultra",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Flip 折叠屏",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:苍穹 Aether N8 Max",
+        "御风 CoolMate 移动空调 产品规格.md",
+        "SPU:星耀 X100 青春版",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "embed_ms": 498.4860999998091,
+      "retrieve_ms": 14.258200000313082,
+      "rerank_ms": 9023.670400000356,
+      "latency_ms": 9536.414700000478,
+      "chunk_doc_keys": [
+        "星耀 Note 14 Pro.md",
+        "SPU:灵耀 Lumina Z9 Ultra",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Flip 折叠屏",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:苍穹 Aether N8 Max",
+        "SPU:星耀 Note 14 Pro",
+        "御风 CoolMate 移动空调 产品规格.md",
+        "SPU:星耀 X100 青春版",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D10",
+      "query": "防水等级能戴着游泳吗",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 SmartRing Nova 智能戒指 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "embed_ms": 520.4472000000351,
+      "retrieve_ms": 15.513499999997293,
+      "rerank_ms": 8617.43260000003,
+      "latency_ms": 9153.393300000062,
+      "chunk_doc_keys": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    }
+  ],
+  "rewrite_on": [
+    {
+      "id": "D01",
+      "query": "星耀 X100 Pro Max 和 X200 哪个拍照更好",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀X100ProMax-产品参数.md",
+        "星耀 X200 5G 影像旗舰.md"
+      ],
+      "ranked_docs": [
+        "星耀X100ProMax-产品参数.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100青春版-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "embed_ms": 500.0198000000182,
+      "retrieve_ms": 16.298399999868707,
+      "rerank_ms": 8575.175500000114,
+      "latency_ms": 11536.758500000133,
+      "chunk_doc_keys": [
+        "星耀X100ProMax-产品参数.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100青春版-产品参数.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 2445.264800000132
+    },
+    {
+      "id": "D02",
+      "query": "玉米手机 10 Pro的续航和快充表现怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "玉米手机 10 Pro.md"
+      ],
+      "ranked_docs": [
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "SPU:大米手机 10 Pro",
+        "灵耀 Lumina Z9 Ultra.md",
+        "SPU:星耀 Note 14 Pro",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "embed_ms": 471.01999999995314,
+      "retrieve_ms": 14.357199999949444,
+      "rerank_ms": 5713.288299999931,
+      "latency_ms": 7055.262099999709,
+      "chunk_doc_keys": [
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "SPU:大米手机 10 Pro",
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "灵耀 Lumina Z9 Ultra.md",
+        "SPU:星耀 Note 14 Pro",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 856.5965999998753
+    },
+    {
+      "id": "D03",
+      "query": "屏幕最大的平板对触控笔的支持怎么样",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 Note 14 Pro.md",
+        "极净 450L 法式多门智能冰箱 产品规格.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "逸彩 55 寸 OLED 电视 产品规格.md",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "充电宝.md"
+      ],
+      "embed_ms": 586.563999999953,
+      "retrieve_ms": 13.648500000044805,
+      "rerank_ms": 8424.363700000185,
+      "latency_ms": 9882.751700000199,
+      "chunk_doc_keys": [
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 Note 14 Pro.md",
+        "极净 450L 法式多门智能冰箱 产品规格.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "逸彩 55 寸 OLED 电视 产品规格.md",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "充电宝.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 858.1755000000157
+    },
+    {
+      "id": "D04",
+      "query": "清逸 AirBook 13 比 AirBook 14 轻多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.9197207891481876,
+      "hit_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "清逸 AirBook 14 轻薄本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "embed_ms": 448.6475999999584,
+      "retrieve_ms": 14.581399999997302,
+      "rerank_ms": 8921.489699999938,
+      "latency_ms": 10335.087899999962,
+      "chunk_doc_keys": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 950.3692000000683
+    },
+    {
+      "id": "D05",
+      "query": "能独立插卡打电话的那款智能手表续航多久",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Note 14 Pro.md",
+        "星耀 X200 5G 影像旗舰.md"
+      ],
+      "embed_ms": 588.4360000000015,
+      "retrieve_ms": 15.034600000035425,
+      "rerank_ms": 7509.725399999979,
+      "latency_ms": 9108.311200000117,
+      "chunk_doc_keys": [
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Note 14 Pro.md",
+        "星耀 X200 5G 影像旗舰.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 995.1152000001002
+    },
+    {
+      "id": "D06",
+      "query": "星耀 Buds Pro 3 开着降噪能连续用几个小时",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "embed_ms": 504.9104999998235,
+      "retrieve_ms": 14.009900000019115,
+      "rerank_ms": 9185.729900000297,
+      "latency_ms": 10780.223600000227,
+      "chunk_doc_keys": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 1075.5733000000873
+    },
+    {
+      "id": "D07",
+      "query": "星耀 GamePro 16 的散热规格怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "玉米手机 10 Pro.md",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "embed_ms": 519.293899999866,
+      "retrieve_ms": 13.538499999867781,
+      "rerank_ms": 9061.844100000144,
+      "latency_ms": 10781.176799999685,
+      "chunk_doc_keys": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "玉米手机 10 Pro.md",
+        "SPU:星耀 Tab Max 14.6",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 1186.5002999998069
+    },
+    {
+      "id": "D08",
+      "query": "苍穹 Aether N8 Max 的峰值亮度能到多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "苍穹 Aether N8 Max.md"
+      ],
+      "ranked_docs": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "embed_ms": 556.433300000208,
+      "retrieve_ms": 13.260600000194245,
+      "rerank_ms": 6541.775000000143,
+      "latency_ms": 7874.417100000301,
+      "chunk_doc_keys": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 762.9481999997552
+    },
+    {
+      "id": "D09",
+      "query": "12 加 512 那个版本的星耀 Note 14 Pro 现在卖多少",
+      "recall12": 1.0,
+      "mrr": 0.2,
+      "ndcg5": 0.38685280723454163,
+      "hit_docs": [
+        "星耀 Note 14 Pro.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "星域 Stellar X1 Pro.md",
+        "星耀 Tab Pro 12.4 产品规格.md"
+      ],
+      "embed_ms": 469.87350000017614,
+      "retrieve_ms": 14.725900000030379,
+      "rerank_ms": 8996.40410000029,
+      "latency_ms": 10292.304000000513,
+      "chunk_doc_keys": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "星域 Stellar X1 Pro.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Tab Pro 12.4 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 811.3005000000157
+    },
+    {
+      "id": "D10",
+      "query": "防水等级能戴着游泳吗",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 SmartRing Nova 智能戒指 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "embed_ms": 456.4454999999725,
+      "retrieve_ms": 13.866299999790499,
+      "rerank_ms": 8598.48490000013,
+      "latency_ms": 9786.493399999927,
+      "chunk_doc_keys": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 717.6967000000332
+    },
+    {
+      "id": "D01",
+      "query": "星耀 X100 Pro Max 和 X200 哪个拍照更好",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀X100ProMax-产品参数.md",
+        "星耀 X200 5G 影像旗舰.md"
+      ],
+      "ranked_docs": [
+        "星耀X100ProMax-产品参数.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100青春版-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "embed_ms": 544.3275000002359,
+      "retrieve_ms": 15.192899999419751,
+      "rerank_ms": 8804.31630000021,
+      "latency_ms": 10242.06069999991,
+      "chunk_doc_keys": [
+        "星耀X100ProMax-产品参数.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100青春版-产品参数.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 878.2240000000456
+    },
+    {
+      "id": "D02",
+      "query": "玉米手机 10 Pro的续航和快充表现怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "玉米手机 10 Pro.md"
+      ],
+      "ranked_docs": [
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "SPU:大米手机 10 Pro",
+        "灵耀 Lumina Z9 Ultra.md",
+        "SPU:星耀 Note 14 Pro",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "embed_ms": 507.0181000000957,
+      "retrieve_ms": 14.47680000001128,
+      "rerank_ms": 6116.263100000197,
+      "latency_ms": 7647.876200000155,
+      "chunk_doc_keys": [
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "SPU:大米手机 10 Pro",
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "灵耀 Lumina Z9 Ultra.md",
+        "SPU:星耀 Note 14 Pro",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Band 9 智能手环"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 1010.1181999998516
+    },
+    {
+      "id": "D03",
+      "query": "屏幕最大那款平板对触控笔的支持怎么样",
+      "recall12": 0.0,
+      "mrr": 0.0,
+      "ndcg5": 0.0,
+      "hit_docs": [],
+      "ranked_docs": [
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 Note 14 Pro.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "逸彩 55 寸 OLED 电视 产品规格.md",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "充电器.md",
+        "充电宝.md"
+      ],
+      "embed_ms": 584.7782999999254,
+      "retrieve_ms": 13.674000000264641,
+      "rerank_ms": 8949.902100000145,
+      "latency_ms": 10385.78650000045,
+      "chunk_doc_keys": [
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Creator 14 设计师本",
+        "星耀 Note 14 Pro.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "逸彩 55 寸 OLED 电视 产品规格.md",
+        "星耀 43 寸 全高清智能电视 Lite 产品规格.md",
+        "充电器.md",
+        "充电宝.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 837.4321000001146
+    },
+    {
+      "id": "D04",
+      "query": "清逸 AirBook 13 比 AirBook 14 轻多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.9197207891481876,
+      "hit_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "清逸 AirBook 14 轻薄本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "embed_ms": 488.97849999957543,
+      "retrieve_ms": 13.296900000568712,
+      "rerank_ms": 8969.06880000006,
+      "latency_ms": 10229.538500000217,
+      "chunk_doc_keys": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "逸彩 VividSound 智能音箱 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 758.1943000000138
+    },
+    {
+      "id": "D05",
+      "query": "能独立插卡打电话的那款智能手表续航多久",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Note 14 Pro.md",
+        "星耀 X200 5G 影像旗舰.md"
+      ],
+      "embed_ms": 500.4700999998022,
+      "retrieve_ms": 13.928900000337308,
+      "rerank_ms": 6999.500700000226,
+      "latency_ms": 8304.326800000126,
+      "chunk_doc_keys": [
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Note 14 Pro.md",
+        "星耀 X200 5G 影像旗舰.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 790.4270999997607
+    },
+    {
+      "id": "D06",
+      "query": "星耀 Buds Pro 3 开着降噪能连续用几个小时",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "embed_ms": 525.2079000001686,
+      "retrieve_ms": 14.183799999955227,
+      "rerank_ms": 9172.758499999873,
+      "latency_ms": 10420.721299999968,
+      "chunk_doc_keys": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 708.5710999999719
+    },
+    {
+      "id": "D07",
+      "query": "星耀 GamePro 16 的散热规格怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "玉米手机 10 Pro.md",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "embed_ms": 488.7321000001066,
+      "retrieve_ms": 14.167899999847577,
+      "rerank_ms": 9031.843499999923,
+      "latency_ms": 10554.167499999949,
+      "chunk_doc_keys": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Lite 10.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "玉米手机 10 Pro.md",
+        "SPU:星耀 Tab Max 14.6",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 1019.4240000000718
+    },
+    {
+      "id": "D08",
+      "query": "苍穹 Aether N8 Max 的峰值亮度能到多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "苍穹 Aether N8 Max.md"
+      ],
+      "ranked_docs": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "embed_ms": 558.1310999996276,
+      "retrieve_ms": 15.338500000325439,
+      "rerank_ms": 6597.937500000171,
+      "latency_ms": 8595.194099999844,
+      "chunk_doc_keys": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 1423.7869999997201
+    },
+    {
+      "id": "D09",
+      "query": "12 加 512 那个版本的星耀 Note 14 Pro 现在卖多少",
+      "recall12": 1.0,
+      "mrr": 0.2,
+      "ndcg5": 0.38685280723454163,
+      "hit_docs": [
+        "星耀 Note 14 Pro.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "星域 Stellar X1 Pro.md",
+        "星耀 Tab Pro 12.4 产品规格.md"
+      ],
+      "embed_ms": 476.59280000016224,
+      "retrieve_ms": 16.479899999467307,
+      "rerank_ms": 8963.605700000244,
+      "latency_ms": 10982.641999999942,
+      "chunk_doc_keys": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星域 Stellar X1 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "星域 Stellar X1 Pro.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Tab Pro 12.4 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 1525.9636000000683
+    },
+    {
+      "id": "D10",
+      "query": "防水等级能戴着游泳吗",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 SmartRing Nova 智能戒指 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "embed_ms": 495.22350000006554,
+      "retrieve_ms": 15.302399999654881,
+      "rerank_ms": 8581.933099999787,
+      "latency_ms": 10013.993399999435,
+      "chunk_doc_keys": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Flip 折叠屏.md",
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "玉米手机 10 Pro.md",
+        "星耀 A60 5G 学生机.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 AR Glasses Air 智能眼镜",
+        "极净 AquaBloom 智能加湿器 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 921.5343999999277
+    }
+  ],
+  "oracle": [
+    {
+      "id": "D01",
+      "query": "星耀 X100 Pro Max 和星耀 X200 5G 影像旗舰哪个拍照更好",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.9197207891481876,
+      "hit_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "ranked_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "embed_ms": 512.1719000001121,
+      "retrieve_ms": 16.278999999940424,
+      "rerank_ms": 8759.463399999959,
+      "latency_ms": 9287.914300000011,
+      "chunk_doc_keys": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "星耀X100ProMax-产品参数.md",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D02",
+      "query": "玉米手机 10 Pro 的电池容量和有线快充功率是多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "玉米手机 10 Pro.md"
+      ],
+      "ranked_docs": [
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "充电器.md"
+      ],
+      "embed_ms": 520.4877999999553,
+      "retrieve_ms": 15.131300000120973,
+      "rerank_ms": 6325.256800000034,
+      "latency_ms": 6860.87590000011,
+      "chunk_doc_keys": [
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "SPU:玉米手机 10 Pro",
+        "玉米手机 10 Pro.md",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "玉米手机 10 Pro.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "充电器.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D03",
+      "query": "星耀 Tab Max 14.6 对触控笔的支持怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 Tab Max 14.6 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Tab Air 11 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Tab Lite 10.4 产品规格.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "embed_ms": 559.8709999999301,
+      "retrieve_ms": 14.606100000037259,
+      "rerank_ms": 8548.85000000013,
+      "latency_ms": 9123.327100000097,
+      "chunk_doc_keys": [
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "星耀 Tab Air 11 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Tab Lite 10.4 产品规格.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D04",
+      "query": "清逸 AirBook 13 比 清逸 AirBook 14 轻多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.9197207891481876,
+      "hit_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "清逸 AirBook 14 轻薄本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "embed_ms": 492.4743999999919,
+      "retrieve_ms": 15.477700000019468,
+      "rerank_ms": 9340.264200000092,
+      "latency_ms": 9848.216300000104,
+      "chunk_doc_keys": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D05",
+      "query": "星耀 Watch 4 Ultra 旗舰手表的续航多久",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6509209298071326,
+      "hit_docs": [
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 75 寸 8K 量子点电视 Ultra 产品规格.md"
+      ],
+      "embed_ms": 580.5164999997032,
+      "retrieve_ms": 14.917600000444509,
+      "rerank_ms": 9085.201700000198,
+      "latency_ms": 9680.635800000346,
+      "chunk_doc_keys": [
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 75 寸 8K 量子点电视 Ultra 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D06",
+      "query": "星耀 Buds Pro 3 开着降噪能连续用几个小时",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "embed_ms": 507.74860000001354,
+      "retrieve_ms": 14.670199999727629,
+      "rerank_ms": 9094.32310000011,
+      "latency_ms": 9616.741899999852,
+      "chunk_doc_keys": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D07",
+      "query": "星耀 GamePro 16 游戏本的散热规格怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Pro 12.4",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "玉米手机 10 Pro.md",
+        "星耀 50 寸 4K 游戏电视 G-Series 产品规格.md",
+        "SPU:星耀 X100 Pro Max",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "embed_ms": 492.9339999998774,
+      "retrieve_ms": 29.177400000207854,
+      "rerank_ms": 9024.485699999786,
+      "latency_ms": 9546.597099999872,
+      "chunk_doc_keys": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Pro 12.4",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "玉米手机 10 Pro.md",
+        "星耀 50 寸 4K 游戏电视 G-Series 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 X100 Pro Max",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D08",
+      "query": "苍穹 Aether N8 Max 的峰值亮度能到多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "苍穹 Aether N8 Max.md"
+      ],
+      "ranked_docs": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "embed_ms": 522.6814000002378,
+      "retrieve_ms": 13.641899999583984,
+      "rerank_ms": 6634.038099999998,
+      "latency_ms": 7170.36139999982,
+      "chunk_doc_keys": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D09",
+      "query": "星耀 Note 14 Pro 12GB+512GB 版本现在卖多少钱",
+      "recall12": 1.0,
+      "mrr": 0.25,
+      "ndcg5": 0.43067655807339306,
+      "hit_docs": [
+        "星耀 Note 14 Pro.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "星耀 Flip 折叠屏.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表"
+      ],
+      "embed_ms": 544.4524999998066,
+      "retrieve_ms": 13.95600000023478,
+      "rerank_ms": 8730.00570000022,
+      "latency_ms": 9288.414200000261,
+      "chunk_doc_keys": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Flip 折叠屏.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D10",
+      "query": "星耀 SmartRing Nova 的防水等级能戴着游泳吗",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 SmartRing Nova 智能戒指 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "星耀 Flip 折叠屏.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 9 智能手环 产品规格.md"
+      ],
+      "embed_ms": 539.4171999996615,
+      "retrieve_ms": 15.855300000566785,
+      "rerank_ms": 8661.681600000065,
+      "latency_ms": 9216.954100000294,
+      "chunk_doc_keys": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "星耀 Flip 折叠屏.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 9 智能手环 产品规格.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表"
+      ],
+      "repeat": 1,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D01",
+      "query": "星耀 X100 Pro Max 和星耀 X200 5G 影像旗舰哪个拍照更好",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.9197207891481876,
+      "hit_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "ranked_docs": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "embed_ms": 564.7832999998172,
+      "retrieve_ms": 14.700400000492664,
+      "rerank_ms": 8903.416800000286,
+      "latency_ms": 9482.900500000596,
+      "chunk_doc_keys": [
+        "星耀 X200 5G 影像旗舰.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "星耀X100ProMax-产品参数.md",
+        "星域 Stellar X1 Pro.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D02",
+      "query": "玉米手机 10 Pro 的电池容量和有线快充功率是多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "玉米手机 10 Pro.md"
+      ],
+      "ranked_docs": [
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "充电器.md"
+      ],
+      "embed_ms": 550.8085999999821,
+      "retrieve_ms": 15.084700000443263,
+      "rerank_ms": 6287.36600000002,
+      "latency_ms": 6853.259300000445,
+      "chunk_doc_keys": [
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "玉米手机 10 Pro.md",
+        "SPU:玉米手机 10 Pro",
+        "SPU:玉米手机 10 Pro",
+        "玉米手机 10 Pro.md",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "玉米手机 10 Pro.md",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 Note 14 Pro",
+        "充电器.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D03",
+      "query": "星耀 Tab Max 14.6 对触控笔的支持怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 Tab Max 14.6 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Tab Air 11 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Tab Lite 10.4 产品规格.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "embed_ms": 525.9486999998444,
+      "retrieve_ms": 14.573299999938172,
+      "rerank_ms": 8951.839100000143,
+      "latency_ms": 9492.361099999926,
+      "chunk_doc_keys": [
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "星耀 Tab Air 11 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Lite 10.4",
+        "星耀 Tab Lite 10.4 产品规格.md",
+        "星耀X100ProMax-产品参数.md",
+        "星耀X100ProMax-产品参数.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D04",
+      "query": "清逸 AirBook 13 比 清逸 AirBook 14 轻多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 0.9197207891481876,
+      "hit_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "清逸 AirBook 14 轻薄本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "embed_ms": 480.974900000092,
+      "retrieve_ms": 13.276499999847147,
+      "rerank_ms": 8963.99509999992,
+      "latency_ms": 9458.24649999986,
+      "chunk_doc_keys": [
+        "清逸 AirBook 13 极致轻薄 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "SPU:清逸 AirBook 14 轻薄本",
+        "清逸 AirBook 14 轻薄本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Tab Air 11",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Band 8 智能手环 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D05",
+      "query": "星耀 Watch 4 Ultra 旗舰手表的续航多久",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6509209298071326,
+      "hit_docs": [
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 75 寸 8K 量子点电视 Ultra 产品规格.md"
+      ],
+      "embed_ms": 516.1481000000094,
+      "retrieve_ms": 14.019400000051974,
+      "rerank_ms": 8973.110500000075,
+      "latency_ms": 9503.278000000137,
+      "chunk_doc_keys": [
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "星耀 Watch 4 Ultra 旗舰手表 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 Band 8 智能手环",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Note 14 Pro",
+        "星耀 75 寸 8K 量子点电视 Ultra 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D06",
+      "query": "星耀 Buds Pro 3 开着降噪能连续用几个小时",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "embed_ms": 579.6675000001414,
+      "retrieve_ms": 15.403500000047643,
+      "rerank_ms": 8971.896699999888,
+      "latency_ms": 9566.967700000077,
+      "chunk_doc_keys": [
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Buds Pro 3 降噪耳机 产品规格.md",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Watch 3 Pro 智能手表 产品规格.md",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "逸彩 VividPods Pro 真无线耳机 产品规格.md",
+        "星耀 Tab Pro 12.4 产品规格.md",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 8 智能手环 产品规格.md",
+        "极净 AquaBloom 智能加湿器 产品规格.md",
+        "极净 HeatChef 空气炸锅 产品规格.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D07",
+      "query": "星耀 GamePro 16 游戏本的散热规格怎么样",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md"
+      ],
+      "ranked_docs": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Pro 12.4",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "玉米手机 10 Pro.md",
+        "星耀 50 寸 4K 游戏电视 G-Series 产品规格.md",
+        "SPU:星耀 X100 Pro Max",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "embed_ms": 566.6841000002023,
+      "retrieve_ms": 14.370799999596784,
+      "rerank_ms": 8979.719199999636,
+      "latency_ms": 9560.774099999435,
+      "chunk_doc_keys": [
+        "星耀 GamePro 16 游戏本 产品规格.md",
+        "清逸 ProBook 16 高性能本 产品规格.md",
+        "星耀 ThinkBook 16 商务本 产品规格.md",
+        "SPU:星耀 Creator 14 设计师本",
+        "SPU:星耀 Tab Pro 12.4",
+        "逸彩 50 寸 QLED 游戏电视 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "玉米手机 10 Pro.md",
+        "星耀 50 寸 4K 游戏电视 G-Series 产品规格.md",
+        "SPU:星耀 Tab Max 14.6",
+        "SPU:星耀 X100 Pro Max",
+        "灵耀 Lumina Z9 Ultra.md"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D08",
+      "query": "苍穹 Aether N8 Max 的峰值亮度能到多少",
+      "recall12": 1.0,
+      "mrr": 1.0,
+      "ndcg5": 1.0,
+      "hit_docs": [
+        "苍穹 Aether N8 Max.md"
+      ],
+      "ranked_docs": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "embed_ms": 509.3629999996665,
+      "retrieve_ms": 14.0705000003436,
+      "rerank_ms": 6523.715700000139,
+      "latency_ms": 7047.149200000149,
+      "chunk_doc_keys": [
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:苍穹 Aether N8 Max",
+        "苍穹 Aether N8 Max.md",
+        "星耀X100ProMax-产品参数.md",
+        "苍穹 Aether N8 Max.md",
+        "SPU:逸彩 The Wall 120 寸巨幕电视",
+        "星耀X100ProMax-产品参数.md",
+        "SPU:星耀 X100 Pro Max",
+        "SPU:星耀 Tab Lite 10.4"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D09",
+      "query": "星耀 Note 14 Pro 12GB+512GB 版本现在卖多少钱",
+      "recall12": 1.0,
+      "mrr": 0.25,
+      "ndcg5": 0.43067655807339306,
+      "hit_docs": [
+        "星耀 Note 14 Pro.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "星耀 Flip 折叠屏.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表"
+      ],
+      "embed_ms": 581.2983000000713,
+      "retrieve_ms": 15.725799999927403,
+      "rerank_ms": 8760.856099999728,
+      "latency_ms": 9357.880199999727,
+      "chunk_doc_keys": [
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Note 14 Pro",
+        "SPU:星耀 Tab Pro 12.4",
+        "SPU:星耀 Tab Max 14.6",
+        "星耀 Note 14 Pro.md",
+        "SPU:星耀 Tab Pro 12.4",
+        "星耀 Flip 折叠屏.md",
+        "星耀 Tab Max 14.6 产品规格.md",
+        "SPU:星耀 Watch 3 Pro 智能手表"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    },
+    {
+      "id": "D10",
+      "query": "星耀 SmartRing Nova 的防水等级能戴着游泳吗",
+      "recall12": 1.0,
+      "mrr": 0.5,
+      "ndcg5": 0.6309297535714575,
+      "hit_docs": [
+        "星耀 SmartRing Nova 智能戒指 产品规格.md"
+      ],
+      "ranked_docs": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "星耀 Flip 折叠屏.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 9 智能手环 产品规格.md"
+      ],
+      "embed_ms": 515.4054999998152,
+      "retrieve_ms": 15.688999999838416,
+      "rerank_ms": 8671.922399999858,
+      "latency_ms": 9203.016899999511,
+      "chunk_doc_keys": [
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "星耀 SmartRing Nova 智能戒指 产品规格.md",
+        "星耀 Flip 折叠屏.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表",
+        "SPU:星耀 SmartRing Nova 智能戒指",
+        "SPU:星耀 Band 8 智能手环",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 X200 5G 影像旗舰",
+        "SPU:星耀 Band 9 智能手环",
+        "SPU:星耀 Buds Pro 3 降噪耳机",
+        "星耀 Band 9 智能手环 产品规格.md",
+        "SPU:星耀 Watch 4 Ultra 旗舰手表"
+      ],
+      "repeat": 2,
+      "rewrite_ms": 0.0
+    }
+  ],
+  "rewrites": [
+    {
+      "id": "D01",
+      "repeat": 1,
+      "raw": "它和 X200 哪个拍照更好",
+      "rewritten": "星耀 X100 Pro Max 和 X200 哪个拍照更好",
+      "rewrite_ms": 2445.264800000132
+    },
+    {
+      "id": "D02",
+      "repeat": 1,
+      "raw": "这款手机的续航和快充表现怎么样",
+      "rewritten": "玉米手机 10 Pro的续航和快充表现怎么样",
+      "rewrite_ms": 856.5965999998753
+    },
+    {
+      "id": "D03",
+      "repeat": 1,
+      "raw": "屏幕最大那款对触控笔的支持怎么样",
+      "rewritten": "屏幕最大的平板对触控笔的支持怎么样",
+      "rewrite_ms": 858.1755000000157
+    },
+    {
+      "id": "D04",
+      "repeat": 1,
+      "raw": "它比 AirBook 14 轻多少",
+      "rewritten": "清逸 AirBook 13 比 AirBook 14 轻多少",
+      "rewrite_ms": 950.3692000000683
+    },
+    {
+      "id": "D05",
+      "repeat": 1,
+      "raw": "能独立插卡打电话的那款续航多久",
+      "rewritten": "能独立插卡打电话的那款智能手表续航多久",
+      "rewrite_ms": 995.1152000001002
+    },
+    {
+      "id": "D06",
+      "repeat": 1,
+      "raw": "开着降噪能连续用几个小时",
+      "rewritten": "星耀 Buds Pro 3 开着降噪能连续用几个小时",
+      "rewrite_ms": 1075.5733000000873
+    },
+    {
+      "id": "D07",
+      "repeat": 1,
+      "raw": "这台机器的散热规格怎么样",
+      "rewritten": "星耀 GamePro 16 的散热规格怎么样",
+      "rewrite_ms": 1186.5002999998069
+    },
+    {
+      "id": "D08",
+      "repeat": 1,
+      "raw": "它的峰值亮度能到多少",
+      "rewritten": "苍穹 Aether N8 Max 的峰值亮度能到多少",
+      "rewrite_ms": 762.9481999997552
+    },
+    {
+      "id": "D09",
+      "repeat": 1,
+      "raw": "12 加 512 那个版本现在卖多少",
+      "rewritten": "12 加 512 那个版本的星耀 Note 14 Pro 现在卖多少",
+      "rewrite_ms": 811.3005000000157
+    },
+    {
+      "id": "D10",
+      "repeat": 1,
+      "raw": "防水等级能戴着游泳吗",
+      "rewritten": "防水等级能戴着游泳吗",
+      "rewrite_ms": 717.6967000000332
+    },
+    {
+      "id": "D01",
+      "repeat": 2,
+      "raw": "它和 X200 哪个拍照更好",
+      "rewritten": "星耀 X100 Pro Max 和 X200 哪个拍照更好",
+      "rewrite_ms": 878.2240000000456
+    },
+    {
+      "id": "D02",
+      "repeat": 2,
+      "raw": "这款手机的续航和快充表现怎么样",
+      "rewritten": "玉米手机 10 Pro的续航和快充表现怎么样",
+      "rewrite_ms": 1010.1181999998516
+    },
+    {
+      "id": "D03",
+      "repeat": 2,
+      "raw": "屏幕最大那款对触控笔的支持怎么样",
+      "rewritten": "屏幕最大那款平板对触控笔的支持怎么样",
+      "rewrite_ms": 837.4321000001146
+    },
+    {
+      "id": "D04",
+      "repeat": 2,
+      "raw": "它比 AirBook 14 轻多少",
+      "rewritten": "清逸 AirBook 13 比 AirBook 14 轻多少",
+      "rewrite_ms": 758.1943000000138
+    },
+    {
+      "id": "D05",
+      "repeat": 2,
+      "raw": "能独立插卡打电话的那款续航多久",
+      "rewritten": "能独立插卡打电话的那款智能手表续航多久",
+      "rewrite_ms": 790.4270999997607
+    },
+    {
+      "id": "D06",
+      "repeat": 2,
+      "raw": "开着降噪能连续用几个小时",
+      "rewritten": "星耀 Buds Pro 3 开着降噪能连续用几个小时",
+      "rewrite_ms": 708.5710999999719
+    },
+    {
+      "id": "D07",
+      "repeat": 2,
+      "raw": "这台机器的散热规格怎么样",
+      "rewritten": "星耀 GamePro 16 的散热规格怎么样",
+      "rewrite_ms": 1019.4240000000718
+    },
+    {
+      "id": "D08",
+      "repeat": 2,
+      "raw": "它的峰值亮度能到多少",
+      "rewritten": "苍穹 Aether N8 Max 的峰值亮度能到多少",
+      "rewrite_ms": 1423.7869999997201
+    },
+    {
+      "id": "D09",
+      "repeat": 2,
+      "raw": "12 加 512 那个版本现在卖多少",
+      "rewritten": "12 加 512 那个版本的星耀 Note 14 Pro 现在卖多少",
+      "rewrite_ms": 1525.9636000000683
+    },
+    {
+      "id": "D10",
+      "repeat": 2,
+      "raw": "防水等级能戴着游泳吗",
+      "rewritten": "防水等级能戴着游泳吗",
+      "rewrite_ms": 921.5343999999277
+    }
+  ],
+  "status": "complete",
+  "metadata": {
+    "kb_chunks": 266,
+    "kb_sha256": "1309cc409c09b418873345ee3c169a4d409269885ea5ad56cbe38feda7adef6e",
+    "eval_sha256": "c4722806f20231214d9fa00120908b7363defe7dc1f61280523b28884b881527",
+    "embedding_model": "text-embedding-v2",
+    "reranker_model": "./data/models/bge-reranker-v2-m3",
+    "reranker_device": "cpu",
+    "llm_model": "deepseek-chat",
+    "temperature": 0.3,
+    "repeats": 2,
+    "seed": 20261107,
+    "metric_version": 2,
+    "rewrite_scope": "forced rewrite helper, not production trigger coverage",
+    "latency_scope": "cold embedding + ES + warm BGE + rewrite LLM (rewrite_on only)",
+    "llm_cache_enabled": false
+  },
+  "rewrite_attempts": 20,
+  "summary": [
+    {
+      "variant": "raw",
+      "n": 20,
+      "recall12": 0.7,
+      "mrr": 0.45,
+      "ndcg5": 0.509436073324115,
+      "latency_avg_ms": 9139.868539999998
+    },
+    {
+      "variant": "rewrite_on",
+      "n": 20,
+      "recall12": 0.9,
+      "mrr": 0.72,
+      "ndcg5": 0.7568433103525644,
+      "latency_avg_ms": 9740.454665000037
+    },
+    {
+      "variant": "oracle",
+      "n": 20,
+      "recall12": 1.0,
+      "mrr": 0.775,
+      "ndcg5": 0.8182898573319817,
+      "latency_avg_ms": 8958.29358000003
+    }
+  ],
+  "by_repeat": {
+    "1": [
+      {
+        "variant": "raw",
+        "n": 10,
+        "recall12": 0.7,
+        "mrr": 0.45,
+        "ndcg5": 0.509436073324115,
+        "latency_avg_ms": 9156.456489999982
+      },
+      {
+        "variant": "rewrite_on",
+        "n": 10,
+        "recall12": 0.9,
+        "mrr": 0.72,
+        "ndcg5": 0.7568433103525644,
+        "latency_avg_ms": 9743.278630000077
+      },
+      {
+        "variant": "oracle",
+        "n": 10,
+        "recall12": 1.0,
+        "mrr": 0.775,
+        "ndcg5": 0.8182898573319817,
+        "latency_avg_ms": 8964.003810000077
+      }
+    ],
+    "2": [
+      {
+        "variant": "raw",
+        "n": 10,
+        "recall12": 0.7,
+        "mrr": 0.45,
+        "ndcg5": 0.509436073324115,
+        "latency_avg_ms": 9123.280590000013
+      },
+      {
+        "variant": "rewrite_on",
+        "n": 10,
+        "recall12": 0.9,
+        "mrr": 0.72,
+        "ndcg5": 0.7568433103525644,
+        "latency_avg_ms": 9737.6307
+      },
+      {
+        "variant": "oracle",
+        "n": 10,
+        "recall12": 1.0,
+        "mrr": 0.775,
+        "ndcg5": 0.8182898573319817,
+        "latency_avg_ms": 8952.583349999986
+      }
+    ]
+  }
+}
