@@ -37,7 +37,6 @@
         <jjwt>0.12.6</jjwt>
         <jaxb-api>4.0.2</jaxb-api>
         <poi>5.2.5</poi>
-        <wechatpay>0.4.8</wechatpay>
         <hutool>5.8.32</hutool>
     </properties>
 
@@ -132,12 +131,6 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi}</version>
-            </dependency>
-            <!-- 微信支付 V3 -->
-            <dependency>
-                <groupId>com.github.wechatpay-apiv3</groupId>
-                <artifactId>wechatpay-apache-httpclient</artifactId>
-                <version>${wechatpay}</version>
             </dependency>
             <!-- Hutool 工具集（图形验证码 captcha 用） -->
             <dependency>
