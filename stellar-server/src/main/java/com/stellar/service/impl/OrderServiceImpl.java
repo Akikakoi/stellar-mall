@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -396,10 +398,13 @@ public class OrderServiceImpl implements OrderService {
         Integer pointsDeducted = 0;
         BigDecimal pointsAmount = BigDecimal.ZERO;
         if (usePoints && payAmountBeforePoints.compareTo(BigDecimal.ZERO) > 0) {
+            int frozen = 0;
             try {
                 BigDecimal requestedAmount = requestedPointsAmount != null ? requestedPointsAmount : payAmountBeforePoints;
-                int frozen = pointsService.freezePointsForOrder(uid, order.getId(), requestedAmount, payAmountBeforePoints);
+                frozen = pointsService.freezePointsForOrder(uid, order.getId(), requestedAmount, payAmountBeforePoints);
                 if (frozen > 0) {
+                    // 冻结走 REQUIRES_NEW 已独立提交；下单事务回滚时必须补偿解冻，避免孤儿冻结
+                    registerPointsRollbackCompensation(uid, order.getId());
                     pointsDeducted = frozen;
                     pointsAmount = BigDecimal.valueOf(frozen)
                             .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
@@ -416,6 +421,19 @@ public class OrderServiceImpl implements OrderService {
                     order.setPointsAmount(pointsAmount);
                 }
             } catch (Exception e) {
+                if (frozen > 0) {
+                    try {
+                        pointsService.unfreezePointsForOrder(uid, order.getId());
+                    } catch (Exception unfreezeError) {
+                        log.error("[POINTS_LOSS] 积分冻结后订单写入失败，立即解冻失败: userId={}, orderId={}",
+                                uid, order.getId(), unfreezeError);
+                    }
+                    pointsDeducted = 0;
+                    pointsAmount = BigDecimal.ZERO;
+                    order.setPayAmount(payAmountBeforePoints);
+                    order.setPointsDeducted(0);
+                    order.setPointsAmount(BigDecimal.ZERO);
+                }
                 log.error("[OrderService] 积分冻结失败，本次下单不使用积分: orderId={}, userId={}", order.getId(), uid, e);
             }
         }
@@ -462,7 +480,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param orderId   订单ID
      * @param userId    用户ID
-     * @param payMethod 支付方式（1-微信 2-支付宝 3-银行卡 4-钱包）
+     * @param payMethod 支付方式（1-模拟微信 2-模拟支付宝 3-模拟银行卡 4-站内钱包）
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -495,6 +513,29 @@ public class OrderServiceImpl implements OrderService {
         pointsFacade.consumeFrozenForOrderQuietly(userId, orderId);
         // 下单奖励积分（不影响支付主流程）
         pointsFacade.earnForOrderQuietly(userId, orderId, order.getPayAmount());
+    }
+
+    /**
+     * 下单事务回滚时补偿解冻已独立提交的冻结积分。
+     * 冻结接口使用 REQUIRES_NEW，无法随订单事务回滚，必须在回滚完成后显式解冻。
+     */
+    private void registerPointsRollbackCompensation(Long userId, Long orderId) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status != TransactionSynchronization.STATUS_ROLLED_BACK) {
+                    return;
+                }
+                try {
+                    pointsService.unfreezePointsForOrder(userId, orderId);
+                } catch (Exception e) {
+                    log.error("[POINTS_LOSS] 下单回滚后解冻积分失败: userId={}, orderId={}", userId, orderId, e);
+                }
+            }
+        });
     }
 
     /** 支付后累加订单中各 SPU 的销量。 */
@@ -959,12 +1000,19 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void completeRefund(Long orderId, Long skuId) {
+        completeRefund(orderId, skuId, true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void completeRefund(Long orderId, Long skuId, boolean rollbackStock) {
         if (skuId == null) {
             log.warn("[OrderService] 订单 {} 部分退款缺少 skuId，跳过", orderId);
             return;
         }
 
-        MallOrder order = mallOrderMapper.getById(orderId);
+        // 锁定订单行：同一订单的多笔售后退款串行结算，避免“是否全部退完”判断并发穿透
+        MallOrder order = mallOrderMapper.getByIdForUpdate(orderId);
         if (order == null) {
             throw new BaseException(MessageConstant.ORDER_NOT_FOUND);
         }
@@ -977,8 +1025,14 @@ public class OrderServiceImpl implements OrderService {
             return;
         }
 
-        // 回滚本次退款商品的库存
-        rollbackSkuStock(orderId, skuId);
+        // 仅退货退款在收到退货后回滚库存；仅退款商品未寄回，不能增加库存
+        if (rollbackStock) {
+            rollbackSkuStock(orderId, skuId);
+        } else {
+            log.info("[OrderService] 订单 {} SKU {} 为仅退款，跳过库存回滚", orderId, skuId);
+        }
+        // 退款成功即回减销量，避免 BI 销量只增不减
+        decrSaleCountForRefund(orderId, skuId);
 
         // 判断订单所有商品是否都已退款 → 是则标记整单已退款，否则标记部分退款
         List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(orderId);
@@ -1013,6 +1067,28 @@ public class OrderServiceImpl implements OrderService {
                         it.getQty() == null ? 0 : it.getQty(), orderNo);
                 return;
             }
+        }
+    }
+
+    /**
+     * 退款回减销量：按订单明细定位 SPU，扣减本次退款 SKU 的数量。
+     * 销量是派生指标，失败只记 [SALES_LOSS] 告警，不阻断退款主流程。
+     */
+    private void decrSaleCountForRefund(Long orderId, Long skuId) {
+        if (skuId == null) return;
+        try {
+            List<MallOrderItem> items = mallOrderItemMapper.listByOrderId(orderId);
+            if (items == null) return;
+            for (MallOrderItem it : items) {
+                if (skuId.equals(it.getSkuId()) && it.getSpuId() != null
+                        && it.getQty() != null && it.getQty() > 0) {
+                    spuMapper.decrSaleCount(it.getSpuId(), it.getQty());
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            log.error("[SALES_LOSS] 退款销量回减失败（退款主流程不受影响）: orderId={}, skuId={}",
+                    orderId, skuId, e);
         }
     }
 

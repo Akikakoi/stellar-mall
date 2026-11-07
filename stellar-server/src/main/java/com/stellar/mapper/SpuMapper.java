@@ -85,6 +85,9 @@ public interface SpuMapper {
     /** 累加商品销量（付款成功后调用）。 */
     int incrSaleCount(@Param("spuId") Long spuId, @Param("qty") int qty);
 
+    /** 退款扣减销量（GREATEST 防负值）。 */
+    int decrSaleCount(@Param("spuId") Long spuId, @Param("qty") int qty);
+
     /** 累加/扣减商品评价数（发表+1，隐藏-1，结果不小于 0）。 */
     int incrCommentCount(@Param("spuId") Long spuId, @Param("delta") int delta);
 

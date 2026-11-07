@@ -28,7 +28,7 @@ public interface OrderService {
 
     /**
      * 模拟支付：PENDING → PAID。归属校验 + 状态校验。
-     * @param payMethod 支付方式：1微信 2支付宝 4钱包，传 null 则沿用订单原支付方式
+     * @param payMethod 支付方式：1模拟微信 2模拟支付宝 3模拟银行卡 4站内钱包，传 null 则沿用订单原支付方式
      */
     void pay(Long orderId, Long userId, Integer payMethod);
 
@@ -89,6 +89,12 @@ public interface OrderService {
      * @param skuId   本次退款的 SKU（必传）
      */
     void completeRefund(Long orderId, Long skuId);
+
+    /**
+     * 完成退款，并显式控制是否回滚库存。
+     * <p>仅退款（商品未寄回）不应回滚库存；退货退款在收到退货后回滚。</p>
+     */
+    void completeRefund(Long orderId, Long skuId, boolean rollbackStock);
 
     /**
      * 自动取消过期的待付款订单（由定时任务调用，15 分钟超时）。

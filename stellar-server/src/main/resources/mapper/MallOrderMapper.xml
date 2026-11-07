@@ -101,6 +101,11 @@
         SELECT * FROM stellar_mall_order WHERE id = #{id} LIMIT 1
     </select>
 
+    <!-- 退款结算锁：同一订单的并发退款在此串行化，保证“是否全部退完”判断不被并发穿透 -->
+    <select id="getByIdForUpdate" resultMap="MallOrderMap">
+        SELECT * FROM stellar_mall_order WHERE id = #{id} FOR UPDATE
+    </select>
+
     <!-- 批量按 id 列表查询订单（调用方需保证 ids 非空，否则 IN () 语法错误） -->
     <select id="listByIds" resultMap="MallOrderMap">
         SELECT * FROM stellar_mall_order

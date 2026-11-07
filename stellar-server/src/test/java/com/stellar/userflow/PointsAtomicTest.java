@@ -172,11 +172,49 @@ class PointsAtomicTest {
         when(userPointsMapper.getByUserId(USER_ID)).thenReturn(userPoints(500, 0, 0));
         when(userPointsMapper.expirePointsAtomic(USER_ID, 200)).thenReturn(1);
         when(pointsRecordMapper.insert(any())).thenReturn(1);
+        when(pointsRecordMapper.markExpired(record.getId())).thenReturn(1);
 
         int total = pointsService.processExpiredPoints();
 
         assertEquals(200, total);
         verify(userPointsMapper, times(1)).expirePointsAtomic(USER_ID, 200);
         verify(userPointsMapper, never()).expirePoints(anyLong(), anyInt(), anyInt());
+        verify(pointsRecordMapper).markExpired(record.getId());
+    }
+
+    // ========== 退款收回赠送积分（幂等） ==========
+
+    @Test @DisplayName("退款收回积分：只扣尚未收回的部分")
+    void reclaim_onlyRemaining() {
+        com.stellar.entity.PointsRecord earn = com.stellar.entity.PointsRecord.builder()
+                .userId(USER_ID).type(1).points(100).bizType("ORDER").bizId(ORDER_ID.toString()).build();
+        when(pointsRecordMapper.findByBiz(USER_ID, "ORDER", ORDER_ID.toString()))
+                .thenReturn(Collections.singletonList(earn));
+        when(pointsRecordMapper.sumDeductedByBiz(USER_ID, "ORDER_RECLAIM", ORDER_ID.toString()))
+                .thenReturn(40);
+        when(userPointsMapper.deductPointsAtomic(USER_ID, 60)).thenReturn(1);
+        when(userPointsMapper.getByUserId(USER_ID)).thenReturn(userPoints(940, 0, 1));
+        when(pointsRecordMapper.insert(any())).thenReturn(1);
+
+        int reclaimed = pointsService.reclaimOrderEarnPoints(USER_ID, ORDER_ID);
+
+        assertEquals(60, reclaimed);
+        verify(userPointsMapper).deductPointsAtomic(USER_ID, 60);
+    }
+
+    @Test @DisplayName("退款收回积分：已全部收回时幂等返回，不再扣减")
+    void reclaim_alreadyAll_idempotent() {
+        com.stellar.entity.PointsRecord earn = com.stellar.entity.PointsRecord.builder()
+                .userId(USER_ID).type(1).points(100).bizType("ORDER").bizId(ORDER_ID.toString()).build();
+        when(pointsRecordMapper.findByBiz(USER_ID, "ORDER", ORDER_ID.toString()))
+                .thenReturn(Collections.singletonList(earn));
+        when(pointsRecordMapper.sumDeductedByBiz(USER_ID, "ORDER_RECLAIM", ORDER_ID.toString()))
+                .thenReturn(100);
+
+        int reclaimed = pointsService.reclaimOrderEarnPoints(USER_ID, ORDER_ID);
+
+        assertEquals(0, reclaimed);
+        verify(userPointsMapper, never()).deductPointsAtomic(anyLong(), anyInt());
+        verify(pointsRecordMapper, never()).insert(any());
     }
 }

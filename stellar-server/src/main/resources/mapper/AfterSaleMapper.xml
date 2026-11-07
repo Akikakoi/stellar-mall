@@ -70,6 +70,16 @@
         UPDATE stellar_after_sale SET status = #{status} WHERE id = #{id}
     </update>
 
+    <!-- 确认退款：CAS 状态流转，防止并发/重复点击重复退款 -->
+    <update id="casConfirmRefund">
+        UPDATE stellar_after_sale
+        SET status = #{toStatus},
+            refund_time = #{refundTime},
+            update_time = #{refundTime},
+            update_user = #{empId}
+        WHERE id = #{id} AND status = #{fromStatus}
+    </update>
+
     <!-- 按 id 查询售后单 -->
     <select id="getById" resultMap="AfterSaleMap">
         SELECT * FROM stellar_after_sale WHERE id = #{id} LIMIT 1

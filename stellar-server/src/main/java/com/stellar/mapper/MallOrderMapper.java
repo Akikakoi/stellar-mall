@@ -43,6 +43,9 @@ public interface MallOrderMapper {
 
     MallOrder getById(@Param("id") Long id);
 
+    /** 退款结算时锁定订单行，串行化同一订单的并发售后退款，避免订单最终状态判断竞态。 */
+    MallOrder getByIdForUpdate(@Param("id") Long id);
+
     /** 批量按 id 列表查询订单，用于组装售后列表等场景，避免循环单条查询。 */
     List<MallOrder> listByIds(@Param("ids") List<Long> ids);
 

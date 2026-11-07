@@ -33,4 +33,12 @@ public interface PointsRecordMapper {
     List<PointsRecord> findByBiz(@Param("userId") Long userId,
                                   @Param("bizType") String bizType,
                                   @Param("bizId") String bizId);
+
+    /** 汇总某业务来源已扣减的积分数（负向流水绝对值），用于退款收回幂等。 */
+    int sumDeductedByBiz(@Param("userId") Long userId,
+                         @Param("bizType") String bizType,
+                         @Param("bizId") String bizId);
+
+    /** 标记获得流水已过期处理，避免同一笔积分被重复扣除。 */
+    int markExpired(@Param("id") Long id);
 }

@@ -13,6 +13,7 @@ import com.stellar.service.UserMessageService;
 import com.stellar.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -583,24 +584,33 @@ public class PointsServiceImpl implements PointsService {
         }
         if (totalEarned <= 0) return 0;
 
-        // 扣减积分
-        deductUserPoints(userId, totalEarned, "ORDER_RECLAIM", orderId.toString(),
-                "订单退款收回赠送积分 -" + totalEarned + "积分");
+        // 幂等：只收回尚未收回的部分，重复调用/历史部分收回不会二次扣减
+        int alreadyReclaimed = pointsRecordMapper.sumDeductedByBiz(userId, "ORDER_RECLAIM", orderId.toString());
+        int remaining = totalEarned - alreadyReclaimed;
+        if (remaining <= 0) {
+            log.info("[PointsService] 用户 {} 订单 {} 赠送积分已全部收回，跳过重复收回", userId, orderId);
+            return 0;
+        }
 
-        log.info("[PointsService] 用户 {} 订单 {} 退款收回赠送积分 {} 积分", userId, orderId, totalEarned);
+        // 扣减积分
+        deductUserPoints(userId, remaining, "ORDER_RECLAIM", orderId.toString(),
+                "订单退款收回赠送积分 -" + remaining + "积分");
+
+        log.info("[PointsService] 用户 {} 订单 {} 退款收回赠送积分 {} 积分（累计已收回 {}/{}）",
+                userId, orderId, remaining, alreadyReclaimed + remaining, totalEarned);
 
         // 发送积分收回通知
         try {
             String orderNo = getOrderNo(orderId);
             userMessageService.createMessage(userId, "POINTS_RECLAIM",
                     "积分收回通知",
-                    "您的订单 " + orderNo + " 已退款，赠送的 " + totalEarned + "积分已收回",
+                    "您的订单 " + orderNo + " 已退款，赠送的 " + remaining + "积分已收回",
                     orderId);
         } catch (Exception e) {
             log.warn("[PointsService] 积分收回通知发送失败: userId={}, orderId={}", userId, orderId, e);
         }
 
-        return totalEarned;
+        return remaining;
     }
 
     // ================================================================
@@ -862,6 +872,7 @@ public class PointsServiceImpl implements PointsService {
     // 过期策略
     // ================================================================
 
+    @Scheduled(cron = "0 0 2 * * ?")
     @Override
     @Transactional(rollbackFor = Exception.class)
     /**
@@ -871,7 +882,8 @@ public class PointsServiceImpl implements PointsService {
      */
     public int processExpiredPoints() {
         LocalDate today = LocalDate.now();
-        List<PointsRecord> expiringRecords = pointsRecordMapper.findExpiringPoints(today, today);
+        // 兜底扫描历史未处理记录，避免某天任务失败后永久漏扣
+        List<PointsRecord> expiringRecords = pointsRecordMapper.findExpiringPoints(LocalDate.of(1970, 1, 1), today);
         int totalExpired = 0;
 
         if (expiringRecords == null || expiringRecords.isEmpty()) {
@@ -904,6 +916,10 @@ public class PointsServiceImpl implements PointsService {
                         .createTime(LocalDateTime.now())
                         .build();
                 pointsRecordMapper.insert(expireRecord);
+                // 标记原获得流水已处理，避免下次扫描重复扣除同一笔积分
+                if (pointsRecordMapper.markExpired(record.getId()) == 0) {
+                    throw new BaseException("积分过期标记失败，事务回滚避免重复扣减");
+                }
                 totalExpired += expireAmount;
             }
         }

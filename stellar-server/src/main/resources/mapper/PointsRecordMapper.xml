@@ -64,4 +64,21 @@
           AND type = 1
     </select>
 
+    <!-- 已收回积分汇总：负向流水取绝对值，用于退款收回幂等 -->
+    <select id="sumDeductedByBiz" resultType="int">
+        SELECT COALESCE(SUM(-points), 0)
+        FROM stellar_points_record
+        WHERE user_id = #{userId}
+          AND biz_type = #{bizType}
+          AND biz_id = #{bizId}
+          AND points &lt; 0
+    </select>
+
+    <!-- 过期处理标记：清空到期日，后续扫描不再重复扣除 -->
+    <update id="markExpired">
+        UPDATE stellar_points_record
+        SET expired_time = NULL
+        WHERE id = #{id} AND type = 1
+    </update>
+
 </mapper>

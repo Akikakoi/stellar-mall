@@ -6,6 +6,7 @@ import com.stellar.enumeration.OperationType;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -21,6 +22,16 @@ public interface AfterSaleMapper {
     int update(AfterSale afterSale);
 
     int updateStatus(@Param("id") Long id, @Param("status") Integer status);
+
+    /**
+     * 确认退款状态 CAS：仅当当前状态为 fromStatus 时更新为 toStatus。
+     * 返回 0 表示状态已被并发请求变更，调用方据此做幂等返回或报错。
+     */
+    int casConfirmRefund(@Param("id") Long id,
+                         @Param("fromStatus") Integer fromStatus,
+                         @Param("toStatus") Integer toStatus,
+                         @Param("refundTime") LocalDateTime refundTime,
+                         @Param("empId") Long empId);
 
     AfterSale getById(@Param("id") Long id);
 

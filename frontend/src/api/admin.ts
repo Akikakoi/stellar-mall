@@ -262,7 +262,9 @@ export function auditAfterSale(data: any): Promise<any> {
 export function confirmRefund(id: number): Promise<any> {
   return adminRequest({
     url: `/admin/aftersale/${id}/confirm-refund`,
-    method: 'post'
+    method: 'post',
+    // 同一售后单的重复点击/重试复用同一个幂等键，后端 CAS 之外再加一层请求去重
+    __idempotencyAction: `admin:aftersale:confirm-refund:${id}`
   })
 }
 

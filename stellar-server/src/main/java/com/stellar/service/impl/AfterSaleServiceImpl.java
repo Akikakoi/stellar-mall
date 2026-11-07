@@ -415,45 +415,72 @@ public class AfterSaleServiceImpl implements AfterSaleService {
         if (afterSale == null) {
             throw new BaseException(MessageConstant.AFTER_SALE_NOT_FOUND);
         }
-        if (afterSale.getStatus() != AfterSaleStatus.REFUNDING.getCode()) {
+        Integer status = afterSale.getStatus();
+        if (Integer.valueOf(AfterSaleStatus.COMPLETED.getCode()).equals(status)) {
+            log.info("[AfterSaleService] 售后单 {} 已完成退款，幂等返回", id);
+            return;
+        }
+        if (!Integer.valueOf(AfterSaleStatus.REFUNDING.getCode()).equals(status)) {
             throw new BaseException(MessageConstant.AFTER_SALE_STATUS_ERROR
                     + "（当前状态仅退款中可确认退款）");
         }
 
         log.info("[AfterSaleService] 开始确认退款: id={}, orderId={}, amount={}", id, afterSale.getOrderId(), afterSale.getAmount());
 
-        // 售后单 → 完成
-        AfterSale update = AfterSale.builder()
-                .id(id)
-                .status(AfterSaleStatus.COMPLETED.getCode())
-                .refundTime(LocalDateTime.now())
-                .build();
-        afterSaleMapper.update(update);
+        // 售后单 → 完成：CAS 占位，只有第一个请求能推进状态并执行退款副作用
+        LocalDateTime refundTime = LocalDateTime.now();
+        int rows = afterSaleMapper.casConfirmRefund(
+                id,
+                AfterSaleStatus.REFUNDING.getCode(),
+                AfterSaleStatus.COMPLETED.getCode(),
+                refundTime,
+                empId);
+        if (rows == 0) {
+            AfterSale current = afterSaleMapper.getById(id);
+            if (current != null
+                    && Integer.valueOf(AfterSaleStatus.COMPLETED.getCode()).equals(current.getStatus())) {
+                log.info("[AfterSaleService] 售后单 {} 已由其他请求完成退款，幂等返回", id);
+                return;
+            }
+            throw new BaseException(MessageConstant.AFTER_SALE_STATUS_ERROR
+                    + "（售后状态已变更，请刷新后重试）");
+        }
         log.info("[AfterSaleService] 售后单已更新为完成: id={}", id);
 
-        // 订单 → REFUNDED / PARTIAL_REFUNDED 并按售后 SKU 回滚库存
-        orderService.completeRefund(afterSale.getOrderId(), afterSale.getSkuId());
+        // 订单 → REFUNDED / PARTIAL_REFUNDED；仅退货退款才回滚库存
+        boolean rollbackStock = Integer.valueOf(AfterSaleType.RETURN_REFUND.getCode())
+                .equals(afterSale.getType());
+        orderService.completeRefund(afterSale.getOrderId(), afterSale.getSkuId(), rollbackStock);
         log.info("[AfterSaleService] 订单退款完成: orderId={}, skuId={}", afterSale.getOrderId(), afterSale.getSkuId());
+
+        MallOrder refundedOrder = mallOrderMapper.getById(afterSale.getOrderId());
+        boolean fullyRefunded = refundedOrder != null
+                && OrderStatus.REFUNDED.getBackendValue().equals(refundedOrder.getStatus());
 
         // 退款到钱包
         walletService.refundToWallet(afterSale.getUserId(), afterSale.getOrderId(), afterSale.getAmount());
         log.info("[AfterSaleService] 钱包退款完成: userId={}, amount={}", afterSale.getUserId(), afterSale.getAmount());
 
-        // 退还优惠券
-        couponService.returnCouponByOrderId(afterSale.getOrderId());
+        // 仅整单退款才退还优惠券；部分退款整张退券会导致折扣被重复使用
+        if (fullyRefunded) {
+            couponService.returnCouponByOrderId(afterSale.getOrderId());
+        }
 
-        // 按比例退还积分
-        refundPointsQuietly(afterSale);
+        // 按比例退还抵扣积分；仅整单退款收回赠送积分
+        refundPointsQuietly(afterSale, fullyRefunded);
 
-        // 发送消息通知用户
-        MallOrder order = mallOrderMapper.getById(afterSale.getOrderId());
-        if (order != null) {
-            String content = "您的售后申请（售后单号 AS" + afterSale.getId() + "）退款已完成";
-            if (afterSale.getAmount() != null) {
-                content += "，退款金额 ¥" + afterSale.getAmount().setScale(2).toPlainString();
+        // 发送消息通知用户；通知失败不应回滚已完成的退款
+        try {
+            if (refundedOrder != null) {
+                String content = "您的售后申请（售后单号 AS" + afterSale.getId() + "）退款已完成";
+                if (afterSale.getAmount() != null) {
+                    content += "，退款金额 ¥" + afterSale.getAmount().setScale(2).toPlainString();
+                }
+                userMessageService.createMessage(afterSale.getUserId(), "AFTER_SALE_COMPLETED",
+                        "退款已完成", content, afterSale.getOrderId());
             }
-            userMessageService.createMessage(afterSale.getUserId(), "AFTER_SALE_COMPLETED",
-                    "退款已完成", content, afterSale.getOrderId());
+        } catch (Exception e) {
+            log.warn("[AfterSaleService] 退款完成通知发送失败: afterSaleId={}", id, e);
         }
 
         log.info("[AfterSaleService] 员工 {} 确认退款完成，售后单 id={}", empId, id);
@@ -649,9 +676,11 @@ public class AfterSaleServiceImpl implements AfterSaleService {
      * 退款时处理积分：退还抵扣积分 + 收回奖励积分。异常不影响退款主流程。
      * 收口在 {@link com.stellar.service.PointsFacade}，失败记 [POINTS_LOSS] 告警日志。
      */
-    private void refundPointsQuietly(AfterSale afterSale) {
-        // 1) 收回订单赠送的奖励积分
-        pointsFacade.reclaimEarnForOrderQuietly(afterSale.getUserId(), afterSale.getOrderId());
+    private void refundPointsQuietly(AfterSale afterSale, boolean fullyRefunded) {
+        // 1) 仅整单退款时收回订单赠送的奖励积分；部分退款不收回
+        if (fullyRefunded) {
+            pointsFacade.reclaimEarnForOrderQuietly(afterSale.getUserId(), afterSale.getOrderId());
+        }
 
         // 2) 按退款比例退还抵扣积分（比例计算在 Facade 内，口径：与订单实付金额同口径）
         pointsFacade.refundForOrderQuietly(afterSale.getUserId(), afterSale.getOrderId(), afterSale.getAmount());

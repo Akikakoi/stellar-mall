@@ -286,6 +286,10 @@
     UPDATE stellar_spu SET sale_count = sale_count + #{qty} WHERE id = #{spuId}
   </update>
 
+  <update id="decrSaleCount">
+    UPDATE stellar_spu SET sale_count = GREATEST(sale_count - #{qty}, 0) WHERE id = #{spuId}
+  </update>
+
   <!-- 评价数累计/扣减（评价发表+1、隐藏-1，GREATEST 防负值） -->
   <update id="incrCommentCount">
     UPDATE stellar_spu

@@ -18,7 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -798,7 +801,7 @@ class OrderServiceProxyTest {
         void refundCompleted_success() {
             MallOrder o = order(ORDER_ID, OrderStatus.REFUNDING.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(400), BigDecimal.valueOf(400));
-            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+            when(mallOrderMapper.getByIdForUpdate(ORDER_ID)).thenReturn(o);
             MallOrderItem it = orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 3, BigDecimal.valueOf(100));
             when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Collections.singletonList(it));
             // 当前售后单（SKU 10）已完成 → 订单全部商品已退 → 标记整单已退款
@@ -808,6 +811,7 @@ class OrderServiceProxyTest {
             orderService.completeRefund(ORDER_ID, 10L);
 
             verify(skuStockService).rollback(eq(10L), eq(3), any());
+            verify(spuMapper).decrSaleCount(1L, 3);
             verify(mallOrderMapper).markRefunded(ORDER_ID);
             verify(mallOrderMapper, never()).markPartialRefunded(ORDER_ID);
         }
@@ -816,7 +820,7 @@ class OrderServiceProxyTest {
         void refundPartial_partialMarked() {
             MallOrder o = order(ORDER_ID, OrderStatus.REFUNDING.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(400), BigDecimal.valueOf(400));
-            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+            when(mallOrderMapper.getByIdForUpdate(ORDER_ID)).thenReturn(o);
             MallOrderItem it = orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 3, BigDecimal.valueOf(100));
             when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Collections.singletonList(it));
             // 已完成售后不包含该 SKU（订单还有其他商品未退）→ 标记部分退款
@@ -826,15 +830,33 @@ class OrderServiceProxyTest {
             orderService.completeRefund(ORDER_ID, 10L);
 
             verify(skuStockService).rollback(eq(10L), eq(3), any());
+            verify(spuMapper).decrSaleCount(1L, 3);
             verify(mallOrderMapper).markPartialRefunded(ORDER_ID);
             verify(mallOrderMapper, never()).markRefunded(ORDER_ID);
+        }
+
+        @Test @DisplayName("仅退款（rollbackStock=false）→ 不回滚库存，仍更新订单退款状态")
+        void refundOnly_noStockRollback() {
+            MallOrder o = order(ORDER_ID, OrderStatus.REFUNDING.getBackendValue(), USER_ID,
+                    BigDecimal.valueOf(400), BigDecimal.valueOf(400));
+            when(mallOrderMapper.getByIdForUpdate(ORDER_ID)).thenReturn(o);
+            MallOrderItem it = orderItem(1L, ORDER_ID, 10L, 1L, "SPU1", 3, BigDecimal.valueOf(100));
+            when(mallOrderItemMapper.listByOrderId(ORDER_ID)).thenReturn(Collections.singletonList(it));
+            when(afterSaleMapper.listCompletedSkuIdsByOrder(ORDER_ID)).thenReturn(Collections.emptyList());
+            when(mallOrderMapper.markPartialRefunded(ORDER_ID)).thenReturn(1);
+
+            orderService.completeRefund(ORDER_ID, 10L, false);
+
+            verify(skuStockService, never()).rollback(anyLong(), anyInt(), any());
+            verify(spuMapper).decrSaleCount(1L, 3);
+            verify(mallOrderMapper).markPartialRefunded(ORDER_ID);
         }
 
         @Test @DisplayName("已取消订单 → 不可退款")
         void refundCancelled_throws() {
             MallOrder o = order(ORDER_ID, OrderStatus.CANCELLED.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(400), BigDecimal.valueOf(400));
-            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+            when(mallOrderMapper.getByIdForUpdate(ORDER_ID)).thenReturn(o);
 
             assertThrows(BaseException.class,
                     () -> orderService.completeRefund(ORDER_ID, 10L));
@@ -843,7 +865,7 @@ class OrderServiceProxyTest {
 
         @Test @DisplayName("订单不存在 → BaseException")
         void refundNonExistent_throws() {
-            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(null);
+            when(mallOrderMapper.getByIdForUpdate(ORDER_ID)).thenReturn(null);
             assertThrows(BaseException.class,
                     () -> orderService.completeRefund(ORDER_ID, 10L));
         }
@@ -853,7 +875,7 @@ class OrderServiceProxyTest {
             MallOrder o = order(ORDER_ID, OrderStatus.REFUNDED.getBackendValue(), USER_ID,
                     BigDecimal.valueOf(400), BigDecimal.valueOf(400));
             o.setIsRefunded(1);
-            when(mallOrderMapper.getById(ORDER_ID)).thenReturn(o);
+            when(mallOrderMapper.getByIdForUpdate(ORDER_ID)).thenReturn(o);
 
             orderService.completeRefund(ORDER_ID, 10L);
 
@@ -1094,6 +1116,25 @@ class OrderServiceProxyTest {
 
             assertThrows(BaseException.class,
                     () -> orderService.confirm(ORDER_ID, USER_ID));
+        }
+    }
+
+    @Test
+    @DisplayName("下单事务回滚 → 补偿解冻冻结积分")
+    void rollback_unfreezesFrozenPoints() throws Exception {
+        TransactionSynchronizationManager.initSynchronization();
+        try {
+            Method method = OrderServiceImpl.class.getDeclaredMethod(
+                    "registerPointsRollbackCompensation", Long.class, Long.class);
+            method.setAccessible(true);
+            method.invoke(orderService, USER_ID, ORDER_ID);
+
+            for (TransactionSynchronization sync : TransactionSynchronizationManager.getSynchronizations()) {
+                sync.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
+            }
+            verify(pointsService).unfreezePointsForOrder(USER_ID, ORDER_ID);
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
         }
     }
 }
