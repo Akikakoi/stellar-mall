@@ -5,6 +5,8 @@
 """
 from __future__ import annotations
 
+import time
+import uuid
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
@@ -206,14 +208,23 @@ def sync_spu(
     if chunks:
         mgr: EsVectorStore = get_vector_store()
         try:
-            # 先按 biz_type+biz_id 删除旧分块（幂等），再重新写入
-            mgr.delete_by_metadata_filter(
-                {"source": "mall_spu", "biz_id": biz_id, "biz_type": "SPU"}
-            )
-            metadatas = [dict(metadata_base, chunk_index=i, total_chunks=len(chunks))
+            # 先写新版本分块，成功后再删旧版本；写入失败不会丢旧数据
+            sync_version = f"{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
+            metadatas = [dict(metadata_base, chunk_index=i, total_chunks=len(chunks),
+                              sync_version=sync_version)
                          for i in range(len(chunks))]
-            ids = [f"mall_spu_{biz_id}_{i}" for i in range(len(chunks))]
+            ids = [f"mall_spu_{biz_id}_{sync_version}_{i}" for i in range(len(chunks))]
             mgr.add_texts(texts=chunks, metadatas=metadatas, ids=ids)
+            mgr.delete_by_query({
+                "bool": {
+                    "must": [
+                        {"term": {"source": "mall_spu"}},
+                        {"term": {"biz_id": biz_id}},
+                        {"term": {"biz_type": "SPU"}},
+                    ],
+                    "must_not": [{"term": {"sync_version.keyword": sync_version}}],
+                }
+            })
             chunk_count = len(chunks)
         except Exception as e:  # pragma: no cover - 异常时返回 500，让 Mall 端重试
             raise HTTPException(
@@ -276,13 +287,22 @@ def sync_doc(
     if chunks:
         mgr: EsVectorStore = get_vector_store()
         try:
-            mgr.delete_by_metadata_filter(
-                {"source": "mall_doc", "biz_id": biz_id, "biz_type": metadata_base["biz_type"]}
-            )
-            metadatas = [dict(metadata_base, chunk_index=i, total_chunks=len(chunks))
+            sync_version = f"{int(time.time() * 1000)}_{uuid.uuid4().hex[:8]}"
+            metadatas = [dict(metadata_base, chunk_index=i, total_chunks=len(chunks),
+                              sync_version=sync_version)
                          for i in range(len(chunks))]
-            ids = [f"mall_doc_{biz_id}_{i}" for i in range(len(chunks))]
+            ids = [f"mall_doc_{biz_id}_{sync_version}_{i}" for i in range(len(chunks))]
             mgr.add_texts(texts=chunks, metadatas=metadatas, ids=ids)
+            mgr.delete_by_query({
+                "bool": {
+                    "must": [
+                        {"term": {"source": "mall_doc"}},
+                        {"term": {"biz_id": biz_id}},
+                        {"term": {"biz_type": metadata_base["biz_type"]}},
+                    ],
+                    "must_not": [{"term": {"sync_version.keyword": sync_version}}],
+                }
+            })
             chunk_count = len(chunks)
         except Exception as e:  # pragma: no cover
             raise HTTPException(
@@ -294,6 +314,13 @@ def sync_doc(
     try:
         from app.rag.retriever import invalidate_docs_cache
         invalidate_docs_cache()
+    except Exception:
+        pass
+
+    # 政策/公告类文档变更无法按商品精准失效，清空 LLM 三层缓存避免返回过期答案
+    try:
+        from app.rag.llm_cache import invalidate_llm_cache_nowait
+        invalidate_llm_cache_nowait()
     except Exception:
         pass
 

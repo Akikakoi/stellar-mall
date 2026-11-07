@@ -70,6 +70,9 @@ public class SpuSearchService {
     @Value("${stellar.rag.base-url:http://127.0.0.1:8000}")
     private String ragBaseUrl;
 
+    @Value("${stellar.rag.internal-sync-secret:}")
+    private String ragSyncSecret;
+
     /** 语义向量维度（必须与 ES nameVec mapping 一致，见 ElasticsearchConfig）。
      *  默认 1536 = DashScope text-embedding-v2；本地 bge-large-zh-v1.5 为 1024。 */
     @Value("${stellar.elasticsearch.vector-dim:1536}")
@@ -303,7 +306,7 @@ public class SpuSearchService {
         }
         try {
             double[] arr = com.stellar.elasticsearch.client.RagEmbeddingClient
-                    .embedOne(ragBaseUrl, text, 5000, 10000);
+                    .embedOne(ragBaseUrl, ragSyncSecret, text, 5000, 10000);
             if (arr == null) return null;
             if (arr.length != vectorDim) {
                 log.warn("Embedding dim mismatch: got {}, expect {} (text='{}'). Semantic search disabled, "

@@ -11,7 +11,8 @@ from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 from app.config import settings
 from app.core.logger import logger
 from app.rag.llm import get_langchain_chat
-from app.rag.llm_cache import get_cache_sync, put_cache_sync, single_flight_sync, INTENT_PROMPT_HASH, AGENT_PROMPT_HASH, REWRITE_PROMPT_HASH
+from app.rag.llm_cache import get_cache_sync, put_cache_sync, single_flight_sync
+from app.rag import llm_cache as llm_cache_module
 from app.rag.retriever import get_query_cache
 from app.agent.state import AgentState
 from app.agent.prompts import INTENT_CLASSIFICATION_PROMPT, AGENT_SYSTEM_PROMPT, PARAM_MISSING_PROMPT, CONTEXT_REWRITE_PROMPT
@@ -24,6 +25,11 @@ from app.agent.tools import (
 )
 from app.agent.tools.kb_tool import kb_specs_for_products
 from app.agent.tools.resolve_sku_tool import resolve_sku_tool
+
+
+def _prompt_hash(name: str) -> str:
+    """读取 llm_cache 初始化后的提示词哈希，避免 from-import 绑定空字符串。"""
+    return getattr(llm_cache_module, name, "")
 
 
 # 流式请求的事件发射器由服务层注入；ContextVar 可随 asyncio.to_thread 复制到工作线程。
@@ -248,14 +254,66 @@ def _resolve_query_tags(query: str) -> list | None:
 # 带疑问语气（吗/没/了）、需要上下文推断、或咨询/搜索边界模糊的一律交给 LLM。
 # 例："订单取消了吗" 不匹配 cancel_order（无"取消订单/帮我取消"字样），走 LLM 判断。
 _INTENT_RULES = [
-    ("cancel_order", re.compile(r"取消订单|帮我取消|我要取消")),
+    ("cancel_order", re.compile(r"(确认|确定)?取消订单|帮我取消|我要取消")),
     ("confirm_receipt", re.compile(r"确认收货|确认签收")),
     ("wallet_query", re.compile(r"钱包.*(余额|多少)|余额.*(多少|查)")),
     ("cart_query", re.compile(r"购物车.*(有什么|看看|查|列表|里面)")),
     ("order_query", re.compile(r"(订单|物流).*(进度|状态|到哪|物流|列表|查)|查(一下)?(我的)?订单")),
     ("favorite_query", re.compile(r"收藏(夹)?.*(看看|查|哪些|列表)|看看.*收藏")),
-    ("after_sales", re.compile(r"(申请|发起)售后")),
+    ("cart_clear", re.compile(r"(确认|确定)?清空购物车")),
+    ("cart_delete", re.compile(r"(确认|确定)?删除.*(购物车|商品|编号)|删除第\s*\d+\s*个")),
+    ("after_sales", re.compile(r"(申请|发起|确认申请|确认发起)售后")),
 ]
+
+# 高危写操作：必须先得到用户明确确认，不能仅凭意图分类直接执行
+HIGH_RISK_WRITE_INTENTS = {"cancel_order", "confirm_receipt", "cart_clear", "cart_delete", "after_sales"}
+
+
+def _is_write_confirmed(query: str) -> bool:
+    """当前用户消息是否包含明确的确认词。"""
+    return bool(re.search(r"确认|确定|同意|是的|继续", query or ""))
+
+
+def _write_confirmation_text(pending: dict) -> str:
+    intent = (pending or {}).get("intent", "")
+    params = (pending or {}).get("params") or {}
+    if intent == "cancel_order":
+        return f"即将取消订单 {params.get('order_id', '')}。请回复「确认取消订单」后执行；回复其他内容将不会执行。"
+    if intent == "cart_clear":
+        return "即将清空购物车。请回复「确认清空购物车」后执行；回复其他内容将不会执行。"
+    if intent == "cart_delete":
+        return (f"即将删除购物车商品（编号 {params.get('cart_item_id', '')}）。"
+                "请回复「确认删除」后执行；回复其他内容将不会执行。")
+    if intent == "after_sales":
+        type_text = {"refund": "退款", "return": "退货退款", "exchange": "换货"}.get(
+            str(params.get("after_sales_type", "")), str(params.get("after_sales_type", "")))
+        return (f"即将提交售后申请（订单 {params.get('order_id', '')}，类型 {type_text}）。"
+                "请回复「确认申请售后」后执行；回复其他内容将不会执行。")
+    if intent == "confirm_receipt":
+        return f"即将确认收货（订单 {params.get('order_id', '')}）。请回复「确认收货」后执行。"
+    return "该操作需要确认。请回复「确认」后执行；回复其他内容将不会执行。"
+
+
+def _write_confirmation_suggestions(pending: dict) -> list:
+    intent = (pending or {}).get("intent", "")
+    params = (pending or {}).get("params") or {}
+    if intent == "cancel_order":
+        return [f"确认取消订单（订单号 {params.get('order_id', '')}）", "暂不取消"]
+    if intent == "cart_clear":
+        return ["确认清空购物车", "暂不清空"]
+    if intent == "cart_delete":
+        return [f"确认删除（编号 {params.get('cart_item_id', '')}）", "暂不删除"]
+    if intent == "after_sales":
+        suggestion_type = {"refund": "退款", "return": "退货", "exchange": "换货"}.get(
+            str(params.get("after_sales_type", "")), str(params.get("after_sales_type", "")))
+        reason = str(params.get("reason", ""))[:20]
+        suffix = f"，{reason}" if reason else ""
+        order = params.get("order_id", "")
+        order_part = f"订单号 {order}，" if order else ""
+        return [f"确认申请售后（{order_part}{suggestion_type}{suffix}）", "暂不申请"]
+    if intent == "confirm_receipt":
+        return [f"确认收货（订单号 {params.get('order_id', '')}）", "暂不确认"]
+    return ["确认", "取消"]
 
 
 def intent_classification_node(state: AgentState) -> Dict[str, Any]:
@@ -287,7 +345,7 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
             query=query,
             model=settings.LLM_MODEL_NAME,
             temperature=settings.LLM_TEMPERATURE,
-            system_prompt_hash=INTENT_PROMPT_HASH,
+            system_prompt_hash=_prompt_hash("INTENT_PROMPT_HASH"),
             cache_type="intent",
         )
     if cached:
@@ -331,7 +389,7 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
                             query=classify_query,
                             model=settings.LLM_MODEL_NAME,
                             temperature=settings.LLM_TEMPERATURE,
-                            system_prompt_hash=INTENT_PROMPT_HASH,
+                            system_prompt_hash=_prompt_hash("INTENT_PROMPT_HASH"),
                             context_hash=None,
                             answer=json.dumps(result, ensure_ascii=False),
                             sources=[],
@@ -528,6 +586,16 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
                         missing.append(param)
                 else:
                     missing.append(param)
+            elif param == "spu_id":
+                extracted = _extract_spu_id(query, state.get("messages", []))
+                if extracted:
+                    collected["spu_id"] = extracted
+                else:
+                    resolved = _auto_resolve_spu(state) if intent == "review_query" else None
+                    if resolved:
+                        collected["spu_id"] = resolved
+                    else:
+                        missing.append(param)
             elif param == "sku_id":
                 extracted = _extract_sku_id(query, state.get("messages", []))
                 if extracted:
@@ -570,6 +638,16 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
                 collected["checked"] = c
         if collected.get("qty") is None and collected.get("checked") is None:
             missing.append("qty")
+
+    if not missing and intent in HIGH_RISK_WRITE_INTENTS and not _is_write_confirmed(query):
+        # 高危写操作统一二次确认：本次只返回确认提示，不执行工具
+        return {
+            "missing_params": [],
+            "required_params": collected,
+            "current_tool": tool_name,
+            "confirmation_required": True,
+            "pending_write": {"intent": intent, "params": dict(collected)},
+        }
 
     return {
         "missing_params": missing,
@@ -752,7 +830,7 @@ def _resolve_pronoun(query: str, history_text: str) -> str:
             query=query,
             model=settings.LLM_MODEL_NAME,
             temperature=settings.LLM_TEMPERATURE,
-            system_prompt_hash=REWRITE_PROMPT_HASH,
+            system_prompt_hash=_prompt_hash("REWRITE_PROMPT_HASH"),
             context_hash=ctx_hash,
             cache_type="rewrite",
         )
@@ -768,7 +846,7 @@ def _resolve_pronoun(query: str, history_text: str) -> str:
                     query=query,
                     model=settings.LLM_MODEL_NAME,
                     temperature=settings.LLM_TEMPERATURE,
-                    system_prompt_hash=REWRITE_PROMPT_HASH,
+                    system_prompt_hash=_prompt_hash("REWRITE_PROMPT_HASH"),
                     context_hash=ctx_hash,
                     answer=result,
                     sources=[],
@@ -887,6 +965,60 @@ def _auto_resolve_sku(state: AgentState) -> str | None:
         return None
 
 
+def _extract_spu_id(query: str, messages: list) -> str | None:
+    """从用户消息/追问回答中提取 SPU 编号。"""
+    import re
+    for pattern in (
+        r'SPU\s*(?:编号|ID|id)?[：: #]*(\d+)',
+        r'商品\s*(?:ID|编号|号)[：: #]*(\d+)',
+    ):
+        m = re.search(pattern, query or "", re.IGNORECASE)
+        if m:
+            return m.group(1)
+    if re.fullmatch(r'\s*\d{1,12}\s*', query or ""):
+        for msg in reversed(messages[-4:]):
+            if isinstance(msg, AIMessage):
+                content = msg.content if isinstance(msg.content, str) else str(msg.content)
+                if "SPU" in content or "商品编号" in content:
+                    return query.strip()
+                return None
+    return None
+
+
+def _auto_resolve_spu(state: AgentState) -> str | None:
+    """评价查询缺 SPU 时，用商品搜索把商品名解析为唯一 SPU；不唯一则返回 None 触发追问。"""
+    import re
+    query = _get_last_user_query(state)
+    if not query:
+        return None
+    cleaned = re.sub(
+        r"(帮我|请|查询|查一下|看看|看一下|评价|评论|口碑|怎么样|好不好|如何|这款|那款|这个|那个|的)",
+        " ", query,
+    ).strip()
+    if len(cleaned) < 2:
+        return None
+    try:
+        result = product_search_tool.invoke({
+            "query": cleaned,
+            "page": 1,
+            "page_size": 5,
+            "mall_token": state.get("mall_token"),
+            "user_id": state.get("user_id"),
+        })
+    except Exception as e:
+        logger.warning(f"[auto_resolve_spu] 商品搜索失败: {e}")
+        return None
+    if not result or not result.get("success"):
+        return None
+    data = result.get("data") or []
+    if isinstance(data, dict):
+        data = data.get("records") or data.get("list") or []
+    if not isinstance(data, list) or len(data) != 1 or not isinstance(data[0], dict):
+        return None
+    spu_id = data[0].get("spu_id") or data[0].get("id")
+    return str(spu_id) if spu_id else None
+
+
 def _extract_sku_id(query: str, messages: list) -> str | None:
     """从用户消息中提取 SKU 编号。
 
@@ -924,7 +1056,16 @@ def _extract_sku_id(query: str, messages: list) -> str | None:
 
 
 def ask_params_node(state: AgentState) -> Dict[str, Any]:
-    """缺参追问节点：生成追问话术。"""
+    """缺参追问节点：生成追问话术；高危写操作在这里生成二次确认提示。"""
+    if state.get("confirmation_required"):
+        pending = state.get("pending_write") or {}
+        return {
+            "final_answer": _write_confirmation_text(pending),
+            "suggestions": _write_confirmation_suggestions(pending),
+            "confirmation_required": False,
+            "current_tool": None,
+            "missing_params": [],
+        }
     intent = state.get("intent", "other")
     missing = state.get("missing_params", [])
     if not missing:
@@ -941,6 +1082,8 @@ def ask_params_node(state: AgentState) -> Dict[str, Any]:
             missing_desc.append("售后原因")
         elif p == "query":
             missing_desc.append("查询内容")
+        elif p == "spu_id":
+            missing_desc.append("商品编号（可在商品详情页查看，或直接告诉我商品名）")
         elif p == "cart_item_id":
             missing_desc.append("购物车商品编号（先查看购物车获取编号）")
         elif p == "qty":
@@ -1315,7 +1458,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
         query=query,
         model=settings.LLM_MODEL_NAME,
         temperature=settings.LLM_TEMPERATURE,
-        system_prompt_hash=AGENT_PROMPT_HASH,
+        system_prompt_hash=_prompt_hash("AGENT_PROMPT_HASH"),
         context_hash=context_hash,
         cache_type="answer",
         context_keys=evidence_keys,
@@ -1436,7 +1579,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                         query=query,
                         model=settings.LLM_MODEL_NAME,
                         temperature=settings.LLM_TEMPERATURE,
-                        system_prompt_hash=AGENT_PROMPT_HASH,
+                        system_prompt_hash=_prompt_hash("AGENT_PROMPT_HASH"),
                         context_hash=context_hash,
                         answer=full_answer,
                         sources=state.get("sources", []),
@@ -1768,6 +1911,8 @@ def route_after_intent(state: AgentState) -> str:
 
 def route_after_params(state: AgentState) -> str:
     """参数检查后的路由。"""
+    if state.get("confirmation_required"):
+        return "ask_params"
     missing = state.get("missing_params", [])
     if missing:
         return "ask_params"

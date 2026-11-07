@@ -123,7 +123,9 @@ class EsVectorStore:
             d["content"] = text
             d["vec"] = vec
             docs.append(d)
-        es_bulk_index(KB_ES_INDEX, docs, ids=ids)
+        written = es_bulk_index(KB_ES_INDEX, docs, ids=ids)
+        if written != len(docs):
+            raise RuntimeError(f"ES bulk wrote {written}/{len(docs)} chunks")
         logger.info(f"[ES] 入库 {len(docs)} 条 chunk（index={KB_ES_INDEX}）")
         return list(ids) if ids else []
 
@@ -151,6 +153,18 @@ class EsVectorStore:
         except Exception as e:  # noqa
             logger.warning(f"[ES] 按 filter={where_filter} 删除失败: {e}")
             return 0
+
+    def delete_by_query(self, query: dict) -> int:
+        """按原始 ES query 删除（支持 must_not，用于版本化替换后清理旧分块）。"""
+        if not query:
+            return 0
+        es = get_es()
+        # 先刷新，确保刚写入的新版本分块对 must_not 可见，避免删除误伤新数据
+        es.indices.refresh(index=KB_ES_INDEX)
+        res = es.delete_by_query(index=KB_ES_INDEX, query=query, refresh=True)
+        deleted = int(res.get("deleted", 0))
+        logger.info(f"[ES] 按 query 删除 {deleted} 条 chunk")
+        return deleted
 
     def add_document(self, kb_doc: KbDocument, chunk_size: int = None, chunk_overlap: int = None):
         splits = _doc_load_and_split(kb_doc, chunk_size=chunk_size, chunk_overlap=chunk_overlap)

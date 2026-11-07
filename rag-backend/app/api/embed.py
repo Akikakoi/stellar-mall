@@ -4,9 +4,10 @@
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from app.api.internal import _require_sync_secret
 from app.rag.embeddings import get_embeddings
 from app.core.logger import logger
 
@@ -23,8 +24,8 @@ class EmbedResponse(BaseModel):
 
 
 @router.post("/embed", response_model=EmbedResponse, tags=["Embedding"])
-async def embed_texts(req: EmbedRequest):
-    """将商品名称/描述文本转为语义向量。"""
+async def embed_texts(req: EmbedRequest, _auth: None = Depends(_require_sync_secret)):
+    """将商品名称/描述文本转为语义向量（需共享密钥，避免公网滥用付费 Embedding）。"""
     try:
         emb = get_embeddings()
         vectors = emb.embed_documents(req.texts)

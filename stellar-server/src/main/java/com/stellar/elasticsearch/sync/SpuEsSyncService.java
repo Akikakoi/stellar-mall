@@ -33,6 +33,9 @@ public class SpuEsSyncService {
     @Value("${stellar.rag.base-url:http://127.0.0.1:8000}")
     private String ragBaseUrl;
 
+    @Value("${stellar.rag.internal-sync-secret:}")
+    private String ragSyncSecret;
+
     /** 语义向量维度（必须与 ES dense_vector mapping 一致，见 ElasticsearchConfig）。
      *  默认 1536 = DashScope text-embedding-v2；本地 bge-large-zh-v1.5 为 1024。
      *  维度不符时丢弃向量（宁缺毋滥），避免整批写入 ES 报 400。 */
@@ -181,7 +184,7 @@ public class SpuEsSyncService {
     /** 单批 POST /api/embed。受检异常上抛给调用方（fetchEmbeddings 已 catch 记日志）。 */
     private List<double[]> doEmbedBatch(List<String> texts) throws Exception {
         return com.stellar.elasticsearch.client.RagEmbeddingClient
-                .embedBatch(ragBaseUrl, texts, 5000, 60000);
+                .embedBatch(ragBaseUrl, ragSyncSecret, texts, 5000, 60000);
     }
 
     /** 单条向量化（商品同步时），维度不符或失败时返回 null。 */

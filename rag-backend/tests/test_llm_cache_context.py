@@ -7,6 +7,7 @@
     cd rag-backend
     python -m pytest tests/test_llm_cache_context.py -v
 """
+from app.agent import nodes as nodes_module
 from app.agent.nodes import _evidence_keys
 from app.rag import llm_cache as cache_module
 from app.rag.llm_cache import _context_matches
@@ -74,6 +75,11 @@ def test_evidence_keys_skip_invalid_and_empty():
     assert _evidence_keys({}) == []
     assert _evidence_keys(None) == []
     assert len(_evidence_keys({"success": True})) == 1
+
+
+def test_prompt_hash_reads_latest_cache_value(monkeypatch):
+    monkeypatch.setattr(cache_module, "AGENT_PROMPT_HASH", "fresh-hash")
+    assert nodes_module._prompt_hash("AGENT_PROMPT_HASH") == "fresh-hash"
 
 
 def test_module_wrappers_forward_context_keys(monkeypatch):

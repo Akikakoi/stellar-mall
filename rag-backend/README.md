@@ -69,7 +69,7 @@
 
 * 联合健康检查：RAG 主库 + Mall MySQL / Redis / API 探活
 
-* MCP Server：通过 `python -m app.mcp_server` 将商城 Agent 工具暴露为 MCP 工具
+* MCP Server：通过 `python -m app.mcp_server` 将商城 Agent 工具暴露为 MCP 工具；取消订单/确认收货/清空购物车/删除购物车项/申请售后等高危写工具必须显式传 `confirm=true`，否则直接拒绝
 
 ## 项目结构
 

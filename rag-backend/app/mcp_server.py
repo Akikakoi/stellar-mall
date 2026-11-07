@@ -27,6 +27,16 @@ from app.core.logger import logger
 mcp = FastMCP(settings.MCP_SERVER_NAME or "stellar-mall")
 
 
+def _mcp_write_guard(confirm: bool) -> Optional[dict]:
+    """MCP 高危写工具的统一闸门：调用方必须先获得用户确认并显式传 confirm=true。"""
+    if confirm:
+        return None
+    return {
+        "success": False,
+        "message": "高危操作需要用户明确确认后，以 confirm=true 重新调用；本次未执行任何变更。",
+    }
+
+
 # ──────────────────────────────────────────────────────────────
 # 商品搜索
 # ──────────────────────────────────────────────────────────────
@@ -77,8 +87,12 @@ def query_orders(
 def cancel_order(
     order_id: str,
     mall_token: Optional[str] = None,
+    confirm: bool = False,
 ) -> dict:
-    """取消待付款或待发货的订单。"""
+    """取消待付款或待发货的订单；必须显式 confirm=true。"""
+    denied = _mcp_write_guard(confirm)
+    if denied:
+        return denied
     from app.agent.tools.cancel_order_tool import cancel_order_tool
 
     return cancel_order_tool.invoke({
@@ -94,8 +108,12 @@ def cancel_order(
 def confirm_receipt(
     order_id: str,
     mall_token: Optional[str] = None,
+    confirm: bool = False,
 ) -> dict:
-    """确认已收到商品，将订单从待收货变为已完成。"""
+    """确认已收到商品，将订单从待收货变为已完成；必须显式 confirm=true。"""
+    denied = _mcp_write_guard(confirm)
+    if denied:
+        return denied
     from app.agent.tools.confirm_receipt_tool import confirm_receipt_tool
 
     return confirm_receipt_tool.invoke({
@@ -166,8 +184,12 @@ def update_cart_item(
 def delete_cart_item(
     cart_item_id: str,
     mall_token: Optional[str] = None,
+    confirm: bool = False,
 ) -> dict:
-    """从购物车中移除指定商品。"""
+    """从购物车中移除指定商品；必须显式 confirm=true。"""
+    denied = _mcp_write_guard(confirm)
+    if denied:
+        return denied
     from app.agent.tools.cart_tool import delete_cart_item_tool
 
     return delete_cart_item_tool.invoke({
@@ -182,8 +204,12 @@ def delete_cart_item(
 @mcp.tool()
 def clear_cart(
     mall_token: Optional[str] = None,
+    confirm: bool = False,
 ) -> dict:
-    """清空购物车中的所有商品。"""
+    """清空购物车中的所有商品；必须显式 confirm=true。"""
+    denied = _mcp_write_guard(confirm)
+    if denied:
+        return denied
     from app.agent.tools.cart_tool import clear_cart_tool
 
     return clear_cart_tool.invoke({
@@ -203,11 +229,15 @@ def apply_after_sales(
     description: Optional[str] = "",
     contact_phone: Optional[str] = "",
     mall_token: Optional[str] = None,
+    confirm: bool = False,
 ) -> dict:
-    """提交售后申请（退货/换货/退款），写入商城真实售后系统。
+    """提交售后申请（退货/换货/退款），写入商城真实售后系统；必须显式 confirm=true。
 
     after_sales_type 可选值：refund(仅退款) / return(退货退款) / exchange(换货)
     """
+    denied = _mcp_write_guard(confirm)
+    if denied:
+        return denied
     from app.agent.tools.after_sales_tool import apply_after_sales_tool
 
     return apply_after_sales_tool.invoke({

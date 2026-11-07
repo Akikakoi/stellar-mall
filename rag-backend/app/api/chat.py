@@ -111,16 +111,18 @@ async def chat(
             fallback = "（智能体服务暂时不可用，请稍后重试。如持续失败请联系管理员。）"
             answer_parts.append(fallback)
             yield _format_sse("token", {"content": fallback})
-
-        latency = int((time.time() - t0) * 1000)
-        full_ans = "".join(answer_parts)
-        try:
-            conv_svc.append_message(
-                conv_id, MessageRole.ASSISTANT, full_ans,
-                sources=sources_data, tokens_used=tokens, latency_ms=latency,
-            )
-        except Exception as e:  # noqa
-            logger.warning(f"写入消息历史失败: {e}")
+        finally:
+            # 客户端断开/CancelledError 也会进入 finally，保存已生成的部分答案，避免重载后只剩提问
+            latency = int((time.time() - t0) * 1000)
+            full_ans = "".join(answer_parts)
+            if full_ans.strip():
+                try:
+                    conv_svc.append_message(
+                        conv_id, MessageRole.ASSISTANT, full_ans,
+                        sources=sources_data, tokens_used=tokens, latency_ms=latency,
+                    )
+                except Exception as e:  # noqa
+                    logger.warning(f"写入消息历史失败: {e}")
 
         yield _format_sse("done", {
             "tokens": tokens,

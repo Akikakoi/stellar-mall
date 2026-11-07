@@ -22,18 +22,21 @@ public final class RagEmbeddingClient {
     private RagEmbeddingClient() {
     }
 
-    public static double[] embedOne(String baseUrl, String text,
+    public static double[] embedOne(String baseUrl, String secret, String text,
                                     int connectTimeoutMs, int readTimeoutMs) throws Exception {
-        List<double[]> vectors = embedBatch(baseUrl, List.of(text), connectTimeoutMs, readTimeoutMs);
+        List<double[]> vectors = embedBatch(baseUrl, secret, List.of(text), connectTimeoutMs, readTimeoutMs);
         return vectors.isEmpty() ? null : vectors.get(0);
     }
 
-    public static List<double[]> embedBatch(String baseUrl, List<String> texts,
+    public static List<double[]> embedBatch(String baseUrl, String secret, List<String> texts,
                                             int connectTimeoutMs, int readTimeoutMs) throws Exception {
         String body = MAPPER.writeValueAsString(Map.of("texts", new ArrayList<>(texts)));
         HttpURLConnection conn = (HttpURLConnection) new URL(baseUrl + "/api/embed").openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+        if (secret != null && !secret.isEmpty()) {
+            conn.setRequestProperty("X-Stellar-Rag-Sync-Secret", secret);
+        }
         conn.setDoOutput(true);
         conn.setConnectTimeout(connectTimeoutMs);
         conn.setReadTimeout(readTimeoutMs);

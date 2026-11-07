@@ -1,5 +1,6 @@
 """知识库服务（最小实现：DB层CRUD + 空索引器）。后续由 RAG 模块补齐向量化。"""
 from __future__ import annotations
+import re
 import tempfile
 import uuid
 from datetime import datetime
@@ -18,6 +19,11 @@ from app.rag.llm_cache import invalidate_llm_cache_nowait
 from app.rag.retriever import get_query_cache, invalidate_docs_cache
 from app.schemas import KbDocInfo, KbDocUpdateReq, KbPreviewResp
 from app.services.operation_log_service import log_operation
+
+
+def _safe_filename(name: str) -> str:
+    """只保留文件名本身，剥离 ../、绝对路径和 Windows 反斜杠路径。"""
+    return re.split(r"[\\/]", str(name))[-1].strip()
 
 
 class KbService:
@@ -94,7 +100,9 @@ class KbService:
                                chunk_size: int = None, chunk_overlap: int = None):
         if not file or not getattr(file, "filename", None):
             raise BizError("请上传文件", code=40020)
-        filename = str(file.filename)
+        filename = _safe_filename(file.filename)
+        if not filename:
+            raise BizError("文件名无效", code=40020)
         ext = Path(filename).suffix.lower()
         if ext not in settings.ALLOWED_EXT_LIST:
             raise BizError(f"不支持的文件类型: {ext}，允许 {settings.ALLOWED_EXT_LIST}", code=40021)
@@ -258,7 +266,9 @@ class KbService:
                            limit: int = 50) -> dict:
         if not file or not getattr(file, "filename", None):
             raise BizError("请上传文件", code=40020)
-        filename = str(file.filename)
+        filename = _safe_filename(file.filename)
+        if not filename:
+            raise BizError("文件名无效", code=40020)
         ext = Path(filename).suffix.lower()
         if ext not in settings.ALLOWED_EXT_LIST:
             raise BizError(f"不支持的文件类型: {ext}，允许 {settings.ALLOWED_EXT_LIST}", code=40021)
