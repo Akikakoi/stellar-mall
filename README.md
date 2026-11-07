@@ -136,6 +136,8 @@ DB_PASSWORD=... python scripts/check_flyway_baseline.py
 
 之后保持 Flyway 开启即可按 V29+ 增量升级；执行前请备份数据库。
 
+> Flyway 10.x 启动时会读取 `performance_schema.user_variables_by_thread`。业务账号通常没有该权限，且 Druid 会把探测失败的连接标记为不可用，导致后续 `foreign_key_checks` 查询报 “connection disabled”。`application-dev.yml.example` 已为 Flyway 配置独立的 `url/user/password`（Spring Boot 会使用 `SimpleDriverDataSource`），让该探测失败可被正常降级；若你的 Flyway 仍走业务数据源，需要给账号授予该表的 SELECT 权限，或用 root 执行迁移。
+
 ### 3. 配置密钥
 
 后端 `stellar-server/src/main/resources/application-dev.yml`（参考 `.example` 文件）：
