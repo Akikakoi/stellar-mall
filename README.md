@@ -29,7 +29,7 @@
 | AI/RAG | FastAPI + LangChain + LangGraph（5 节点状态机 + ReAct Agent）+ ChromaDB + BM25 + BGE Reranker |
 | AI 缓存 | Redis 三层 LLM 缓存（L1 精确 + L2 语义 + L3 模型），布隆过滤 + Single-flight + 异步写 + 本地余弦精排 |
 | BI 智能分析 | ChatBI 自然语言查数 + AI 经营日报 |
-| 支付 | 微信支付 V3 |
+| 支付 | 模拟支付（个人学习项目，不接入真实支付渠道；钱包为站内虚拟余额） |
 | 鉴权 | JWT（用户端 + 管理端双密钥） |
 | 基础设施 | Docker Compose（ES + MySQL + Redis） |
 
@@ -49,10 +49,12 @@ stellar-mall/
 
 ## 核心功能
 
+> **支付说明**：本项目是个人学习项目，支付与充值均为模拟流程，不接入微信/支付宝真实支付；钱包余额仅用于站内演示，不涉及真实资金。
+
 ### 电商基础
 - 商品管理：SPU/SKU 模型，多级分类，多图上传，商品搜索（ES + MySQL 降级）
 - 购物车：多规格选择，数量调整，批量操作
-- 订单系统：下单、支付（微信支付 V3）、取消、退款、积分抵扣
+- 订单系统：下单、模拟支付、取消、退款、积分抵扣（微信/支付宝仅作模拟渠道展示）
 - 地址簿：多地址管理，默认地址，收货地址联动
 - 优惠券：领取、使用、过期管理
 - 售后保障：延保 / 保险服务费全链路
@@ -116,12 +118,14 @@ docker compose up -d
 - 数据库连接信息
 - Aliyun OSS AccessKey
 - JWT 签名密钥
-- 微信支付配置
+- 支付说明：模拟支付无需商户号、证书或真实支付配置
 
 RAG 后端 `rag-backend/.env`（参考 `.env.example`）：
 - DashScope API Key
 - JWT 密钥（需与后端一致）
 - 内部同步密钥
+
+> JWT 与 RAG 同步密钥生产必须通过环境变量覆盖；仍使用 `CHANGE_ME...`、`<占位符>` 或长度不足会在启动时直接失败（测试通过 `allow-insecure-defaults=true` 显式放行）。
 
 ### 4. 一键启动（Windows）
 
