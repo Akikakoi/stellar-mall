@@ -28,11 +28,13 @@ export default defineConfig({
     }
   ],
 
-  // 自动启动 Vite dev server
+  // 自动启动 Vite dev server。
+  // 显式绑定 127.0.0.1：Ubuntu runner 上 localhost 可能只解析到 ::1，
+  // 而 Playwright 探测的是 127.0.0.1，会一直等到超时。
   webServer: {
-    command: 'npx vite --port 5173',
+    command: 'npx vite --host 127.0.0.1 --port 5173',
     url: 'http://127.0.0.1:5173',
-    reuseExistingServer: true,
-    timeout: 30_000
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000
   }
 })
