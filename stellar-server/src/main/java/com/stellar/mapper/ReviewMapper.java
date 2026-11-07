@@ -23,8 +23,10 @@ public interface ReviewMapper {
     Review getByOrderIdAndUserId(@Param("orderId") Long orderId, @Param("userId") Long userId);
     List<Review> pageAll(@Param("spuId") Long spuId, @Param("status") Integer status,
                          @Param("spuName") String spuName,
+                         @Param("hasReply") Boolean hasReply, @Param("maxRating") Integer maxRating,
                          @Param("offset") int offset, @Param("pageSize") int pageSize);
     long countAll(@Param("spuId") Long spuId, @Param("status") Integer status,
-                  @Param("spuName") String spuName);
+                  @Param("spuName") String spuName,
+                  @Param("hasReply") Boolean hasReply, @Param("maxRating") Integer maxRating);
     long countByUserIdAndSpuId(@Param("userId") Long userId, @Param("spuId") Long spuId);
 }

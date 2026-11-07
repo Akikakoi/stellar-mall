@@ -179,19 +179,24 @@ public class ReviewServiceImpl implements ReviewService {
     /**
      * 后台管理端分页查询所有评价（支持多条件筛选）。
      *
-     * @param spuId    SPU ID（可选）
-     * @param status   状态（可选）
-     * @param spuName  SPU名称（可选，模糊匹配）
-     * @param page     页码
-     * @param pageSize 每页条数
+     * @param spuId     SPU ID（可选）
+     * @param status    状态（可选）
+     * @param spuName   SPU名称（可选，模糊匹配）
+     * @param hasReply  是否已回复（可选）
+     * @param maxRating 评分上限，用于差评筛选（可选）
+     * @param page      页码
+     * @param pageSize  每页条数
      * @return 分页结果
      */
     @Override
-    public PageResult pageAll(Long spuId, Integer status, String spuName, Integer page, Integer pageSize) {
+    public PageResult pageAll(Long spuId, Integer status, String spuName,
+                              Boolean hasReply, Integer maxRating,
+                              Integer page, Integer pageSize) {
         int p = (page == null || page < 1) ? 1 : page;
         int ps = (pageSize == null || pageSize < 1) ? 10 : pageSize;
-        List<Review> list = reviewMapper.pageAll(spuId, status, spuName, (p - 1) * ps, ps);
-        long total = reviewMapper.countAll(spuId, status, spuName);
+        List<Review> list = reviewMapper.pageAll(spuId, status, spuName, hasReply, maxRating,
+                (p - 1) * ps, ps);
+        long total = reviewMapper.countAll(spuId, status, spuName, hasReply, maxRating);
         return new PageResult(total, list == null ? new ArrayList<>() : list);
     }
 }

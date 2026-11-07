@@ -35,6 +35,7 @@ declare module 'vue' {
     ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']
     ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDivider: typeof import('element-plus/es')['ElDivider']
+    ElDrawer: typeof import('element-plus/es')['ElDrawer']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
@@ -78,6 +79,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SkuSpecSelector: typeof import('./src/components/SkuSpecSelector.vue')['default']
     SourceCard: typeof import('./src/components/SourceCard.vue')['default']
+    SpuReviewDrawer: typeof import('./src/components/admin/SpuReviewDrawer.vue')['default']
     ThemeToggle: typeof import('./src/components/ThemeToggle.vue')['default']
   }
   export interface GlobalDirectives {

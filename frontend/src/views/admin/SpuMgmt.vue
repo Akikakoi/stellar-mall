@@ -57,7 +57,7 @@
             </el-image>
           </template>
         </el-table-column>
-        <el-table-column prop="name" min-width="200" show-overflow-tooltip>
+        <el-table-column prop="name" min-width="200">
           <template #header>
             <span class="col-header-sort">
               商品名称
@@ -65,6 +65,20 @@
                 {{ query.sortOrder === 'asc' ? '▲' : '▼' }}
               </span>
             </span>
+          </template>
+          <template #default="{ row }">
+            <div class="spu-name-cell">
+              <div class="spu-name-text" :title="row.name">{{ row.name }}</div>
+              <button
+                type="button"
+                class="spu-review-entry"
+                :title="`查看「${row.name}」的评价`"
+                @click.stop="openReviewDrawer(row)"
+              >
+                <el-icon :size="12"><ChatLineSquare /></el-icon>
+                评价 {{ row.commentCount || 0 }}
+              </button>
+            </div>
           </template>
         </el-table-column>
         <el-table-column prop="categoryName" label="分类" width="120" />
@@ -494,6 +508,13 @@
         <el-button type="primary" :loading="importing" @click="handleImport" :disabled="!importFile">开始导入</el-button>
       </template>
     </el-dialog>
+
+    <!-- 商品评价抽屉：商品视角查看/回复/隐藏该商品的评价 -->
+    <SpuReviewDrawer
+      v-model="reviewDrawerVisible"
+      :spu="reviewSpu"
+      @changed="onReviewChanged"
+    />
   </div>
 </template>
 
@@ -503,7 +524,8 @@ import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batc
 import { adminRequest } from '@/api/request'
 import { apiKbUploadWithChunks, apiKbPreview, apiKbGet, apiKbMatch, apiKbMatchBatch, apiKbDelete } from '@/api/rag'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, Search, Document, Loading } from '@element-plus/icons-vue'
+import { Upload, Search, Document, Loading, ChatLineSquare } from '@element-plus/icons-vue'
+import SpuReviewDrawer from '@/components/admin/SpuReviewDrawer.vue'
 import { storage } from '@/utils/storage'
 
 const SORT_STORAGE_KEY = 'stellar:admin:spu-mgmt:sort:v1'
@@ -1110,6 +1132,28 @@ async function handleDelete(row: any) {
   try { await ElMessageBox.confirm(`确定删除商品「${row.name}」？`, '提示', { type: 'warning' }); await deleteSpu(row.id); ElMessage.success('已删除'); loadPage() } catch (e: any) {}
 }
 
+/* ===== 商品评价抽屉 =====
+ * 商品视角的评价入口：抽屉内只查该 spuId 的评价，全站队列仍走「评价管理」页。 */
+const reviewDrawerVisible = ref(false)
+const reviewSpu = ref<any>(null)
+/** 抽屉里回复/隐藏过评价 → 关闭时回刷列表（隐藏会同步改 comment_count） */
+let reviewDirty = false
+
+function openReviewDrawer(row: any) {
+  reviewSpu.value = row
+  reviewDrawerVisible.value = true
+}
+
+function onReviewChanged() {
+  reviewDirty = true
+}
+
+watch(reviewDrawerVisible, (visible) => {
+  if (visible || !reviewDirty) return
+  reviewDirty = false
+  loadPage()
+})
+
 onMounted(() => { restoreSort(); loadMeta(); loadPage() })
 
 // Import/Export
@@ -1264,6 +1308,32 @@ async function handleStockAdjust() {
 .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .panel-actions { display: flex; gap: 8px; align-items: center; }
 .panel-title { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+
+/* 名称列：第一行商品名（单行省略），第二行评价入口小字 */
+.spu-name-cell { min-width: 0; padding: 2px 0; }
+.spu-name-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spu-review-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-color);
+}
+.spu-review-entry:hover { color: var(--brand-primary); }
 .batch-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px 16px; background: var(--brand-primary-soft); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); overflow: hidden; }
 .toolbar-slide-enter-active, .toolbar-slide-leave-active { transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out); }
 .toolbar-slide-enter-from, .toolbar-slide-leave-to { opacity: 0; transform: translateY(-6px); }

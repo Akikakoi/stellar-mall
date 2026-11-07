@@ -19,13 +19,15 @@ public class ReviewAdminController {
 
 @RequireRole({1, 2, 3})
     @GetMapping("/page")
-    @ApiOperation("评价分页，支持按 spuId / 商品名称 / status 筛选")
+    @ApiOperation("评价分页，支持按 spuId / 商品名称 / status / 是否已回复 / 差评筛选")
     public Result<PageResult> page(@RequestParam(required = false) Long spuId,
                                    @RequestParam(required = false) Integer status,
                                    @RequestParam(required = false) String spuName,
+                                   @RequestParam(required = false) Boolean hasReply,
+                                   @RequestParam(required = false) Integer maxRating,
                                    @RequestParam(defaultValue = "1") Integer page,
                                    @RequestParam(defaultValue = "10") Integer pageSize) {
-        return Result.success(reviewService.pageAll(spuId, status, spuName, page, pageSize));
+        return Result.success(reviewService.pageAll(spuId, status, spuName, hasReply, maxRating, page, pageSize));
     }
 
 @RequireRole({1, 2, 3})

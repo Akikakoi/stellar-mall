@@ -87,6 +87,11 @@
             <if test="spuId != null">AND r.spu_id = #{spuId}</if>
             <if test="status != null">AND r.status = #{status}</if>
             <if test="spuName != null and spuName != ''">AND s.name LIKE CONCAT('%', #{spuName}, '%')</if>
+            <!-- 未回复 / 已回复：回复为空串与 NULL 视为同一种「未回复」 -->
+            <if test="hasReply != null and hasReply == true">AND r.reply IS NOT NULL AND r.reply &lt;&gt; ''</if>
+            <if test="hasReply != null and hasReply == false">AND (r.reply IS NULL OR r.reply = '')</if>
+            <!-- 差评筛选：评分小于等于 N 星 -->
+            <if test="maxRating != null">AND r.rating &lt;= #{maxRating}</if>
         </where>
         ORDER BY r.create_time DESC
         LIMIT #{pageSize} OFFSET #{offset}
@@ -100,6 +105,9 @@
             <if test="spuId != null">AND r.spu_id = #{spuId}</if>
             <if test="status != null">AND r.status = #{status}</if>
             <if test="spuName != null and spuName != ''">AND s.name LIKE CONCAT('%', #{spuName}, '%')</if>
+            <if test="hasReply != null and hasReply == true">AND r.reply IS NOT NULL AND r.reply &lt;&gt; ''</if>
+            <if test="hasReply != null and hasReply == false">AND (r.reply IS NULL OR r.reply = '')</if>
+            <if test="maxRating != null">AND r.rating &lt;= #{maxRating}</if>
         </where>
     </select>
 
