@@ -1,5 +1,6 @@
 package com.stellar.ragsync.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,9 @@ public class RagSyncProperties {
      *  ⚠️ 必须和 RAG 端 .env 里 STELLAR_RAG_INTERNAL_SYNC_SECRET 完全一致！ */
     private String internalSyncSecret;
 
+    /** 仅测试/本地显式开启；生产必须为 false。 */
+    private boolean allowInsecureDefaults = false;
+
     /** 读取超时（毫秒）。 */
     private int timeoutMs = 10000;
 
@@ -27,4 +31,21 @@ public class RagSyncProperties {
 
     /** 最大重试次数（outbox 兜底），默认 3。 */
     private int maxAttempt = 3;
+
+    @PostConstruct
+    void validateSecret() {
+        if (allowInsecureDefaults) {
+            return;
+        }
+        if (internalSyncSecret == null || internalSyncSecret.isBlank()
+                || internalSyncSecret.startsWith("CHANGE_ME")
+                || internalSyncSecret.startsWith("<")
+                || internalSyncSecret.contains("替换")
+                || internalSyncSecret.length() < 16) {
+            throw new IllegalStateException(
+                    "Insecure RAG sync secret: stellar.rag.internal-sync-secret must be >=16 chars "
+                            + "and set via STELLAR_RAG_INTERNAL_SYNC_SECRET "
+                            + "(or explicitly set stellar.rag.allow-insecure-defaults=true for tests)");
+        }
+    }
 }

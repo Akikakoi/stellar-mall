@@ -60,6 +60,10 @@
             <artifactId>spring-boot</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
 
         <!-- MultipartFile 等 Web 类型 -->
         <dependency>
