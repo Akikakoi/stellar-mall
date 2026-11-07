@@ -113,6 +113,27 @@ def _safe_load_suggestions(raw: Any) -> List[str]:
         return []
 
 
+def _context_matches(meta: Dict[str, Any], context_hash: Optional[str],
+                     context_keys: Optional[List[str]]) -> bool:
+    """L2 上下文匹配：优先比对证据集合，老条目回退到 context_hash。
+
+    context_keys 是证据内容的稳定指纹（不含相似度分数、顺序、问句文本）。
+    只有证据集合完全相同才允许复用；老条目没有该字段时保持原有严格行为。
+    """
+    if context_keys is not None:
+        raw = meta.get("context_keys_json")
+        if raw:
+            try:
+                cached_keys = json.loads(raw)
+            except (TypeError, ValueError):
+                cached_keys = None
+            if isinstance(cached_keys, list):
+                return set(cached_keys) == set(context_keys)
+    if context_hash and meta.get("context_hash") and meta.get("context_hash") != context_hash:
+        return False
+    return True
+
+
 # 这些 hash 在 import 时计算一次，变化时重启生效
 INTENT_PROMPT_HASH = ""  # 延迟计算，避免循环 import
 AGENT_PROMPT_HASH = ""
@@ -516,6 +537,7 @@ async def _semantic_search(
     cache_type: str = "answer",
     context_hash: Optional[str] = None,
     query_emb: Optional[List[float]] = None,
+    context_keys: Optional[List[str]] = None,
 ) -> Optional[Dict[str, Any]]:
     """从 Chroma 语义缓存检索。
 
@@ -566,7 +588,7 @@ async def _semantic_search(
                 continue
             # context_hash 过滤：若调用方传了 context_hash，必须精确匹配
             # （防止"X100 Pro"的答案被语义检索返回给"X100 Pro Max"）
-            if context_hash and meta.get("context_hash") and meta.get("context_hash") != context_hash:
+            if not _context_matches(meta, context_hash, context_keys):
                 continue
             # 检查 TTL
             created_at = float(meta.get("created_at", 0))
@@ -643,6 +665,7 @@ def _semantic_search_sync(
     cache_type: str = "answer",
     context_hash: Optional[str] = None,
     query_emb: Optional[List[float]] = None,
+    context_keys: Optional[List[str]] = None,
 ) -> Optional[Dict[str, Any]]:
     """_semantic_search 的纯同步实现（供 get_sync 使用，避免 asyncio.run 开销）。
 
@@ -687,7 +710,7 @@ def _semantic_search_sync(
                     or meta.get("system_prompt_hash") != system_prompt_hash
                     or meta.get("cache_type") != cache_type):
                 continue
-            if context_hash and meta.get("context_hash") and meta.get("context_hash") != context_hash:
+            if not _context_matches(meta, context_hash, context_keys):
                 continue
             created_at = float(meta.get("created_at", 0))
             ttl = settings.LLM_CACHE_SEMANTIC_TTL_ANSWER if cache_type == "answer" else settings.LLM_CACHE_SEMANTIC_TTL_INTENT
@@ -764,6 +787,7 @@ async def _semantic_put(
     product_ids: Optional[List[int]] = None,
     cache_type: str = "answer",
     suggestions: Optional[List[str]] = None,
+    context_keys: Optional[List[str]] = None,
 ) -> bool:
     """写入 Chroma 语义缓存。"""
     col = _get_semantic_collection()
@@ -785,6 +809,7 @@ async def _semantic_put(
             "temperature": temperature,
             "system_prompt_hash": system_prompt_hash,
             "context_hash": context_hash or "",
+            "context_keys_json": json.dumps(sorted(set(context_keys)), ensure_ascii=False) if context_keys else "",
             "intent": intent,
             "sources_json": json.dumps(sources, ensure_ascii=False),
             "tokens_used": tokens_used,
@@ -848,6 +873,7 @@ def _do_put_sync(
     product_ids: Optional[List[int]] = None,
     cache_type: str = "answer",
     suggestions: Optional[List[str]] = None,
+    context_keys: Optional[List[str]] = None,
 ) -> None:
     """在后台线程池中真正执行 L1 + L2 写入。与 async put() 等价，只做写、不做读。"""
     try:
@@ -874,6 +900,7 @@ def _do_put_sync(
                 answer=answer, sources=sources, intent=intent,
                 tokens_used=tokens_used, product_ids=product_ids,
                 cache_type=cache_type, suggestions=suggestions,
+                context_keys=context_keys,
             ))
         except RuntimeError as e:
             # 后台写线程不应有运行中的事件循环；出现说明调用环境异常，记日志便于排查
@@ -896,6 +923,7 @@ class LLMCache:
         system_prompt_hash: str,
         context_hash: Optional[str] = None,
         cache_type: str = "answer",
+        context_keys: Optional[List[str]] = None,
     ) -> Optional[Dict[str, Any]]:
         """查询缓存：L1 → L2，命中返回结果，未命中返回 None。"""
         if not settings.LLM_CACHE_ENABLED:
@@ -907,7 +935,8 @@ class LLMCache:
             return result
 
         # L2: Chroma 语义缓存
-        result = await _semantic_search(query, model, temperature, system_prompt_hash, cache_type, context_hash)
+        result = await _semantic_search(query, model, temperature, system_prompt_hash, cache_type, context_hash,
+                                        context_keys=context_keys)
         if result:
             # 语义命中后，顺便回写 L1（不阻塞）。
             # 必须透传调用方的 context_hash：L1 key 由 (query, ..., context_hash) 共同决定，
@@ -936,6 +965,7 @@ class LLMCache:
         product_ids: Optional[List[int]] = None,
         cache_type: str = "answer",
         suggestions: Optional[List[str]] = None,
+        context_keys: Optional[List[str]] = None,
     ) -> None:
         """异步写入 L1 + L2（不阻塞主流程）。"""
         if not settings.LLM_CACHE_ENABLED:
@@ -964,6 +994,7 @@ class LLMCache:
             answer=answer, sources=sources, intent=intent,
             tokens_used=tokens_used, product_ids=product_ids,
             cache_type=cache_type, suggestions=suggestions,
+            context_keys=context_keys,
         )
 
     def get_sync(
@@ -975,6 +1006,7 @@ class LLMCache:
         context_hash: Optional[str] = None,
         cache_type: str = "answer",
         query_emb: Optional[List[float]] = None,
+        context_keys: Optional[List[str]] = None,
     ) -> Optional[Dict[str, Any]]:
         """同步查询缓存（供线程池中的 LangGraph 节点使用）。
 
@@ -992,7 +1024,8 @@ class LLMCache:
 
         # L2: Chroma 语义缓存——走同步实现，避免 asyncio.run 每次新建/销毁事件循环
         result = _semantic_search_sync(
-            query, model, temperature, system_prompt_hash, cache_type, context_hash, query_emb
+            query, model, temperature, system_prompt_hash, cache_type, context_hash, query_emb,
+            context_keys=context_keys,
         )
         if result:
             # 语义命中后回写 L1（同步）。透传 context_hash，保证回写 key 与后续读取 key 一致。
@@ -1017,6 +1050,7 @@ class LLMCache:
         product_ids: Optional[List[int]] = None,
         cache_type: str = "answer",
         suggestions: Optional[List[str]] = None,
+        context_keys: Optional[List[str]] = None,
     ) -> None:
         """异步化写入 L1 + L2：提交到后台线程池，不阻塞主回答链路。
 
@@ -1027,7 +1061,7 @@ class LLMCache:
             _do_put_sync,
             query, model, temperature, system_prompt_hash, context_hash,
             answer, sources, intent, tokens_used, product_ids, cache_type,
-            suggestions,
+            suggestions, context_keys,
         )
 
     async def invalidate_by_product_ids(self, product_ids: List[int]) -> int:
@@ -1125,13 +1159,15 @@ def get_cache_sync(
     system_prompt_hash: str, context_hash: Optional[str] = None,
     cache_type: str = "answer",
     query_emb: Optional[List[float]] = None,
+    context_keys: Optional[List[str]] = None,
 ) -> Optional[Dict[str, Any]]:
     """同步查询缓存（供 LangGraph 线程池节点使用）。
 
     :param query_emb: 可选预计算查询向量，透传 L2 避免重复 embedding。
     """
     return get_llm_cache().get_sync(
-        query, model, temperature, system_prompt_hash, context_hash, cache_type, query_emb
+        query, model, temperature, system_prompt_hash, context_hash, cache_type,
+        query_emb, context_keys=context_keys,
     )
 
 
@@ -1141,13 +1177,14 @@ def put_cache_sync(
     answer: str, sources: List[dict], intent: str, tokens_used: int,
     product_ids: Optional[List[int]] = None, cache_type: str = "answer",
     suggestions: Optional[List[str]] = None,
+    context_keys: Optional[List[str]] = None,
 ) -> None:
     """同步写入缓存（供 LangGraph 线程池节点使用）。"""
     try:
         get_llm_cache().put_sync(
             query, model, temperature, system_prompt_hash, context_hash,
             answer, sources, intent, tokens_used, product_ids, cache_type,
-            suggestions,
+            suggestions, context_keys=context_keys,
         )
     except Exception:
         pass

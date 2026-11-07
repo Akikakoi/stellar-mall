@@ -1213,6 +1213,26 @@ def _tool_execution_impl(state: AgentState) -> Dict[str, Any]:
         return {"tool_results": {"success": False, "message": f"工具执行失败: {str(e)}"}}
 
 
+def _evidence_keys(tool_result: dict) -> List[str]:
+    """证据内容的稳定指纹：忽略分数、顺序、问句和提示文本，覆盖完整工具结果。"""
+    if not isinstance(tool_result, dict) or not tool_result:
+        return []
+
+    def normalize(value, root=False):
+        if isinstance(value, dict):
+            return {k: normalize(v) for k, v in value.items()
+                    if k != "score" and not (root and k in ("query", "message"))}
+        if isinstance(value, list):
+            items = [normalize(item) for item in value]
+            return sorted(items, key=lambda item: json.dumps(
+                item, sort_keys=True, ensure_ascii=False, default=str))
+        return value
+
+    canonical = json.dumps(normalize(tool_result, root=True), sort_keys=True,
+                           ensure_ascii=False, default=str)
+    return [hashlib.sha256(canonical.encode()).hexdigest()]
+
+
 def _extract_product_ids(tool_result: dict) -> List[int]:
     """从工具结果中提取商品 ID 列表（用于缓存精准失效）。"""
     ids = []
@@ -1290,6 +1310,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
     context_hash = hashlib.sha256(
         json.dumps(tool_result, sort_keys=True, ensure_ascii=False, default=str).encode()
     ).hexdigest()
+    evidence_keys = _evidence_keys(tool_result)
     cached = get_cache_sync(
         query=query,
         model=settings.LLM_MODEL_NAME,
@@ -1297,6 +1318,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
         system_prompt_hash=AGENT_PROMPT_HASH,
         context_hash=context_hash,
         cache_type="answer",
+        context_keys=evidence_keys,
     )
     if cached:
         logger.info(f"[Agent] cache HIT  query={query[:30]}...  intent={intent}")
@@ -1423,6 +1445,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                         product_ids=product_ids,
                         cache_type="answer",
                         suggestions=suggestions,
+                        context_keys=evidence_keys,
                     )
                 except Exception:
                     pass
