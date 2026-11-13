@@ -78,6 +78,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SkuSpecSelector: typeof import('./src/components/SkuSpecSelector.vue')['default']
+    SlidingTabs: typeof import('./src/components/SlidingTabs.vue')['default']
     SourceCard: typeof import('./src/components/SourceCard.vue')['default']
     SpuReviewDrawer: typeof import('./src/components/admin/SpuReviewDrawer.vue')['default']
     ThemeToggle: typeof import('./src/components/ThemeToggle.vue')['default']

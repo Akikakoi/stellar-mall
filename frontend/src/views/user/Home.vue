@@ -99,10 +99,13 @@
               <div class="cat-header">
                 <div class="cat-title">{{ mod.title || getCatName(mod) }}</div>
                 <div class="cat-side">
-                  <div v-if="getSubCats(mod).length > 0" class="sub-tabs">
-                    <span v-if="!getCfg(mod).categoryIds" class="sub-tab" :class="{ active: !mod._activeSub }" @click="switchModuleSub(mod, null)">全部</span>
-                    <span v-for="sub in getSubCats(mod)" :key="sub.id" class="sub-tab" :class="{ active: mod._activeSub === sub.id }" @click="switchModuleSub(mod, sub.id)">{{ sub.name }}</span>
-                  </div>
+                  <SlidingTabs
+                    v-if="getSubCats(mod).length > 0"
+                    :items="moduleSubTabs(mod)"
+                    :model-value="mod._activeSub"
+                    label="模块子分类"
+                    @update:model-value="(v) => switchModuleSub(mod, v)"
+                  />
                   <a v-else class="view-more" @click="viewMoreModule(mod)">查看更多 <svg class="arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
               </div>
@@ -197,10 +200,15 @@
               <div class="cat-header">
                 <div class="cat-title">{{ sec.name }}</div>
                 <div class="cat-side">
-                  <div v-if="sec.subs.length > 0" class="sub-tabs">
-                    <span class="sub-tab" :class="{ active: sec.activeSubId === null }" @click="switchSub(sec, null)" @mouseenter="switchSub(sec, null)">全部</span>
-                    <span v-for="sub in sec.subs" :key="sub.id" class="sub-tab" :class="{ active: sec.activeSubId === sub.id }" @click="switchSub(sec, sub.id)" @mouseenter="switchSub(sec, sub.id)">{{ sub.name }}</span>
-                  </div>
+                  <SlidingTabs
+                    v-if="sec.subs.length > 0"
+                    :items="sectionSubTabs(sec)"
+                    :model-value="sec.activeSubId"
+                    label="分区子分类"
+                    hover-switch
+                    @update:model-value="(v) => switchSub(sec, v)"
+                    @hover="(v) => switchSub(sec, v)"
+                  />
                   <a v-else class="view-more" @click="viewMore(sec)">查看更多 <svg class="arrow-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></a>
                 </div>
               </div>
@@ -288,6 +296,7 @@ import { ossThumb } from '@/utils/imgThumb'
 import { loadOrbitRecent, rememberOrbitRecent } from '@/utils/orbitRecent'
 import { ElMessage } from 'element-plus'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
+import SlidingTabs, { type SlideTabItem } from '@/components/SlidingTabs.vue'
 
 const __PH = window.__PH
 const router = useRouter()
@@ -428,6 +437,28 @@ function getSubCats(mod: any) {
       .filter(Boolean)
   }
   return []
+}
+
+/**
+ * 模块子分类 → 滑动标签的数据（「全部」只在未配置 categoryIds 时出现）
+ * @param {Object} mod - 模块对象
+ */
+function moduleSubTabs(mod: any): SlideTabItem[] {
+  const items: SlideTabItem[] = []
+  if (!getCfg(mod).categoryIds) items.push({ value: null, label: '全部' })
+  for (const sub of getSubCats(mod)) items.push({ value: sub.id, label: sub.name })
+  return items
+}
+
+/**
+ * 兜底分区的子分类 → 滑动标签的数据（始终带「全部」）
+ * @param {Object} sec - 分区对象
+ */
+function sectionSubTabs(sec: any): SlideTabItem[] {
+  return [
+    { value: null, label: '全部' },
+    ...sec.subs.map((sub: any) => ({ value: sub.id, label: sub.name }))
+  ]
 }
 
 /**
@@ -1304,14 +1335,6 @@ onUnmounted(() => {
 }
 .cat-title { font-size: 24px; font-weight: 600; color: var(--text-primary); }
 .cat-side { display: flex; align-items: center; gap: 22px; }
-.sub-tabs { display: flex; gap: 22px; flex-wrap: wrap; }
-.sub-tab {
-  font-size: 15px; color: var(--text-secondary); cursor: pointer;
-  padding-bottom: 4px; border-bottom: 2px solid transparent;
-  transition: color var(--transition-color), border-color var(--transition-color); user-select: none;
-}
-.sub-tab:hover { color: var(--brand-primary); }
-.sub-tab.active { color: var(--brand-primary); border-bottom-color: var(--brand-primary); font-weight: 600; }
 .view-more {
   font-size: 13px; color: var(--brand-primary); cursor: pointer;
   display: inline-flex; align-items: center; gap: 4px;
@@ -1561,8 +1584,6 @@ onUnmounted(() => {
   .hero-eyebrow { font-size: 12px; padding: 5px 12px; }
   .hero-subtitle { font-size: 16px; }
   .hero-cta { height: 46px; padding: 0 26px; font-size: 15px; }
-  .sub-tabs { gap: 14px; }
-  .sub-tab { font-size: 13px; }
   .p-card img { max-width: 118px; }
 }
 </style>
