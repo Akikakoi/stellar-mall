@@ -13,7 +13,14 @@
         <el-button type="primary" @click="load">查询</el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading">
+      <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+      <AdminTableSkeleton
+        v-if="loading && list.length === 0"
+        :rows="8"
+        :columns="[0.5, 1.0, 1.0, 0.7, 1.1, 0.8]"
+        :row-height="56"
+      />
+      <el-table v-else :data="list" v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="email" label="邮箱" min-width="220" />
         <el-table-column prop="nickname" label="昵称" min-width="140" />
@@ -52,6 +59,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { pageUsers, setUserStatus, type AdminUser } from '@/api/admin'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 
 const list = ref<AdminUser[]>([])
 const total = ref(0)

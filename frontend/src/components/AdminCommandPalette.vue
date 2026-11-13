@@ -14,13 +14,16 @@
             />
             <span class="cmdk-esc">ESC</span>
           </div>
-          <div class="cmdk-results">
+          <div class="cmdk-results" ref="resultsRef">
+            <!-- 选中高亮是一块独立层，跟着 activeIndex 平移过去；
+                 直接给每一项换背景的话，连按方向键会"闪五下" -->
+            <div class="cmdk-highlight" :style="highlightStyle" aria-hidden="true"></div>
             <div
               v-for="(item, i) in filtered"
               :key="item.path"
               class="cmdk-item"
               :class="{ 'is-active': i === activeIndex }"
-              @mouseenter="activeIndex = i"
+              @mouseenter="setActive(i)"
               @click="go(item.path)"
             >
               <span class="cmdk-item-title">{{ item.title }}</span>
@@ -62,6 +65,34 @@ const router = useRouter()
 const query = ref('')
 const activeIndex = ref(0)
 const inputRef = ref<HTMLInputElement | null>(null)
+const resultsRef = ref<HTMLElement | null>(null)
+
+/** 高亮层的位置与高度（相对 .cmdk-results） */
+const highlightStyle = ref<Record<string, string>>({ opacity: '0' })
+
+/** 把高亮块挪到当前选中项上，并保证它滚进可视区 */
+function syncHighlight(scroll = false) {
+  const box = resultsRef.value
+  if (!box) return
+  const el = box.querySelector<HTMLElement>('.cmdk-item.is-active')
+  if (!el) {
+    highlightStyle.value = { opacity: '0' }
+    return
+  }
+  highlightStyle.value = {
+    opacity: '1',
+    height: `${el.offsetHeight}px`,
+    transform: `translateY(${el.offsetTop}px)`
+  }
+  if (scroll) el.scrollIntoView({ block: 'nearest' })
+}
+
+/** 鼠标移入也跟着换选中项，和键盘共用同一套高亮 */
+function setActive(i: number) {
+  if (activeIndex.value === i) return
+  activeIndex.value = i
+  nextTick(() => syncHighlight())
+}
 
 const visible = computed({
   get: () => props.visible,
@@ -129,8 +160,16 @@ function open() {
 watch(visible, (v) => {
   if (v) {
     reset()
-    nextTick(() => inputRef.value?.focus())
+    nextTick(() => {
+      inputRef.value?.focus()
+      syncHighlight()
+    })
   }
+})
+
+/** 选中项或过滤结果变化时重算高亮位置；键盘操作时顺带把该项滚进可视区 */
+watch([activeIndex, filtered], () => {
+  nextTick(() => syncHighlight(true))
 })
 
 /** 输入变化时选中位归零，避免高亮停在已过滤掉的项上 */
@@ -194,11 +233,28 @@ defineExpose({ open, close })
   line-height: 1.4;
 }
 .cmdk-results {
+  position: relative;
   max-height: 320px;
   overflow-y: auto;
   padding: 6px;
 }
+/* 选中高亮：一层独立的背景块，靠 transform 平移，不参与布局 */
+.cmdk-highlight {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 0;
+  border-radius: 6px;
+  background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+  pointer-events: none;
+  transition:
+    transform var(--dur-2, 200ms) var(--ease-standard, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    height var(--dur-2, 200ms) var(--ease-standard, cubic-bezier(0.2, 0.8, 0.2, 1)),
+    opacity var(--dur-1, 120ms) linear;
+}
 .cmdk-item {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -208,7 +264,8 @@ defineExpose({ open, close })
   font-size: 13px;
   color: var(--text-primary, #1d1d1f);
 }
-.cmdk-item.is-active { background: var(--bg-hover, rgba(0, 0, 0, 0.05)); }
+/* 选中态不再自己上底色，交给上面的高亮层 */
+.cmdk-item.is-active { color: var(--text-primary, #1d1d1f); }
 .cmdk-item-path { font-size: 11px; color: var(--text-muted, #86868b); }
 .cmdk-empty {
   padding: 28px 0;
@@ -233,6 +290,21 @@ defineExpose({ open, close })
   margin-right: 2px;
 }
 
-.cmdk-fade-enter-active, .cmdk-fade-leave-active { transition: opacity 0.12s ease; }
-.cmdk-fade-enter-from, .cmdk-fade-leave-to { opacity: 0; }
+/* 弹层淡入的同时，面板自己从上方落下并轻微放大：比整层纯淡入更有"弹出"感 */
+.cmdk-fade-enter-active,
+.cmdk-fade-leave-active {
+  transition: opacity var(--dur-2, 200ms) var(--ease-standard, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+.cmdk-fade-enter-active .cmdk-panel,
+.cmdk-fade-leave-active .cmdk-panel {
+  transition: transform var(--dur-3, 320ms) var(--ease-enter, cubic-bezier(0, 0, 0.2, 1)),
+    opacity var(--dur-2, 200ms) var(--ease-standard, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+.cmdk-fade-enter-from,
+.cmdk-fade-leave-to { opacity: 0; }
+.cmdk-fade-enter-from .cmdk-panel,
+.cmdk-fade-leave-to .cmdk-panel {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
 </style>

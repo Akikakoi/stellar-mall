@@ -12,6 +12,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AdminCommandPalette: typeof import('./src/components/AdminCommandPalette.vue')['default']
+    AdminTableSkeleton: typeof import('./src/components/admin/AdminTableSkeleton.vue')['default']
     ChatMessage: typeof import('./src/components/ChatMessage.vue')['default']
     DemoProductVisual: typeof import('./src/components/demo/DemoProductVisual.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']

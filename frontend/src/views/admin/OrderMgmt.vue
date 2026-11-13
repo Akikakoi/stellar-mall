@@ -29,7 +29,16 @@
         <el-button type="primary" :disabled="loading" @click="onQueryClick">查询</el-button>
       </div>
 
-      <el-table :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;">
+      <!-- 首屏骨架 -->
+      <AdminTableSkeleton
+        v-if="loading && records.length === 0"
+        :rows="8"
+        :columns="[1.4, 0.8, 0.7, 1.8, 1.0, 1.1, 0.8]"
+        :row-height="64"
+        thumb
+      />
+      <el-table v-else :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;"
+        :row-class-name="tableRowClassName">
         <el-table-column prop="orderNo" label="订单号" width="200" show-overflow-tooltip />
         <el-table-column label="订单金额" width="120">
           <template #default="{ row }">¥{{ Number(row.payAmount ?? 0).toFixed(2) }}</template>
@@ -126,8 +135,14 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { pageOrder, shipOrder, deleteOrder } from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
+import { useRowFlash } from '@/composables/useRowFlash'
 
 const route = useRoute()
+
+/** 发货后让该订单行闪一下，确认改的是哪一单 */
+const { flashRows, rowClass } = useRowFlash()
+function tableRowClassName({ row }: { row: any }) { return rowClass(row.id) }
 
 const loading = ref(false)
 const records = ref<any[]>([])
@@ -233,6 +248,7 @@ async function doShip() {
       deliveryCompany: shipForm.deliveryCompany || null
     })
     ElMessage.success('发货成功，已通知用户')
+    flashRows([shipTarget.id])
     shipDialogVisible.value = false
     loadPage()
   } catch (e: any) {
@@ -331,4 +347,11 @@ onMounted(() => {
   display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 10px;
 }
 .text-muted { color: var(--text-muted); }
+
+/* 行反馈：刚发货的订单闪一下底色（1100ms 与 useRowFlash 默认时长对齐） */
+:deep(.el-table__body tr.row-flash > td.el-table__cell) { animation: row-flash 1100ms var(--ease-out); }
+@keyframes row-flash {
+  0%, 55% { background-color: var(--brand-primary-soft); }
+  100% { background-color: transparent; }
+}
 </style>

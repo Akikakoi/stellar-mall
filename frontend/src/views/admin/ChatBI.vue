@@ -270,6 +270,16 @@ onUnmounted(() => {
 .chart-box { width: 100%; height: 320px; }
 .detail-collapse { border-top: 1px dashed var(--border-base); }
 .detail-collapse :deep(.el-collapse-item__header) { font-size: 13px; color: var(--text-secondary); }
+
+/* 回答分块浮现：等 10~30 秒后一次性砸出来很难读，
+   摘要 → 图表 → 明细折叠各错开 90ms，给眼睛一个阅读顺序（不是打字机） */
+.answer-card .answer-summary { animation: chat-in var(--dur-3) var(--ease-enter) both; }
+.answer-card .chart-box { animation: chat-in var(--dur-3) var(--ease-enter) 90ms both; }
+.answer-card .detail-collapse { animation: chat-in var(--dur-3) var(--ease-enter) 180ms both; }
+@keyframes chat-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
 .sql-block {
   background: var(--bg-hover);
   border-radius: var(--radius-md);

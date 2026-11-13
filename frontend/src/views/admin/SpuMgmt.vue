@@ -46,13 +46,23 @@
         </div>
       </Transition>
 
-      <el-table :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;"
+      <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状，避免转圈白屏 -->
+      <AdminTableSkeleton
+        v-if="loading && records.length === 0"
+        :rows="8"
+        :columns="[0.3, 0.6, 1.8, 0.9, 0.7, 0.6, 0.8]"
+        :row-height="72"
+        thumb
+      />
+      <el-table v-else :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;"
         @selection-change="handleSelectionChange" :row-class-name="tableRowClassName">
         
         <el-table-column type="selection" width="45" />
         <el-table-column label="图片" width="80">
           <template #default="{ row }">
-            <el-image :src="row.mainImage || row.image || row.pic" :preview-src-list="[row.mainImage || row.image || row.pic]" style="width: 48px; height: 48px; border-radius: var(--radius-sm);" fit="cover">
+            <!-- preview-teleported 必须加：不加的话查看器会渲染在单元格里，
+                 被表格的 overflow 裁成一坨错位的巨图（点图片就"花屏"的老 bug） -->
+            <el-image :src="row.mainImage || row.image || row.pic" :preview-src-list="[row.mainImage || row.image || row.pic]" preview-teleported hide-on-click-modal style="width: 48px; height: 48px; border-radius: var(--radius-sm);" fit="cover">
               <template #error><div class="img-placeholder">N/A</div></template>
             </el-image>
           </template>
@@ -161,7 +171,7 @@
                 class="image-preview-item"
                 :class="{ 'is-main': idx === 0 }"
               >
-                <el-image :src="img.url" fit="cover" class="image-preview-img" :preview-src-list="uploadedImages.map(i => i.url)" />
+                <el-image :src="img.url" fit="cover" class="image-preview-img" :preview-src-list="uploadedImages.map(i => i.url)" preview-teleported hide-on-click-modal />
                 <div class="image-preview-label">{{ idx === 0 ? '主图' : `副图${idx}` }}</div>
                 <div class="image-preview-remove" @click="removeUploadedImage(idx)">
                   <el-icon><Close /></el-icon>
@@ -526,11 +536,16 @@ import { apiKbUploadWithChunks, apiKbPreview, apiKbGet, apiKbMatch, apiKbMatchBa
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Upload, Search, Document, Loading, ChatLineSquare } from '@element-plus/icons-vue'
 import SpuReviewDrawer from '@/components/admin/SpuReviewDrawer.vue'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
+import { useRowFlash } from '@/composables/useRowFlash'
 import { storage } from '@/utils/storage'
 
 const SORT_STORAGE_KEY = 'stellar:admin:spu-mgmt:sort:v1'
 const SORT_BY_ALLOWED = new Set(['createTime', 'name'])
 const SORT_ORDER_ALLOWED = new Set(['asc', 'desc'])
+
+/** 上下架后让被改的行闪一下，批量操作时能对上号 */
+const { flashRows, rowClass } = useRowFlash()
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -1083,13 +1098,13 @@ async function submitForm() {
 }
 
 function handleSelectionChange(rows: any) { selectedRows.value = rows }
-function tableRowClassName({ row }: { row: any }) { return row.status === 0 ? 'row-off-shelf' : '' }
+function tableRowClassName({ row }: { row: any }) { return rowClass(row.id, row.status === 0 ? 'row-off-shelf' : '') }
 
 /** 下架单个商品，二次确认后执行 */
 async function handleShelfOff(row: any) {
   const name = row.name || ('商品#' + row.id)
   try { await ElMessageBox.confirm(`确定下架商品「${name}」？\n下架后用户将无法搜索和购买该商品。`, '下架确认', { type: 'warning' }) } catch (e: any) { return }
-  try { await setSpuStatus(row.id, 0); ElMessage.success(`「${name}」已下架`); loadPage() }
+  try { await setSpuStatus(row.id, 0); ElMessage.success(`「${name}」已下架`); flashRows([row.id]); loadPage() }
   catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '下架失败') }
 }
 
@@ -1097,7 +1112,7 @@ async function handleShelfOff(row: any) {
 async function handleShelfOn(row: any) {
   const name = row.name || ('商品#' + row.id)
   try { await ElMessageBox.confirm(`确定上架商品「${name}」？`, '上架确认', { type: 'warning' }) } catch (e: any) { return }
-  try { await setSpuStatus(row.id, 1); ElMessage.success(`「${name}」已上架`); loadPage() }
+  try { await setSpuStatus(row.id, 1); ElMessage.success(`「${name}」已上架`); flashRows([row.id]); loadPage() }
   catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '上架失败') }
 }
 
@@ -1109,6 +1124,7 @@ async function handleBatchShelfOff() {
     const ids = selectedRows.value.map((r: any) => r.id)
     await batchSetSpuStatus(ids, 0)
     ElMessage.success(`已成功下架 ${selectedRows.value.length} 件商品`)
+    flashRows(ids)
     selectedRows.value = []
     loadPage()
   } catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量下架失败') }
@@ -1122,6 +1138,7 @@ async function handleBatchShelfOn() {
     const ids = selectedRows.value.map((r: any) => r.id)
     await batchSetSpuStatus(ids, 1)
     ElMessage.success(`已成功上架 ${selectedRows.value.length} 件商品`)
+    flashRows(ids)
     selectedRows.value = []
     loadPage()
   } catch (e: any) { ElMessage.error((e?.response?.data?.msg) || e?.message || '批量上架失败') }
@@ -1335,8 +1352,28 @@ async function handleStockAdjust() {
 }
 .spu-review-entry:hover { color: var(--brand-primary); }
 .batch-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding: 10px 16px; background: var(--brand-primary-soft); border: 1px solid var(--brand-primary); border-radius: var(--radius-md); overflow: hidden; }
-.toolbar-slide-enter-active, .toolbar-slide-leave-active { transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out); }
-.toolbar-slide-enter-from, .toolbar-slide-leave-to { opacity: 0; transform: translateY(-6px); }
+/* 批量工具栏：除了淡入，还要把「占位高度」一起补间，
+   否则表格会被瞬间顶下去一截，勾选的视觉反馈变成一次抖动 */
+.toolbar-slide-enter-active,
+.toolbar-slide-leave-active {
+  overflow: hidden;
+  transition:
+    max-height var(--dur-3) var(--ease-standard),
+    margin-bottom var(--dur-3) var(--ease-standard),
+    opacity var(--dur-2) var(--ease-standard),
+    transform var(--dur-3) var(--ease-standard);
+}
+.toolbar-slide-enter-from,
+.toolbar-slide-leave-to { max-height: 0; margin-bottom: 0; opacity: 0; transform: translateY(-6px); }
+.toolbar-slide-enter-to,
+.toolbar-slide-leave-from { max-height: 56px; margin-bottom: 12px; }
+
+/* 行反馈：刚改过的行闪一下底色（1100ms 与 useRowFlash 的默认时长对齐） */
+:deep(.el-table__body tr.row-flash > td.el-table__cell) { animation: row-flash 1100ms var(--ease-out); }
+@keyframes row-flash {
+  0%, 55% { background-color: var(--brand-primary-soft); }
+  100% { background-color: transparent; }
+}
 .batch-tip { font-size: 14px; font-weight: 500; color: var(--brand-primary); flex: 1; }
 .img-placeholder { width: 48px; height: 48px; background: var(--bg-hover); color: var(--text-muted); display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 12px; }
 .col-header-sort { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }

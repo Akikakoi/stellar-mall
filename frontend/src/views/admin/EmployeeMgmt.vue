@@ -18,7 +18,14 @@
         <el-button type="primary" @click="loadPage">查询</el-button>
       </div>
 
-      <el-table :data="records" v-loading="loading" style="width: 100%;">
+      <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+      <AdminTableSkeleton
+        v-if="loading && records.length === 0"
+        :rows="8"
+        :columns="[0.5, 1.0, 0.9, 0.7, 0.6, 0.9, 0.8, 0.8]"
+        :row-height="56"
+      />
+      <el-table v-else :data="records" v-loading="loading" style="width: 100%;">
         <el-table-column prop="id" label="ID" width="70" />
         <el-table-column prop="username" label="用户名" width="140" />
         <el-table-column prop="name" label="姓名" width="140" />
@@ -91,6 +98,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { pageEmployee, saveEmployee, updateEmployee, setEmployeeStatus } from '@/api/admin'
 import { ElMessage } from 'element-plus'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 
 const loading = ref(false)
 const submitting = ref(false)

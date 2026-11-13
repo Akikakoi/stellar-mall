@@ -7,7 +7,14 @@
           <div class="panel-head">
             <span class="panel-title">积分规则</span>
           </div>
-          <el-table :data="rules" v-loading="rulesLoading">
+          <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+          <AdminTableSkeleton
+            v-if="rulesLoading && rules.length === 0"
+            :rows="8"
+            :columns="[0.4, 0.9, 0.8, 0.7, 0.7, 0.8, 0.9, 0.7, 0.8]"
+            :row-height="56"
+          />
+          <el-table v-else :data="rules" v-loading="rulesLoading">
             <el-table-column prop="id" label="ID" width="60" />
             <el-table-column label="规则类型" width="100">
               <template #default="{ row }">
@@ -127,7 +134,14 @@
               <el-option label="下架" :value="0" />
             </el-select>
           </div>
-          <el-table :data="prodList" v-loading="prodLoading">
+          <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+          <AdminTableSkeleton
+            v-if="prodLoading && prodList.length === 0"
+            :rows="8"
+            :columns="[0.4, 1.3, 0.6, 0.8, 0.8, 0.7, 0.9, 0.7, 0.8]"
+            :row-height="56"
+          />
+          <el-table v-else :data="prodList" v-loading="prodLoading">
             <el-table-column prop="id" label="ID" width="60" />
             <el-table-column prop="name" label="名称" min-width="160" show-overflow-tooltip />
             <el-table-column label="类型" width="80">
@@ -217,6 +231,7 @@
 import { ref, onMounted } from 'vue'
 import { listPointsRules, savePointsRule, deletePointsRule, adjustPoints, pagePointsProducts, savePointsProduct, deletePointsProduct } from '@/api/admin'
 import { ElMessage } from 'element-plus'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 
 const activeTab = ref('rules')
 

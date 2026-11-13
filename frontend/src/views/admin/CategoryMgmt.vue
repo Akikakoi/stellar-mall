@@ -26,7 +26,14 @@
         <el-button type="primary" :disabled="loading" @click="onQueryClick">查询</el-button>
       </div>
 
-      <el-table :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;">
+      <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+      <AdminTableSkeleton
+        v-if="loading && records.length === 0"
+        :rows="8"
+        :columns="[1.4, 0.7, 0.6, 0.7, 0.8, 0.8]"
+        :row-height="56"
+      />
+      <el-table v-else :data="records" v-loading="loading" empty-text="暂无数据" style="width: 100%;">
         
         <el-table-column min-width="200">
           <template #header>
@@ -118,6 +125,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { pageCategory, saveCategory, updateCategory, deleteCategory, checkCategoryDeletable, setCategoryStatus } from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { storage } from '@/utils/storage'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 
 // ======== 排序记忆：storage key + 排序字段/方向白名单 ========
 const SORT_STORAGE_KEY = 'stellar:admin:category-mgmt:sort:v1'
