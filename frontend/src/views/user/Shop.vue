@@ -169,7 +169,7 @@
               </div>
             </div>
             <div v-for="spu in spus" :key="spu.id" class="spu-card" :data-flip-key="spu.id" @click="goDetail(spu.id)">
-              <div class="spu-image" v-image-pan>
+              <div class="spu-image">
                 <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy"
                   v-placeholder />
                 <button class="fav-btn" :class="{ active: favSet.has(spu.id) }" @click.stop="toggleFav(spu)"
@@ -243,49 +243,6 @@ const cartStore = useCartStore()
 /** 商品网格容器：排序 / 分类切换时用它做 FLIP 重排 */
 const gridRef = ref<HTMLElement | null>(null)
 const { capture: captureGrid, play: playGrid } = useFlip(gridRef)
-
-/**
- * 商品卡图片内平移（image-pan）
- *
- * 光标在卡内移动时，图片放大到 1.12 并朝反方向轻移 18px：
- * 比「整图等比放大」更有空间感，也不会让小图糊成一片。
- * 触屏没有 hover、系统要求减少动效时不启用；移出后交给 CSS 过渡回中。
- */
-const panHandlers = new WeakMap<HTMLElement, { move: (e: PointerEvent) => void; leave: () => void }>()
-
-const vImagePan = {
-  mounted(el: HTMLElement) {
-    if (!window.matchMedia?.('(hover: hover) and (pointer: fine)').matches) return
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
-    const img = el.querySelector<HTMLImageElement>('img')
-    if (!img) return
-
-    const move = (e: PointerEvent) => {
-      const rect = el.getBoundingClientRect()
-      if (!rect.width || !rect.height) return
-      const px = (e.clientX - rect.left) / rect.width - 0.5
-      const py = (e.clientY - rect.top) / rect.height - 0.5
-      // 跟手时关掉过渡，否则每次 pointermove 都会排队补间
-      img.style.transition = 'none'
-      img.style.transform =
-        `scale(1.12) translate3d(${(-px * 18).toFixed(1)}px, ${(-py * 18).toFixed(1)}px, 0)`
-    }
-    const leave = () => {
-      img.style.transition = ''
-      img.style.transform = ''
-    }
-    el.addEventListener('pointermove', move, { passive: true })
-    el.addEventListener('pointerleave', leave)
-    panHandlers.set(el, { move, leave })
-  },
-  unmounted(el: HTMLElement) {
-    const handlers = panHandlers.get(el)
-    if (!handlers) return
-    el.removeEventListener('pointermove', handlers.move)
-    el.removeEventListener('pointerleave', handlers.leave)
-    panHandlers.delete(el)
-  }
-}
 
 const columns = ref(Number(localStorage.getItem('stellar_shop_cols')) || 4)
 function setColumns(n: any) {
@@ -1111,11 +1068,9 @@ html.theme-dark .history-panel {
   .spu-card:hover { transform: var(--hover-lift); box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight); border-color: var(--brand-primary-border); }
 }
 .spu-image { aspect-ratio: 1; overflow: hidden; background: var(--bg-hover); position: relative; }
-.spu-image img {
-  width: 100%; height: 100%; object-fit: cover;
-  /* 内平移由 v-image-pan 写 transform；移出时这条过渡负责回中 */
-  transition: transform var(--dur-4) var(--ease-out);
-  will-change: transform;
+.spu-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.25s var(--ease-out); }
+@media (hover: hover) {
+  .spu-card:hover .spu-image img { transform: scale(1.05); }
 }
 .fav-btn {
   position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%;
