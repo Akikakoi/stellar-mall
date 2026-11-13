@@ -23,7 +23,27 @@
      --ease-out 强 ease-out：入场/离场默认曲线（起始快，感觉跟手）
      --ease-in-out 强 ease-in-out：屏幕内位移/形态变化用
      --transition-base 常规 UI 过渡（≤300ms 预算）
-     --transition-color hover 颜色反馈（高频交互，120-200ms 区间） */
+     --transition-color hover 颜色反馈（高频交互，120-200ms 区间）
+
+     时长 / 距离 / 错峰阶梯：新动效一律引用这几档，不再写裸数字。
+     规则：时长跟距离走（4px 用 dur-1，整块重排用 dur-4），
+     进入用 ease-enter（快出慢收），退出用 ease-exit（慢起快走），
+     同屏元素依次出现用 stagger，单次总时长不超过 600ms。 */
+  --dur-1: 120ms;   /* 微反馈：按下、hover 位移 */
+  --dur-2: 200ms;   /* 组件状态：折叠、切换 */
+  --dur-3: 320ms;   /* 面板进出、tab 指示器 */
+  --dur-4: 480ms;   /* 网格重排（FLIP）、大块入场 */
+  --dur-5: 720ms;   /* 整页叙事，慎用 */
+  --move-1: 4px;
+  --move-2: 8px;
+  --move-3: 16px;
+  --move-4: 26px;
+  --stagger-1: 40ms;
+  --stagger-2: 70ms;
+  --stagger-3: 110ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --transition-base: 200ms var(--ease-out);
@@ -209,6 +229,23 @@ html.theme-switching *::after {
    - 过渡属性收窄为颜色/透明度类：transform / width / grid-rows 等位移动画全部瞬时直达终态
    - 平滑滚动改瞬时 */
 @media (prefers-reduced-motion: reduce) {
+  /* 动效 token 归零：引用 token 的组件不需要各写一套兜底，距离归零 + 时长 1ms
+     即「直接到终态」，比统一压成 0ms 更安全（0ms 有时会跳过 transitionend） */
+  :root {
+    --dur-1: 1ms;
+    --dur-2: 1ms;
+    --dur-3: 1ms;
+    --dur-4: 1ms;
+    --dur-5: 1ms;
+    --move-1: 0px;
+    --move-2: 0px;
+    --move-3: 0px;
+    --move-4: 0px;
+    --stagger-1: 0ms;
+    --stagger-2: 0ms;
+    --stagger-3: 0ms;
+  }
+
   *,
   *::before,
   *::after {
@@ -226,6 +263,39 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* ===== 骨架屏占位（收藏 / 购物车等列表共用）=====
+   尺寸由使用方决定，这里只给材质：底色 + shimmer。
+   规则：骨架块的高度必须等于真实行高，否则加载完成时会跳一下。 */
+.sk-block,
+.sk-line {
+  /* 允许用在 span 上：非 flex/grid 容器里 inline 元素的宽高会被忽略 */
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--bg-hover, #f0f0f0) 25%,
+    var(--bg-card, #e8e8e8) 50%,
+    var(--bg-hover, #f0f0f0) 75%
+  );
+  background-size: 200% 100%;
+  animation: sk-shimmer 1.5s linear infinite;
+}
+
+.sk-line {
+  height: 14px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.sk-line--long { width: 100%; height: 16px; }
+.sk-line--short { width: 60%; }
+.sk-line--price { width: 80px; height: 20px; }
+.sk-line--btn { width: 96px; height: 30px; border-radius: 8px; margin-bottom: 0; }
+
+@keyframes sk-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 body {
