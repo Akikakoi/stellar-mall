@@ -100,7 +100,10 @@
         <el-descriptions :column="1" border size="default">
           <el-descriptions-item label="订单编号">
             <span class="mono">{{ order?.orderNo || '-' }}</span>
-            <el-button link type="primary" @click="copyOrderNo">复制</el-button>
+            <el-button link :type="copied ? 'success' : 'primary'" @click="copyOrderNo">
+              {{ copied ? '已复制' : '复制' }}
+            </el-button>
+            <span class="sr-only" aria-live="polite">{{ copied ? '订单号已复制' : '' }}</span>
           </el-descriptions-item>
           <el-descriptions-item label="下单时间">{{ order?.createTime || '-' }}</el-descriptions-item>
           <el-descriptions-item label="支付方式">{{ payMethodText(order?.payMethod) }}</el-descriptions-item>
@@ -177,6 +180,9 @@
         <el-button type="primary" :loading="returnSubmitting" @click="onSubmitReturn">提交</el-button>
       </template>
     </el-dialog>
+
+    <!-- 支付成功：对勾描边 + 纸屑，一次付款只出现一次 -->
+    <PaySuccessOverlay :show="paySuccess" :amount="paidAmount" @done="onPaySuccessDone" />
   </div>
 </template>
 
@@ -195,6 +201,7 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Location } from '@element-plus/icons-vue'
 import { ORDER_STATUS, AFTER_SALE_STATUS, orderStatusText, orderStatusTag } from '@/constants/order'
+import PaySuccessOverlay from '@/components/PaySuccessOverlay.vue'
 
 const __PH = window.__PH
 
@@ -203,6 +210,14 @@ const router = useRouter()
 
 const loading = ref(false)
 const order = ref<any>(null)
+
+/** 支付成功面板：付款成功到刷新订单之间插一段确认感 */
+const paySuccess = ref(false)
+const paidAmount = ref(0)
+
+/** 订单号复制反馈：按钮变「已复制」，1.6 秒后复原 */
+const copied = ref(false)
+let copyTimer: number | undefined
 const afterSale = ref<any>(null)  // 关联的售后单
 
 // ---- 订单倒计时 ----
@@ -408,9 +423,16 @@ async function onPay() {
       { type: 'info', confirmButtonText: '确认支付', cancelButtonText: '取消' }
     )
     await apiPayOrder(order.value.id, payMethod)
-    ElMessage.success(isWalletPay ? '钱包支付成功' : '模拟支付成功')
-    load()
+    // 先收起确认框，再给一记「成功」：对勾描边 + 纸屑，收尾后才刷新订单
+    paidAmount.value = Number(order.value.payAmount || 0)
+    paySuccess.value = true
   } catch (e: any) { /* 用户取消不提示 */ }
+}
+
+/** 支付成功面板收尾（自动或点击跳过）：关掉面板并刷新订单状态 */
+function onPaySuccessDone() {
+  paySuccess.value = false
+  load()
 }
 
 /**
@@ -438,14 +460,18 @@ async function onConfirm() {
 }
 
 /**
- * 复制订单编号到剪贴板
+ * 复制订单编号到剪贴板：成功时按钮自己变「已复制」，
+ * 比弹一条 toast 更靠近手指，也不用再去找哪句话消失了
  */
-function copyOrderNo() {
+async function copyOrderNo() {
   const t = order.value?.orderNo
   if (!t) return
   try {
-    navigator.clipboard && navigator.clipboard.writeText(t)
-    ElMessage.success('订单号已复制')
+    // 非 HTTPS 或没有剪贴板权限时 navigator.clipboard 可能不存在，走 catch 兜底
+    await navigator.clipboard.writeText(t)
+    copied.value = true
+    if (copyTimer) clearTimeout(copyTimer)
+    copyTimer = window.setTimeout(() => { copied.value = false }, 1600)
   } catch (e: any) {
     ElMessage.info(t)
   }
@@ -500,6 +526,9 @@ async function onSubmitReturn() {
 
 onMounted(load)
 onUnmounted(stopCountdown)
+onUnmounted(() => {
+  if (copyTimer) clearTimeout(copyTimer)
+})
 watch(() => route.params.id, load)
 </script>
 
@@ -650,5 +679,18 @@ watch(() => route.params.id, load)
   .panel-head .panel-title { font-size: 15px; }
   /* 订单信息表格标签列收窄 */
   :deep(.el-descriptions__label) { width: 88px; }
+}
+
+/* 只给读屏用的播报文本 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

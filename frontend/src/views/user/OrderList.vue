@@ -102,6 +102,9 @@
         <el-button type="primary" :loading="returnSubmitting" @click="submitReturn">提交</el-button>
       </template>
     </el-dialog>
+
+    <!-- 支付成功：与订单详情共用同一套「对勾 + 纸屑」，收尾后刷新列表 -->
+    <PaySuccessOverlay :show="paySuccess" :amount="paidAmount" @done="onPaySuccessDone" />
   </div>
 </template>
 
@@ -112,6 +115,7 @@ import { listOrder, cancelOrder, payOrder, confirmOrder, deleteUserOrder, listAf
 import { ORDER_STATUS, AFTER_SALE_STATUS, orderStatusText, orderStatusTag } from '@/constants/order'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Timer } from '@element-plus/icons-vue'
+import PaySuccessOverlay from '@/components/PaySuccessOverlay.vue'
 
 const __PH = window.__PH
 
@@ -240,6 +244,10 @@ async function cancel(order: any) {
 const paying = ref(false)
 const payDialogVisible = ref(false)
 const pendingOrder = ref<any>(null)
+
+/** 支付成功面板 */
+const paySuccess = ref(false)
+const paidAmount = ref(0)
 const selectedPayMethod = ref('1')
 
 /**
@@ -260,9 +268,10 @@ async function doPay() {
   paying.value = true
   try {
     await payOrder(pendingOrder.value.id, parseInt(selectedPayMethod.value))
-    ElMessage.success(selectedPayMethod.value === '4' ? '钱包支付成功' : '模拟支付成功')
+    // 关掉支付方式弹窗，让「成功」这一记单独占满屏幕，收尾后再刷新列表
+    paidAmount.value = Number(pendingOrder.value.payAmount || pendingOrder.value.amount || 0)
     payDialogVisible.value = false
-    loadOrders()
+    paySuccess.value = true
   } catch (e: any) {
     if (e?.message) {
       ElMessage.error(e?.response?.data?.msg || e?.message || '支付失败')
@@ -270,6 +279,12 @@ async function doPay() {
   } finally {
     paying.value = false
   }
+}
+
+/** 支付成功面板收尾：关面板并刷新列表 */
+function onPaySuccessDone() {
+  paySuccess.value = false
+  loadOrders()
 }
 
 /**
