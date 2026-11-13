@@ -149,6 +149,8 @@
 
           <!-- 商品网格 -->
           <div class="spu-grid"
+            ref="gridRef"
+            :class="{ 'is-refreshing': loading && spus.length > 0 }"
             :style="{ gridTemplateColumns: `repeat(${columns}, 1fr)` }"
             v-infinite-scroll="loadMore"
             :infinite-scroll-disabled="!hasMore || loading || loadingMore"
@@ -166,7 +168,7 @@
                 </div>
               </div>
             </div>
-            <div v-for="spu in spus" :key="spu.id" class="spu-card" @click="goDetail(spu.id)">
+            <div v-for="spu in spus" :key="spu.id" class="spu-card" :data-flip-key="spu.id" @click="goDetail(spu.id)">
               <div class="spu-image">
                 <img :src="spu.mainImage || __PH" :alt="spu.name" loading="lazy"
                   v-placeholder />
@@ -216,7 +218,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Loading, Search, Close } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
@@ -224,6 +226,7 @@ import { useCartStore } from '@/stores/cart'
 import { listSpu, listCategory, addFavorite, removeFavorite, batchCheckFavorites, getSpu, addCart } from '@/api/mall'
 import { ElMessage } from 'element-plus'
 import { useSearchHistory } from '@/composables/useSearchHistory'
+import { useFlip } from '@/composables/useFlip'
 import { track } from '@/utils/tracker'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 import DOMPurify from 'dompurify'
@@ -236,6 +239,10 @@ const router = useRouter()
 const isCategoryPage = computed(() => !!route.query.categoryId)
 const userStore = useUserStore()
 const cartStore = useCartStore()
+
+/** 商品网格容器：排序 / 分类切换时用它做 FLIP 重排 */
+const gridRef = ref<HTMLElement | null>(null)
+const { capture: captureGrid, play: playGrid } = useFlip(gridRef)
 
 const columns = ref(Number(localStorage.getItem('stellar_shop_cols')) || 4)
 function setColumns(n: any) {
@@ -371,7 +378,7 @@ function doShopSearch() {
   activeSort.value = 'default'
   initialAggCategories.value = []
   aggCategories.value = []
-  page.value = 1; spus.value = []
+  page.value = 1
   loadSpu()
   track('search', { keyword: kw, scene: 'search' })
 }
@@ -386,7 +393,7 @@ function setSort(sortKey: any) {
   } else {
     activeSort.value = sortKey
   }
-  page.value = 1; spus.value = []
+  page.value = 1
   loadSpu()
 }
 
@@ -401,7 +408,6 @@ function applyPriceFilter() {
     return
   }
   page.value = 1
-  spus.value = []
   loadSpu()
 }
 
@@ -412,7 +418,6 @@ function resetPriceFilter() {
   customPriceFrom.value = ''
   customPriceTo.value = ''
   page.value = 1
-  spus.value = []
   loadSpu()
 }
 
@@ -428,7 +433,7 @@ function toggleCategoryFilter(catId: any) {
     activeCategoryId.value = catId
     router.replace({ query: { ...route.query, categoryId: catId } })
   }
-  page.value = 1; spus.value = []
+  page.value = 1
   loadSpu()
 }
 
@@ -494,11 +499,12 @@ async function loadSpu(append = false) {
   } else {
     loading.value = true
     page.value = 1
-    spus.value = []
-    total.value = 0
     favSet.clear()
     highlights.value = {}
     // 聚合数据不重置，保持初始全量数据
+    // 旧卡片先留在原地作为 FLIP 的起点（首次加载时列表为空，骨架屏照常显示）；
+    // total 不归零，避免把「共 N 件」清成 0 再跳回来
+    captureGrid()
   }
   try {
     const params: Record<string, any> = { page: page.value, pageSize: pageSize.value }
@@ -558,6 +564,11 @@ async function loadSpu(append = false) {
   } finally {
     loading.value = false
     loadingMore.value = false
+    // 新列表渲染完成后，把卡片从旧位置滑到新位置（追加加载不参与）
+    if (!append) {
+      await nextTick()
+      playGrid()
+    }
   }
 }
 
@@ -1034,6 +1045,13 @@ html.theme-dark .history-panel {
 .spu-grid {
   display: grid;
   gap: 18px;
+}
+/* 刷新中：旧卡片降透明度并暂时不响应点击，避免用过期结果跳详情；
+   卡片本身仍留在原位，作为 FLIP 的起点 */
+.spu-grid.is-refreshing .spu-card {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity var(--dur-2) var(--ease-standard);
 }
 .spu-card {
   /* 磨砂玻璃卡片（全站规范：--glass-bg + backdrop-blur，双前缀） */
