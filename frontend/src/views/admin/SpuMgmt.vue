@@ -52,7 +52,7 @@
         <el-table-column type="selection" width="45" />
         <el-table-column label="图片" width="80">
           <template #default="{ row }">
-            <el-image :src="row.mainImage || row.image || row.pic" :preview-src-list="[row.mainImage || row.image || row.pic]" style="width: 48px; height: 48px; border-radius: var(--radius-sm);" fit="cover">
+            <el-image :src="row.mainImage || row.image || row.pic" :preview-src-list="[row.mainImage || row.image || row.pic]" preview-teleported hide-on-click-modal style="width: 48px; height: 48px; border-radius: var(--radius-sm);" fit="cover">
               <template #error><div class="img-placeholder">N/A</div></template>
             </el-image>
           </template>
@@ -161,7 +161,7 @@
                 class="image-preview-item"
                 :class="{ 'is-main': idx === 0 }"
               >
-                <el-image :src="img.url" fit="cover" class="image-preview-img" :preview-src-list="uploadedImages.map(i => i.url)" />
+                <el-image :src="img.url" fit="cover" class="image-preview-img" :preview-src-list="uploadedImages.map(i => i.url)" preview-teleported hide-on-click-modal />
                 <div class="image-preview-label">{{ idx === 0 ? '主图' : `副图${idx}` }}</div>
                 <div class="image-preview-remove" @click="removeUploadedImage(idx)">
                   <el-icon><Close /></el-icon>
