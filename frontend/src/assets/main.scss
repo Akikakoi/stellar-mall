@@ -49,6 +49,11 @@
   --transition-base: 200ms var(--ease-out);
   --transition-color: 160ms ease;
 
+  /* 圆形主题擦除时用的目标底色：主题变量挂在 html.theme-* 上，
+     JS 无法用探针元素求值，所以在这里各留一份（与两种主题的 --bg-base 同值） */
+  --wipe-surface-dark: #000000;
+  --wipe-surface-light: #f5f5f7;
+
   --brand-primary: #0071e3;
   --brand-primary-hover: #0077ed;
   --brand-primary-active: #0068d1;
@@ -221,6 +226,26 @@ html.theme-switching *,
 html.theme-switching *::before,
 html.theme-switching *::after {
   transition: none !important;
+}
+
+/* ===== 主题圆形擦除 =====
+   目标主题的底色 + 背景图 + 压暗层铺在固定层上，由 useTheme 用 clip-path 扩散；
+   扩散到盖满视口后才翻转主题 class（此时露不出来），遮罩再淡出。
+   层内用 WAAPI 驱动，不受 html.theme-switching 的 transition:none 影响。 */
+.theme-wipe-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+}
+.theme-wipe-photo,
+.theme-wipe-tint {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 /* ===== 减少动态效果（系统级无障碍偏好）=====
