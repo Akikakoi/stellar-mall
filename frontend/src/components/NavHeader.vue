@@ -1,5 +1,5 @@
 <template>
-  <header class="top-bar" :class="{ hidden: isHidden }">
+  <header class="top-bar" ref="headerRef" :class="{ hidden: isHidden }">
     <div class="container">
       <div
         class="logo"
@@ -283,6 +283,22 @@ onUnmounted(() => {
 const userStore = useUserStore()
 const { count: unreadCount } = useUnreadBadge()
 const searchKeyword = ref('')
+
+/**
+ * 未读角标弹跳：只在新消息让数字变大时播一次，
+ * 已读（数字变小）不跳，避免刷消息时一直动。
+ */
+const headerRef = ref<HTMLElement | null>(null)
+function bumpUnreadBadge() {
+  const sup = headerRef.value?.querySelector<HTMLElement>('.msg-bell .el-badge__content')
+  if (!sup) return
+  sup.classList.remove('is-bump')
+  void sup.offsetWidth
+  sup.classList.add('is-bump')
+}
+watch(unreadCount, (next, prev) => {
+  if (next > (prev || 0)) nextTick(bumpUnreadBadge)
+})
 
 // ===== 移动端汉堡菜单 =====
 const mobileOpen = ref(false)
@@ -576,6 +592,16 @@ function handleLogoClick() {
   gap: 12px;
 }
 .msg-bell { margin-right: 0; }
+/* 新消息角标弹跳：保留 EP 用于定位 sup 的 translate，只叠加 scale */
+.msg-bell :deep(.el-badge__content.is-bump) {
+  animation: unread-bump var(--dur-4) var(--ease-out);
+}
+@keyframes unread-bump {
+  0% { transform: translateY(-50%) translateX(100%) scale(1); }
+  35% { transform: translateY(-50%) translateX(100%) scale(1.35); }
+  70% { transform: translateY(-50%) translateX(100%) scale(0.94); }
+  100% { transform: translateY(-50%) translateX(100%) scale(1); }
+}
 .bell-btn {
   border: none;
   background: transparent;

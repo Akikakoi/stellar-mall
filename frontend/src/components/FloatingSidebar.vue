@@ -1,5 +1,5 @@
 <template>
-  <div class="floating-sidebar" :class="{ 'is-hidden': !showSidebar }">
+  <div class="floating-sidebar" ref="sidebarRef" :class="{ 'is-hidden': !showSidebar }">
     <div class="sidebar-inner">
       <div v-for="item in items" :key="item.key" class="sidebar-item" @click="item.action">
         <el-badge :value="item.badge" :hidden="!item.badge" :max="99">
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   ShoppingCartFull,
@@ -38,6 +38,26 @@ const cartCount = computed(() =>
   cartStore.totalCount > 0 && !cartStore.badgeSeen ? cartStore.totalCount : 0
 )
 const showBackTop = ref(false)
+
+/** 侧栏根节点：加购后对购物车角标做一次弹跳 */
+const sidebarRef = ref<HTMLElement | null>(null)
+
+/**
+ * 角标弹跳：只在数量增加时播一次（浏览、轮询导致的数字变化不跳）。
+ * 直接对 Element Plus 的 sup 元素做「移除 class → 强制 reflow → 加回」，
+ * 动画才会重播；减少动效下全局规则把动画压成 0.01ms，等于不跳。
+ */
+function bumpCartBadge() {
+  const sup = sidebarRef.value?.querySelector<HTMLElement>('.sidebar-item .el-badge__content')
+  if (!sup) return
+  sup.classList.remove('is-bump')
+  void sup.offsetWidth
+  sup.classList.add('is-bump')
+}
+
+watch(cartCount, (next, prev) => {
+  if (next > (prev || 0)) nextTick(bumpCartBadge)
+})
 
 /** 首页顶部（Hero 区域）先隐藏快捷栏，等商品模块进入视口后再出现 */
 const isHome = computed(() => route.path === '/')
@@ -190,6 +210,17 @@ watch(() => route.path, () => {
   height: 1px;
   background: var(--glass-border);
   margin: 4px 8px;
+}
+
+/* 角标弹跳：保留 EP 用来定位 sup 的 translate，只叠加 scale */
+.sidebar-item :deep(.el-badge__content.is-bump) {
+  animation: badge-bump var(--dur-4) var(--ease-out);
+}
+@keyframes badge-bump {
+  0% { transform: translateY(-50%) translateX(100%) scale(1); }
+  35% { transform: translateY(-50%) translateX(100%) scale(1.35); }
+  70% { transform: translateY(-50%) translateX(100%) scale(0.94); }
+  100% { transform: translateY(-50%) translateX(100%) scale(1); }
 }
 
 /* ===== 移动端：右侧悬浮栏改为底部横条，不遮挡竖向内容 ===== */
