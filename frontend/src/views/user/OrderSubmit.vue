@@ -2,6 +2,7 @@
   <div class="order-submit-page">
 
     <main class="container main-content" v-loading="submitting">
+      <OrderSteps :current="2" />
       <div class="card address-card">
         <div class="card-title">收货信息</div>
         <Transition name="address-fade" mode="out-in">
@@ -187,6 +188,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { track } from '@/utils/tracker'
 import areaData from 'china-area-data'
 import { convertAreaDataToOptions } from '@/utils/area'
+import OrderSteps from '@/components/OrderSteps.vue'
 
 const areaOptions = convertAreaDataToOptions(areaData, '86')
 
