@@ -15,8 +15,24 @@
         </div>
       </div>
 
-      <div class="fav-grid" :style="{ gridTemplateColumns: `repeat(${colsPerRow}, 1fr)` }" v-loading="loading">
-        <div v-for="item in favorites" :key="item.id" class="fav-card">
+      <!-- 首次加载：骨架屏占位，尺寸与真实卡片一致，加载完成后淡出 -->
+      <div v-if="loading && favorites.length === 0"
+        class="fav-grid"
+        :style="{ gridTemplateColumns: `repeat(${colsPerRow}, 1fr)` }"
+        aria-busy="true">
+        <div v-for="i in colsPerRow * 2" :key="'fav-skeleton-' + i" class="fav-card fav-card--skeleton">
+          <div class="fav-image sk-block"></div>
+          <div class="fav-info">
+            <div class="sk-line sk-line--long"></div>
+            <div class="sk-line sk-line--short"></div>
+            <div class="sk-line sk-line--price"></div>
+            <div class="sk-line sk-line--btn"></div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else ref="gridRef" class="fav-grid fav-grid--in" :style="{ gridTemplateColumns: `repeat(${colsPerRow}, 1fr)` }">
+        <div v-for="item in favorites" :key="item.id" class="fav-card" :data-flip-key="item.id">
           <div class="fav-image" @click="goDetail(item.spuId)">
             <img :src="item.spuImage || __PH" :alt="item.spuName" v-placeholder />
           </div>
@@ -38,12 +54,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { listFavorites, removeFavorite } from '@/api/mall'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { useFlip } from '@/composables/useFlip'
 import { track } from '@/utils/tracker'
 
 const __PH = window.__PH
@@ -55,8 +72,21 @@ const cartStore = useCartStore()
 const loading = ref(false)
 const favorites = ref<any[]>([])
 
+/** 收藏网格容器：换每行列数、取消收藏后做 FLIP 重排 */
+const gridRef = ref<HTMLElement | null>(null)
+const { capture: captureGrid, play: playGrid } = useFlip(gridRef)
+
 const LAYOUT_KEY = 'stellar_fav_cols'
 const colsPerRow = ref(Number(localStorage.getItem(LAYOUT_KEY)) || 4)
+
+/**
+ * 每行列数变化：先记录旧位置（flush: pre 时 DOM 尚未更新），
+ * 等新网格渲染完再补间，卡片从旧格位滑到新格位
+ */
+watch(colsPerRow, () => {
+  captureGrid()
+  nextTick(() => playGrid())
+})
 
 /** 将每行显示列数偏好保存到 localStorage */
 function saveLayout() {
@@ -106,9 +136,13 @@ async function handleRemove(item: any) {
   }
   try {
     await removeFavorite(item.spuId)
+    // 删掉一张卡会让后面的卡重排：先量旧位置，再在渲染后补间
+    captureGrid()
     track('favorite', { spuId: item.spuId, scene: 'favorites', extra: { fav: 0 } })
     ElMessage.success('已取消收藏')
     favorites.value = favorites.value.filter((f: any) => f.id !== item.id)
+    await nextTick()
+    playGrid()
   } catch (e: any) {
     ElMessage.error('取消收藏失败')
   }
@@ -184,4 +218,17 @@ onMounted(async () => {
 .fav-name:hover { color: var(--brand-primary); }
 .fav-price { color: var(--text-primary); font-size: 18px; font-weight: 700; margin-bottom: 14px; }
 .fav-actions { display: flex; gap: 10px; }
+
+/* ===== 加载态 ===== */
+/* 骨架卡：尺寸与真实卡一致（图片 1:1 + 信息区四行），保证换入时不跳 */
+.fav-card--skeleton { cursor: default; pointer-events: none; }
+.fav-card--skeleton:hover { transform: none; box-shadow: none; }
+.fav-card--skeleton .fav-info .sk-line--price { margin: 0 0 11px; }
+
+/* 真实内容淡入，只播一次，不改变终态（不影响 hover 位移） */
+.fav-grid--in .fav-card { animation: fav-card-in var(--dur-3) var(--ease-enter); }
+@keyframes fav-card-in {
+  from { opacity: 0; transform: translateY(var(--move-2)); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
