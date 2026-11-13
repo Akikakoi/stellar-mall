@@ -3,22 +3,22 @@
     <div class="stat-strip">
       <div class="stat-cell clickable" @click="goOrders('PAID')">
         <div class="stat-label">待处理订单</div>
-        <div class="stat-value">{{ stats.pendingOrders || 0 }}</div>
+        <div class="stat-value">{{ pendingOrdersShown }}</div>
         <div class="stat-hint">{{ (stats.pendingOrders || 0) > 0 ? '待发货' : '暂无积压' }}</div>
       </div>
       <div class="stat-cell clickable" @click="goOrdersToday()">
         <div class="stat-label">今日订单</div>
-        <div class="stat-value">{{ stats.todayOrders || 0 }}</div>
+        <div class="stat-value">{{ todayOrdersShown }}</div>
         <div class="stat-hint">查看今日明细</div>
       </div>
       <div class="stat-cell">
         <div class="stat-label">今日销售额</div>
-        <div class="stat-value">¥{{ Number(stats.todaySales || 0).toLocaleString() }}</div>
+        <div class="stat-value">¥{{ todaySalesShown.toLocaleString() }}</div>
         <div class="stat-hint">实时统计</div>
       </div>
       <div class="stat-cell clickable" @click="router.push('/admin/inventory')">
         <div class="stat-label">低库存预警</div>
-        <div class="stat-value" :class="{ 'value-warn': (stats.lowStockCount || 0) > 0 }">{{ stats.lowStockCount || 0 }}</div>
+        <div class="stat-value" :class="{ 'value-warn': (stats.lowStockCount || 0) > 0 }">{{ lowStockShown }}</div>
         <div class="stat-hint">{{ (stats.lowStockCount || 0) > 0 ? '需要补货' : '库存健康' }}</div>
       </div>
     </div>
@@ -204,6 +204,7 @@ import { generateDailyReport } from '@/api/admin'
 import { adminRequest } from '@/api/request'
 import { Goods, Tickets, Box, Discount, Loading } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useCountUp } from '@/composables/useCountUp'
 import * as echarts from 'echarts/core'
 import { LineChart, BarChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent } from 'echarts/components'
@@ -219,6 +220,12 @@ const stats = reactive<any>({
   pendingOrders: 0, todayOrders: 0, todaySales: 0, lowStockCount: 0,
   pendingAfterSaleCount: 0, behaviorEvents: 0, behaviorVisitors: 0
 })
+
+// KPI 数字滚动：只影响展示，判断逻辑仍读 stats 原值
+const pendingOrdersShown = useCountUp(computed(() => Number(stats.pendingOrders || 0)))
+const todayOrdersShown = useCountUp(computed(() => Number(stats.todayOrders || 0)))
+const todaySalesShown = useCountUp(computed(() => Number(stats.todaySales || 0)))
+const lowStockShown = useCountUp(computed(() => Number(stats.lowStockCount || 0)))
 const orderTrendData = ref<any[]>([])
 const salesTrendData = ref<any[]>([])
 const behaviorTopEvents = ref<any[]>([])
