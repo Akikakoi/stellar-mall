@@ -1,0 +1,24 @@
+# 行尾策略：仓库统一 LF，Windows 脚本用 CRLF
+# 目的：Windows 上不再出现 "LF will be replaced by CRLF" 提示，
+# 也不会因为编辑器自动改行尾而产生「整文件都变了」的假 diff。
+* text=auto eol=lf
+
+# Windows 原生脚本保留 CRLF（PowerShell 5.1 / cmd 的老版本对 LF 不友好）
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二进制：不做行尾转换，也不参与文本 diff
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.pdf  binary
+*.jar  binary
+*.zip  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.otf  binary
