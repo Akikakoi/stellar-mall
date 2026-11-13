@@ -5,7 +5,14 @@
       <span class="tip">保障服务按「单个商品」配置组合：在商品编辑中选择该商品可选购的服务；服务价格以此处为准，结算时后端按服务表权威重算。</span>
     </div>
 
-    <el-table :data="services" v-loading="loading">
+    <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+    <AdminTableSkeleton
+      v-if="loading && services.length === 0"
+      :rows="8"
+      :columns="[0.5, 1.4, 0.7, 0.6, 0.8, 0.7, 0.8]"
+      :row-height="56"
+    />
+    <el-table v-else :data="services" v-loading="loading">
       <el-table-column prop="id" label="ID" width="70" />
       <el-table-column prop="code" label="标识（code）" min-width="150" show-overflow-tooltip />
       <el-table-column prop="title" label="名称" min-width="160" />
@@ -68,6 +75,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { listServices, saveService, deleteService } from '@/api/admin'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 
 const loading = ref(false)
 const submitting = ref(false)

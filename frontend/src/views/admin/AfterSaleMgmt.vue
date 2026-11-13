@@ -16,7 +16,15 @@
         <el-button :disabled="loading" @click="reset">重置</el-button>
       </div>
 
-      <el-table :data="tableData" v-loading="loading" empty-text="暂无数据" style="width: 100%;">
+      <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+      <AdminTableSkeleton
+        v-if="loading && tableData.length === 0"
+        :rows="8"
+        :columns="[0.9, 1.2, 1.4, 0.7, 0.7, 0.7, 0.9, 0.8]"
+        :row-height="56"
+      />
+      <el-table v-else :data="tableData" v-loading="loading" empty-text="暂无数据" style="width: 100%;"
+        :row-class-name="tableRowClassName">
         <el-table-column prop="id" label="售后单号" width="120">
           <template #default="{ row }">AS{{ row.id }}</template>
         </el-table-column>
@@ -130,6 +138,12 @@ import { ref, onMounted } from 'vue'
 import { pageAfterSale, auditAfterSale, confirmRefund } from '@/api/admin'
 import { AFTER_SALE_STATUS, AFTER_SALE_STATUS_TEXT, AFTER_SALE_TYPE_TEXT, afterSaleStatusTag } from '@/constants/order'
 import { ElMessage } from 'element-plus'
+import { useRowFlash } from '@/composables/useRowFlash'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
+
+/** 审核/退款后让该售后单行闪一下 */
+const { flashRows, rowClass } = useRowFlash()
+function tableRowClassName({ row }: { row: any }) { return rowClass(row.id) }
 
 const loading = ref(false)
 const tableData = ref<any[]>([])
@@ -217,6 +231,7 @@ async function doAudit() {
       remark: auditRemark.value.trim() || null
     })
     ElMessage.success(auditAction.value === 'approve' ? '审核通过' : '已拒绝')
+    flashRows([auditRow.value.id])
     auditVisible.value = false
     loadData()
   } catch (e: any) {
@@ -255,5 +270,12 @@ onMounted(loadData)
 }
 .panel-title {
   font-size: 18px; font-weight: 600; color: var(--text-primary);
+}
+
+/* 行反馈：刚审核过的售后单闪一下底色（1100ms 与 useRowFlash 默认时长对齐） */
+:deep(.el-table__body tr.row-flash > td.el-table__cell) { animation: row-flash 1100ms var(--ease-out); }
+@keyframes row-flash {
+  0%, 55% { background-color: var(--brand-primary-soft); }
+  100% { background-color: transparent; }
 }
 </style>

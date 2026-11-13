@@ -12,7 +12,14 @@
         </el-select>
       </div>
 
-      <el-table :data="list" v-loading="loading">
+      <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+      <AdminTableSkeleton
+        v-if="loading && list.length === 0"
+        :rows="8"
+        :columns="[0.4, 1.2, 0.6, 1.5, 0.7, 1.0, 0.8, 0.8]"
+        :row-height="56"
+      />
+      <el-table v-else :data="list" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column label="商品" min-width="160" show-overflow-tooltip>
         <template #default="{ row }">
@@ -67,6 +74,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminRequest } from '@/api/request'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 
 const loading = ref(false)
 const submitting = ref(false)

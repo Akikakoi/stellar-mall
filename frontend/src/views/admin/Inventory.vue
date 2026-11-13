@@ -36,7 +36,14 @@
         <el-button @click="resetFilters">重置</el-button>
       </div>
 
-      <el-table :data="list" v-loading="loading">
+      <!-- 首屏骨架 -->
+      <AdminTableSkeleton
+        v-if="loading && list.length === 0"
+        :rows="8"
+        :columns="[1.2, 1.6, 0.7, 0.5, 0.9, 0.6]"
+        :row-height="56"
+      />
+      <el-table v-else :data="list" v-loading="loading">
         <el-table-column label="操作时间" width="170">
           <template #default="{ row }">{{ formatTime(row.createTime) }}</template>
         </el-table-column>
@@ -155,6 +162,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { adminRequest } from '@/api/request'
+import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 
 const loading = ref(false)
 const submitting = ref(false)
