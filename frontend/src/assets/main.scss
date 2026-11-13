@@ -1045,3 +1045,19 @@ html.theme-dark .spu-detail-page {
 .glass-select-popper .el-cascader-menu__item:hover {
   background: var(--glass-hover, rgba(0, 0, 0, 0.05)) !important;
 }
+
+/* ===== 描述列表（订单信息 / 售后详情 / 后台详情弹窗）=====
+ * EP 的带边框描述列表是 border-collapse 的 <table>，外框四角永远是直角，
+ * 放进 --radius-lg 的卡片里很跳。做法：把「外框」交给 body（可裁切），
+ * 单元格只保留内部网格线，这样圆角处不会出现被裁断的 1px 缺角。
+ */
+.el-descriptions__body:has(> .el-descriptions__table.is-bordered) {
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+/* 贴边的四条外框交给 body，避免和 body 描边叠成 2px */
+.el-descriptions__table.is-bordered tr:first-child .el-descriptions__cell { border-top: 0; }
+.el-descriptions__table.is-bordered tr:last-child .el-descriptions__cell { border-bottom: 0; }
+.el-descriptions__table.is-bordered .el-descriptions__cell:first-child { border-left: 0; }
+.el-descriptions__table.is-bordered .el-descriptions__cell:last-child { border-right: 0; }
