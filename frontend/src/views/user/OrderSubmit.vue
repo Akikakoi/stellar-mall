@@ -282,6 +282,15 @@ const selectedCouponId = ref<any>(null)
 const couponDiscount = ref(0)
 const walletBalance = ref(0)
 
+// ==================== 积分抵扣 ====================
+// 注意：这几个 ref 必须声明在 finalAmount 之前。
+// watch 创建时会先跑一次 getter 取旧值，而 getter 会读 finalAmount，
+// 提前声明后 finalAmount 里引用的 pointsDeduction 才不是 TDZ 状态。
+const userPoints = ref(0)
+const usePoints = ref(false)
+const pointsDeduction = ref(0)
+const pointsDeductedCount = ref(0)
+
 const finalAmount = computed(() => Math.max(0, orderAmount.value - couponDiscount.value - pointsDeduction.value))
 
 // 钱包余额不足以覆盖应付金额时，自动从钱包支付切回模拟微信支付
@@ -293,12 +302,6 @@ watch(
     }
   }
 )
-
-// ==================== 积分抵扣 ====================
-const userPoints = ref(0)
-const usePoints = ref(false)
-const pointsDeduction = ref(0)
-const pointsDeductedCount = ref(0)
 
 const canUsePoints = computed(() => userPoints.value >= 100 && finalAmountWithoutPoints.value > 0)
 
