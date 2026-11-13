@@ -185,6 +185,25 @@ export const useCartStore = defineStore('cart', {
       return res
     },
 
+    /**
+     * 仅从本地列表移除（不调接口），用于「可撤销删除」：
+     * 行先乐观消失、金额同帧更新，4.5s 内撤销则整行放回，超时才真正提交接口。
+     */
+    removeLocal(idOrSkuId: number) {
+      const index = this.items.findIndex((it) => it.id === idOrSkuId || it.skuId === idOrSkuId)
+      if (index < 0) return -1
+      this.items.splice(index, 1)
+      this.persist()
+      return index
+    },
+
+    /** 撤销删除：把之前移除的行放回原索引，超出范围时退回末尾 */
+    restoreLocal(item: CartItem & Partial<CartRowVO>, index: number) {
+      const target = Math.min(Math.max(index, 0), this.items.length)
+      this.items.splice(target, 0, item)
+      this.persist()
+    },
+
     /** 切换单个商品的选中状态 */
     toggleChecked(idOrSkuId: number) {
       const item = this.items.find((it) => it.id === idOrSkuId || it.skuId === idOrSkuId)

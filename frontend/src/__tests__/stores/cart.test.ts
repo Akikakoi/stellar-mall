@@ -258,6 +258,63 @@ describe('useCartStore', () => {
     })
   })
 
+  // ── Actions: 可撤销删除（仅本地） ──
+  describe('removeLocal / restoreLocal', () => {
+    it('removeLocal 只动本地列表，不调删除接口', async () => {
+      const store = createStore()
+      store.items = [
+        mockItem({ id: 1 }),
+        mockItem({ id: 2 }),
+        mockItem({ id: 3 })
+      ]
+      const index = store.removeLocal(2)
+
+      expect(index).toBe(1)
+      expect(store.items.map(i => i.id)).toEqual([1, 3])
+      // 关键：撤销窗口内不能真的提交删除
+      const { deleteCart } = await import('@/api/mall')
+      expect(deleteCart).not.toHaveBeenCalled()
+    })
+
+    it('removeLocal 找不到目标时返回 -1 且不改列表', () => {
+      const store = createStore()
+      store.items = [mockItem({ id: 1, skuId: 101 })]
+      expect(store.removeLocal(999)).toBe(-1)
+      expect(store.items).toHaveLength(1)
+    })
+
+    it('removeLocal 支持用 skuId 匹配', () => {
+      const store = createStore()
+      store.items = [mockItem({ id: 1, skuId: 101 }), mockItem({ id: 2, skuId: 202 })]
+      expect(store.removeLocal(202)).toBe(1)
+      expect(store.items).toHaveLength(1)
+      expect(store.items[0]!.id).toBe(1)
+    })
+
+    it('restoreLocal 放回原索引，总价随之恢复', () => {
+      const store = createStore()
+      store.items = [
+        mockItem({ id: 1, price: 10, quantity: 1 }),
+        mockItem({ id: 2, price: 20, quantity: 1 }),
+        mockItem({ id: 3, price: 30, quantity: 1 })
+      ]
+      const snapshot = { ...store.items[1]! }
+      const index = store.removeLocal(2)
+      expect(store.totalAmount).toBe(40)
+
+      store.restoreLocal(snapshot, index)
+      expect(store.items.map(i => i.id)).toEqual([1, 2, 3])
+      expect(store.totalAmount).toBe(60)
+    })
+
+    it('restoreLocal 索引越界时退回末尾', () => {
+      const store = createStore()
+      store.items = [mockItem({ id: 1 })]
+      store.restoreLocal(mockItem({ id: 9 }), 99)
+      expect(store.items.map(i => i.id)).toEqual([1, 9])
+    })
+  })
+
   // ── Actions: reset ──
   describe('reset', () => {
     it('退出时清空购物车', () => {
