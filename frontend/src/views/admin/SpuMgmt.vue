@@ -534,7 +534,7 @@ import { pageSpu, getAdminSpu, saveSpu, updateSpu, deleteSpu, setSpuStatus, batc
 import { adminRequest } from '@/api/request'
 import { apiKbUploadWithChunks, apiKbPreview, apiKbGet, apiKbMatch, apiKbMatchBatch, apiKbDelete } from '@/api/rag'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Upload, Search, Document, Loading, ChatLineSquare } from '@element-plus/icons-vue'
+import { Upload, Search, Document, Loading, ChatLineSquare, Close } from '@element-plus/icons-vue'
 import SpuReviewDrawer from '@/components/admin/SpuReviewDrawer.vue'
 import AdminTableSkeleton from '@/components/admin/AdminTableSkeleton.vue'
 import { useRowFlash } from '@/composables/useRowFlash'

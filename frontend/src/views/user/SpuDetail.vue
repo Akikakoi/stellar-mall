@@ -176,7 +176,7 @@ import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { track } from '@/utils/tracker'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
-import { ArrowLeft } from '@element-plus/icons-vue'
+import { ArrowLeft, ArrowRight, Close, ZoomIn } from '@element-plus/icons-vue'
 
 const __PH = window.__PH
 
