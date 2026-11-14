@@ -43,8 +43,9 @@ FlagEmbedding==1.2.11
 httpx==0.27.2
 aiofiles==24.1.0
 
-# MCP (Model Context Protocol) — 将 Agent 工具暴露为 MCP Server
-mcp[cli]>=1.0.0
+# MCP (Model Context Protocol) — 将商城只读查询能力暴露为 MCP Server
+# 必须 <2：mcp 2.x 把 FastMCP 改名为 MCPServer，app/mcp_server.py 用的是 v1 API
+mcp[cli]>=1.0.0,<2
 
 # Redis (LLM Cache + Mall Bridge)
 redis[hiredis]>=5.0.0,<6.0.0
