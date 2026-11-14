@@ -20,7 +20,9 @@ public interface CouponMapper {
     Coupon getCouponById(@Param("id") Long id);
     List<Coupon> pageCoupon(@Param("name") String name, @Param("status") Integer status, @Param("offset") int offset, @Param("pageSize") int pageSize);
     long countCoupon(@Param("name") String name, @Param("status") Integer status);
-    List<Coupon> listAvailableCoupons(@Param("userId") Long userId);
+    /** 可领取优惠券：now 由应用侧传入，避免 DB 与 JVM 时区不一致导致有效期判断漂移。 */
+    List<Coupon> listAvailableCoupons(@Param("userId") Long userId,
+                                      @Param("now") java.time.LocalDateTime now);
     int incrReceivedCount(@Param("id") Long id);
     int incrUsedCount(@Param("id") Long id);
 

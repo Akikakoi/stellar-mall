@@ -107,7 +107,7 @@
         SELECT c.* FROM stellar_coupon c
         WHERE c.status = 1
           AND c.received_count &lt; c.total_count
-          AND NOW() BETWEEN c.start_time AND c.end_time
+          AND #{now} BETWEEN c.start_time AND c.end_time
           AND (
               c.per_user_limit IS NULL OR c.per_user_limit &lt;= 0
               OR (

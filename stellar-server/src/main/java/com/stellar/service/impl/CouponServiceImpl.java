@@ -103,7 +103,8 @@ public class CouponServiceImpl implements CouponService {
      */
     @Override
     public List<Coupon> listAvailable(Long userId) {
-        return couponMapper.listAvailableCoupons(userId);
+        // 有效期判定统一用应用侧时间（与 claim() 的校验口径一致），避免 DB 与 JVM 时区不一致时列表提前/延后可见
+        return couponMapper.listAvailableCoupons(userId, LocalDateTime.now());
     }
 
     /**
