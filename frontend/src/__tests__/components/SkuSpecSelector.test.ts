@@ -266,4 +266,40 @@ describe('SkuSpecSelector', () => {
       expect(disabledOptions).toHaveLength(0)
     })
   })
+
+  // ── 组合缺格自动纠正 ──
+  describe('incomplete spec combinations', () => {
+    /** 故意造缺格数据：银翼白只有 128G，深空黑只有 256G */
+    function mountSparse() {
+      return mount(SkuSpecSelector, {
+        props: {
+          spu: { id: 1, name: '测试平板' },
+          skus: [
+            { id: 11, name: '银翼白-128G', price: 1999, stock: 10, image: '/s.jpg',
+              specsJson: JSON.stringify({ 颜色: '银翼白', 存储: '128G' }) },
+            { id: 12, name: '深空黑-256G', price: 2799, stock: 10, image: '/b.jpg',
+              specsJson: JSON.stringify({ 颜色: '深空黑', 存储: '256G' }) }
+          ] as Sku[],
+          modelValue: 1
+        }
+      })
+    }
+
+    it('切到其他维度组合不存在的选项时，自动纠正到有货 SKU', async () => {
+      const wrapper = mountSparse()
+      await nextTick()
+      // 默认应是银翼白 + 128G
+      expect(wrapper.emitted('sku-change')!.at(-1)![0]).toMatchObject({ id: 11 })
+
+      const black = wrapper.findAll('.spec-option').find(b => b.text().includes('深空黑'))!
+      await black.trigger('click')
+      await nextTick()
+
+      // 深空黑 + 128G 不存在，应自动落到 深空黑 + 256G
+      expect(wrapper.emitted('sku-change')!.at(-1)![0]).toMatchObject({ id: 12 })
+      const activeTexts = wrapper.findAll('.spec-option.active').map(b => b.text())
+      expect(activeTexts.some(t => t.includes('深空黑'))).toBe(true)
+      expect(activeTexts.some(t => t.includes('256G'))).toBe(true)
+    })
+  })
 })

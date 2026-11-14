@@ -25,7 +25,7 @@
               height="420px"
               arrow="hover"
               trigger="click"
-              :autoplay="galleryImages.length > 1"
+              :autoplay="galleryAutoplay && galleryImages.length > 1"
             >
               <el-carousel-item v-for="(img, idx) in galleryImages" :key="idx">
                 <img
@@ -193,6 +193,9 @@ const selectedSku = ref<any>(null)
 const qty = ref(1)
 const isFav = ref(false)
 const selectedServices = ref<any[]>([])
+// 轮播实例与自动播放开关：用户选过规格后停止自动翻页，避免刚切到某配色的图又被轮走
+const carouselRef = ref<any>(null)
+const galleryAutoplay = ref(true)
 
 // 保障服务：来自后端（管理端按单个商品配置，详情接口按 SPU 关联返回）。
 // 字段映射：id 用服务的 code（稳定标识，购物车/订单快照中的服务 id 即 code）
@@ -305,6 +308,22 @@ onBeforeUnmount(() => {
 
 function onSkuChange(sku: any) {
   selectedSku.value = sku
+  syncGalleryToSku(sku)
+}
+
+/**
+ * 选到某个 SKU 时，把轮播切到该 SKU 自己的图（同配色共用一张图）。
+ * 图集里没有该图时保持原位，不做猜测。
+ */
+function syncGalleryToSku(sku: any) {
+  const img = sku?.image
+  if (!img) return
+  const idx = galleryImages.value.indexOf(img)
+  if (idx < 0) return
+  galleryAutoplay.value = false
+  nextTick(() => {
+    carouselRef.value?.setActiveItem?.(idx)
+  })
 }
 
 // Reviews
