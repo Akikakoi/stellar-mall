@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """P2 验收：ES RRF 混合检索质量冒烟（语义/精确/tags/乱码）。"""
 import sys, io
+from pathlib import Path
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-sys.path.insert(0, r"d:\Desktop\stellar-mall\rag-backend")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.rag.retriever import hybrid_retrieve
 
