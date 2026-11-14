@@ -34,9 +34,13 @@ const router = useRouter()
 const route = useRoute()
 const cartStore = useCartStore()
 
-const cartCount = computed(() =>
-  cartStore.totalCount > 0 && !cartStore.badgeSeen ? cartStore.totalCount : 0
-)
+/**
+ * 角标常显购物车件数。
+ * 旧逻辑为「有商品且未点开过购物车」才显示（badgeSeen 收口），
+ * 用户点过一次购物车后角标就永久消失，与「车里有东西」的直觉不符，故改为常显；
+ * 新增商品仍由下方 watch 的弹跳动效提示。cart store 的 badgeSeen 暂保留未使用。
+ */
+const cartCount = computed(() => cartStore.totalCount)
 const showBackTop = ref(false)
 
 /** 侧栏根节点：加购后对购物车角标做一次弹跳 */
@@ -90,10 +94,7 @@ const items = computed(() => [
     label: '购物车',
     icon: ShoppingCartFull,
     badge: cartCount.value || null,
-    action: () => {
-      cartStore.markBadgeSeen()
-      router.push('/cart')
-    }
+    action: () => router.push('/cart')
   },
   {
     key: 'favorites',
