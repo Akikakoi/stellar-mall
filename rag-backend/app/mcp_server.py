@@ -1,4 +1,13 @@
-"""MCP (Model Context Protocol) Server — 将商城 Agent 工具暴露为 MCP 工具。
+"""MCP (Model Context Protocol) Server — 把商城**只读**查询能力暴露给 IDE。
+
+定位：开发者/运营在 TRAE、Claude Desktop 里用自然语言查商城数据
+（商品、订单、购物车、收藏、钱包、评价、知识库）。
+
+刻意不开放任何写操作：取消订单、确认收货、加购、清空购物车、提交售后
+这类有副作用的调用，统一走 C 端 Agent 的 HTTP 接口，由 graph 侧
+`react_safety` 的服务端确认机制（用户确认词 / user_confirmed）把关。
+MCP 侧的调用方是 IDE 里的模型，"confirm=true" 由模型自己填，
+不构成真实的人类确认，因此这里干脆不提供写工具。
 
 启动方式：
     python -m app.mcp_server          # stdio 模式（TRAE IDE / Claude Desktop）
@@ -17,28 +26,26 @@
 """
 from __future__ import annotations
 
+import sys
 from typing import Optional
 
-from mcp.server.fastmcp import FastMCP
+# stdio 传输下 stdout 只允许承载 JSON-RPC，任何日志混进去都会让客户端解析失败。
+# app/core/logger.py 默认把日志打到 stdout（为 FastAPI 场景设计），这里在导入期就切到 stderr。
+from loguru import logger as _loguru
 
-from app.config import settings
-from app.core.logger import logger
+_loguru.remove()
+_loguru.add(sys.stderr, level="INFO")
+
+from mcp.server.fastmcp import FastMCP  # noqa: E402
+
+from app.config import settings  # noqa: E402
+from app.core.logger import logger  # noqa: E402
 
 mcp = FastMCP(settings.MCP_SERVER_NAME or "stellar-mall")
 
 
-def _mcp_write_guard(confirm: bool) -> Optional[dict]:
-    """MCP 高危写工具的统一闸门：调用方必须先获得用户确认并显式传 confirm=true。"""
-    if confirm:
-        return None
-    return {
-        "success": False,
-        "message": "高危操作需要用户明确确认后，以 confirm=true 重新调用；本次未执行任何变更。",
-    }
-
-
 # ──────────────────────────────────────────────────────────────
-# 商品搜索
+# 商品
 # ──────────────────────────────────────────────────────────────
 @mcp.tool()
 def search_products(
@@ -58,8 +65,40 @@ def search_products(
     })
 
 
+@mcp.tool()
+def resolve_sku(
+    product_name: str,
+    spec_description: Optional[str] = None,
+    mall_token: Optional[str] = None,
+) -> dict:
+    """根据商品名称和规格描述解析出 SKU ID，例如「星耀 X100 Pro Max」+「16+512」。"""
+    from app.agent.tools.resolve_sku_tool import resolve_sku_tool
+
+    return resolve_sku_tool.invoke({
+        "product_name": product_name,
+        "spec_description": spec_description,
+        "mall_token": mall_token,
+    })
+
+
+@mcp.tool()
+def query_reviews(
+    spu_id: str,
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    """查询指定商品的用户评价，包括评分、内容、回复等。"""
+    from app.agent.tools.review_tool import query_reviews_tool
+
+    return query_reviews_tool.invoke({
+        "spu_id": spu_id,
+        "page": page,
+        "page_size": page_size,
+    })
+
+
 # ──────────────────────────────────────────────────────────────
-# 订单查询
+# 订单 / 购物车 / 收藏 / 钱包（均为只读查询）
 # ──────────────────────────────────────────────────────────────
 @mcp.tool()
 def query_orders(
@@ -80,51 +119,6 @@ def query_orders(
     })
 
 
-# ──────────────────────────────────────────────────────────────
-# 取消订单
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def cancel_order(
-    order_id: str,
-    mall_token: Optional[str] = None,
-    confirm: bool = False,
-) -> dict:
-    """取消待付款或待发货的订单；必须显式 confirm=true。"""
-    denied = _mcp_write_guard(confirm)
-    if denied:
-        return denied
-    from app.agent.tools.cancel_order_tool import cancel_order_tool
-
-    return cancel_order_tool.invoke({
-        "order_id": order_id,
-        "mall_token": mall_token,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 确认收货
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def confirm_receipt(
-    order_id: str,
-    mall_token: Optional[str] = None,
-    confirm: bool = False,
-) -> dict:
-    """确认已收到商品，将订单从待收货变为已完成；必须显式 confirm=true。"""
-    denied = _mcp_write_guard(confirm)
-    if denied:
-        return denied
-    from app.agent.tools.confirm_receipt_tool import confirm_receipt_tool
-
-    return confirm_receipt_tool.invoke({
-        "order_id": order_id,
-        "mall_token": mall_token,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 购物车 - 查看
-# ──────────────────────────────────────────────────────────────
 @mcp.tool()
 def view_cart(
     mall_token: Optional[str] = None,
@@ -137,123 +131,6 @@ def view_cart(
     })
 
 
-# ──────────────────────────────────────────────────────────────
-# 购物车 - 加入
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def add_to_cart(
-    sku_id: str,
-    qty: int = 1,
-    mall_token: Optional[str] = None,
-) -> dict:
-    """将指定 SKU 商品加入购物车。"""
-    from app.agent.tools.add_cart_tool import add_to_cart_tool
-
-    return add_to_cart_tool.invoke({
-        "sku_id": sku_id,
-        "qty": qty,
-        "mall_token": mall_token,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 购物车 - 更新
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def update_cart_item(
-    cart_item_id: str,
-    qty: Optional[int] = None,
-    checked: Optional[int] = None,
-    mall_token: Optional[str] = None,
-) -> dict:
-    """修改购物车中商品的数量或勾选状态。"""
-    from app.agent.tools.cart_tool import update_cart_item_tool
-
-    return update_cart_item_tool.invoke({
-        "cart_item_id": cart_item_id,
-        "qty": qty,
-        "checked": checked,
-        "mall_token": mall_token,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 购物车 - 删除单项
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def delete_cart_item(
-    cart_item_id: str,
-    mall_token: Optional[str] = None,
-    confirm: bool = False,
-) -> dict:
-    """从购物车中移除指定商品；必须显式 confirm=true。"""
-    denied = _mcp_write_guard(confirm)
-    if denied:
-        return denied
-    from app.agent.tools.cart_tool import delete_cart_item_tool
-
-    return delete_cart_item_tool.invoke({
-        "cart_item_id": cart_item_id,
-        "mall_token": mall_token,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 购物车 - 清空
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def clear_cart(
-    mall_token: Optional[str] = None,
-    confirm: bool = False,
-) -> dict:
-    """清空购物车中的所有商品；必须显式 confirm=true。"""
-    denied = _mcp_write_guard(confirm)
-    if denied:
-        return denied
-    from app.agent.tools.cart_tool import clear_cart_tool
-
-    return clear_cart_tool.invoke({
-        "mall_token": mall_token,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 售后
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def apply_after_sales(
-    order_id: str,
-    after_sales_type: str,
-    reason: str,
-    sku_id: Optional[str] = None,
-    description: Optional[str] = "",
-    contact_phone: Optional[str] = "",
-    mall_token: Optional[str] = None,
-    confirm: bool = False,
-) -> dict:
-    """提交售后申请（退货/换货/退款），写入商城真实售后系统；必须显式 confirm=true。
-
-    after_sales_type 可选值：refund(仅退款) / return(退货退款) / exchange(换货)
-    """
-    denied = _mcp_write_guard(confirm)
-    if denied:
-        return denied
-    from app.agent.tools.after_sales_tool import apply_after_sales_tool
-
-    return apply_after_sales_tool.invoke({
-        "order_id": order_id,
-        "after_sales_type": after_sales_type,
-        "reason": reason,
-        "sku_id": sku_id,
-        "description": description,
-        "contact_phone": contact_phone,
-        "mall_token": mall_token,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 收藏夹
-# ──────────────────────────────────────────────────────────────
 @mcp.tool()
 def query_favorites(
     mall_token: Optional[str] = None,
@@ -266,9 +143,6 @@ def query_favorites(
     })
 
 
-# ──────────────────────────────────────────────────────────────
-# 钱包
-# ──────────────────────────────────────────────────────────────
 @mcp.tool()
 def query_wallet(
     mall_token: Optional[str] = None,
@@ -282,26 +156,7 @@ def query_wallet(
 
 
 # ──────────────────────────────────────────────────────────────
-# 商品评价
-# ──────────────────────────────────────────────────────────────
-@mcp.tool()
-def query_reviews(
-    spu_id: str,
-    page: int = 1,
-    page_size: int = 10,
-) -> dict:
-    """查询指定商品的用户评价，包括评分、内容、回复等。"""
-    from app.agent.tools.review_tool import query_reviews_tool
-
-    return query_reviews_tool.invoke({
-        "spu_id": spu_id,
-        "page": page,
-        "page_size": page_size,
-    })
-
-
-# ──────────────────────────────────────────────────────────────
-# 知识库检索
+# 知识库
 # ──────────────────────────────────────────────────────────────
 @mcp.tool()
 def search_knowledge_base(
@@ -309,12 +164,11 @@ def search_knowledge_base(
     top_k: int = 5,
 ) -> dict:
     """检索商品知识库，查询商品信息、售后政策、使用说明等静态知识。"""
-    from app.agent.tools.kb_tool import kb_search_tool
+    from app.agent.tools.kb_tool import _kb_search_impl
 
-    return kb_search_tool.invoke({
-        "query": query,
-        "top_k": top_k,
-    })
+    # 跳过本地 BGE 精排：MCP 是 stdio 短进程，reranker 冷加载在 CPU 上约 5 分钟，
+    # 而 ES 的 RRF 已融合语义 + 关键词两路，IDE 查询场景够用
+    return _kb_search_impl(query, top_k=top_k, use_rerank=False)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -325,7 +179,14 @@ def main():
     if not settings.MCP_ENABLED:
         logger.warning("[MCP] MCP_ENABLED=false，跳过启动")
         return
-    logger.info(f"[MCP] 启动 MCP Server: {settings.MCP_SERVER_NAME}")
+    # 预热 C 扩展：numpy 等首次导入若发生在 anyio 事件循环运行期间，Windows 上会
+    # 卡死在 DLL 加载（实测 >80s 无返回，faulthandler 栈停在 numpy._core.multiarray）。
+    # 必须在 mcp.run() 建立事件循环之前预导入。
+    import numpy  # noqa: F401
+    # config 初始化时 setup_logger 会重新挂上 stdout sink，启动前再清一次
+    _loguru.remove()
+    _loguru.add(sys.stderr, level="INFO")
+    logger.info(f"[MCP] 启动 MCP Server: {settings.MCP_SERVER_NAME}（只读模式）")
     mcp.run(transport="stdio")
 
 

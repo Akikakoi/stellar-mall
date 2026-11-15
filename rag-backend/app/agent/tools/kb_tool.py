@@ -29,15 +29,24 @@ def _clean_product_name(doc_name: str) -> str:
     return name
 
 
-@tool
-def kb_search_tool(query: str, top_k: int = 5, tags_filter: Optional[List[str]] = None) -> dict:
-    """知识库检索工具，用于查询商品信息、售后政策、使用说明等静态知识。"""
+def _kb_search_impl(query: str, top_k: int = 5, tags_filter: Optional[List[str]] = None,
+                    use_rerank: bool = True) -> dict:
+    """知识库检索实现。
+
+    use_rerank=False 时跳过本地 BGE 精排，直接按 ES RRF 召回名次折算相对分。
+    用于 MCP/IDE 这类 stdio 短进程场景：reranker 冷加载在 CPU 上约 5 分钟，
+    而每次 IDE 会话都是新进程，付不起这个代价；ES 的 RRF 本身已融合语义与关键词。
+    """
     try:
         # 召回数取 max(精排数, 配置召回数)：top_k=20 的单产品属性查询若只召回
         # RETRIEVER_TOP_K=12 条，精排窗口反而大于召回窗口，候选不足
         recalled = hybrid_retrieve(query, top_k=max(top_k, settings.RETRIEVER_TOP_K),
                                    tags_filter=tags_filter)
-        ranked = rerank(query, recalled, top_k=top_k)
+        if use_rerank:
+            ranked = rerank(query, recalled, top_k=top_k)
+        else:
+            # 未精排：1/(rank+1) 只是名次折算的相对分，不是相关性概率
+            ranked = [(doc, 1.0 / (i + 1)) for i, doc in enumerate(recalled[:top_k])]
         return _ranked_to_result(query, ranked)
     except Exception as e:
         # 检索基础设施异常（ES 挂了等）必须如实报错：success=False 让上层
@@ -45,6 +54,12 @@ def kb_search_tool(query: str, top_k: int = 5, tags_filter: Optional[List[str]] 
         # 此前静默返回空结果会被 LLM 当成「知识库没查到」并缓存错误答案
         logger.warning(f"[kb_search_tool] 检索失败: {e}")
         return {"success": False, "query": query, "sources": [], "count": 0, "error": str(e)}
+
+
+@tool
+def kb_search_tool(query: str, top_k: int = 5, tags_filter: Optional[List[str]] = None) -> dict:
+    """知识库检索工具，用于查询商品信息、售后政策、使用说明等静态知识。"""
+    return _kb_search_impl(query, top_k=top_k, tags_filter=tags_filter, use_rerank=True)
 
 
 def _norm_name(s: str) -> str:

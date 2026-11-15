@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """P2 验收：HTTP 端到端（管理端上传/删除闭环 + chat 流式 + ES 数量对照）。"""
 import sys, io, time, json
+from pathlib import Path
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-sys.path.insert(0, r"d:\Desktop\stellar-mall\rag-backend")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import requests
 from app.core.security import create_access_token

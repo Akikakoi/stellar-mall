@@ -288,13 +288,21 @@ function isOptionDisabled(groupKey: string, value: string) {
 }
 
 /**
- * 选择规格选项，更新选中值并同步数量
+ * 选择规格选项，更新选中值并同步数量。
+ * 若切换后与其他维度组合不出任何 SKU（常见于 SKU 组合不缺格），
+ * 自动把其余维度纠正到含该值且优先有库存的最近 SKU，避免出现
+ * "颜色已选中但无对应 SKU、按钮变灰、主图不跟随"的空档状态。
  * @param {string} groupKey - 规格键名
  * @param {string} value - 规格值
  */
 function selectOption(groupKey: string, value: string) {
   if (selectedValues.value[groupKey] === value) return
   selectedValues.value[groupKey] = value
+  if (!selectedSku.value) {
+    const pool = parsedSkus.value.filter((sku: any) => sku.specsMap[groupKey] === value)
+    const candidate = pool.find((sku: any) => Number(sku.stock) > 0) || pool[0]
+    if (candidate) selectedValues.value = { ...candidate.specsMap }
+  }
   syncQuantity()
   emit('sku-change', selectedSku.value)
 }
@@ -416,10 +424,10 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
-  min-height: 36px;
+  padding: 9px 18px;
+  min-height: 40px;
   border: 1px solid var(--border-base);
-  border-radius: var(--radius-md);
+  border-radius: 14px;
   background: var(--bg-card);
   color: var(--text-secondary);
   font-size: 14px;
@@ -433,10 +441,12 @@ onMounted(() => {
   color: var(--text-primary);
 }
 
+/* 选中态：中性浅底 + 主色描边与文字（对齐规格选项设计稿，底色不再用品牌浅色） */
 .spec-option.active {
   border-color: var(--spec-active, var(--brand-primary));
-  background: var(--spec-active-soft, var(--brand-primary-soft));
+  background: var(--bg-hover);
   color: var(--spec-active, var(--brand-primary));
+  font-weight: 600;
 }
 
 .spec-option:disabled {
