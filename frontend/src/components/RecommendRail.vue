@@ -60,6 +60,8 @@ const props = withDefaults(defineProps<{
   note?: string
   /** 埋点场景：recommend_home / recommend_detail / recommend_cart */
   scene?: string
+  /** 点击商品是否新开标签页（详情页“看了又看”用） */
+  openInNewTab?: boolean
 }>(), {
   title: '猜你喜欢',
   limit: 8,
@@ -68,7 +70,8 @@ const props = withDefaults(defineProps<{
   maxPrice: undefined,
   layout: 'grid',
   note: '',
-  scene: 'recommend_home'
+  scene: 'recommend_home',
+  openInNewTab: false
 })
 
 const router = useRouter()
@@ -160,7 +163,12 @@ function goDetail(item: RecommendItem, index: number) {
       personalized: personalized.value
     }
   })
-  router.push(`/spu/${item.id}`)
+  const href = router.resolve(`/spu/${item.id}`).href
+  if (props.openInNewTab) {
+    window.open(href, '_blank', 'noopener,noreferrer')
+  } else {
+    router.push(href)
+  }
 }
 
 onMounted(() => {

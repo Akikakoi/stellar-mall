@@ -127,6 +127,7 @@
       :exclude-ids="[spu.id]"
       :seed-spu-id="spu.id"
       scene="recommend_detail"
+      open-in-new-tab
     />
 
     <!-- 评价区域 -->
