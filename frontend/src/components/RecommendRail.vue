@@ -47,7 +47,7 @@ import { useRouter } from 'vue-router'
 import { getRecommendations } from '@/api/mall'
 import type { RecommendItem } from '@/types/models'
 import { ossThumb } from '@/utils/imgThumb'
-import { track } from '@/utils/tracker'
+import { getDeviceId, track } from '@/utils/tracker'
 
 const props = withDefaults(defineProps<{
   title?: string
@@ -131,7 +131,7 @@ async function load() {
     const limit = Math.max(1, Math.min(props.limit, 30))
     // 有价格上限时多取一些候选，过滤后仍尽量填满展示位
     const requestLimit = props.maxPrice != null ? 30 : Math.min(30, limit + excluded.size)
-    const res = await getRecommendations(requestLimit, props.seedSpuId, props.maxPrice)
+    const res = await getRecommendations(requestLimit, props.seedSpuId, props.maxPrice, getDeviceId())
     items.value = (res?.items || [])
       .filter((item) => !excluded.has(item.id))
       .filter((item) => props.maxPrice == null || Number(item.minPrice || 0) <= props.maxPrice)

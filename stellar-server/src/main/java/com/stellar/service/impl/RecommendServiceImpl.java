@@ -4,6 +4,7 @@ import com.stellar.entity.Spu;
 import com.stellar.entity.UserBehavior;
 import com.stellar.mapper.SpuMapper;
 import com.stellar.mapper.UserBehaviorMapper;
+import com.stellar.properties.RecommendProperties;
 import com.stellar.service.RecommendService;
 import com.stellar.vo.RecommendItemVO;
 import com.stellar.vo.RecommendResultVO;
@@ -26,64 +27,72 @@ import java.util.Set;
 
 /**
  * 轻量混合推荐：
- *   1) ItemCF：把用户行为按 view=1 / cart=3 / favorite=4 / order=5 加权，30 天半衰，
- *      计算 item-item 余弦相似度；
- *   2) 内容偏好：用户历史类目分布 + 价格带亲和度；
+ *   1) ItemCF：view=1 / cart=3 / favorite=4 / order=5，30 天半衰，item-item 余弦相似度；
+ *   2) 内容偏好：用户/设备历史类目分布 + 价格带亲和度；
  *   3) 热度兜底：行为热度 + 销量/评论/新品/热卖标记；
- *   4) 融合排序后做类目多样性截断（每类最多 4 条）。
+ *   4) 详情页 seed 商品：优先使用 seed 的 item-to-item 相似度，缺失时退回类目/价格兜底；
+ *   5) 游客：有 device_id 行为时按设备画像个性化，否则走热度。
  *
- * 模型在内存中惰性构建，默认 60 秒刷新一次；当前数据量（千级行为、百级商品）足够。
- * 游客或没有行为的用户直接走热度冷启动。
+ * 模型在内存中惰性构建，刷新间隔与融合权重见 {@link RecommendProperties}。
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendServiceImpl implements RecommendService {
 
-    private static final int BEHAVIOR_DAYS = 90;
-    private static final long MODEL_TTL_MS = 60_000L;
-    private static final int MAX_ITEMS_PER_USER = 40;
-    private static final int MAX_SIMILAR_PER_ITEM = 60;
-    private static final int MAX_PER_CATEGORY = 4;
-    private static final int MAX_LIMIT = 30;
+    private static final String USER_PREFIX = "u:";
+    private static final String DEVICE_PREFIX = "d:";
     private static final double ITEM_SCORE_CAP = 15.0;
-
-    private static final double W_CF = 0.50;
-    private static final double W_CONTENT = 0.40;
-    private static final double W_POPULAR = 0.10;
 
     private final UserBehaviorMapper behaviorMapper;
     private final SpuMapper spuMapper;
+    private final RecommendProperties props;
 
     private volatile Model model;
     private volatile long modelAt;
     private final Object modelLock = new Object();
 
     @Override
-    public RecommendResultVO recommend(Long userId, int limit, Long seedSpuId, BigDecimal maxPrice) {
-        int n = Math.max(1, Math.min(limit, MAX_LIMIT));
+    public RecommendResultVO recommend(Long userId, String deviceId, int limit,
+                                       Long seedSpuId, BigDecimal maxPrice) {
+        int n = Math.max(1, Math.min(limit, props.getMaxLimit()));
         Model m = getModel();
         long now = System.currentTimeMillis();
         Spu seed = seedSpuId == null ? null : m.spuById.get(seedSpuId);
+        String profileKey = resolveProfileKey(m, userId, deviceId);
 
-        Map<Long, Double> userItems = userId == null ? null : m.userItem.get(userId);
-        if (userItems != null && !userItems.isEmpty()) {
-            return hybrid(m, userId, userItems, n, now, seed, maxPrice);
+        if (profileKey != null) {
+            return hybrid(m, profileKey, userId, n, now, seed, maxPrice);
         }
-        return coldStart(m, userId, n, now, seed, maxPrice);
+        return coldStart(m, userId, deviceId, n, now, seed, maxPrice);
     }
 
-    // ===================== 个性化：CF + 内容 + 热度 =====================
+    private String resolveProfileKey(Model m, Long userId, String deviceId) {
+        if (userId != null) {
+            String key = USER_PREFIX + userId;
+            Map<Long, Double> scores = m.profileItem.get(key);
+            if (scores != null && !scores.isEmpty()) return key;
+        }
+        if (deviceId != null && !deviceId.isBlank()) {
+            String key = DEVICE_PREFIX + deviceId;
+            Map<Long, Double> scores = m.profileItem.get(key);
+            if (scores != null && !scores.isEmpty()) return key;
+        }
+        return null;
+    }
 
-    private RecommendResultVO hybrid(Model m, Long userId, Map<Long, Double> userItems, int n,
+    // ===================== 个性化：item-to-item + CF + 内容 + 热度 =====================
+
+    private RecommendResultVO hybrid(Model m, String profileKey, Long userId, int n,
                                      long now, Spu seed, BigDecimal maxPrice) {
-        Set<Long> interacted = userItems.keySet();
+        Map<Long, Double> profileItems = m.profileItem.getOrDefault(profileKey, Map.of());
+        Set<Long> interacted = profileItems.keySet();
         Long seedId = seed == null ? null : seed.getId();
 
         Map<Long, Double> cf = new HashMap<>();
         Map<Long, Long> cfSource = new HashMap<>();
         Map<Long, Double> cfSourceWeight = new HashMap<>();
-        for (Map.Entry<Long, Double> ue : userItems.entrySet()) {
+        for (Map.Entry<Long, Double> ue : profileItems.entrySet()) {
             Long sourceId = ue.getKey();
             double sourceScore = ue.getValue();
             Map<Long, Double> similar = m.itemSimilar.get(sourceId);
@@ -94,11 +103,11 @@ public class RecommendServiceImpl implements RecommendService {
                         || Objects.equals(candidate, seedId)) continue;
                 Spu candidateSpu = m.spuById.get(candidate);
                 if (priceAbove(candidateSpu, maxPrice)) continue;
-                // 跨类目共现保留但降权：18 个用户的小样本里随机跨类目噪声容易压过真实偏好
                 Spu sourceSpu = m.spuById.get(sourceId);
                 boolean sameCategory = sourceSpu != null && candidateSpu != null
                         && Objects.equals(sourceSpu.getCategoryId(), candidateSpu.getCategoryId());
-                double contribution = sourceScore * se.getValue() * (sameCategory ? 1.0 : 0.35);
+                double contribution = sourceScore * se.getValue()
+                        * (sameCategory ? 1.0 : props.getCrossCategoryCfWeight());
                 cf.merge(candidate, contribution, Double::sum);
                 if (contribution > cfSourceWeight.getOrDefault(candidate, 0.0)) {
                     cfSourceWeight.put(candidate, contribution);
@@ -107,82 +116,118 @@ public class RecommendServiceImpl implements RecommendService {
             }
         }
 
-        Map<Long, Double> userCats = m.userCategory.getOrDefault(userId, Map.of());
-        double avgPrice = m.userAvgPrice.getOrDefault(userId, 0.0);
+        Map<Long, Double> seedSim = buildSeedSimilarity(m, seed, interacted, maxPrice);
+        Map<Long, Double> profileCats = m.profileCategory.getOrDefault(profileKey, Map.of());
+        double avgPrice = m.profileAvgPrice.getOrDefault(profileKey, 0.0);
         Map<Long, Double> content = new HashMap<>();
         Map<Long, Double> pop = new HashMap<>();
         for (Spu s : m.activeItems) {
             Long id = s.getId();
             if (interacted.contains(id) || Objects.equals(id, seedId) || priceAbove(s, maxPrice)) continue;
-            double catScore = userCats.getOrDefault(s.getCategoryId(), 0.0);
+            double catScore = profileCats.getOrDefault(s.getCategoryId(), 0.0);
             double priceAffinity = priceAffinity(s.getMinPrice(), avgPrice);
             content.put(id, 0.8 * catScore + 0.2 * priceAffinity);
             pop.put(id, Math.log1p(m.popularity.getOrDefault(id, 0.0)));
         }
         normalize(cf);
+        normalize(seedSim);
         normalize(content);
         normalize(pop);
 
         Set<Long> candidates = new HashSet<>();
         candidates.addAll(cf.keySet());
+        candidates.addAll(seedSim.keySet());
         candidates.addAll(content.keySet());
         candidates.addAll(pop.keySet());
+
+        boolean hasSeedSim = !seedSim.isEmpty();
+        double cfW = props.getCfWeight();
+        double contentW = props.getContentWeight();
+        double popW = props.getPopularWeight();
+        double seedW = props.getSeedWeight();
+        double baseSum = cfW + contentW + popW;
+        double restScale = baseSum > 0 ? Math.max(0.0, 1.0 - seedW) / baseSum : 0.0;
 
         List<Map.Entry<Long, Double>> ranked = new ArrayList<>();
         for (Long id : candidates) {
             Spu s = m.spuById.get(id);
-            double catPref = s == null ? 0.0 : userCats.getOrDefault(s.getCategoryId(), 0.0);
-            double score = W_CF * cf.getOrDefault(id, 0.0)
-                    + W_CONTENT * content.getOrDefault(id, 0.0)
-                    + W_POPULAR * pop.getOrDefault(id, 0.0);
-            // 类目先验：用户常看的类目小幅加权，避免跨类目共现把结果带偏
-            score *= 0.80 + 0.40 * catPref;
-            if (seed != null) score *= seedMultiplier(seed, s);
+            double catPref = s == null ? 0.0 : profileCats.getOrDefault(s.getCategoryId(), 0.0);
+            double score;
+            if (hasSeedSim) {
+                score = seedW * seedSim.getOrDefault(id, 0.0)
+                        + restScale * (cfW * cf.getOrDefault(id, 0.0)
+                        + contentW * content.getOrDefault(id, 0.0)
+                        + popW * pop.getOrDefault(id, 0.0));
+            } else {
+                score = cfW * cf.getOrDefault(id, 0.0)
+                        + contentW * content.getOrDefault(id, 0.0)
+                        + popW * pop.getOrDefault(id, 0.0);
+                if (seed != null) score *= seedMultiplier(seed, s);
+            }
+            score *= props.getCategoryPriorBase() + props.getCategoryPriorWeight() * catPref;
             ranked.add(Map.entry(id, score));
         }
         ranked.sort(Map.Entry.<Long, Double>comparingByValue().reversed());
 
-        List<RecommendItemVO> items = pickDiverse(m, ranked, n, cf, content, pop, cfSource);
+        List<RecommendItemVO> items = pickDiverse(m, ranked, n, cf, content, pop, seedSim, cfSource, seed);
+        String note = profileKey.startsWith(DEVICE_PREFIX)
+                ? "基于本设备的浏览/加购行为的混合推荐"
+                : "基于近期浏览/加购/收藏/下单行为的混合推荐";
         return RecommendResultVO.builder()
                 .items(items)
-                .strategy("hybrid")
+                .strategy(hasSeedSim ? "item" : "hybrid")
                 .personalized(true)
                 .userId(userId)
                 .generatedAt(now)
-                .note("基于近期浏览/加购/收藏/下单行为的混合推荐")
+                .note(note)
                 .build();
     }
 
-    // ===================== 冷启动：热度 + 类目多样性 =====================
+    // ===================== 冷启动：seed 相似度 / 热度 + 类目多样性 =====================
 
-    private RecommendResultVO coldStart(Model m, Long userId, int n, long now, Spu seed, BigDecimal maxPrice) {
+    private RecommendResultVO coldStart(Model m, Long userId, String deviceId, int n,
+                                        long now, Spu seed, BigDecimal maxPrice) {
         Long seedId = seed == null ? null : seed.getId();
+        Map<Long, Double> seedSim = buildSeedSimilarity(m, seed, Set.of(), maxPrice);
+        Map<Long, Double> pop = new HashMap<>();
         List<Map.Entry<Long, Double>> ranked = new ArrayList<>();
-        for (Spu s : m.activeItems) {
-            if (Objects.equals(s.getId(), seedId) || priceAbove(s, maxPrice)) continue;
-            double score = Math.log1p(m.popularity.getOrDefault(s.getId(), 0.0));
-            if (seed != null) score *= seedMultiplier(seed, s);
-            ranked.add(Map.entry(s.getId(), score));
+
+        if (!seedSim.isEmpty()) {
+            normalize(seedSim);
+            for (Spu s : m.activeItems) {
+                if (Objects.equals(s.getId(), seedId) || priceAbove(s, maxPrice)) continue;
+                pop.put(s.getId(), Math.log1p(m.popularity.getOrDefault(s.getId(), 0.0)));
+            }
+            normalize(pop);
+            for (Spu s : m.activeItems) {
+                if (Objects.equals(s.getId(), seedId) || priceAbove(s, maxPrice)) continue;
+                double score = 0.70 * seedSim.getOrDefault(s.getId(), 0.0)
+                        + 0.30 * pop.getOrDefault(s.getId(), 0.0);
+                ranked.add(Map.entry(s.getId(), score));
+            }
+        } else {
+            for (Spu s : m.activeItems) {
+                if (Objects.equals(s.getId(), seedId) || priceAbove(s, maxPrice)) continue;
+                double score = Math.log1p(m.popularity.getOrDefault(s.getId(), 0.0));
+                if (seed != null) score *= seedMultiplier(seed, s);
+                pop.put(s.getId(), score);
+                ranked.add(Map.entry(s.getId(), score));
+            }
         }
         ranked.sort(Map.Entry.<Long, Double>comparingByValue().reversed());
 
         Map<Long, Double> empty = Map.of();
         Map<Long, Long> emptySource = Map.of();
-        List<RecommendItemVO> items = pickDiverse(m, ranked, n, empty, empty, empty, emptySource);
-        for (RecommendItemVO item : items) {
-            Spu s = m.spuById.get(item.getId());
-            item.setSource("popular");
-            item.setReason(s != null && Integer.valueOf(1).equals(s.getIsHot()) ? "近期热卖"
-                    : s != null && Integer.valueOf(1).equals(s.getIsNew()) ? "新品上架"
-                    : "大家都在看");
-        }
+        List<RecommendItemVO> items = pickDiverse(m, ranked, n, empty, empty, pop, seedSim, emptySource, seed);
+        String note = userId == null && (deviceId == null || deviceId.isBlank())
+                ? "游客模式：按热度推荐" : "暂无行为数据：先按热度推荐";
         return RecommendResultVO.builder()
                 .items(items)
-                .strategy("popular")
+                .strategy(seedSim.isEmpty() ? "popular" : "item")
                 .personalized(false)
                 .userId(userId)
                 .generatedAt(now)
-                .note(userId == null ? "游客模式：按热度推荐" : "暂无行为数据：先按热度推荐")
+                .note(note)
                 .build();
     }
 
@@ -194,7 +239,9 @@ public class RecommendServiceImpl implements RecommendService {
                                              Map<Long, Double> cf,
                                              Map<Long, Double> content,
                                              Map<Long, Double> pop,
-                                             Map<Long, Long> cfSource) {
+                                             Map<Long, Double> seedSim,
+                                             Map<Long, Long> cfSource,
+                                             Spu seed) {
         List<RecommendItemVO> out = new ArrayList<>(n);
         Set<Long> picked = new HashSet<>();
         Map<Long, Integer> catCount = new HashMap<>();
@@ -204,19 +251,18 @@ public class RecommendServiceImpl implements RecommendService {
             Spu s = m.spuById.get(e.getKey());
             if (s == null) continue;
             int used = catCount.getOrDefault(s.getCategoryId(), 0);
-            if (used >= MAX_PER_CATEGORY) continue;
-            out.add(toVO(m, s, e.getValue(), cf, content, pop, cfSource));
+            if (used >= props.getMaxPerCategory()) continue;
+            out.add(toVO(m, s, e.getValue(), cf, content, pop, seedSim, cfSource, seed));
             picked.add(s.getId());
             catCount.put(s.getCategoryId(), used + 1);
         }
-        // 类目截断后不足 n 条，放宽多样性补齐
         if (out.size() < n) {
             for (Map.Entry<Long, Double> e : ranked) {
                 if (out.size() >= n) break;
                 if (picked.contains(e.getKey())) continue;
                 Spu s = m.spuById.get(e.getKey());
                 if (s == null) continue;
-                out.add(toVO(m, s, e.getValue(), cf, content, pop, cfSource));
+                out.add(toVO(m, s, e.getValue(), cf, content, pop, seedSim, cfSource, seed));
                 picked.add(s.getId());
             }
         }
@@ -227,15 +273,21 @@ public class RecommendServiceImpl implements RecommendService {
                                  Map<Long, Double> cf,
                                  Map<Long, Double> content,
                                  Map<Long, Double> pop,
-                                 Map<Long, Long> cfSource) {
+                                 Map<Long, Double> seedSim,
+                                 Map<Long, Long> cfSource,
+                                 Spu seed) {
+        double seedN = seedSim.getOrDefault(s.getId(), 0.0);
         double cfN = cf.getOrDefault(s.getId(), 0.0);
         double contentN = content.getOrDefault(s.getId(), 0.0);
-        double popN = pop.getOrDefault(s.getId(), 0.0);
-        String source;
-        String reason;
         Spu src = cfSource.containsKey(s.getId()) ? m.spuById.get(cfSource.get(s.getId())) : null;
         boolean sameCategory = src != null && Objects.equals(src.getCategoryId(), s.getCategoryId());
-        if (cfN > 0.10 && sameCategory) {
+
+        String source;
+        String reason;
+        if (seedN > 0.05 && seed != null) {
+            source = "item";
+            reason = "和你在看的「" + seed.getName() + "」相似";
+        } else if (cfN > 0.10 && sameCategory) {
             source = "cf";
             reason = "因为你浏览过「" + src.getName() + "」";
         } else if (contentN > 0.10) {
@@ -267,11 +319,11 @@ public class RecommendServiceImpl implements RecommendService {
 
     private Model getModel() {
         Model m = model;
-        if (m != null && System.currentTimeMillis() - modelAt <= MODEL_TTL_MS) {
+        if (m != null && System.currentTimeMillis() - modelAt <= props.getModelTtlMs()) {
             return m;
         }
         synchronized (modelLock) {
-            if (model == null || System.currentTimeMillis() - modelAt > MODEL_TTL_MS) {
+            if (model == null || System.currentTimeMillis() - modelAt > props.getModelTtlMs()) {
                 model = buildModel();
                 modelAt = System.currentTimeMillis();
             }
@@ -291,44 +343,50 @@ public class RecommendServiceImpl implements RecommendService {
             }
         }
 
-        List<UserBehavior> behaviors = behaviorMapper.listRecentForRecommendation(BEHAVIOR_DAYS);
-        LocalDateTime now = LocalDateTime.now();
+        List<UserBehavior> behaviors = behaviorMapper.listRecentForRecommendation(props.getBehaviorDays());
         int used = 0;
         for (UserBehavior b : behaviors) {
-            if (b.getUserId() == null || b.getSpuId() == null || b.getEventTime() == null) continue;
+            if (b.getSpuId() == null || b.getEventTime() == null) continue;
+            String key = profileKey(b.getUserId(), b.getDeviceId());
+            if (key == null) continue;
             Spu s = m.spuById.get(b.getSpuId());
             if (s == null) continue;
             double w = eventWeight(b.getEventType());
             if (w <= 0) continue;
             long days = Math.max(0, ChronoUnit.DAYS.between(b.getEventTime().toLocalDate(), LocalDate.now()));
             double decay = Math.exp(-days / 30.0);
-            m.userItem.computeIfAbsent(b.getUserId(), k -> new HashMap<>())
+            m.profileItem.computeIfAbsent(key, k -> new HashMap<>())
                     .merge(b.getSpuId(), w * decay, Double::sum);
             used++;
         }
-        // 单商品对单用户的权重封顶，避免重复曝光压过真实偏好
-        for (Map<Long, Double> scores : m.userItem.values()) {
+        for (Map<Long, Double> scores : m.profileItem.values()) {
             scores.replaceAll((k, v) -> Math.min(v, ITEM_SCORE_CAP));
         }
 
         buildSimilarities(m);
         buildPopularity(m);
-        buildUserProfiles(m);
+        buildProfiles(m);
 
-        log.info("[recommend] model built: users={}, activeItems={}, behaviors={}, similarItems={}",
-                m.userItem.size(), m.activeItems.size(), used, m.itemSimilar.size());
+        log.info("[recommend] model built: profiles={}, activeItems={}, behaviors={}, similarItems={}",
+                m.profileItem.size(), m.activeItems.size(), used, m.itemSimilar.size());
         return m;
+    }
+
+    private static String profileKey(Long userId, String deviceId) {
+        if (userId != null) return USER_PREFIX + userId;
+        if (deviceId != null && !deviceId.isBlank()) return DEVICE_PREFIX + deviceId;
+        return null;
     }
 
     private void buildSimilarities(Model m) {
         Map<Long, Map<Long, Double>> dot = new HashMap<>();
         Map<Long, Double> norm = new HashMap<>();
 
-        for (Map<Long, Double> scores : m.userItem.values()) {
+        for (Map<Long, Double> scores : m.profileItem.values()) {
             List<Map.Entry<Long, Double>> items = new ArrayList<>(scores.entrySet());
             items.sort(Map.Entry.<Long, Double>comparingByValue().reversed());
-            if (items.size() > MAX_ITEMS_PER_USER) {
-                items = items.subList(0, MAX_ITEMS_PER_USER);
+            if (items.size() > props.getMaxItemsPerUser()) {
+                items = items.subList(0, props.getMaxItemsPerUser());
             }
             for (Map.Entry<Long, Double> e : items) {
                 norm.merge(e.getKey(), e.getValue() * e.getValue(), Double::sum);
@@ -357,8 +415,8 @@ public class RecommendServiceImpl implements RecommendService {
                 if (sim > 0.01) sims.add(Map.entry(b, sim));
             }
             sims.sort(Map.Entry.<Long, Double>comparingByValue().reversed());
-            if (sims.size() > MAX_SIMILAR_PER_ITEM) {
-                sims = sims.subList(0, MAX_SIMILAR_PER_ITEM);
+            if (sims.size() > props.getMaxSimilarPerItem()) {
+                sims = sims.subList(0, props.getMaxSimilarPerItem());
             }
             Map<Long, Double> similar = new LinkedHashMap<>();
             for (Map.Entry<Long, Double> se : sims) similar.put(se.getKey(), se.getValue());
@@ -367,7 +425,7 @@ public class RecommendServiceImpl implements RecommendService {
     }
 
     private void buildPopularity(Model m) {
-        for (Map<Long, Double> scores : m.userItem.values()) {
+        for (Map<Long, Double> scores : m.profileItem.values()) {
             for (Map.Entry<Long, Double> e : scores.entrySet()) {
                 m.popularity.merge(e.getKey(), e.getValue(), Double::sum);
             }
@@ -386,8 +444,8 @@ public class RecommendServiceImpl implements RecommendService {
         }
     }
 
-    private void buildUserProfiles(Model m) {
-        for (Map.Entry<Long, Map<Long, Double>> ue : m.userItem.entrySet()) {
+    private void buildProfiles(Model m) {
+        for (Map.Entry<String, Map<Long, Double>> ue : m.profileItem.entrySet()) {
             Map<Long, Double> cat = new HashMap<>();
             double total = 0.0;
             double weightedPrice = 0.0;
@@ -406,26 +464,43 @@ public class RecommendServiceImpl implements RecommendService {
             if (total > 0) {
                 final double catTotal = total;
                 cat.replaceAll((k, v) -> v / catTotal);
-                m.userAvgPrice.put(ue.getKey(), weightedPrice / total);
+                m.profileAvgPrice.put(ue.getKey(), weightedPrice / total);
             }
-            m.userCategory.put(ue.getKey(), cat);
+            m.profileCategory.put(ue.getKey(), cat);
         }
     }
 
     // ===================== 工具 =====================
 
-    /** 详情页种子商品加权：同类目 + 同价位带越高，越容易被“看了又看”选中。 */
+    private static Map<Long, Double> buildSeedSimilarity(Model m, Spu seed,
+                                                         Set<Long> interacted,
+                                                         BigDecimal maxPrice) {
+        if (seed == null) return Map.of();
+        Map<Long, Double> similar = m.itemSimilar.get(seed.getId());
+        if (similar == null || similar.isEmpty()) return Map.of();
+        Map<Long, Double> out = new HashMap<>();
+        for (Map.Entry<Long, Double> e : similar.entrySet()) {
+            Long candidate = e.getKey();
+            if (interacted.contains(candidate) || !m.activeIds.contains(candidate)) continue;
+            Spu s = m.spuById.get(candidate);
+            if (s == null || !Objects.equals(seed.getCategoryId(), s.getCategoryId())) continue;
+            if (priceAbove(s, maxPrice)) continue;
+            out.put(candidate, e.getValue());
+        }
+        return out;
+    }
+
     private static boolean priceAbove(Spu spu, BigDecimal maxPrice) {
         return spu != null && maxPrice != null && spu.getMinPrice() != null
                 && spu.getMinPrice().compareTo(maxPrice) > 0;
     }
 
-    private static double seedMultiplier(Spu seed, Spu candidate) {
+    private double seedMultiplier(Spu seed, Spu candidate) {
         if (seed == null || candidate == null) return 1.0;
         double catBoost = Objects.equals(seed.getCategoryId(), candidate.getCategoryId()) ? 1.0 : 0.0;
         double seedPrice = seed.getMinPrice() == null ? 0.0 : seed.getMinPrice().doubleValue();
         double priceBoost = priceAffinity(candidate.getMinPrice(), seedPrice);
-        return 1.0 + 0.80 * catBoost + 0.20 * priceBoost;
+        return 1.0 + props.getSeedCategoryBoost() * catBoost + props.getSeedPriceBoost() * priceBoost;
     }
 
     private static double eventWeight(String eventType) {
@@ -459,10 +534,10 @@ public class RecommendServiceImpl implements RecommendService {
         final Map<Long, Spu> spuById = new HashMap<>();
         final List<Spu> activeItems = new ArrayList<>();
         final Set<Long> activeIds = new HashSet<>();
-        final Map<Long, Map<Long, Double>> userItem = new HashMap<>();
+        final Map<String, Map<Long, Double>> profileItem = new HashMap<>();
         final Map<Long, Map<Long, Double>> itemSimilar = new HashMap<>();
         final Map<Long, Double> popularity = new HashMap<>();
-        final Map<Long, Map<Long, Double>> userCategory = new HashMap<>();
-        final Map<Long, Double> userAvgPrice = new HashMap<>();
+        final Map<String, Map<Long, Double>> profileCategory = new HashMap<>();
+        final Map<String, Double> profileAvgPrice = new HashMap<>();
     }
 }
