@@ -244,7 +244,13 @@ onBeforeUnmount(() => {
   overflow-x: auto;
   padding: 2px 2px 12px;
   scroll-snap-type: x mandatory;
-  scrollbar-width: thin;
+  /* 保留横向滚动，但隐藏滚动条 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.rail-track.rail::-webkit-scrollbar {
+  display: none;
 }
 
 .rail-track.rail .rec-card {
