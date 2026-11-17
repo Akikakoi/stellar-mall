@@ -550,6 +550,25 @@ function handleBuyNow() {
 }
 
 onMounted(() => { loadDetail(); loadReviews() })
+
+// 从推荐位/相关商品进入另一个详情页时，Vue 会复用当前组件；必须监听路由参数重新加载，
+// 否则只改 URL、页面仍停留在上一件商品上，看起来像“点不进去”。
+watch(() => route.params.id, (id, prev) => {
+  if (!id || id === prev) return
+  selectedSku.value = null
+  qty.value = 1
+  selectedServices.value = []
+  isFav.value = false
+  reviews.value = []
+  reviewTotal.value = 0
+  avgRating.value = 0
+  offShelf.value = false
+  zoomVisible.value = false
+  galleryAutoplay.value = true
+  window.scrollTo({ top: 0, behavior: 'auto' })
+  loadDetail()
+  loadReviews()
+})
 </script>
 
 <style scoped>
