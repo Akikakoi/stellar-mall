@@ -60,8 +60,10 @@ const props = withDefaults(defineProps<{
   note?: string
   /** 埋点场景：recommend_home / recommend_detail / recommend_cart */
   scene?: string
-  /** 点击商品是否新开标签页（详情页“看了又看”用） */
+  /** 点击商品是否新开标签页（推荐位统一默认新开） */
   openInNewTab?: boolean
+  /** 是否允许推荐已交互商品（购物车凑单用） */
+  includeInteracted?: boolean
 }>(), {
   title: '猜你喜欢',
   limit: 8,
@@ -71,7 +73,8 @@ const props = withDefaults(defineProps<{
   layout: 'grid',
   note: '',
   scene: 'recommend_home',
-  openInNewTab: false
+  openInNewTab: true,
+  includeInteracted: false
 })
 
 const router = useRouter()
@@ -134,7 +137,7 @@ async function load() {
     const limit = Math.max(1, Math.min(props.limit, 30))
     // 有价格上限时多取一些候选，过滤后仍尽量填满展示位
     const requestLimit = props.maxPrice != null ? 30 : Math.min(30, limit + excluded.size)
-    const res = await getRecommendations(requestLimit, props.seedSpuId, props.maxPrice, getDeviceId())
+    const res = await getRecommendations(requestLimit, props.seedSpuId, props.maxPrice, getDeviceId(), props.includeInteracted)
     items.value = (res?.items || [])
       .filter((item) => !excluded.has(item.id))
       .filter((item) => props.maxPrice == null || Number(item.minPrice || 0) <= props.maxPrice)

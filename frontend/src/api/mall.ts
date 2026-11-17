@@ -194,7 +194,13 @@ export function suggestSpu(prefix: string): Promise<SearchSuggest> {
  * 接口匿名放行：登录用户自动个性化，游客走热度推荐。
  * __silent：推荐位失败不应弹全局错误，页面直接隐藏即可。
  */
-export function getRecommendations(limit = 12, seedSpuId?: number, maxPrice?: number, deviceId?: string): Promise<RecommendResult> {
+export function getRecommendations(
+  limit = 12,
+  seedSpuId?: number,
+  maxPrice?: number,
+  deviceId?: string,
+  includeInteracted = false
+): Promise<RecommendResult> {
   return userRequest({
     url: '/user/spu/recommend',
     method: 'get',
@@ -202,7 +208,8 @@ export function getRecommendations(limit = 12, seedSpuId?: number, maxPrice?: nu
       limit,
       ...(seedSpuId ? { seedSpuId } : {}),
       ...(maxPrice != null ? { maxPrice } : {}),
-      ...(deviceId ? { deviceId } : {})
+      ...(deviceId ? { deviceId } : {}),
+      ...(includeInteracted ? { includeInteracted: true } : {})
     },
     __silent: true
   } as any)

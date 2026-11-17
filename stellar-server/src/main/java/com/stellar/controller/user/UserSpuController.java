@@ -107,9 +107,10 @@ public class UserSpuController {
             @RequestParam(required = false) Long seedSpuId,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String deviceId,
+            @RequestParam(defaultValue = "false") boolean includeInteracted,
             HttpServletRequest request) {
         return Result.success(recommendService.recommend(
-                resolveOptionalUserId(request), deviceId, limit, seedSpuId, maxPrice));
+                resolveOptionalUserId(request), deviceId, limit, seedSpuId, maxPrice, includeInteracted));
     }
 
     /** 推荐接口允许游客访问：能解析到有效 C 端 token 就个性化，否则走热度冷启动。 */

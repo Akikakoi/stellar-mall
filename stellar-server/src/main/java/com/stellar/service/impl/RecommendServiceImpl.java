@@ -54,7 +54,7 @@ public class RecommendServiceImpl implements RecommendService {
 
     @Override
     public RecommendResultVO recommend(Long userId, String deviceId, int limit,
-                                       Long seedSpuId, BigDecimal maxPrice) {
+                                       Long seedSpuId, BigDecimal maxPrice, boolean includeInteracted) {
         int n = Math.max(1, Math.min(limit, props.getMaxLimit()));
         Model m = getModel();
         long now = System.currentTimeMillis();
@@ -62,7 +62,7 @@ public class RecommendServiceImpl implements RecommendService {
         String profileKey = resolveProfileKey(m, userId, deviceId);
 
         if (profileKey != null) {
-            return hybrid(m, profileKey, userId, n, now, seed, maxPrice);
+            return hybrid(m, profileKey, userId, n, now, seed, maxPrice, includeInteracted);
         }
         return coldStart(m, userId, deviceId, n, now, seed, maxPrice);
     }
@@ -84,9 +84,10 @@ public class RecommendServiceImpl implements RecommendService {
     // ===================== 个性化：item-to-item + CF + 内容 + 热度 =====================
 
     private RecommendResultVO hybrid(Model m, String profileKey, Long userId, int n,
-                                     long now, Spu seed, BigDecimal maxPrice) {
+                                     long now, Spu seed, BigDecimal maxPrice, boolean includeInteracted) {
         Map<Long, Double> profileItems = m.profileItem.getOrDefault(profileKey, Map.of());
-        Set<Long> interacted = profileItems.keySet();
+        // 凑单场景允许“看过但没买”的商品重新出现；普通推荐仍严格排除已交互
+        Set<Long> interacted = includeInteracted ? Set.of() : profileItems.keySet();
         Long seedId = seed == null ? null : seed.getId();
 
         Map<Long, Double> cf = new HashMap<>();

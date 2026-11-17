@@ -17,5 +17,5 @@ public interface RecommendService {
      * @param seedSpuId 当前商品 ID（详情页“看了又看”用），优先 item-to-item 相似度
      * @param maxPrice  价格上限（购物车凑单用）
      */
-    RecommendResultVO recommend(Long userId, String deviceId, int limit, Long seedSpuId, BigDecimal maxPrice);
+    RecommendResultVO recommend(Long userId, String deviceId, int limit, Long seedSpuId, BigDecimal maxPrice, boolean includeInteracted);
 }

@@ -116,6 +116,7 @@
       :seed-spu-id="cartSeedId"
       note="低门槛加购，凑单更划算"
       scene="recommend_cart"
+      include-interacted
     />
 
     <!-- 删除撤销条：行先乐观消失，4.5 秒内可放回，超时才真正提交接口 -->

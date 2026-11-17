@@ -78,7 +78,7 @@ class RecommendServiceImplTest {
     void coldStartWithoutBehavior() {
         when(behaviorMapper.listRecentForRecommendation(anyInt())).thenReturn(List.of());
 
-        RecommendResultVO res = service.recommend(null, null, 10, null, null);
+        RecommendResultVO res = service.recommend(null, null, 10, null, null, false);
 
         assertFalse(res.getPersonalized());
         assertEquals("popular", res.getStrategy());
@@ -95,7 +95,7 @@ class RecommendServiceImplTest {
                 bh(1L, null, 4, "view_item", 3)
         ));
 
-        RecommendResultVO res = service.recommend(1L, null, 10, null, null);
+        RecommendResultVO res = service.recommend(1L, null, 10, null, null, false);
 
         assertTrue(res.getPersonalized());
         assertEquals("hybrid", res.getStrategy());
@@ -115,7 +115,7 @@ class RecommendServiceImplTest {
                 bh(null, "dev-1", 4, "view_item", 3)
         ));
 
-        RecommendResultVO res = service.recommend(null, "dev-1", 10, null, null);
+        RecommendResultVO res = service.recommend(null, "dev-1", 10, null, null, false);
 
         assertTrue(res.getPersonalized());
         assertEquals("hybrid", res.getStrategy());
@@ -133,7 +133,7 @@ class RecommendServiceImplTest {
                 bh(1L, null, 1, "view_item", 1)
         ));
 
-        RecommendResultVO res = service.recommend(1L, null, 10, null, new BigDecimal("100"));
+        RecommendResultVO res = service.recommend(1L, null, 10, null, new BigDecimal("100"), false);
 
         assertFalse(res.getItems().isEmpty());
         for (RecommendItemVO item : res.getItems()) {
@@ -153,7 +153,7 @@ class RecommendServiceImplTest {
                 bh(2L, null, 3, "view_item", 2)
         ));
 
-        RecommendResultVO res = service.recommend(1L, null, 10, 3L, null);
+        RecommendResultVO res = service.recommend(1L, null, 10, 3L, null, false);
 
         assertEquals("item", res.getStrategy());
         assertTrue(res.getItems().stream().anyMatch(i -> "item".equals(i.getSource())
@@ -166,12 +166,27 @@ class RecommendServiceImplTest {
     void limitClamped() {
         when(behaviorMapper.listRecentForRecommendation(anyInt())).thenReturn(List.of());
 
-        RecommendResultVO zero = service.recommend(null, null, 0, null, null);
+        RecommendResultVO zero = service.recommend(null, null, 0, null, null, false);
         assertFalse(zero.getItems().isEmpty());
 
-        RecommendResultVO huge = service.recommend(null, null, 100, null, null);
+        RecommendResultVO huge = service.recommend(null, null, 100, null, null, false);
         assertTrue(huge.getItems().size() <= spus.size());
         assertTrue(huge.getItems().size() <= new RecommendProperties().getMaxLimit());
+    }
+
+    @Test
+    @DisplayName("includeInteracted=true 允许已浏览商品重新出现（凑单场景）")
+    void includeInteractedAllowsSeenItems() {
+        when(behaviorMapper.listRecentForRecommendation(anyInt())).thenReturn(List.of(
+                bh(1L, null, 1, "view_item", 1),
+                bh(1L, null, 2, "view_item", 2)
+        ));
+
+        RecommendResultVO strict = service.recommend(1L, null, 10, null, null, false);
+        RecommendResultVO relaxed = service.recommend(1L, null, 10, null, null, true);
+
+        assertFalse(ids(strict).contains(1L));
+        assertTrue(ids(relaxed).contains(1L) || ids(relaxed).contains(2L));
     }
 
     @Test
@@ -182,7 +197,7 @@ class RecommendServiceImplTest {
         RecommendServiceImpl customService = new RecommendServiceImpl(behaviorMapper, spuMapper, custom);
         when(behaviorMapper.listRecentForRecommendation(anyInt())).thenReturn(List.of());
 
-        RecommendResultVO res = customService.recommend(null, null, 3, null, null);
+        RecommendResultVO res = customService.recommend(null, null, 3, null, null, false);
 
         assertEquals(3, res.getItems().size(), "3 个类目各 1 条");
         long distinctCategories = res.getItems().stream()
@@ -200,7 +215,7 @@ class RecommendServiceImplTest {
         when(spuMapper.listAll()).thenReturn(withOffShelf);
         when(behaviorMapper.listRecentForRecommendation(anyInt())).thenReturn(List.of());
 
-        RecommendResultVO res = service.recommend(null, null, 10, null, null);
+        RecommendResultVO res = service.recommend(null, null, 10, null, null, false);
 
         assertFalse(ids(res).contains(99L));
     }
