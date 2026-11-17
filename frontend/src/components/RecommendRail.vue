@@ -1,5 +1,5 @@
 <template>
-  <section v-if="visible" ref="railRef" class="recommend-rail" :class="`layout-${layout}`">
+  <section v-if="visible" ref="railRef" class="recommend-rail">
     <div class="rail-head">
       <div class="rail-heading">
         <h2 class="rail-title">{{ title }}</h2>
@@ -8,7 +8,7 @@
       <span class="rail-badge" :class="{ personalized }">{{ personalized ? '为你推荐' : '热门推荐' }}</span>
     </div>
 
-    <div v-if="loading" class="rail-track" :class="layout">
+    <div v-if="loading" class="rec-grid">
       <div v-for="i in limit" :key="`sk-${i}`" class="rec-card skeleton">
         <div class="rec-img-wrap sk-img"></div>
         <div class="rec-body">
@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div v-else class="rail-track" :class="layout">
+    <div v-else class="rec-grid">
       <article
         v-for="(item, index) in items"
         :key="item.id"
@@ -56,7 +56,6 @@ const props = withDefaults(defineProps<{
   seedSpuId?: number
   /** 只展示不高于该价格的商品（购物车凑单用） */
   maxPrice?: number
-  layout?: 'grid' | 'rail'
   note?: string
   /** 埋点场景：recommend_home / recommend_detail / recommend_cart */
   scene?: string
@@ -70,7 +69,6 @@ const props = withDefaults(defineProps<{
   excludeIds: () => [],
   seedSpuId: undefined,
   maxPrice: undefined,
-  layout: 'grid',
   note: '',
   scene: 'recommend_home',
   openInNewTab: true,
@@ -232,30 +230,10 @@ onBeforeUnmount(() => {
   background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
 }
 
-.rail-track.grid {
+.rec-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
-}
-
-.rail-track.rail {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding: 2px 2px 12px;
-  scroll-snap-type: x mandatory;
-  /* 保留横向滚动，但隐藏滚动条 */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.rail-track.rail::-webkit-scrollbar {
-  display: none;
-}
-
-.rail-track.rail .rec-card {
-  flex: 0 0 220px;
-  scroll-snap-align: start;
 }
 
 .rec-card {
@@ -360,14 +338,13 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 1100px) {
-  .rail-track.grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .rec-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
   .recommend-rail { padding: 0 14px; margin-bottom: 40px; }
   .rail-title { font-size: 19px; }
-  .rail-track.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .rail-track.rail .rec-card { flex-basis: 168px; }
+  .rec-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .rec-name { font-size: 13px; min-height: 36px; }
   .rec-price { font-size: 15px; }
 }

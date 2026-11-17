@@ -109,7 +109,6 @@
     <RecommendRail
       v-if="!loading && cartStore.items.length > 0"
       title="凑单推荐"
-      layout="rail"
       :limit="8"
       :max-price="299"
       :exclude-ids="cartSpuIds"

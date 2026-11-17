@@ -233,7 +233,6 @@
 
         <RecommendRail
           title="猜你喜欢"
-          layout="grid"
           :limit="8"
           :exclude-ids="orbitIds"
           scene="recommend_home"

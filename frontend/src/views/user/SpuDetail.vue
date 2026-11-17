@@ -122,7 +122,6 @@
       v-if="spu && !offShelf"
       :key="spu.id"
       title="看了又看"
-      layout="rail"
       :limit="8"
       :exclude-ids="[spu.id]"
       :seed-spu-id="spu.id"
