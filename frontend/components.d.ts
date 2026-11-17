@@ -78,6 +78,7 @@ declare module 'vue' {
     NavHeader: typeof import('./src/components/NavHeader.vue')['default']
     OrderSteps: typeof import('./src/components/OrderSteps.vue')['default']
     PaySuccessOverlay: typeof import('./src/components/PaySuccessOverlay.vue')['default']
+    RecommendRail: typeof import('./src/components/RecommendRail.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SkuSpecSelector: typeof import('./src/components/SkuSpecSelector.vue')['default']

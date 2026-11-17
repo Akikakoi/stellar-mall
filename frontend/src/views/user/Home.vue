@@ -230,6 +230,14 @@
             <el-empty v-if="sections.every((s: any) => s.loaded && s.products.length === 0)" class="glass-empty" description="暂无商品" />
           </main>
         </template>
+
+        <RecommendRail
+          title="猜你喜欢"
+          layout="grid"
+          :limit="8"
+          :exclude-ids="orbitIds"
+          scene="recommend_home"
+        />
       </template>
 
       <!-- 筛选模式：平铺网格 -->
@@ -297,6 +305,7 @@ import { loadOrbitRecent, rememberOrbitRecent } from '@/utils/orbitRecent'
 import { ElMessage } from 'element-plus'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
 import SlidingTabs, { type SlideTabItem } from '@/components/SlidingTabs.vue'
+import RecommendRail from '@/components/RecommendRail.vue'
 
 const __PH = window.__PH
 const router = useRouter()
@@ -321,6 +330,8 @@ const ORBIT_DISPLAY_COUNT = 8
 
 /** Hero 环绕轨道商品（管理端配置候选池；未配置时每次刷新从整个商品库随机抽取） */
 const orbitProducts = ref<any[]>([])
+/** 首屏环绕商品 id：传给「猜你喜欢」避免同一商品在首屏和底部重复出现 */
+const orbitIds = computed(() => orbitProducts.value.map((p: any) => Number(p.id)).filter(Boolean))
 /** 悬停/聚焦商品卡时暂停整圈公转，避免只剩单卡停转而打乱队形 */
 const orbitPaused = ref(false)
 /** 首轮取数是否已结束：结束且无商品时撤掉骨架环，避免空环一直转 */

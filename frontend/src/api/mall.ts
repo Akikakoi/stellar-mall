@@ -14,6 +14,7 @@ import type {
   CartRowVO, Order, Address, Wallet, WalletTransaction,
   PointsRecord, PointsRedeem, UserPoints, PointsProduct, CheckinResult,
   AfterSale, Favorite, MallMessage, BrowseHistory,
+  RecommendResult,
 } from '@/types/models'
 
 // =========================== 用户认证 ===========================
@@ -186,6 +187,20 @@ export function suggestSpu(prefix: string): Promise<SearchSuggest> {
     method: 'get',
     params: { prefix }
   })
+}
+
+/**
+ * 混合推荐（ItemCF + 类目/价格偏好 + 热度兜底）。
+ * 接口匿名放行：登录用户自动个性化，游客走热度推荐。
+ * __silent：推荐位失败不应弹全局错误，页面直接隐藏即可。
+ */
+export function getRecommendations(limit = 12, seedSpuId?: number, maxPrice?: number): Promise<RecommendResult> {
+  return userRequest({
+    url: '/user/spu/recommend',
+    method: 'get',
+    params: { limit, ...(seedSpuId ? { seedSpuId } : {}), ...(maxPrice != null ? { maxPrice } : {}) },
+    __silent: true
+  } as any)
 }
 
 /** 获取分类列表 */

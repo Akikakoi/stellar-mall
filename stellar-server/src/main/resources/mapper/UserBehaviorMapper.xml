@@ -16,5 +16,15 @@
              #{b.clientIp}, #{b.userAgent}, NOW())
         </foreach>
     </insert>
+    <!-- 推荐模型：近期有效行为（登录用户 + 关联 SPU），只取建模需要的四列 -->
+    <select id="listRecentForRecommendation" resultType="com.stellar.entity.UserBehavior">
+        SELECT user_id, spu_id, event_type, event_time
+        FROM stellar_user_behavior
+        WHERE user_id IS NOT NULL
+          AND spu_id IS NOT NULL
+          AND event_type IN ('view_item', 'add_to_cart', 'favorite', 'order_placed')
+          AND event_time &gt;= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        ORDER BY user_id ASC, event_time ASC, id ASC
+    </select>
 
 </mapper>

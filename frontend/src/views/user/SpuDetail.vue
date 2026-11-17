@@ -117,6 +117,18 @@
       </div>
     </main>
 
+    <!-- 推荐位：基于当前商品与用户行为，排除当前商品 -->
+    <RecommendRail
+      v-if="spu && !offShelf"
+      :key="spu.id"
+      title="看了又看"
+      layout="rail"
+      :limit="8"
+      :exclude-ids="[spu.id]"
+      :seed-spu-id="spu.id"
+      scene="recommend_detail"
+    />
+
     <!-- 评价区域 -->
     <div class="review-section container">
       <div class="review-header">
@@ -176,6 +188,7 @@ import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { track } from '@/utils/tracker'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
+import RecommendRail from '@/components/RecommendRail.vue'
 import { ArrowLeft, ArrowRight, Close, ZoomIn } from '@element-plus/icons-vue'
 
 const __PH = window.__PH

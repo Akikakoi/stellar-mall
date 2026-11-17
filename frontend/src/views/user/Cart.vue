@@ -105,6 +105,19 @@
       </template>
     </main>
 
+    <!-- 凑单推荐：购物车非空时展示，只推荐低门槛商品 -->
+    <RecommendRail
+      v-if="!loading && cartStore.items.length > 0"
+      title="凑单推荐"
+      layout="rail"
+      :limit="8"
+      :max-price="299"
+      :exclude-ids="cartSpuIds"
+      :seed-spu-id="cartSeedId"
+      note="低门槛加购，凑单更划算"
+      scene="recommend_cart"
+    />
+
     <!-- 删除撤销条：行先乐观消失，4.5 秒内可放回，超时才真正提交接口 -->
     <Transition name="undo">
       <div v-if="pendingRemoval" class="undo-wrap">
@@ -119,16 +132,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useCartStore } from '@/stores/cart'
+import RecommendRail from '@/components/RecommendRail.vue'
 
 const __PH = window.__PH
 
 const router = useRouter()
 const cartStore = useCartStore()
 const loading = ref(false)
+
+/** 购物车里的 SPU id：传给凑单推荐，避免推荐已在购物车的商品 */
+const cartSpuIds = computed(() =>
+  cartStore.items.map((item: any) => Number(item.spuId)).filter((id: number) => !!id)
+)
+/** 用购物车第一件商品做种子，让凑单推荐略带同类目倾向 */
+const cartSeedId = computed(() => cartSpuIds.value[0])
 
 /** 撤销窗口：4.5 秒，与 ui-atlas undo-delete 的实测值一致 */
 const UNDO_WINDOW = 4500
