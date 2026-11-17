@@ -3,7 +3,7 @@
     <div class="rail-head">
       <div class="rail-heading">
         <h2 class="rail-title">{{ title }}</h2>
-        <p v-if="displayNote" class="rail-note">{{ displayNote }}</p>
+        <p v-if="displayNote && !hideNote" class="rail-note">{{ displayNote }}</p>
       </div>
       <span class="rail-badge" :class="{ personalized }">{{ personalized ? '为你推荐' : '热门推荐' }}</span>
     </div>
@@ -57,6 +57,8 @@ const props = withDefaults(defineProps<{
   /** 只展示不高于该价格的商品（购物车凑单用） */
   maxPrice?: number
   note?: string
+  /** 隐藏标题下方的说明文字 */
+  hideNote?: boolean
   /** 埋点场景：recommend_home / recommend_detail / recommend_cart */
   scene?: string
   /** 点击商品是否新开标签页（推荐位统一默认新开） */
@@ -70,6 +72,7 @@ const props = withDefaults(defineProps<{
   seedSpuId: undefined,
   maxPrice: undefined,
   note: '',
+  hideNote: false,
   scene: 'recommend_home',
   openInNewTab: true,
   includeInteracted: false
