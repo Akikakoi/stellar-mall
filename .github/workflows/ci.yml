@@ -25,6 +25,14 @@ jobs:
       - name: Build & test
         run: mvn test -pl stellar-server -am --batch-mode
 
+      - name: Upload surefire reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-surefire
+          path: stellar-server/target/surefire-reports/
+          if-no-files-found: ignore
+
   # ── RAG 后端：离线单元测试（不装 BGE/torch） ──
   rag-test:
     runs-on: ubuntu-latest
@@ -164,7 +172,8 @@ jobs:
         run: mvn -q -pl stellar-server -am -DskipTests package --batch-mode
 
       - name: Install MySQL client
-        run: sudo apt-get update && sudo apt-get install -y mysql-client
+        # 只装 client core，避免 mysql-client 元包顺带安装 mysql-server 导致 postinst 失败
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mysql-client-core-8.0
 
       - name: Import schema and seed
         env:
