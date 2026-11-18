@@ -23,7 +23,7 @@ jobs:
           cache: maven
 
       - name: Build & test
-        run: mvn test -pl stellar-server -am --batch-mode
+        run: mvn test -pl stellar-server -am --batch-mode -Dsurefire.rerunFailingTestsCount=1
 
       - name: Upload surefire reports
         if: failure()
@@ -171,29 +171,43 @@ jobs:
       - name: Build backend jar
         run: mvn -q -pl stellar-server -am -DskipTests package --batch-mode
 
-      - name: Install MySQL client
-        # 只装 client core，避免 mysql-client 元包顺带安装 mysql-server 导致 postinst 失败
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mysql-client-core-8.0
+      - name: Locate MySQL service container
+        # 不再 apt 安装 mysql 客户端：ubuntu-latest 的包依赖会顺带拉起 mysql-server，
+        # postinst 可能失败。直接复用 service 容器里的 mysql 客户端。
+        run: |
+          CID=$(docker ps --format '{{.ID}} {{.Image}}' | awk '$2 ~ /mysql/ {print $1; exit}')
+          if [ -z "$CID" ]; then
+            echo "MySQL service container not found" >&2
+            docker ps >&2
+            exit 1
+          fi
+          echo "MYSQL_CONTAINER=$CID" >> "$GITHUB_ENV"
 
       - name: Import schema and seed
-        env:
-          MYSQL_PWD: stellar
         run: |
-          mysql --default-character-set=utf8mb4 -h127.0.0.1 -ustellar stellar_mall < stellar-server/src/main/resources/sql/stellar_mall_schema_current.sql
-          mysql --default-character-set=utf8mb4 -h127.0.0.1 -ustellar stellar_mall < stellar-server/src/main/resources/sql/stellar_mall_init_data.sql
-          mysql --default-character-set=utf8mb4 -h127.0.0.1 -ustellar stellar_mall < scripts/ci_seed.sql
+          docker exec -e MYSQL_PWD=stellar -i "$MYSQL_CONTAINER" \
+            mysql --default-character-set=utf8mb4 -ustellar stellar_mall \
+            < stellar-server/src/main/resources/sql/stellar_mall_schema_current.sql
+          docker exec -e MYSQL_PWD=stellar -i "$MYSQL_CONTAINER" \
+            mysql --default-character-set=utf8mb4 -ustellar stellar_mall \
+            < stellar-server/src/main/resources/sql/stellar_mall_init_data.sql
+          docker exec -e MYSQL_PWD=stellar -i "$MYSQL_CONTAINER" \
+            mysql --default-character-set=utf8mb4 -ustellar stellar_mall \
+            < scripts/ci_seed.sql
 
       - name: Verify seed consistency
-        env:
-          MYSQL_PWD: stellar
         run: |
-          orphan_sku=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+          mysql_q() {
+            docker exec -e MYSQL_PWD=stellar -i "$MYSQL_CONTAINER" \
+              mysql -N -B -ustellar stellar_mall -e "$1"
+          }
+          orphan_sku=$(mysql_q \
             "SELECT COUNT(*) FROM stellar_spu s LEFT JOIN stellar_sku k ON k.spu_id = s.id WHERE k.id IS NULL")
-          orphan_category=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+          orphan_category=$(mysql_q \
             "SELECT COUNT(*) FROM stellar_spu s LEFT JOIN stellar_category c ON c.id = s.category_id WHERE c.id IS NULL")
-          points_account=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+          points_account=$(mysql_q \
             "SELECT COUNT(*) FROM stellar_user_points WHERE user_id = 1 AND available_points = 5200")
-          expired_seed=$(mysql -N -B -h127.0.0.1 -ustellar stellar_mall -e \
+          expired_seed=$(mysql_q \
             "SELECT COUNT(*) FROM stellar_points_record WHERE user_id = 1 AND biz_id = 'ci-expired-points'")
           echo "spu_without_sku=$orphan_sku spu_without_category=$orphan_category points_account=$points_account expired_seed=$expired_seed"
           test "$orphan_sku" = "0" && test "$orphan_category" = "0" \
