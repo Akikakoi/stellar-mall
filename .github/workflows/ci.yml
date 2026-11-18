@@ -12,16 +12,6 @@ jobs:
   # 不依赖 application-dev.yml，可在 CI 上独立启动上下文。
   backend-test:
     runs-on: ubuntu-latest
-    services:
-      # 测试配置会检测 16379；已有真实 Redis 时跳过内嵌 Redis，避免 Ubuntu 26 上
-      # embedded-redis 自带二进制不兼容导致 Spring 上下文启动失败。
-      redis:
-        image: redis:7.2
-        ports:
-          - 16379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=10s --health-timeout=5s --health-retries=12
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +23,7 @@ jobs:
           cache: maven
 
       - name: Build & test
-        run: mvn test -pl stellar-server -am --batch-mode -Dsurefire.rerunFailingTestsCount=1
+        run: mvn test -pl stellar-server -am --batch-mode
 
       - name: Upload surefire reports
         if: failure()
