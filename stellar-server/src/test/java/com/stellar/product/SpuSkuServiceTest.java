@@ -10,11 +10,14 @@ import com.stellar.result.PageResult;
 import com.stellar.service.CategoryService;
 import com.stellar.service.SpuService;
 import com.stellar.service.SkuService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.test.annotation.DirtiesContext;
 
@@ -49,6 +52,18 @@ class SpuSkuServiceTest {
 
     @MockBean
     private co.elastic.clients.elasticsearch.ElasticsearchClient elasticsearchClient;
+
+    @Autowired(required = false)
+    private CacheManager cacheManager;
+
+    /** H2 每个上下文会 DROP/重建，自增 ID 会复用；Redis 里的 spu:detail 不会随
+     *  @DirtiesContext 清理，必须在本类每个用例前清掉，避免读到上一轮同 ID 的旧商品。 */
+    @BeforeEach
+    void clearSpuDetailCache() {
+        if (cacheManager == null) return;
+        Cache cache = cacheManager.getCache("spu:detail");
+        if (cache != null) cache.clear();
+    }
 
     private static String uid(String prefix) {
         return prefix + "-UT-" + Integer.toHexString(
