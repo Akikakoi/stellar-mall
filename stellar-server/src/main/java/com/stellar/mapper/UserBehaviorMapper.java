@@ -12,4 +12,10 @@ public interface UserBehaviorMapper {
 
     /** 批量插入（event_time 统一取数据库 NOW()，批次内先后由自增 id 区分）。 */
     int batchInsert(@Param("list") List<UserBehavior> list);
+
+    /**
+     * 推荐模型用的近期有效行为：只取登录用户、关联了 SPU 的强/弱反馈事件。
+     * 返回字段仅 userId / spuId / eventType / eventTime，避免把长文本带进内存。
+     */
+    List<UserBehavior> listRecentForRecommendation(@Param("days") int days);
 }

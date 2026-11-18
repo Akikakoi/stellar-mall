@@ -117,6 +117,18 @@
       </div>
     </main>
 
+    <!-- 推荐位：基于当前商品与用户行为，排除当前商品 -->
+    <RecommendRail
+      v-if="spu && !offShelf"
+      :key="spu.id"
+      title="看了又看"
+      :limit="8"
+      :exclude-ids="[spu.id]"
+      :seed-spu-id="spu.id"
+      scene="recommend_detail"
+      hide-note
+    />
+
     <!-- 评价区域 -->
     <div class="review-section container">
       <div class="review-header">
@@ -176,6 +188,7 @@ import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { track } from '@/utils/tracker'
 import SkuSpecSelector from '@/components/SkuSpecSelector.vue'
+import RecommendRail from '@/components/RecommendRail.vue'
 import { ArrowLeft, ArrowRight, Close, ZoomIn } from '@element-plus/icons-vue'
 
 const __PH = window.__PH
@@ -537,6 +550,25 @@ function handleBuyNow() {
 }
 
 onMounted(() => { loadDetail(); loadReviews() })
+
+// 从推荐位/相关商品进入另一个详情页时，Vue 会复用当前组件；必须监听路由参数重新加载，
+// 否则只改 URL、页面仍停留在上一件商品上，看起来像“点不进去”。
+watch(() => route.params.id, (id, prev) => {
+  if (!id || id === prev) return
+  selectedSku.value = null
+  qty.value = 1
+  selectedServices.value = []
+  isFav.value = false
+  reviews.value = []
+  reviewTotal.value = 0
+  avgRating.value = 0
+  offShelf.value = false
+  zoomVisible.value = false
+  galleryAutoplay.value = true
+  window.scrollTo({ top: 0, behavior: 'auto' })
+  loadDetail()
+  loadReviews()
+})
 </script>
 
 <style scoped>

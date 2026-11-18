@@ -140,6 +140,24 @@ stellar:
   rag:
     base-url: ${STELLAR_RAG_BASE_URL:http://127.0.0.1:8000}
     internal-sync-secret: ${STELLAR_RAG_INTERNAL_SYNC_SECRET:CHANGE_ME_RAG_SYNC_SECRET}
+  # 推荐算法参数（可在不重启代码的情况下通过配置中心/环境变量覆盖）
+  recommend:
+    behavior-days: 90
+    model-ttl-ms: 60000
+    max-items-per-user: 40
+    max-similar-per-item: 60
+    max-per-category: 4
+    max-limit: 30
+    cf-weight: 0.50
+    content-weight: 0.40
+    popular-weight: 0.10
+    # 详情页存在 seed 商品 item-to-item 相似度时，seed 权重占比
+    seed-weight: 0.45
+    cross-category-cf-weight: 0.35
+    category-prior-base: 0.80
+    category-prior-weight: 0.40
+    seed-category-boost: 0.80
+    seed-price-boost: 0.20
   # 邮件发送（邮箱验证码）
   # enabled=true 走真实 SMTP 发送；enabled=false（默认）为开发模式，
   # 不真实发信，接口直接返回验证码方便本地调试

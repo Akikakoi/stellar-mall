@@ -98,6 +98,36 @@ export interface SearchSuggest {
   correction?: string
 }
 
+/** 推荐商品条目(对齐 RecommendItemVO) */
+export interface RecommendItem {
+  id: number
+  name: string
+  subTitle?: string
+  mainImage?: string
+  minPrice?: number
+  maxPrice?: number
+  saleCount?: number
+  commentCount?: number
+  categoryId?: number
+  categoryName?: string
+  /** 推荐理由，可直接展示 */
+  reason: string
+  /** cf / content / popular */
+  source: string
+  score: number
+}
+
+/** 推荐接口响应(对齐 RecommendResultVO) */
+export interface RecommendResult {
+  items: RecommendItem[]
+  /** hybrid / popular */
+  strategy: string
+  personalized: boolean
+  userId?: number
+  generatedAt?: number
+  note?: string
+}
+
 /** 搜索聚合桶(对齐 BucketVO) */
 export interface Bucket {
   key?: string

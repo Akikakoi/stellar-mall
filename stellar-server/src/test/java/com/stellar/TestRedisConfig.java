@@ -9,6 +9,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import redis.embedded.RedisServer;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 
 /**
  * 测试用内嵌 Redis 配置（固定端口 16379，与 application.properties 的
@@ -36,6 +38,10 @@ public class TestRedisConfig {
         if (redisServer != null) {
             return;
         }
+        // CI 通过 service 容器提供 Redis；能连上就复用，避免再启动内嵌二进制。
+        if (redisReachable()) {
+            return;
+        }
         RedisServer server = new RedisServer(REDIS_PORT);
         server.start();
         redisServer = server;
@@ -46,6 +52,15 @@ public class TestRedisConfig {
                 // JVM 退出阶段忽略关闭异常
             }
         }));
+    }
+
+    private static boolean redisReachable() {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress("127.0.0.1", REDIS_PORT), 300);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @Bean
