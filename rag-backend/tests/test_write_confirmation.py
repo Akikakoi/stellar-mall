@@ -5,6 +5,8 @@ import ast
 import re
 from pathlib import Path
 
+from app.agent.tool_registry import INTENT_TO_TOOL, is_confirmed
+
 NODES = Path(__file__).resolve().parents[1] / "app" / "agent" / "nodes.py"
 
 
@@ -17,10 +19,14 @@ def load_function(name: str, namespace: dict):
 
 
 def test_confirmation_words():
-    fn = load_function("_is_write_confirmed", {"re": re})
-    assert fn("取消订单 87") is False
-    assert fn("确认取消订单 87") is True
-    assert fn("确定清空购物车") is True
+    ns = {"INTENT_TO_TOOL": INTENT_TO_TOOL, "is_confirmed": is_confirmed}
+    fn = load_function("_is_write_confirmed", ns)
+    assert fn("取消订单 87", "cancel_order") is False
+    assert fn("确认取消订单 87", "cancel_order") is True
+    assert fn("确定清空购物车", "cart_clear") is True
+    # 两条链路统一：通用确认词生效；"继续"不再被当作确认
+    assert fn("嗯", "cancel_order") is True
+    assert fn("继续查下一条", "cancel_order") is False
 
 
 def test_confirmation_text_contains_action_and_param():

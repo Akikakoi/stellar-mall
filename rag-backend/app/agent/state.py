@@ -23,3 +23,10 @@ class AgentState(TypedDict, total=False):
     cart_listing: Optional[List[str]]  # 最近一次向用户展示的购物车条目 ID 顺序（"第N个"→真实 ID 映射）
     confirmation_required: Optional[bool]  # 高危写操作等待用户确认
     pending_write: Optional[dict]         # 待确认的高危写操作（intent + 已解析参数）
+    # 可观测字段：意图来源、缓存命中、耗时、ReAct 步数
+    intent_source: Optional[str]      # rule / cache / llm / llm_reclassified
+    intent_cache_hit: Optional[bool]
+    intent_latency_ms: Optional[int]
+    from_cache: Optional[bool]        # 回答是否命中 FAQ/LLM 缓存
+    cache_source: Optional[str]       # 命中来源: faq / llm（区分缓存类型，便于报表归因）
+    react_steps: Optional[int]        # ReAct 实际迭代步数

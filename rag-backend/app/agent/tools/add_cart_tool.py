@@ -5,7 +5,7 @@ from app.agent.tools.mall_client import call_mall
 from app.agent.tools._mall_response import unwrap_mall
 
 
-@tool
+@tool("add_to_cart")
 def add_to_cart_tool(
     sku_id: str,
     qty: int = 1,

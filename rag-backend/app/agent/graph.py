@@ -12,7 +12,9 @@ from app.agent.nodes import (
     generate_answer_node,
     route_after_intent,
     route_after_params,
+    route_after_answer,
 )
+from app.agent.react_subgraph import react_subgraph
 
 
 def build_agent_graph():
@@ -23,7 +25,8 @@ def build_agent_graph():
             → product_consult/order_query/after_sales → [check_params] → 路由
                                                                  → 缺参 → [ask_params] → END
                                                                  → 齐全 → [execute_tool] → [generate_answer] → END
-            → small_talk/other → [generate_answer] → END
+            → small_talk → [generate_answer] → END
+            → other → [generate_answer] → [react_subgraph] → END
     """
     workflow = StateGraph(AgentState)
 
@@ -32,6 +35,7 @@ def build_agent_graph():
     workflow.add_node("ask_params", ask_params_node)
     workflow.add_node("execute_tool", tool_execution_node)
     workflow.add_node("generate_answer", generate_answer_node)
+    workflow.add_node("react_agent", react_subgraph)
 
     workflow.set_entry_point("intent_classification")
 
@@ -55,7 +59,15 @@ def build_agent_graph():
 
     workflow.add_edge("ask_params", END)
     workflow.add_edge("execute_tool", "generate_answer")
-    workflow.add_edge("generate_answer", END)
+    workflow.add_conditional_edges(
+        "generate_answer",
+        route_after_answer,
+        {
+            "react_agent": "react_agent",
+            "end": END,
+        },
+    )
+    workflow.add_edge("react_agent", END)
 
     return workflow.compile()
 
@@ -116,4 +128,11 @@ def run_agent(query: str, user_id: int = None, mall_token: str = None,
         "required_params": result.get("required_params", {}),
         "uses_react": result.get("uses_react", False),
         "suggestions": result.get("suggestions", []),
+        # 可观测字段必须完整透传：服务层据此记账（缓存命中 / ReAct 占比 / 意图来源）
+        "intent_source": result.get("intent_source"),
+        "intent_cache_hit": result.get("intent_cache_hit", False),
+        "intent_latency_ms": result.get("intent_latency_ms"),
+        "from_cache": result.get("from_cache", False),
+        "cache_source": result.get("cache_source"),
+        "react_steps": result.get("react_steps", 0),
     }

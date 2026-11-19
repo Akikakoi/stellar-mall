@@ -5,7 +5,7 @@ from app.agent.tools.mall_client import call_mall
 from app.agent.tools._mall_response import unwrap_mall
 
 
-@tool
+@tool("confirm_receipt")
 def confirm_receipt_tool(
     order_id: str,
     mall_token: Optional[str] = None,

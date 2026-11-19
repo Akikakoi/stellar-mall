@@ -5,7 +5,7 @@ from app.agent.tools.mall_client import call_mall
 from app.agent.tools._mall_response import unwrap_mall
 
 
-@tool
+@tool("query_cart")
 def query_cart_tool(
     mall_token: Optional[str] = None,
     user_id: Optional[int] = None,
@@ -66,7 +66,7 @@ def _normalize_cart_item(item: dict) -> dict:
     }
 
 
-@tool
+@tool("clear_cart")
 def clear_cart_tool(
     mall_token: Optional[str] = None,
     user_id: Optional[int] = None,
@@ -87,7 +87,7 @@ def clear_cart_tool(
     }
 
 
-@tool
+@tool("delete_cart_item")
 def delete_cart_item_tool(
     cart_item_id: str,
     mall_token: Optional[str] = None,
@@ -111,7 +111,7 @@ def delete_cart_item_tool(
     }
 
 
-@tool
+@tool("update_cart_item")
 def update_cart_item_tool(
     cart_item_id: str,
     qty: Optional[int] = None,

@@ -5,7 +5,7 @@ from app.agent.tools.mall_client import call_mall
 from app.agent.tools._mall_response import unwrap_mall
 
 
-@tool
+@tool("query_favorite")
 def query_favorite_tool(
     mall_token: Optional[str] = None,
     user_id: Optional[int] = None,

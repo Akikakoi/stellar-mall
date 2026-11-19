@@ -24,7 +24,8 @@ from langchain_core.tools import tool
 
 from app.core.logger import logger
 from app.rag.llm import get_langchain_chat
-from app.agent.react_safety import safe_invoke, IdempotencyGuard
+from app.agent.react_safety import safe_invoke, IdempotencyGuard, RedisIdempotencyGuard
+from app.agent.tool_registry import REACT_TOOL_NAMES
 from app.agent.tools import (
     kb_search_tool,
     query_order_tool,
@@ -68,8 +69,12 @@ class ReactContext:
         self.mall_token = mall_token
         self.user_id = user_id
         self.sourced_ids: set = set()  # 可信标识白名单，来自查询工具的返回结果
-        # 每次 run 独立幂等守卫，避免不同用户之间的写操作互相误判重复
-        self.guard = IdempotencyGuard(max_entries=32, ttl_seconds=_IDEMPOTENCY_TTL)
+        # 每次 run 独立幂等守卫；有 user_id 时用 Redis 跨进程去重，缺失时退回内存守卫（写操作仍会被 safe_invoke 拒绝）
+        self.guard = (
+            RedisIdempotencyGuard(user_id=user_id, ttl_seconds=_IDEMPOTENCY_TTL)
+            if user_id
+            else IdempotencyGuard(max_entries=32, ttl_seconds=_IDEMPOTENCY_TTL)
+        )
 
 
 def _collect_ids(ctx: ReactContext, result: dict) -> None:
@@ -199,6 +204,7 @@ def _wrapped_update_cart_item(ctx: ReactContext):
                            {"cart_item_id": cart_item_id, "qty": qty, "checked": checked,
                             "mall_token": ctx.mall_token},
                            update_cart_item_tool,
+                           user_id=ctx.user_id,
                            sourced_ids=ctx.sourced_ids,
                            idempotency_guard=ctx.guard)
     return _update_cart_item_tool
@@ -213,24 +219,30 @@ def _wrapped_add_to_cart(ctx: ReactContext):
                            {"sku_id": sku_id, "qty": qty,
                             "mall_token": ctx.mall_token},
                            add_to_cart_tool,
+                           user_id=ctx.user_id,
                            sourced_ids=ctx.sourced_ids,
                            idempotency_guard=ctx.guard)
     return _add_to_cart_tool
 
 
 def _build_tools(ctx: ReactContext) -> list:
-    return [
-        _wrapped_kb(ctx),
-        _wrapped_query_order(ctx),
-        _wrapped_query_cart(ctx),
-        _wrapped_query_favorite(ctx),
-        _wrapped_query_wallet(ctx),
-        _wrapped_query_reviews(ctx),
-        _wrapped_product_search(ctx),
-        _wrapped_resolve_sku(ctx),
-        _wrapped_update_cart_item(ctx),
-        _wrapped_add_to_cart(ctx),
-    ]
+    """按注册表 allowed_in_react 过滤工具；高危写工具不会进入 ReAct 工具集。"""
+    candidates = {
+        "kb_search": _wrapped_kb(ctx),
+        "query_order": _wrapped_query_order(ctx),
+        "query_cart": _wrapped_query_cart(ctx),
+        "query_favorite": _wrapped_query_favorite(ctx),
+        "query_wallet": _wrapped_query_wallet(ctx),
+        "query_reviews": _wrapped_query_reviews(ctx),
+        "product_search": _wrapped_product_search(ctx),
+        "resolve_sku": _wrapped_resolve_sku(ctx),
+        "update_cart_item": _wrapped_update_cart_item(ctx),
+        "add_to_cart": _wrapped_add_to_cart(ctx),
+    }
+    missing = set(REACT_TOOL_NAMES) - set(candidates)
+    if missing:
+        raise RuntimeError(f"注册表声明的 ReAct 工具缺少包装: {sorted(missing)}")
+    return [candidates[name] for name in candidates if name in REACT_TOOL_NAMES]
 
 
 # 工具调用在 async 上下文里同步执行会阻塞事件循环，故用 to_thread 包一层
@@ -373,34 +385,37 @@ async def astream_react(
     sources: list = []
 
     for step in range(max_steps):
-        # 真实流式：直接消费模型增量。工具调用轮通常 content 为空，
-        # 若模型先输出文字再触发工具，这段文字会作为 token 先展示（可接受的取舍）。
+        # 模型增量先暂存：工具调用轮的文字属于思考过程，不能当最终答案 token 推出。
+        # 等本轮 tool_calls 判定完成后，才决定发 token（最终答案）还是 agent_thought（中间过程）。
         ai = None
-        streamed_content = []
+        streamed_content: list[str] = []
         async for chunk in bound.astream(messages):
             ai = chunk if ai is None else ai + chunk
             text = chunk.content if isinstance(chunk.content, str) else ""
             if text:
                 streamed_content.append(text)
-                yield {"type": "token", "content": text}
         if ai is None:
             break
         messages.append(ai)
 
-        reasoning = (ai.content or "").strip() if isinstance(ai.content, str) else ""
+        reasoning = "".join(streamed_content) or (
+            (ai.content or "").strip() if isinstance(ai.content, str) else ""
+        )
         tool_calls = getattr(ai, "tool_calls", None) or []
 
         if not tool_calls:
             answer = reasoning or str(ai.content)
             if sources:
                 yield {"type": "sources", "data": sources}
-            # 已经在流式阶段逐 token 发出，只有模型没产出任何内容时才补一次空答案保护
+            # 确认是最终答案轮后再逐块下发，保持真实增量流式
+            for text in streamed_content:
+                yield {"type": "token", "content": text}
             if not streamed_content and answer:
                 yield {"type": "token", "content": answer}
             yield {"type": "done", "tokens": len(answer), "tool_trace": tool_trace}
             return
 
-        if reasoning and not streamed_content:
+        if reasoning:
             yield {"type": "agent_thought", "content": reasoning}
 
         for tc in tool_calls:

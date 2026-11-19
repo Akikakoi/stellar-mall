@@ -5,7 +5,7 @@ from app.agent.tools.mall_client import call_mall
 from app.agent.tools._mall_response import unwrap_mall
 
 
-@tool
+@tool("query_reviews")
 def query_reviews_tool(
     spu_id: str,
     page: int = 1,

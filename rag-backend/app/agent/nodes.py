@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import time
 from contextvars import ContextVar
 from typing import Callable, Dict, Any, List, Optional
 
@@ -25,11 +26,35 @@ from app.agent.tools import (
 )
 from app.agent.tools.kb_tool import kb_specs_for_products
 from app.agent.tools.resolve_sku_tool import resolve_sku_tool
+from app.agent.tool_registry import (
+    HIGH_RISK_WRITE_INTENTS as _REGISTRY_HIGH_RISK_WRITE_INTENTS,
+    INTENT_DESC_MAP,
+    INTENT_TO_TOOL,
+    TOOL_REQUIRED_PARAMS,
+    is_confirmed,
+)
+from app.agent.metrics import record_intent
 
 
 def _prompt_hash(name: str) -> str:
     """读取 llm_cache 初始化后的提示词哈希，避免 from-import 绑定空字符串。"""
     return getattr(llm_cache_module, name, "")
+
+
+def _intent_confidence_from_cache(cached: dict) -> float:
+    """取意图缓存的置信度。
+
+    新条目：完整分类结果存在 answer 的 JSON 里（confidence 字段）；
+    旧条目：曾把 confidence*100 伪装成 tokens_used，兼容读取但不再写入。
+    """
+    try:
+        payload = json.loads(cached.get("answer") or "{}")
+        confidence = float(payload.get("confidence"))
+        if 0.0 <= confidence <= 1.0:
+            return confidence
+    except (TypeError, ValueError, AttributeError):
+        pass
+    return float(cached.get("tokens_used", 90)) / 100.0
 
 
 # 流式请求的事件发射器由服务层注入；ContextVar 可随 asyncio.to_thread 复制到工作线程。
@@ -57,100 +82,7 @@ def _emit_agent_event(event: dict) -> None:
         pass
 
 
-INTENT_DESC_MAP = {
-    "product_consult": "咨询商品信息",
-    "order_query": "查询订单",
-    "cancel_order": "取消订单",
-    "confirm_receipt": "确认收货",
-    "cart_query": "查询购物车",
-    "cart_add": "加入购物车",
-    "cart_clear": "清空购物车",
-    "cart_delete": "删除购物车商品",
-    "cart_update": "修改购物车商品",
-    "after_sales": "申请售后",
-    "favorite_query": "查询收藏夹",
-    "wallet_query": "查询钱包余额",
-    "product_search": "搜索商品",
-    "review_query": "查询商品评价",
-    "small_talk": "闲聊",
-    "other": "其他问题",
-}
-
-TOOL_REQUIRED_PARAMS = {
-    "kb_search": {
-        "required": ["query"],
-        "optional": ["top_k", "tags_filter"],
-    },
-    "query_order": {
-        "required": [],  # 有 token 可以查全部，order_id 是可选
-        "optional": ["order_id", "status"],
-    },
-    "apply_after_sales": {
-        "required": ["order_id", "after_sales_type", "reason"],
-        "optional": ["sku_id", "description", "contact_phone"],
-    },
-    "query_cart": {
-        "required": [],  # 有 token 即可查询购物车
-        "optional": [],
-    },
-    "clear_cart": {
-        "required": [],  # 有 token 即可清空购物车
-        "optional": [],
-    },
-    "delete_cart_item": {
-        "required": ["cart_item_id"],
-        "optional": [],
-    },
-    "update_cart_item": {
-        "required": ["cart_item_id"],
-        "optional": ["qty", "checked"],
-    },
-    "cancel_order": {
-        "required": ["order_id"],
-        "optional": [],
-    },
-    "confirm_receipt": {
-        "required": ["order_id"],
-        "optional": [],
-    },
-    "query_favorite": {
-        "required": [],
-        "optional": [],
-    },
-    "add_to_cart": {
-        "required": ["sku_id"],
-        "optional": ["qty"],
-    },
-    "query_wallet": {
-        "required": [],
-        "optional": [],
-    },
-    "product_search": {
-        "required": ["query"],
-        "optional": ["page", "page_size", "category"],
-    },
-    "query_reviews": {
-        "required": ["spu_id"],
-        "optional": ["page", "page_size"],
-    },
-}
-
-INTENT_TO_TOOL = {
-    "product_consult": "kb_search",
-    "order_query": "query_order",
-    "cancel_order": "cancel_order",
-    "confirm_receipt": "confirm_receipt",
-    "cart_query": "query_cart",
-    "cart_add": "add_to_cart",
-    "cart_clear": "clear_cart",
-    "cart_delete": "delete_cart_item",
-    "cart_update": "update_cart_item",
-    "after_sales": "apply_after_sales",
-    "favorite_query": "query_favorite",
-    "wallet_query": "query_wallet",
-    "product_search": "product_search",
-    "review_query": "query_reviews",
-}
+# 意图描述与工具元数据由 app.agent.tool_registry 统一维护，这里不再本地重复定义。
 
 
 def _get_last_user_query(state: AgentState) -> str:
@@ -266,12 +198,17 @@ _INTENT_RULES = [
 ]
 
 # 高危写操作：必须先得到用户明确确认，不能仅凭意图分类直接执行
-HIGH_RISK_WRITE_INTENTS = {"cancel_order", "confirm_receipt", "cart_clear", "cart_delete", "after_sales"}
+HIGH_RISK_WRITE_INTENTS = set(_REGISTRY_HIGH_RISK_WRITE_INTENTS)
 
 
-def _is_write_confirmed(query: str) -> bool:
-    """当前用户消息是否包含明确的确认词。"""
-    return bool(re.search(r"确认|确定|同意|是的|继续", query or ""))
+def _is_write_confirmed(query: str, intent: str = "") -> bool:
+    """当前用户消息是否包含明确的确认词。
+
+    与 ReAct 侧共用 tool_registry.is_confirmed（单一来源）。
+    不再认可"继续"这类模糊词——"继续查下一条"会被误判为确认执行。
+    """
+    tool_name = INTENT_TO_TOOL.get(intent, "")
+    return is_confirmed(tool_name, query)
 
 
 def _write_confirmation_text(pending: dict) -> str:
@@ -316,18 +253,77 @@ def _write_confirmation_suggestions(pending: dict) -> list:
     return ["确认", "取消"]
 
 
+def _previous_user_query(messages: list) -> str:
+    """返回当前问句之前最近一条用户消息（不含当前问句）。"""
+    human = [msg for msg in messages if isinstance(msg, HumanMessage)]
+    if len(human) < 2:
+        return ""
+    content = human[-2].content
+    return content if isinstance(content, str) else str(content)
+
+
+def _last_assistant_text(messages: list) -> str:
+    for msg in reversed(messages):
+        if isinstance(msg, AIMessage):
+            content = msg.content if isinstance(msg.content, str) else str(msg.content)
+            return content
+    return ""
+
+
+def _rule_intent(text: str) -> str:
+    for rule_intent, pattern in _INTENT_RULES:
+        if pattern.search(text or ""):
+            return rule_intent
+    return ""
+
+
+def _should_reclassify(intent: str, has_history: bool, rewrite_enabled: bool) -> bool:
+    """是否执行 other 兜底重分类。指代改写开关关闭时任何路径都不得改写。"""
+    return intent == "other" and has_history and rewrite_enabled
+
+
+def _confirmation_history_query(state: AgentState, intent: str, query: str) -> str:
+    """确认轮缺参时，从上一轮用户消息补全参数。
+
+    仅在上一轮助手确实在请求写操作确认时启用，避免从无关历史里捞取参数；
+    上一轮用户消息若明确属于另一个写意图，也不复用，防止跨意图串参数。
+    """
+    if intent not in HIGH_RISK_WRITE_INTENTS or not _is_write_confirmed(query, intent):
+        return ""
+    messages = state.get("messages", [])
+    if not re.search(r"请回复|不会执行|需要确认", _last_assistant_text(messages)):
+        return ""
+    source = _previous_user_query(messages)
+    source_rule = _rule_intent(source)
+    if source_rule and source_rule != intent:
+        logger.info(f"[CheckParams] 确认轮历史意图不一致: source={source_rule} current={intent}")
+        return ""
+    return source
+
+
 def intent_classification_node(state: AgentState) -> Dict[str, Any]:
     """意图识别节点：判断用户问题属于哪个类别。"""
+    t0 = time.perf_counter()
     query = _get_last_user_query(state)
     if not query:
         return {"intent": "other", "intent_confidence": 0.0}
+
+    query_hash = hashlib.sha256(query.encode("utf-8")).hexdigest()[:12]
 
     # === 规则快路径：显式指令直接返回，省一次 LLM 调用（规则自含语义，不依赖历史） ===
     for rule_intent, pattern in _INTENT_RULES:
         m = pattern.search(query)
         if m:
             logger.info(f"[Intent] rule HIT  query={query[:30]}...  intent={rule_intent}  matched='{m.group()}'")
-            return {"intent": rule_intent, "intent_confidence": 0.90}
+            latency_ms = int((time.perf_counter() - t0) * 1000)
+            record_intent(rule_intent, "rule", query_hash, latency_ms, confidence=0.90)
+            return {
+                "intent": rule_intent,
+                "intent_confidence": 0.90,
+                "intent_source": "rule",
+                "intent_cache_hit": False,
+                "intent_latency_ms": latency_ms,
+            }
 
     # 构建对话历史文本片段（最多 6 条最近消息）
     history_text = _format_recent_history(state.get("messages", []), max_turns=6)
@@ -350,9 +346,18 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
         )
     if cached:
         logger.info(f"[Intent] cache HIT  query={query[:30]}...  intent={cached['intent']}")
+        latency_ms = int((time.perf_counter() - t0) * 1000)
+        cached_intent = cached.get("intent", "other")
+        record_intent(
+            cached_intent, "cache", query_hash, latency_ms,
+            cache_hit=True, confidence=_intent_confidence_from_cache(cached),
+        )
         return {
-            "intent": cached.get("intent", "other"),
-            "intent_confidence": cached.get("tokens_used", 90) / 100.0,
+            "intent": cached_intent,
+            "intent_confidence": _intent_confidence_from_cache(cached),
+            "intent_source": "cache",
+            "intent_cache_hit": True,
+            "intent_latency_ms": latency_ms,
         }
 
     def _classify(classify_query: str, allow_cache: bool) -> Dict[str, Any]:
@@ -394,7 +399,8 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
                             answer=json.dumps(result, ensure_ascii=False),
                             sources=[],
                             intent=intent,
-                            tokens_used=int(confidence * 100),
+                            # 置信度随 answer 里的完整 JSON 落库，不再伪装成 token 数
+                            tokens_used=0,
                             cache_type="intent",
                         )
                     except Exception:
@@ -414,11 +420,15 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
         return _produce()
 
     result = _classify(query, allow_cache=True)
+    source = "llm"
+    reclassified = False
 
     # === 兜底重分类（消融实验 D03 发现）：含指代的模糊追问被误判 other 时，
     # 先用指代消解改写成自包含问句，再重新分类一次。
     # 重分类不复用/不写入缓存：既避免 other 结果被缓存固化，也降低单次 LLM 抖动影响。
-    if result.get("intent") == "other" and has_history:
+    if _should_reclassify(result.get("intent"), has_history, settings.QUERY_REWRITE_ENABLED):
+        # QUERY_REWRITE_ENABLED=false 时不得偷偷改写：
+        # 这是意图识别的兜底重分类，同样属于"指代改写"，必须与 check_params 的开关一致。
         # 改写用的历史必须排除当前问句：_format_recent_history 默认会拼入最后一条
         # 用户消息，改写 LLM 看到"历史里已有这句话"会原样返回，导致兜底失效
         prior_text = _format_recent_history(state.get("messages", [])[:-1], max_turns=6)
@@ -431,7 +441,21 @@ def intent_classification_node(state: AgentState) -> Dict[str, Any]:
             logger.info(f"[Intent] other 兜底重分类: {query!r} -> {rewritten!r}")
             retry = _classify(rewritten, allow_cache=False)
             if retry.get("intent") != "other":
-                return retry
+                result = retry
+                source = "llm_reclassified"
+                reclassified = True
+
+    latency_ms = int((time.perf_counter() - t0) * 1000)
+    record_intent(
+        result.get("intent", "other"), source, query_hash, latency_ms,
+        confidence=float(result.get("intent_confidence") or 0.0),
+        reclassified=reclassified,
+    )
+    result.update({
+        "intent_source": source,
+        "intent_cache_hit": False,
+        "intent_latency_ms": latency_ms,
+    })
     return result
 
 
@@ -507,6 +531,9 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
 
     required_params = TOOL_REQUIRED_PARAMS[tool_name]["required"]
     collected = state.get("required_params", {})
+    # 确认轮只回复「确认申请售后」时，订单号/类型/原因都在上一轮用户消息里；
+    # 若上一轮助手确实在请求确认，用上一轮用户消息补全缺失参数。
+    confirmation_source = _confirmation_history_query(state, intent, query)
 
     # 规格比较/枚举覆盖：KB 检索需要更高的 top_k，确保多款产品的 spec 都进结果
     if kb_override and tool_name == "kb_search":
@@ -537,24 +564,32 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
                 collected["query"] = query
             elif param == "order_id":
                 extracted = _extract_order_id(query, state.get("messages", []))
+                if not extracted and confirmation_source:
+                    extracted = _extract_order_id(confirmation_source, state.get("messages", []))
                 if extracted:
                     collected["order_id"] = extracted
                 else:
                     missing.append(param)
             elif param == "after_sales_type":
                 extracted = _extract_after_sales_type(query)
+                if not extracted and confirmation_source:
+                    extracted = _extract_after_sales_type(confirmation_source)
                 if extracted:
                     collected["after_sales_type"] = extracted
                 else:
                     missing.append(param)
             elif param == "reason":
                 reason = _extract_reason(query)
+                if not reason and confirmation_source:
+                    reason = _extract_reason(confirmation_source)
                 if reason:
                     collected["reason"] = reason
                 else:
                     missing.append(param)
             elif param == "cart_item_id":
                 extracted = _extract_cart_item_id(query, state.get("messages", []))
+                if not extracted and confirmation_source:
+                    extracted = _extract_cart_item_id(confirmation_source, state.get("messages", []))
                 m_nth = re.search(r"第\s*(\d+)\s*个", query or "")
                 listing = (state.get("cart_listing")
                            or _cart_listing_from_history(state.get("messages", []))
@@ -639,7 +674,7 @@ def check_params_node(state: AgentState) -> Dict[str, Any]:
         if collected.get("qty") is None and collected.get("checked") is None:
             missing.append("qty")
 
-    if not missing and intent in HIGH_RISK_WRITE_INTENTS and not _is_write_confirmed(query):
+    if not missing and intent in HIGH_RISK_WRITE_INTENTS and not _is_write_confirmed(query, intent):
         # 高危写操作统一二次确认：本次只返回确认提示，不执行工具
         return {
             "missing_params": [],
@@ -1430,6 +1465,9 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
                     "final_answer": faq_answer,
                     "stream_chunks": [faq_answer],
                     "sources": faq_sources,
+                    # 命中也要记账，否则报表缓存命中率被低估
+                    "from_cache": True,
+                    "cache_source": "faq",
                     # FAQ 旁路不额外调 LLM，追问建议走意图模板兜底
                     "suggestions": rule_suggestions("product_consult"),
                 }
@@ -1440,9 +1478,8 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
         return _handle_small_talk(state)
 
     if intent == "other":
-        # fallback 路由：无法用确定性流程识别的复杂/组合问题，标记交给 ReAct agent 处理。
-        # 此处不执行 ReAct，仅打标记，由服务层(agent_service)对 other 走 astream_react 真流式；
-        # 同步路径(answer_sync)则由服务层调用 run_react_agent。
+        # fallback 路由：无法用确定性流程识别的复杂/组合问题，打标记后由主图的
+        # react_subgraph 执行（见 graph.py 的 generate_answer 条件边）。
         # 开关关闭时不再进入 ReAct，直接返回可解释的降级提示。
         if not settings.AGENT_ENABLED:
             fallback = "智能体模式已关闭，暂时无法处理这类复杂问题。您可以换个说法，或直接使用商品搜索/订单页面。"
@@ -1469,6 +1506,7 @@ def generate_answer_node(state: AgentState) -> Dict[str, Any]:
             "final_answer": cached["answer"],
             "stream_chunks": list(cached["answer"]),
             "from_cache": True,
+            "cache_source": "llm",
             "sources": cached.get("sources", []),
             # 老缓存条目无 suggestions 字段 → 退回意图模板
             "suggestions": cached.get("suggestions") or rule_suggestions(intent),
@@ -1918,3 +1956,10 @@ def route_after_params(state: AgentState) -> str:
         return "ask_params"
     else:
         return "execute_tool"
+
+
+def route_after_answer(state: AgentState) -> str:
+    """回答生成后的路由：other 意图进入 ReAct 子图，其余结束。"""
+    if state.get("uses_react"):
+        return "react_agent"
+    return "end"

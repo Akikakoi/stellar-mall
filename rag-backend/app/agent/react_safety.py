@@ -18,98 +18,43 @@ import hashlib
 from collections import OrderedDict
 from typing import Dict, List, Optional, Set
 
-# ---- 工具名统一使用 graph 侧 current_tool 的逻辑名（与 nodes.py 一致）----
+from app.core.logger import logger
 
-# 只读工具：无副作用，ReAct 可直接调用
-READ_ONLY_TOOLS: Set[str] = {
-    "kb_search",
-    "query_order",
-    "query_cart",
-    "query_favorite",
-    "query_wallet",
-    "query_reviews",
-    "product_search",
-    "resolve_sku",
-}
+# ---- 工具风险元数据统一来自 tool_registry（单一来源）----
+from app.agent.tool_registry import (  # noqa: E402
+    HIGH_RISK_WRITE,
+    CONFIRM_MESSAGE_TEMPLATE,
+    IDENTIFIER_PARAMS,
+    READ_ONLY_TOOLS as _REGISTRY_READ_ONLY_TOOLS,
+    REVERSIBLE_WRITE_TOOLS as _REGISTRY_REVERSIBLE_WRITE_TOOLS,
+    TOOL_LEVELS,
+    WRITE_IDENTIFIER_REQS,
+    HIGH_RISK_WRITE_TOOLS as _REGISTRY_HIGH_RISK_WRITE_TOOLS,
+    is_confirmed,
+)
 
-# 可逆写操作：放行，但强制参数来源约束 + 幂等
-REVERSIBLE_WRITE_TOOLS: Set[str] = {
-    "add_to_cart",
-    "update_cart_item",
-}
-
-# 高危写操作：必须用户确认（确认词触发或显式 user_confirmed=True）
-HIGH_RISK_WRITE_TOOLS: Set[str] = {
-    "delete_cart_item",
-    "clear_cart",
-    "cancel_order",
-    "confirm_receipt",
-    "apply_after_sales",
-}
-
-# 风险等级聚合表，未知工具一律按最严格处理
-_TOOL_LEVEL: Dict[str, str] = {}
-for _t in READ_ONLY_TOOLS:
-    _TOOL_LEVEL[_t] = "read_only"
-for _t in REVERSIBLE_WRITE_TOOLS:
-    _TOOL_LEVEL[_t] = "reversible_write"
-for _t in HIGH_RISK_WRITE_TOOLS:
-    _TOOL_LEVEL[_t] = "high_risk_write"
-
-TOOL_RISK_LEVELS: Dict[str, str] = _TOOL_LEVEL
+READ_ONLY_TOOLS: Set[str] = set(_REGISTRY_READ_ONLY_TOOLS)
+REVERSIBLE_WRITE_TOOLS: Set[str] = set(_REGISTRY_REVERSIBLE_WRITE_TOOLS)
+HIGH_RISK_WRITE_TOOLS: Set[str] = set(_REGISTRY_HIGH_RISK_WRITE_TOOLS)
+TOOL_RISK_LEVELS: Dict[str, str] = dict(TOOL_LEVELS)
 
 
 def tool_level(tool_name: str) -> str:
     """返回工具风险等级，未登记工具一律按 high_risk_write 处理（fail-closed）。"""
-    return _TOOL_LEVEL.get(tool_name, "high_risk_write")
+    return TOOL_LEVELS.get(tool_name, HIGH_RISK_WRITE)
 
 
-# ---- 标识类参数：必须来自"工具返回结果或用户本轮显式声明"，禁止 LLM 从历史推断 ----
-# 这类参数是写操作的目标，也是最容易被 LLM 编造（从旧对话里猜出 order_id/sku_id）的字段。
-IDENTIFIER_PARAMS: Set[str] = {"order_id", "sku_id", "cart_item_id", "spu_id"}
-
-# 每个写操作依赖的标识参数（缺一即无法安全执行）
-WRITE_IDENTIFIER_REQS: Dict[str, List[str]] = {
-    "add_to_cart": ["sku_id"],
-    "update_cart_item": ["cart_item_id"],
-    "delete_cart_item": ["cart_item_id"],
-    "clear_cart": [],
-    "cancel_order": ["order_id"],
-    "confirm_receipt": ["order_id"],
-    "apply_after_sales": ["order_id"],
-}
-
-# ---- 高危写操作的确认词：命中即视为用户同意（防止 LLM 复述历史时误判）----
-REQUIRED_CONFIRM_WORDS: Dict[str, List[str]] = {
-    "delete_cart_item": ["删除", "确定删除", "确认删除"],
-    "clear_cart": ["清空", "确定清空", "全部清空", "清空购物车"],
-    "cancel_order": ["取消订单", "确定取消", "取消"],
-    "confirm_receipt": ["确认收货", "确定收货"],
-    "apply_after_sales": ["申请售后", "退款", "退货", "换货", "确定"],
-}
-
-# 高危写操作的确认话术模板，供 agent 生成"是否确认"提示
-CONFIRM_MESSAGE_TEMPLATE: Dict[str, str] = {
-    "delete_cart_item": "确定要从购物车删除该商品吗？（删除后不可恢复）",
-    "clear_cart": "确定要清空购物车吗？此操作会移除全部购物车商品。",
-    "cancel_order": "确定要取消该订单吗？（仅待付款/待发货订单可取消）",
-    "confirm_receipt": "确定要确认收货吗？（确认后将触发结算，无法撤销）",
-    "apply_after_sales": "您希望申请售后，请确认退款/退货/换货的类型。",
-}
-
-
-def _normalize_text(text: str) -> str:
-    return (text or "").strip()
+# ---- 标识类参数与确认词均来自 tool_registry，禁止 LLM 从历史推断 ----
 
 
 def _has_confirm_word(tool_name: str, confirm_text: str, user_confirmed: bool) -> bool:
-    """判断是否获得确认：显式 user_confirmed 或确认文本命中确认词。"""
+    """判断是否获得确认：显式 user_confirmed 或确认文本命中确认词。
+
+    与流水线侧共用 tool_registry.is_confirmed，确保同一个商城确认标准一致。
+    """
     if user_confirmed:
         return True
-    text = _normalize_text(confirm_text)
-    if not text:
-        return False
-    return any(w in text for w in REQUIRED_CONFIRM_WORDS.get(tool_name, []))
+    return is_confirmed(tool_name, confirm_text)
 
 
 def _identifier_can_trust(tool_name: str, params: dict, sourced_ids: Optional[Set[str]]) -> bool:
@@ -242,6 +187,39 @@ class IdempotencyGuard:
         return False
 
 
+def _get_redis_client():
+    """惰性获取同步 Redis 客户端，避免安全模块在导入期触发配置校验。"""
+    from app.rag.llm_cache import get_redis_sync
+
+    return get_redis_sync()
+
+
+class RedisIdempotencyGuard:
+    """跨进程幂等守卫：SET key NX EX，Redis 不可用时降级为内存 LRU。"""
+
+    def __init__(self, user_id: int, ttl_seconds: int = 300,
+                 namespace: str = "agent:idem"):
+        if not user_id:
+            raise ValueError("user_id 缺失时不允许构造 Redis 幂等守卫")
+        self.user_id = user_id
+        self.ttl_seconds = ttl_seconds
+        self.namespace = namespace
+        self._fallback = IdempotencyGuard(max_entries=32, ttl_seconds=ttl_seconds)
+
+    def is_repeated(self, idempotency_key: str) -> bool:
+        client = _get_redis_client()
+        if client is None:
+            logger.warning("[Idempotency] Redis 不可用，降级为内存幂等守卫")
+            return self._fallback.is_repeated(idempotency_key)
+        key = f"{self.namespace}:{self.user_id}:{idempotency_key}"
+        try:
+            acquired = client.set(key, "1", nx=True, ex=self.ttl_seconds)
+            return not bool(acquired)
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"[Idempotency] Redis 写入失败，降级为内存守卫: {e}")
+            return self._fallback.is_repeated(idempotency_key)
+
+
 # ---- 供 ReAct 图接入的便捷入口 ----
 
 def safe_invoke(
@@ -249,6 +227,7 @@ def safe_invoke(
     params: dict,
     base_tool,
     *,
+    user_id: Optional[int] = None,
     user_confirmed: bool = False,
     confirm_text: str = "",
     sourced_ids: Optional[Set[str]] = None,
@@ -267,6 +246,16 @@ def safe_invoke(
     """
     if tool_level(tool_name) == "read_only":
         return base_tool.invoke(params)
+
+    # 写操作必须有真实用户身份，否则多副本幂等 key 无法隔离，直接 fail-closed
+    if not user_id:
+        return {
+            "success": False,
+            "blocked": True,
+            "message": "无法确认当前用户身份，写操作未执行。",
+            "reason": "missing_user_id",
+            "require_confirm": False,
+        }
 
     decision = check_write_action(
         tool_name, params,
@@ -306,9 +295,9 @@ __all__ = [
     "tool_level",
     "IDENTIFIER_PARAMS",
     "WRITE_IDENTIFIER_REQS",
-    "REQUIRED_CONFIRM_WORDS",
     "CONFIRM_MESSAGE_TEMPLATE",
     "check_write_action",
     "IdempotencyGuard",
+    "RedisIdempotencyGuard",
     "safe_invoke",
 ]
