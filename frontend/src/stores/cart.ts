@@ -170,7 +170,8 @@ export const useCartStore = defineStore('cart', {
      */
     async updateQty(idOrSkuId: number, quantity: number) {
       const qty = Math.max(1, Number(quantity) || 1)
-      const res = await updateCartQty({ id: idOrSkuId, quantity: qty })
+      // 后端 CartUpdateDTO 只认 qty/checked；字段名必须是 qty，传 quantity 会被忽略导致服务端数量不变
+      const res = await updateCartQty({ id: idOrSkuId, qty: qty })
       const item = this.items.find((it) => it.id === idOrSkuId || it.skuId === idOrSkuId)
       if (item) item.quantity = qty
       this.persist()

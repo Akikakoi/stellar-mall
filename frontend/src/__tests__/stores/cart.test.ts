@@ -18,7 +18,7 @@ vi.mock('@/api/mall', () => ({
 }))
 
 import { useCartStore } from '@/stores/cart'
-import { listCart } from '@/api/mall'
+import { listCart, updateCartQty } from '@/api/mall'
 
 function createStore() {
   setActivePinia(createPinia())
@@ -324,6 +324,45 @@ describe('useCartStore', () => {
       store.reset()
       expect(store.items).toEqual([])
       expect(store.badgeSeen).toBe(true)
+    })
+  })
+
+  // ── Actions: updateQty (mocked API) ──
+  describe('updateQty', () => {
+    it('请求体字段名必须是 qty（后端 CartUpdateDTO 只认 qty/checked）', async () => {
+      const store = createStore()
+      store.items = [mockItem({ id: 7, skuId: 101, quantity: 2 })]
+
+      await store.updateQty(7, 5)
+
+      expect(updateCartQty).toHaveBeenCalledWith({ id: 7, qty: 5 })
+    })
+
+    it('成功后本地数量同步为新值', async () => {
+      const store = createStore()
+      store.items = [mockItem({ id: 7, quantity: 2 })]
+
+      await store.updateQty(7, 5)
+
+      expect(store.items[0]!.quantity).toBe(5)
+    })
+
+    it('数量下限为 1：传 0 按 1 处理', async () => {
+      const store = createStore()
+      store.items = [mockItem({ id: 7, quantity: 3 })]
+
+      await store.updateQty(7, 0)
+
+      expect(updateCartQty).toHaveBeenCalledWith({ id: 7, qty: 1 })
+    })
+
+    it('支持用 skuId 匹配并更新', async () => {
+      const store = createStore()
+      store.items = [mockItem({ id: 7, skuId: 200, quantity: 2 })]
+
+      await store.updateQty(200, 4)
+
+      expect(store.items[0]!.quantity).toBe(4)
     })
   })
 
