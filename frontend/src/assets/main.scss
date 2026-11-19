@@ -552,6 +552,8 @@ body {
 .p-card:active,
 .action-item:active,
 .sidebar-item:active,
+.stat-cell.clickable:active,
+.task-row.clickable:active,
 .fav-btn:active {
   transform: translateY(0) scale(0.98);
 }

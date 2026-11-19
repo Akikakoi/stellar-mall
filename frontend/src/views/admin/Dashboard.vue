@@ -165,22 +165,28 @@
           </el-button>
         </div>
       </div>
-      <div v-if="reportLoading" class="report-loading">
-        <el-icon class="is-loading" :size="18"><Loading /></el-icon>
-        正在汇总经营数据并调用 AI 分析，约需 5~30 秒，请稍候…
-      </div>
-      <el-empty
-        v-else-if="!reportText"
-        description="点击「生成日报」，AI 将基于当日订单、销售、库存等数据生成经营分析报告"
-        :image-size="80"
-      />
-      <div v-else class="report-body">
-        <div
-          v-for="(line, i) in reportLines"
-          :key="i"
-          :class="{ 'report-heading': isReportHeading(line) }"
-        >{{ line }}</div>
-      </div>
+      <!-- 等 5~30 秒后 loading→正文，out-in + fade 避免整段正文瞬间砸出；
+           正文内部再按行错峰，给眼睛一个阅读顺序 -->
+      <transition name="report" mode="out-in">
+        <div v-if="reportLoading" key="loading" class="report-loading">
+          <el-icon class="is-loading" :size="18"><Loading /></el-icon>
+          正在汇总经营数据并调用 AI 分析，约需 5~30 秒，请稍候…
+        </div>
+        <el-empty
+          v-else-if="!reportText"
+          key="empty"
+          description="点击「生成日报」，AI 将基于当日订单、销售、库存等数据生成经营分析报告"
+          :image-size="80"
+        />
+        <div v-else key="body" class="report-body">
+          <div
+            v-for="(line, i) in reportLines"
+            :key="i"
+            :class="{ 'report-heading': isReportHeading(line) }"
+            :style="{ animationDelay: `calc(var(--stagger-1) * ${i})` }"
+          >{{ line }}</div>
+        </div>
+      </transition>
     </div>
 
     <div class="panel">
@@ -443,7 +449,10 @@ async function handleExport(type: any) {
   min-width: 0;
 }
 .stat-cell + .stat-cell { border-left: 1px solid var(--border-base); }
-.stat-cell.clickable { cursor: pointer; transition: background var(--transition-color); }
+.stat-cell.clickable {
+  cursor: pointer;
+  transition: background var(--transition-color), transform 160ms var(--ease-out);
+}
 @media (hover: hover) {
   .stat-cell.clickable:hover { background: var(--bg-hover); }
 }
@@ -468,7 +477,7 @@ async function handleExport(type: any) {
   font-size: 13px;
 }
 .task-row:first-child { border-top: none; }
-.task-row.clickable { cursor: pointer; }
+.task-row.clickable { cursor: pointer; transition: transform 160ms var(--ease-out), background var(--transition-color); }
 @media (hover: hover) {
   .task-row.clickable:hover { background: var(--bg-hover); }
 }
@@ -530,6 +539,22 @@ async function handleExport(type: any) {
   margin-top: 16px;
 }
 .report-body .report-heading:first-child { margin-top: 0; }
+
+/* 三态切换：loading → empty → 正文，mode=out-in 下旧态淡出、新态淡入。
+   只动 opacity，不用位移，跟全局弹窗淡入一个路子 */
+.report-enter-active,
+.report-leave-active { transition: opacity var(--dur-2) var(--ease-out); }
+.report-enter-from,
+.report-leave-to { opacity: 0; }
+
+/* 正文逐行浮现：等 30 秒后一次性砸出来很难读，给眼睛一个阅读顺序。
+   delay 走 --stagger-1（40ms/行，reduce 下 token 归零自动降级），
+   位移用 --move-1，跟 ChatBI 的 chat-in 同款但不打字机 */
+.report-body > div { animation: report-line-in var(--dur-3) var(--ease-enter) both; }
+@keyframes report-line-in {
+  from { opacity: 0; transform: translateY(var(--move-1)); }
+  to { opacity: 1; transform: none; }
+}
 
 /* 近 7 天用户行为 */
 .behavior-summary { display: flex; gap: 40px; margin-bottom: 20px; }

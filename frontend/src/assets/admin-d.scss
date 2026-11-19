@@ -168,3 +168,51 @@ body.area-admin .el-dialog .el-dialog__title {
 body.area-admin .el-dialog .el-form-item {
   margin-bottom: 20px;
 }
+
+/* ===== 数量步进器（el-input-number）胶囊化 =====
+ * 把 Element Plus 默认方角/灰底步进器统一成实底胶囊，与后台极简风一致。
+ * 作用域 body.area-admin 隔离 C 端；中间输入框需压过 main.scss 的
+ * box-shadow !important，故这里同用 !important 且特异性更高。 */
+body.area-admin .el-input-number {
+  border: 1px solid var(--border-base);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition-color);
+}
+body.area-admin .el-input-number:hover:not(.is-disabled) {
+  border-color: var(--brand-primary);
+}
+
+/* 中间数字框：去掉 EP 与 main.scss 的内描边，透明实底、等宽数字 */
+body.area-admin .el-input-number .el-input__wrapper,
+body.area-admin .el-input-number:hover .el-input__wrapper,
+body.area-admin .el-input-number .el-input__wrapper.is-focus,
+body.area-admin .el-input-number.is-controls-right .el-input__wrapper {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+body.area-admin .el-input-number .el-input__inner {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 加减按钮：实底浅色，hover 主色淡底 */
+body.area-admin .el-input-number__decrease,
+body.area-admin .el-input-number__increase {
+  background: var(--bg-hover);
+  border-color: transparent;
+  color: var(--text-secondary);
+  transition: color var(--transition-color), background var(--transition-color);
+}
+body.area-admin .el-input-number__decrease {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  border-right: 1px solid var(--border-base);
+}
+body.area-admin .el-input-number__increase {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  border-left: 1px solid var(--border-base);
+}
+body.area-admin .el-input-number__decrease:hover:not(.is-disabled),
+body.area-admin .el-input-number__increase:hover:not(.is-disabled) {
+  background: var(--brand-primary-soft);
+  color: var(--brand-primary);
+}

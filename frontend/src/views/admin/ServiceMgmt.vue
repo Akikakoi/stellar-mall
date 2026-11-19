@@ -1,46 +1,53 @@
 <template>
   <div class="service-mgmt">
-    <div class="toolbar">
-      <el-button type="primary" @click="openDialog()">新增服务</el-button>
-      <span class="tip">保障服务按「单个商品」配置组合：在商品编辑中选择该商品可选购的服务；服务价格以此处为准，结算时后端按服务表权威重算。</span>
-    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <span class="panel-title">保障服务管理</span>
+        <el-button type="primary" @click="openDialog()">新增服务</el-button>
+      </div>
+      <p class="panel-subtitle">保障服务按「单个商品」配置组合：在商品编辑中选择该商品可选购的服务；服务价格以此处为准，结算时后端按服务表权威重算。</p>
 
-    <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
-    <AdminTableSkeleton
-      v-if="loading && services.length === 0"
-      :rows="8"
-      :columns="[0.5, 1.4, 0.7, 0.6, 0.8, 0.7, 0.8]"
-      :row-height="56"
-    />
-    <el-table v-else :data="services" v-loading="loading">
-      <el-table-column prop="id" label="ID" width="70" />
-      <el-table-column prop="code" label="标识（code）" min-width="150" show-overflow-tooltip />
-      <el-table-column prop="title" label="名称" min-width="160" />
-      <el-table-column label="单价" width="110">
-        <template #default="{ row }">¥{{ Number(row.price || 0).toFixed(2) }}</template>
-      </el-table-column>
-      <el-table-column prop="description" label="说明" min-width="200" show-overflow-tooltip>
-        <template #default="{ row }">{{ row.description || '-' }}</template>
-      </el-table-column>
-      <el-table-column label="状态" width="90">
-        <template #default="{ row }">
-          <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
-            {{ row.status === 1 ? '启用' : '停用' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" width="170" fixed="right">
-        <template #default="{ row }">
-          <el-button type="primary" link size="small" @click="openDialog(row)">编辑</el-button>
-          <el-button
-            size="small" link
-            :type="row.status === 1 ? 'warning' : 'success'"
-            @click="toggleStatus(row)"
-          >{{ row.status === 1 ? '停用' : '启用' }}</el-button>
-          <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+      <!-- 首屏骨架：加载中且还没有数据时先摆出表格形状 -->
+      <AdminTableSkeleton
+        v-if="loading && services.length === 0"
+        :rows="8"
+        :columns="[0.5, 1.4, 0.7, 0.6, 0.8, 0.8]"
+        :row-height="56"
+      />
+      <el-table v-else :data="services" v-loading="loading">
+        <el-table-column prop="id" label="ID" width="70" />
+        <el-table-column prop="title" label="名称" min-width="200">
+          <template #default="{ row }">
+            <div class="service-name">{{ row.title }}</div>
+            <div class="service-code">{{ row.code }}</div>
+          </template>
+        </el-table-column>
+        <el-table-column label="单价" width="110">
+          <template #default="{ row }">¥{{ Number(row.price || 0).toFixed(2) }}</template>
+        </el-table-column>
+        <el-table-column prop="description" label="说明" min-width="200" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.description || '-' }}</template>
+        </el-table-column>
+        <el-table-column label="状态" width="90">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 1 ? 'success' : 'info'" size="small">
+              {{ row.status === 1 ? '启用' : '停用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="170" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="openDialog(row)">编辑</el-button>
+            <el-button
+              size="small" link
+              :type="row.status === 1 ? 'warning' : 'success'"
+              @click="toggleStatus(row)"
+            >{{ row.status === 1 ? '停用' : '启用' }}</el-button>
+            <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <!-- 新增/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="form.id ? '编辑服务' : '新增服务'" width="520px" destroy-on-close>
@@ -158,7 +165,13 @@ onMounted(load)
 
 <style scoped>
 .service-mgmt { padding: 0; }
-.toolbar { margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
-.tip { font-size: 12px; color: var(--text-muted, #999); }
+.panel-subtitle {
+  margin: -8px 0 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.service-name { color: var(--text-primary); font-weight: 500; line-height: 1.4; }
+.service-code { color: var(--text-muted, #999); font-size: 11px; line-height: 1.4; margin-top: 2px; }
 .form-hint { font-size: 12px; color: var(--text-muted, #999); }
 </style>

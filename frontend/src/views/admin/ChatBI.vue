@@ -247,6 +247,13 @@ onUnmounted(() => {
   max-width: 70%;
   font-size: 14px;
   line-height: 1.6;
+  /* 新提问气泡淡入：回答内部已有 chat-in 错峰，这里只做轻量入场，
+     不包整个 chat-item 位移，避免与回答的双重位移动画打架 */
+  animation: question-in var(--dur-2) var(--ease-enter) both;
+}
+@keyframes question-in {
+  from { opacity: 0; transform: translateY(var(--move-1)); }
+  to { opacity: 1; transform: none; }
 }
 .answer-card {
   background: var(--bg-card);
