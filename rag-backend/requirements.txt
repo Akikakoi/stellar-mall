@@ -1,8 +1,8 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 sqlalchemy==2.0.35
-pydantic==2.9.2
-pydantic-settings==2.5.2
+pydantic==2.13.3
+pydantic-settings==2.14.0
 python-dotenv==1.0.1
 passlib[bcrypt]==1.7.4
 # passlib 1.7.4 读取 bcrypt.__about__，bcrypt>=4.1 移除该属性会导致 hash_password 运行时 AttributeError。
