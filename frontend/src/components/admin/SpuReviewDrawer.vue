@@ -56,8 +56,9 @@
           <div
             class="srd-content"
             :class="{ 'is-expanded': expanded.has(row.id) }"
+            :style="expanded.has(row.id) ? { maxHeight: expandedHeight[row.id] } : undefined"
             :title="expanded.has(row.id) ? '' : '点击展开全文'"
-            @click="toggleExpand(row.id)"
+            @click="toggleExpand($event, row.id)"
           >{{ row.content || '（该用户未填写文字评价）' }}</div>
 
           <div v-if="picsOf(row).length" class="srd-pics">
@@ -183,6 +184,9 @@ const total = ref(0)
 const loading = ref(false)
 const unrepliedTotal = ref(0)
 const expanded = ref<Set<any>>(new Set())
+// 每条长评展开时的实际高度：收起态限 3 行，展开态按内容真实高度撑开。
+// 用测得的 scrollHeight 做 max-height，收起时不会因上限虚高而有一段"空等"。
+const expandedHeight = ref<Record<any, string>>({})
 
 const cover = computed(() => props.spu?.mainImage || props.spu?.image || '')
 const emptyText = computed(() => {
@@ -207,9 +211,14 @@ function fmtTime(v?: string) {
   return String(v).replace('T', ' ').slice(0, 16)
 }
 
-function toggleExpand(id: any) {
+function toggleExpand(e: MouseEvent, id: any) {
   const next = new Set(expanded.value)
-  next.has(id) ? next.delete(id) : next.add(id)
+  const willExpand = !next.has(id)
+  if (willExpand) {
+    const el = e.currentTarget as HTMLElement | null
+    if (el) expandedHeight.value[id] = `${el.scrollHeight}px`
+  }
+  willExpand ? next.add(id) : next.delete(id)
   expanded.value = next
 }
 
@@ -257,6 +266,7 @@ async function fetchUnrepliedCount() {
 function onTabChange() {
   page.value = 1
   expanded.value = new Set()
+  expandedHeight.value = {}
   fetchList()
 }
 
@@ -424,16 +434,17 @@ async function setStatus(row: any, status: number) {
   font-size: 13px;
   line-height: 1.6;
   color: var(--text-primary);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  /* 收起态限 3 行（1.6em × 3），展开态由 JS 按 scrollHeight 写入 max-height。
+     用 max-height 过渡而非 line-clamp 瞬切，高度平滑撑开；
+     实测高度做上限，避免虚高上限导致收起时先"空等"一段 */
+  max-height: calc(1.6em * 3);
   overflow: hidden;
   cursor: pointer;
   word-break: break-word;
+  transition: max-height var(--dur-3) var(--ease-standard);
 }
 .srd-content.is-expanded {
-  -webkit-line-clamp: unset;
-  display: block;
+  /* max-height 由内联样式提供（真实内容高度）；此处仅保留语义钩子 */
 }
 .srd-pics {
   display: flex;

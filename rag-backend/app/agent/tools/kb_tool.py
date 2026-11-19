@@ -56,7 +56,7 @@ def _kb_search_impl(query: str, top_k: int = 5, tags_filter: Optional[List[str]]
         return {"success": False, "query": query, "sources": [], "count": 0, "error": str(e)}
 
 
-@tool
+@tool("kb_search")
 def kb_search_tool(query: str, top_k: int = 5, tags_filter: Optional[List[str]] = None) -> dict:
     """知识库检索工具，用于查询商品信息、售后政策、使用说明等静态知识。"""
     return _kb_search_impl(query, top_k=top_k, tags_filter=tags_filter, use_rerank=True)

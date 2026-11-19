@@ -152,7 +152,7 @@ def _match_sku(skus: list, spec_pattern: str | None, product_name: str) -> tuple
     )
 
 
-@tool
+@tool("resolve_sku")
 def resolve_sku_tool(
     product_name: str,
     spec_description: Optional[str] = None,

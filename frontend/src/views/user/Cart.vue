@@ -68,14 +68,32 @@
             </div>
             <div class="col col-price">¥{{ Number(item.price || 0).toFixed(2) }}</div>
             <div class="col col-qty">
-              <el-input-number
-                :model-value="item.quantity"
-                :min="1"
-                :max="itemMaxQty(item)"
-                :disabled="!!item.unavailable"
-                size="small"
-                @update:model-value="(v: any) => cartStore.updateQty(item.id || item.skuId, v)"
-              />
+              <div class="qty-stepper" :class="{ 'is-disabled': item.unavailable }">
+                <button
+                  type="button"
+                  class="qty-stepper__btn"
+                  :disabled="!!item.unavailable || Number(item.quantity) <= 1"
+                  :aria-label="`减少${item.name || '商品'}数量`"
+                  @click="decQty(item)"
+                >−</button>
+                <input
+                  class="qty-stepper__input"
+                  type="text"
+                  inputmode="numeric"
+                  :value="item.quantity"
+                  :disabled="!!item.unavailable"
+                  :aria-label="`${item.name || '商品'}数量`"
+                  @change="onQtyInput(item, $event)"
+                  @keydown.enter="($event.target as HTMLInputElement).blur()"
+                />
+                <button
+                  type="button"
+                  class="qty-stepper__btn"
+                  :disabled="!!item.unavailable || atMaxQty(item)"
+                  :aria-label="`增加${item.name || '商品'}数量`"
+                  @click="incQty(item)"
+                >+</button>
+              </div>
             </div>
             <div class="col col-subtotal amount">
               ¥{{ itemSubtotal(item).toFixed(2) }}
@@ -178,6 +196,36 @@ function itemMaxQty(item: any) {
   if (!Number.isNaN(stock) && stock > 0) caps.push(stock)
   if (caps.length === 0) return undefined
   return Math.min(...caps)
+}
+
+/** 是否已到数量上限（限购/库存），用于禁用「+」 */
+function atMaxQty(item: any) {
+  const max = itemMaxQty(item)
+  return max !== undefined && Number(item?.quantity) >= max
+}
+
+/** 数量步进器：减一（下限 1） */
+function decQty(item: any) {
+  const next = Number(item.quantity) - 1
+  if (next >= 1) void cartStore.updateQty(item.id || item.skuId, next)
+}
+
+/** 数量步进器：加一（不超过限购/库存上限） */
+function incQty(item: any) {
+  const next = Number(item.quantity) + 1
+  if (!atMaxQty({ ...item, quantity: next - 1 })) void cartStore.updateQty(item.id || item.skuId, next)
+}
+
+/** 数量步进器：手动输入后校验并 clamp，非法值回退原值 */
+function onQtyInput(item: any, event: Event) {
+  const input = event.target as HTMLInputElement
+  const n = Number(input.value)
+  let next = Number.isFinite(n) && n > 0 ? Math.floor(n) : Number(item.quantity)
+  if (next < 1) next = 1
+  const max = itemMaxQty(item)
+  if (max !== undefined && next > max) next = max
+  input.value = String(next)
+  if (next !== Number(item.quantity)) void cartStore.updateQty(item.id || item.skuId, next)
 }
 
 /**
@@ -345,6 +393,64 @@ onBeforeUnmount(() => {
 .col-price, .col-subtotal { color: var(--text-primary); }
 .amount { color: var(--text-primary); font-weight: 600; }
 .col-qty { display: flex; justify-content: center; }
+
+/* ===== 数量步进器：磨砂胶囊，与商品详情页同风格 ===== */
+.qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
+  transition: border-color var(--transition-color), background var(--transition-color);
+}
+.qty-stepper:hover:not(.is-disabled) { border-color: var(--brand-primary); }
+.qty-stepper.is-disabled { opacity: 0.5; pointer-events: none; }
+
+.qty-stepper__btn {
+  width: 28px;
+  height: 100%;
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--transition-color), background var(--transition-color);
+}
+.qty-stepper__btn:hover:not(:disabled) {
+  color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+}
+.qty-stepper__btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.qty-stepper__btn:focus-visible { outline: 2px solid var(--brand-primary); outline-offset: -2px; }
+
+.qty-stepper__input {
+  width: 34px;
+  height: 100%;
+  flex-shrink: 0;
+  border: none;
+  border-left: 1px solid var(--glass-border);
+  border-right: 1px solid var(--glass-border);
+  background: transparent;
+  text-align: center;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  outline: none;
+  -moz-appearance: textfield;
+}
+.qty-stepper__input::-webkit-inner-spin-button,
+.qty-stepper__input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
 .footer-bar {
   position: fixed;

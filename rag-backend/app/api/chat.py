@@ -105,6 +105,13 @@ async def chat(
                         "intent": ev.get("intent", intent),
                         "tool_used": ev.get("tool_used"),
                         "missing_params": ev.get("missing_params", []),
+                        "intent_source": ev.get("intent_source"),
+                        "intent_cache_hit": ev.get("intent_cache_hit"),
+                        "intent_latency_ms": ev.get("intent_latency_ms"),
+                        "answer_cache_hit": ev.get("answer_cache_hit"),
+                        "cache_source": ev.get("cache_source"),
+                        "steps": ev.get("steps"),
+                        "agent_latency_ms": ev.get("latency_ms"),
                     }
         except Exception as e:  # noqa
             logger.exception(f"Agent 生成失败: {e}")
@@ -167,6 +174,8 @@ async def chat(
                         extra_meta = {k: data[k] for k in (
                             "conversation_id", "message_id", "latency_ms",
                             "intent", "tool_used", "missing_params",
+                            "intent_source", "intent_cache_hit", "intent_latency_ms",
+                            "answer_cache_hit", "cache_source", "steps", "agent_latency_ms",
                         ) if k in data}
         full_ans = "".join(answer_parts)
         return ok({

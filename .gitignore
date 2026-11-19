@@ -102,11 +102,13 @@ rag-backend/.env
 rag-backend/.env.*
 !rag-backend/.env.example
 
-# ---------- 消融实验原始产物 ----------
-# 入库的只留 compact_results.py 压过的精简版（几百 KB）；
-# 原始 trace / 全量快照单份可达数 MB，留在本地 _raw/ 不入库。
-rag-backend/scripts/ablation/_raw/
-rag-backend/scripts/ablation/*_full.json
+# ---------- RAG 消融 / 健全性实验产物（仅本地保留，不入库）----------
+# 实验报告、结果 JSON、原始 trace、归档脚本仅供本地复盘，版本库只保留商城运行代码。
+# 如需再次跑实验，脚本与数据均在本地对应目录，可直接复用。
+rag-backend/scripts/ablation/
+rag-backend/scripts/ablation_20261116/
+rag-backend/scripts/ablation_archive_20261107/
+rag-backend/scripts/health/
 
 # ---------- Agent 本地通行证 & 临时产物（trae / pre-commit 检查目录）----------
 .trae/
@@ -130,9 +132,6 @@ frontend/typecheck_errors.txt
 # ---------- AI 工具缓存与本地数据 ----------
 .playwright-cli/
 .workbuddy-ai/
-
-# ---------- QQ 机器人（独立模块，暂不入库）----------
-qq-bot/
 
 # ---------- 本地数据库备份（含真实数据，严禁提交）----------
 backups/

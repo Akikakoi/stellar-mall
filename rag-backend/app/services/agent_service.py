@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.logger import logger
 from app.models import User
+from app.agent.metrics import record_agent_run
 
 
 class AgentChatService:
@@ -36,6 +37,7 @@ class AgentChatService:
         from app.agent.graph import run_agent
         from app.agent.nodes import set_agent_event_emitter, reset_agent_event_emitter
 
+        t0 = time.perf_counter()
         try:
             yield {"type": "agent_thought", "content": "正在分析您的问题..."}
 
@@ -88,40 +90,8 @@ class AgentChatService:
             if "intent" not in emitted_types:
                 yield {"type": "intent", "intent": intent, "confidence": intent_confidence}
 
-            # other 场景：图内仅打标记，走 ReAct 真流式
-            if result.get("uses_react"):
-                react_answer_parts: list = []
-                try:
-                    from app.agent.react_agent import astream_react
-
-                    async for ev in astream_react(
-                        query=query,
-                        user_id=self.user.id,
-                        mall_token=mall_token,
-                        conversation_history=conversation_history or [],
-                    ):
-                        if ev.get("type") == "token":
-                            react_answer_parts.append(ev.get("content", ""))
-                        yield ev
-                except Exception as e:  # noqa: BLE001
-                    logger.exception(f"ReAct 流式失败: {e}")
-                    fallback = "（智能体服务暂时不可用，请稍后重试。）"
-                    react_answer_parts.append(fallback)
-                    yield {"type": "token", "content": fallback}
-                    yield {"type": "done", "tokens": len(fallback), "error": str(e)}
-
-                # ReAct 路径不写答案缓存，追问建议现生成（LLM 失败自动退回模板）
-                try:
-                    from app.agent.suggestions import gen_suggestions_sync
-                    suggestions = await asyncio.to_thread(
-                        gen_suggestions_sync, query, "".join(react_answer_parts), intent
-                    )
-                except Exception:  # noqa: BLE001
-                    from app.agent.suggestions import rule_suggestions
-                    suggestions = rule_suggestions(intent)
-                yield {"type": "suggestions", "data": suggestions}
-                return
-
+            # ReAct 已收敛进主图的 react_subgraph：图执行期间事件实时下发，
+            # 服务层不再做二次调用，也不再自行拼装 tool/token 事件。
             current_tool = result.get("current_tool")
             tool_results = result.get("tool_results", {})
             if current_tool and tool_results and "tool_call" not in emitted_types:
@@ -142,19 +112,45 @@ class AgentChatService:
             if missing_params:
                 yield {"type": "missing_params", "data": missing_params}
 
-            # 推荐追问：图中已生成（缓存命中或随答案生成）；缺失时意图模板兜底
+            react_steps = int(result.get("react_steps") or 0)
+            uses_react = react_steps > 0
+
+            # 推荐追问：图中已生成（缓存命中或随答案生成）；ReAct 路径现生成；其余模板兜底
             suggestions = result.get("suggestions") or []
-            if not suggestions:
+            if not suggestions and uses_react and answer:
+                try:
+                    from app.agent.suggestions import gen_suggestions_sync
+                    suggestions = await asyncio.to_thread(
+                        gen_suggestions_sync, query, answer, intent
+                    )
+                except Exception:  # noqa: BLE001
+                    from app.agent.suggestions import rule_suggestions
+                    suggestions = rule_suggestions(intent)
+            elif not suggestions:
                 from app.agent.suggestions import rule_suggestions
                 suggestions = rule_suggestions(intent)
             yield {"type": "suggestions", "data": suggestions}
 
+            answer_cache_hit = bool(result.get("from_cache"))
+            cache_source = result.get("cache_source") or ""
+            latency_ms = int((time.perf_counter() - t0) * 1000)
+            record_agent_run(
+                intent=intent, uses_react=uses_react, answer_cache_hit=answer_cache_hit,
+                latency_ms=latency_ms, react_steps=react_steps, cache_source=cache_source,
+            )
             yield {
                 "type": "done",
                 "tokens": len(answer),
                 "intent": intent,
                 "tool_used": current_tool,
                 "missing_params": missing_params,
+                "intent_source": result.get("intent_source"),
+                "intent_cache_hit": bool(result.get("intent_cache_hit")),
+                "intent_latency_ms": result.get("intent_latency_ms"),
+                "answer_cache_hit": answer_cache_hit,
+                "cache_source": cache_source,
+                "steps": react_steps or 1,
+                "latency_ms": latency_ms,
             }
 
         except Exception as e:
@@ -173,44 +169,38 @@ class AgentChatService:
         """同步调用 Agent。"""
         from app.agent.graph import run_agent
 
-        t0 = time.time()
+        t0 = time.perf_counter()
         result = run_agent(
             query=query,
             user_id=self.user.id,
             mall_token=mall_token,
             conversation_history=conversation_history or [],
         )
-        latency = int((time.time() - t0) * 1000)
+        latency = int((time.perf_counter() - t0) * 1000)
+        answer = result.get("answer", "")
+        react_steps = int(result.get("react_steps") or 0)
+        uses_react = react_steps > 0
+        answer_cache_hit = bool(result.get("from_cache"))
+        cache_source = result.get("cache_source") or ""
 
-        # other 场景：图内仅打标记，交给 ReAct agent 同步执行
-        if result.get("uses_react"):
-            from app.agent.react_agent import run_react_agent
-
-            rr = run_react_agent(
-                query=query,
-                user_id=self.user.id,
-                mall_token=mall_token,
-                conversation_history=conversation_history or [],
-            )
-            return {
-                "answer": rr.get("answer", ""),
-                "sources": rr.get("sources", []),
-                "intent": result.get("intent", "other"),
-                "tool_used": None,
-                "tool_results": {},
-                "missing_params": [],
-                "tokens_used": len(rr.get("answer", "")),
-                "latency_ms": latency,
-                "react_tool_trace": rr.get("tool_trace", []),
-            }
-
+        record_agent_run(
+            intent=result.get("intent", "other"), uses_react=uses_react,
+            answer_cache_hit=answer_cache_hit, latency_ms=latency,
+            react_steps=react_steps, cache_source=cache_source,
+        )
         return {
-            "answer": result.get("answer", ""),
+            "answer": answer,
             "sources": result.get("sources", []),
             "intent": result.get("intent", "other"),
             "tool_used": result.get("current_tool"),
             "tool_results": result.get("tool_results", {}),
             "missing_params": result.get("missing_params", []),
-            "tokens_used": len(result.get("answer", "")),
+            "tokens_used": len(answer),
             "latency_ms": latency,
+            "uses_react": uses_react,
+            "react_steps": react_steps,
+            "intent_source": result.get("intent_source"),
+            "intent_cache_hit": bool(result.get("intent_cache_hit")),
+            "answer_cache_hit": answer_cache_hit,
+            "cache_source": cache_source,
         }

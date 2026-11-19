@@ -5,7 +5,7 @@ from app.agent.tools.mall_client import call_mall
 from app.agent.tools._mall_response import unwrap_mall
 
 
-@tool
+@tool("query_order")
 def query_order_tool(
     order_id: Optional[str] = None,
     status: Optional[int] = None,

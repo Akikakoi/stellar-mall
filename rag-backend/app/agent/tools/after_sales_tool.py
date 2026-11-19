@@ -52,7 +52,7 @@ def _item_label(item: dict) -> str:
     return f"{name}{(' ' + str(spec)) if spec else ''}（SKU {sku}）"
 
 
-@tool
+@tool("apply_after_sales")
 def apply_after_sales_tool(
     order_id: str,
     after_sales_type: str,

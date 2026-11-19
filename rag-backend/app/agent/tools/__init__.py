@@ -9,6 +9,7 @@ from app.agent.tools.add_cart_tool import add_to_cart_tool
 from app.agent.tools.wallet_tool import query_wallet_tool
 from app.agent.tools.product_search_tool import product_search_tool
 from app.agent.tools.review_tool import query_reviews_tool
+from app.agent.tools.resolve_sku_tool import resolve_sku_tool
 
 __all__ = [
     "kb_search_tool",
@@ -25,4 +26,5 @@ __all__ = [
     "query_wallet_tool",
     "product_search_tool",
     "query_reviews_tool",
+    "resolve_sku_tool",
 ]

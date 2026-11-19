@@ -1,13 +1,13 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 sqlalchemy==2.0.35
-pydantic==2.9.2
-pydantic-settings==2.5.2
+pydantic==2.13.3
+pydantic-settings==2.14.0
 python-dotenv==1.0.1
 passlib[bcrypt]==1.7.4
 # passlib 1.7.4 读取 bcrypt.__about__，bcrypt>=4.1 移除该属性会导致 hash_password 运行时 AttributeError。
 # 必须锁死 4.0.x（此行同时约束 passlib[bcrypt] extra 的传递依赖）。
-bcrypt>=4.0.1,<4.1
+bcrypt==4.0.1
 pyjwt==2.9.0
 python-multipart==0.0.12
 loguru==0.7.2
@@ -21,19 +21,22 @@ langchain-core==1.4.9
 langchain-community==0.4.1
 langchain-classic==1.0.4
 langchain-text-splitters==1.1.2
+# app/agent/graph.py、state.py 直接 import StateGraph / add_messages，必须显式声明。
+# langchain 1.3.13 约束 langgraph>=1.2.5,<1.3.0；1.2.9 为本环境实际验证版本。
+langgraph==1.2.9
 
 # Vector Store（P2：Chroma 退场，知识库检索 + L2 语义缓存迁 ES）
-elasticsearch>=8.13,<9
+elasticsearch==8.19.3
 
 # Embeddings (BGE local + DashScope API compatible)
 sentence-transformers==3.1.1
 dashscope==1.20.12
 
 # Document Loaders
-pymupdf>=1.24.0,<2.0.0
+pymupdf==1.28.0
 pypdf==5.0.0
 python-docx==1.1.2
-unstructured>=0.16.19
+unstructured==0.18.32
 markdown==3.7
 
 # Rerank
@@ -45,13 +48,13 @@ aiofiles==24.1.0
 
 # MCP (Model Context Protocol) — 将商城只读查询能力暴露为 MCP Server
 # 必须 <2：mcp 2.x 把 FastMCP 改名为 MCPServer，app/mcp_server.py 用的是 v1 API
-mcp[cli]>=1.0.0,<2
+mcp[cli]==1.30.0
 
 # Redis (LLM Cache + Mall Bridge)
-redis[hiredis]>=5.0.0,<6.0.0
+redis[hiredis]==5.3.1
 
 # MySQL (P3-2：RAG 自有表迁入商城 MySQL，stellar_rag_ 前缀)
-pymysql>=1.1.0
+pymysql==1.2.3
 
 # Utils
 python-dateutil==2.9.0.post0

@@ -6,7 +6,7 @@ from app.agent.tools._mall_response import unwrap_mall
 from app.core.logger import logger
 
 
-@tool
+@tool("product_search")
 def product_search_tool(
     query: str,
     page: int = 1,

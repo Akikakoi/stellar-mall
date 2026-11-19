@@ -1,6 +1,6 @@
 """
 商品搜索 Embedding API — 供 Java 后端调用，将商品文本转为语义向量。
-内部接口，无需鉴权。
+内部接口，使用 X-Stellar-Rag-Sync-Secret 共享密钥鉴权。
 """
 from __future__ import annotations
 
