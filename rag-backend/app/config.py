@@ -154,12 +154,12 @@ class Settings(BaseSettings):
     LLM_CACHE_REDIS_URL: str = "redis://127.0.0.1:6379/11"
     LLM_CACHE_REDIS_TTL_ANSWER: int = 7200       # 答案缓存 TTL（秒）
     LLM_CACHE_REDIS_TTL_INTENT: int = 3600       # 意图缓存 TTL（秒）
-    # L2 Chroma 语义缓存
+    # L2 ES 语义缓存（接口保持同构）
     LLM_CACHE_SEMANTIC_ENABLED: bool = True
     LLM_CACHE_SEMANTIC_MAXSIZE: int = 5000        # 最大条目数
     LLM_CACHE_SEMANTIC_TTL_ANSWER: int = 7200     # 答案缓存 TTL（秒）
     LLM_CACHE_SEMANTIC_TTL_INTENT: int = 3600     # 意图缓存 TTL（秒）
-    LLM_CACHE_SEMANTIC_RERANK_THRESHOLD: float = 0.90  # Reranker 命中阈值（中文自然语言标点差异大，不宜过高）
+    LLM_CACHE_SEMANTIC_RERANK_THRESHOLD: float = 0.90  # 本地余弦相似度命中阈值（中文标点差异大，不宜过高）
     LLM_CACHE_SEMANTIC_K: int = 5                 # 召回候选数
     # 布隆过滤（缓存穿透快速负判定）：命中 L1 前先查布隆，不存在则直接 miss
     # 注：布隆为进程内结构，进程重启后需重新写入才恢复到全量（旧进程写入的 L1 会被跳过一次后自愈）

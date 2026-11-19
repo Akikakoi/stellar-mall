@@ -1,4 +1,4 @@
-"""LLM 三层缓存：L1 Redis 精确 + L2 Chroma 语义 + L3 真实 LLM 调用。
+"""LLM 三层缓存：L1 Redis 精确 + L2 ES 语义 + L3 真实 LLM 调用。
 
 用法：
     from app.rag.llm_cache import get_llm_cache
@@ -25,7 +25,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from app.config import settings
 from app.core.logger import logger
 
-# 方案C：缓存写入专用后台线程池。写入（embedding + Chroma 落库）较重且与当前请求无关，
+# 方案C：缓存写入专用后台线程池。写入（embedding + ES 落库）较重且与当前请求无关，
 # 放后台线程执行，避免阻塞 LLM 回答链路的返回。容量按 CPU 数限定。
 _CACHE_WRITE_EXECUTOR: ThreadPoolExecutor = ThreadPoolExecutor(
     max_workers=min(4, max(1, os.cpu_count() or 2)),
@@ -69,11 +69,20 @@ async def init_redis() -> bool:
         if _redis_available:
             logger.info(f"[LLMCache] L1 Redis 已连接: {settings.LLM_CACHE_REDIS_URL}")
         else:
-            logger.warning("[LLMCache] L1 Redis PING 失败，降级为 Chroma-only 缓存")
+            logger.warning("[LLMCache] L1 Redis PING 失败，降级为 ES-only 缓存")
     except Exception as e:
         _redis_available = False
         _redis_sync = None
-        logger.warning(f"[LLMCache] L1 Redis 不可用 ({e})，降级为 Chroma-only 缓存")
+        logger.warning(f"[LLMCache] L1 Redis 不可用 ({e})，降级为 ES-only 缓存")
+    return _redis_available
+
+
+def get_redis_sync():
+    """供 Agent 指标/幂等守卫复用的同步 Redis 客户端；不可用时返回 None。"""
+    return _redis_sync if _redis_available else None
+
+
+def is_redis_available() -> bool:
     return _redis_available
 
 
@@ -218,7 +227,7 @@ def get_cache_metrics() -> Dict[str, Any]:
 class _BloomFilter:
     """进程内布隆过滤器，用于 L1 精确缓存命中前的快速负判定。
 
-    思路：对从未写入过的 key，Redis/Chroma 查询永远是浪费。对一个忠实实现
+    思路：对从未写入过的 key，Redis/ES 查询永远是浪费。对一个忠实实现
     布隆只存在"必然不存在"与"可能存在并需要进一步查询"两种结论，因此用它
     拦截穿透查询（缓存穿透）可省掉大量无效的 L1 Redis 往返。
 
@@ -509,7 +518,7 @@ _l2_evict_last = [0.0]  # 上次淘汰时间戳（list 包装以便函数内直�
 
 
 def _get_semantic_collection():
-    """获取或初始化 ES 语义缓存 collection（P2：Chroma → ES，接口保持 Chroma 同构）。"""
+    """获取或初始化 ES 语义缓存 collection（已从 Chroma 迁移，接口保持同构）。"""
     global _semantic_collection, _semantic_available
     if _semantic_collection is not None:
         return _semantic_collection if _semantic_available else None
@@ -539,9 +548,9 @@ async def _semantic_search(
     query_emb: Optional[List[float]] = None,
     context_keys: Optional[List[str]] = None,
 ) -> Optional[Dict[str, Any]]:
-    """从 Chroma 语义缓存检索。
+    """从 ES 语义缓存检索。
 
-    流程：query embedding → Chroma 向量检索 (k) → 过滤匹配 model/temp/sys_hash → 相似度精排 → 阈值判定。
+    流程：query embedding → ES 向量检索 (k) → 过滤匹配 model/temp/sys_hash → 相似度精排 → 阈值判定。
 
     :param query_emb: 可选的预计算查询向量。调用方（如 retrieve 链路）若已算过同一
         query 的 embedding，应透传复用，避免重复调用云端 embedding（单次约 1.3s）。
@@ -600,7 +609,7 @@ async def _semantic_search(
         if not candidates:
             return None
 
-        # 方案B：直接用 query embedding + Chroma 已存向量做余弦精排，
+        # 方案B：直接用 query embedding + ES 已存向量做余弦精排，
         # 复用本已算出的 q_emb，不再走 rag.retriever.rerank（会再次触发云端 embedding，单次约 1.3s）。
         # 语义缓存排序只要求"候选间相似度倒序取 top1"，本地余弦即可，无需 CrossEncoder。
         import numpy as np
@@ -669,7 +678,7 @@ def _semantic_search_sync(
 ) -> Optional[Dict[str, Any]]:
     """_semantic_search 的纯同步实现（供 get_sync 使用，避免 asyncio.run 开销）。
 
-    与 async 版的检索/过滤/精排逻辑保持一致；Chroma client 本身即同步调用，
+    与 async 版的检索/过滤/精排逻辑保持一致；ES 检索走同步实现，
     因此这里无需事件循环。二者返回值结构相同。
     """
     # 开关守卫：与 async 版一致，关闭 L2 语义缓存时同步路径同样不再查询
@@ -721,7 +730,7 @@ def _semantic_search_sync(
         if not candidates:
             return None
 
-        # 复用本已算出的 q_emb + Chroma 已存向量做余弦精排，不再触发云端 embedding
+        # 复用本已算出的 q_emb + ES 已存向量做余弦精排，不再触发云端 embedding
         import numpy as np
         q_np = np.asarray(q_emb, dtype=np.float32).reshape(1, -1)
         best_idx = None
@@ -789,7 +798,7 @@ async def _semantic_put(
     suggestions: Optional[List[str]] = None,
     context_keys: Optional[List[str]] = None,
 ) -> bool:
-    """写入 Chroma 语义缓存。"""
+    """写入 ES 语义缓存。"""
     col = _get_semantic_collection()
     if col is None:
         return False
@@ -892,7 +901,7 @@ def _do_put_sync(
         }
         _redis_put_sync(query, model, temperature, system_prompt_hash, context_hash, data, ttl, cache_type,
                         product_ids=product_ids)
-        # L2: Chroma 语义写入（内部是同步 client，但方法为 async，用 asyncio.run 驱动）
+        # L2: ES 语义写入（内部是同步 client，但方法为 async，用 asyncio.run 驱动）
         try:
             asyncio.run(_semantic_put(
                 query=query, model=model, temperature=temperature,
@@ -934,7 +943,7 @@ class LLMCache:
         if result:
             return result
 
-        # L2: Chroma 语义缓存
+        # L2: ES 语义缓存
         result = await _semantic_search(query, model, temperature, system_prompt_hash, cache_type, context_hash,
                                         context_keys=context_keys)
         if result:
@@ -1010,7 +1019,7 @@ class LLMCache:
     ) -> Optional[Dict[str, Any]]:
         """同步查询缓存（供线程池中的 LangGraph 节点使用）。
 
-        L1 用 sync Redis；L2 用 Chroma（同步 client）+ 本函数内直算，不新建事件循环。
+        L1 用 sync Redis；L2 用 ES（同步 client）+ 本函数内直算，不新建事件循环。
 
         :param query_emb: 可选的预计算查询向量，透传给 L2 避免重复 embedding。
         """
@@ -1022,7 +1031,7 @@ class LLMCache:
         if result:
             return result
 
-        # L2: Chroma 语义缓存——走同步实现，避免 asyncio.run 每次新建/销毁事件循环
+        # L2: ES 语义缓存——走同步实现，避免 asyncio.run 每次新建/销毁事件循环
         result = _semantic_search_sync(
             query, model, temperature, system_prompt_hash, cache_type, context_hash, query_emb,
             context_keys=context_keys,
@@ -1054,7 +1063,7 @@ class LLMCache:
     ) -> None:
         """异步化写入 L1 + L2：提交到后台线程池，不阻塞主回答链路。
 
-        方案C：本地 embedding + Chroma 落库较重（秒级），放后台线程执行；
+        方案C：本地 embedding + ES 落库较重（秒级），放后台线程执行；
         写入对当前请求无感知，成功后对后续请求仍可命中。
         """
         _CACHE_WRITE_EXECUTOR.submit(
@@ -1073,7 +1082,7 @@ class LLMCache:
             return 0
         cleared_l2 = 0
         cleared_l1 = 0
-        # L2: Chroma 语义缓存按元数据过滤删除
+        # L2: ES 语义缓存按元数据过滤删除
         if col is not None:
             try:
                 all_data = col.get(include=["metadatas"])
@@ -1191,7 +1200,7 @@ def put_cache_sync(
 
 
 def invalidate_llm_cache_nowait() -> None:
-    """全量失效三层缓存（L1 Redis + L2 Chroma），同步上下文安全调用。
+    """全量失效三层缓存（L1 Redis + L2 ES），同步上下文安全调用。
 
     用途：知识库内容变更等"影响面大、无法按商品精准失效"的场景。
     内部自动适配事件循环：已有运行中 loop 时投递后台任务，否则同步驱动。

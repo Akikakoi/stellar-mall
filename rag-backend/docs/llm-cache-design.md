@@ -1,9 +1,16 @@
 # Stellar Mall LLM 缓存设计文档
 
-> 版本：v1.0  
-> 日期：2026-08-01  
-> 作者：Stellar Mall 团队  
-> 状态：设计阶段
+> 版本：v1.0（历史设计文档）
+> 日期：2026-08-01
+> 作者：Stellar Mall 团队
+> 状态：已落地（2026-11-19 按当前实现校正；实施计划等章节保留历史原貌）
+
+> ℹ️ **与最初设计的关键差异**：
+> - L2 语义缓存从 ChromaDB 迁到 Elasticsearch，判重由 BGE Reranker 0.95 改为本地余弦 0.90。
+> - Agent 路径已全量接入缓存：意图识别、答案生成、查询改写三层缓存 + FAQ 进程内旁路缓存。
+> - 缓存命中按 `cache_source`（faq / llm）计入 Agent 指标，可用 `python scripts/agent_metrics.py` 导出；L1/L2 细分见 `get_cache_metrics()`。
+> - Embedding 为 DashScope `text-embedding-v2`（1536 维），本地 BGE 降级路径实际不可用。
+> - 依赖已全量锁定到 `==` 版本（含 ES 8.19.3、langgraph 1.2.9），见 requirements.txt。
 
 ---
 
@@ -11,7 +18,7 @@
 
 ### 1.1 背景
 
-Stellar Mall 的 RAG 智能问答子系统（rag-backend）通过 LangGraph Agent + ChromaDB 知识库为用户提供商品咨询、订单查询等 AI 能力。每条请求至少经过 **2 次 LLM 调用**（意图识别 + 答案生成），每次调用耗时 1-5 秒、成本约 0.001-0.003 元。目前缓存仅覆盖 RAG 直连路径且命中率极低，Agent 路径完全无缓存。
+Stellar Mall 的 RAG 智能问答子系统（rag-backend）通过 LangGraph Agent（确定性主图 + ReAct 子图）为用户提供商品咨询、订单查询等 AI 能力。每条请求至少经过 **2 次 LLM 调用**（意图识别 + 答案生成），每次调用耗时 1-5 秒、成本约 0.001-0.003 元。当前意图识别、答案生成、查询改写均已接入三层缓存，FAQ 另有进程内旁路缓存。
 
 电商场景中，商品问答具有显著的 **长尾重复性**——热门商品（iPhone、充电器）承载 80% 以上咨询量，且用户问题高度集中（"多少钱""有什么功能""和 XX 比哪个好"）。引入 LLM 缓存可获得显著的延迟和成本收益。
 
@@ -66,9 +73,9 @@ Stellar Mall 的 RAG 智能问答子系统（rag-backend）通过 LangGraph Agen
 项目已具备以下可复用的组件：
 
 - **Redis 7.2**（Java 后端同一实例，`docker-compose.yml`，127.0.0.1:6379，db=11，maxmemory=256MB，淘汰策略 allkeys-lru）
-- **ChromaDB**（`ecommerce_knowledge_base` collection，持久化在 `./data/chroma`）
-- **Embedding 服务**（DashScope `text-embedding-v2` 优先，本地 `BAAI/bge-large-zh-v1.5` 兜底，1024 维）
-- **BGE Reranker**（本地 FlagEmbedding，`rerank` 函数已存在）
+- **Elasticsearch 8.19**（知识库检索 + L2 语义缓存，与商城搜索共用实例）
+- **Embedding 服务**（DashScope `text-embedding-v2`，1536 维；本地 BGE 降级路径实际不可用）
+- **BGE Reranker**（本地 `bge-reranker-v2-m3`，仅用于检索精排；L2 缓存判重用本地余弦）
 - **商品同步管道**（`api/internal.py` SPU/DOC 同步，含 `spu_id` / `min_price` 等 metadata）
 
 **不需要引入任何新组件**。
@@ -92,9 +99,9 @@ Stellar Mall 的 RAG 智能问答子系统（rag-backend）通过 LangGraph Agen
            │ miss
            ▼
 ┌────────────────────────────────────────────────┐
-│  L2: Chroma 语义缓存                             │
+│  L2: ES 语义缓存                                │
 │  Collection: llm_semantic_cache                 │
-│  匹配: Embedding 相似度 + Reranker 二次确认       │
+│  匹配: 向量召回 + 本地余弦阈值 0.90              │
 │  延迟: ~50ms                                    │
 │  命中率: 15-25%（语义相似）                       │
 └──────────┬─────────────────────────────────────┘
@@ -233,18 +240,14 @@ redis_client = aioredis.from_url(
 
 ---
 
-### 4.2 L2 — Chroma 语义缓存
+### 4.2 L2 — ES 语义缓存
 
 #### 4.2.1 Collection 设计
 
-**新建 collection**：`llm_semantic_cache`（与现有的 `ecommerce_knowledge_base` 独立）
+**索引**：`stellar_rag_llm_cache`（由 `ESCacheCollection` 自动创建，与知识库索引独立）
 
 ```python
-# 创建
-chroma_client.create_collection(
-    name="llm_semantic_cache",
-    metadata={"hnsw:space": "cosine"}
-)
+col = ESCacheCollection()
 ```
 
 #### 4.2.2 Document 结构
@@ -272,21 +275,21 @@ chroma_client.create_collection(
 
 ```
 query → Embedding
-  → Chroma llm_semantic_cache 向量检索 (k=5)
+  → ES 语义缓存索引向量检索 (k=5)
   → 过滤：model、temperature、system_prompt_hash 完全匹配
-  → BGE Reranker 精排（query vs 前5条候选的 query 字段）
-  → 最高 rerank_score > 0.95 → 命中
+  → 本地 numpy 余弦精排（query embedding vs 候选向量）
+  → 最高相似度 > 0.90（LLM_CACHE_SEMANTIC_RERANK_THRESHOLD）→ 命中
   → 否则 → miss
 ```
 
-**为什么用 Reranker 而非单纯的 Embedding 相似度**：
+**为什么用本地余弦而非 Reranker 二次精排**：
 
 | 方法 | 阈值 | 典型准确率 | 说明 |
 |------|------|-----------|------|
-| Embedding 余弦相似度 | 0.95 | ~85% | 容易误判"苹果手机多少钱"和"苹果股票多少钱"相似 |
-| Reranker 精排 | 0.95 | ~98% | Cross-encoder 逐对打分，区分度更高 |
+| 本地余弦相似度 | 0.90 | 已在生产验证 | 复用 query embedding，无额外模型往返 |
+| BGE Reranker 精排 | — | — | 仅用于知识库检索精排，不参与缓存判重 |
 
-你项目已有本地 BGE Reranker（`FlagEmbedding`），额外延迟约 10-20ms，换来准确率的大幅提升。
+L2 判重直接复用已算出的 query embedding 与候选向量做余弦，不额外加载 Reranker；检索侧 Reranker 仍由 `app/rag/retriever.py` 使用。
 
 #### 4.2.4 容量与淘汰
 
@@ -327,8 +330,10 @@ return answer  # 不等待缓存写入完成
 
 ### 5.1 意图识别缓存 — `agent/nodes.py:intent_classification_node`
 
+> 下方伪代码为设计阶段命名；当前实现 API 为 `get_cache_sync()` / `put_cache_sync()`（`app/rag/llm_cache.py`）。
+
 **优先级**：P1（预期命中率 50-70%）  
-**缓存层**：L1（Redis 精确）+ L2（Chroma 语义）  
+**缓存层**：L1（Redis 精确）+ L2（ES 语义）
 **Key 特殊性**：意图识别不依赖 context（工具结果），key 不包含 context_hash
 
 **接入伪代码**：
@@ -494,8 +499,8 @@ async def astream_answer_with_sources(query, ...):
 | L1 Redis 答案 | 7200s | Redis `EXPIRE`，到期自动删除 |
 | L1 Redis 意图 | 3600s | Redis `EXPIRE` |
 | L1 Redis 改写 | 1800s | Redis `EXPIRE` |
-| L2 Chroma 答案 | 7200s | 惰性扫描 + 定时清理 |
-| L2 Chroma 意图 | 3600s | 同 |
+| L2 ES 答案 | 7200s | TTL 字段过滤 + 容量淘汰 |
+| L2 ES 意图 | 3600s | 同 |
 
 ### 6.2 精准失效（按商品 ID）
 
@@ -506,7 +511,7 @@ async def astream_answer_with_sources(query, ...):
 Mall Java 后端 SPU 更新
   → 发布事件 / 调用 rag-backend 内部接口
   → rag-backend: invalidate_by_product_ids([123, 456])
-    → L2 Chroma：metadata.product_ids 包含任一 ID → 标记失效
+    → L2 ES：metadata.product_ids 含任一 ID → 标记失效
     → L1 Redis：精确 key 已自动过期（2h TTL），无需额外操作
 ```
 
@@ -522,7 +527,7 @@ await invalidate_by_product_ids([spu_id])
 | 场景 | 操作 | 影响范围 |
 |------|------|----------|
 | Prompt 模板变更 | `invalidate_by_prompt_hash(old_hash)` | 仅旧模板的缓存 |
-| 知识库全量重建 | `invalidate_by_collection("*")` | L2 Chroma 全部清除，L1 自然过期 |
+| 知识库全量重建 | 重建后显式 `invalidate_bm25_cache()` | L2 ES 按 product_ids 精准失效，L1 自然过期 |
 | 模型升级（qwen-plus → qwen-max） | 全量清除 | L1 + L2 全部 |
 
 ### 6.4 缓存穿透防护
@@ -549,14 +554,13 @@ intent_cache_miss:qwen-plus:0.3:INTENT_HASH:{query_hash}  → 单 query miss 计
 LLM_CACHE_REDIS_ENABLED: bool = True
 LLM_CACHE_REDIS_TTL_ANSWER: int = 7200       # 答案缓存 TTL（秒）
 LLM_CACHE_REDIS_TTL_INTENT: int = 3600       # 意图缓存 TTL（秒）
-LLM_CACHE_REDIS_TTL_REWRITE: int = 1800      # 改写缓存 TTL（秒）
 
-# L2 Chroma 语义缓存
+# L2 ES 语义缓存
 LLM_CACHE_SEMANTIC_ENABLED: bool = True
 LLM_CACHE_SEMANTIC_MAXSIZE: int = 5000        # 最大条目数
 LLM_CACHE_SEMANTIC_TTL_ANSWER: int = 7200     # 答案缓存 TTL（秒）
 LLM_CACHE_SEMANTIC_TTL_INTENT: int = 3600     # 意图缓存 TTL（秒）
-LLM_CACHE_SEMANTIC_RANK_THRESHOLD: float = 0.95  # Reranker 命中阈值
+LLM_CACHE_SEMANTIC_RERANK_THRESHOLD: float = 0.90  # 本地余弦相似度命中阈值
 LLM_CACHE_SEMANTIC_K: int = 5                 # 召回候选数
 
 # 全局开关
@@ -587,7 +591,7 @@ LLM_CACHE_ENABLED: bool = True                # 总开关
 
 ```
 [LLMCache] L1_HIT    query="iPhone 15 多少钱" latency_ms=2
-[LLMCache] L2_HIT    query="苹果15 价格"      latency_ms=48  rerank_score=0.97
+[LLMCache] L2_HIT    query="苹果15 价格"      latency_ms=48  best_score=0.93
 [LLMCache] MISS      query="宇宙飞船怎么买"    latency_ms=55
 [LLMCache] WRITE_OK  query="iPhone 15 多少钱" layers=L1+L2
 [LLMCache] WRITE_ERR query="..."             error="Redis timeout"
@@ -622,7 +626,7 @@ redis-cli -n 11 --bigkeys
 
 - [ ] 新建 `app/rag/llm_cache.py` 模块，实现 `get_cached_answer()` / `put_cached_answer()` / `invalidate()` 三个接口
 - [ ] 在 FastAPI `lifespan` 中初始化 Redis 异步客户端
-- [ ] 在 Chroma 中创建 `llm_semantic_cache` collection
+- [x] 在 ES 中创建语义缓存索引（已由 `ESCacheCollection` 完成）
 - [ ] 新增 `config.py` 配置项
 - [ ] 编写单元测试
 
@@ -659,9 +663,9 @@ redis-cli -n 11 --bigkeys
 | 风险 | 概率 | 影响 | 预案 |
 |------|------|------|------|
 | Redis 连接超时 | 低 | 缓存全 miss，走原始 LLM | 超时设为 1s，降级不影响主流程 |
-| Chroma 检索变慢 | 中 | L2 查询耗时增加 | 超时 100ms，超时只返回 L1 结果 |
+| ES 检索变慢 | 中 | L2 查询耗时增加 | 超时即降级，只返回 L1 结果 |
 | 缓存返回过期答案 | 中 | 用户看到错误信息 | 2h TTL + 商品变更精准失效 |
-| Reranker 性能瓶颈 | 低 | 语义缓存延迟 > 100ms | 限制并发、考虑异步预热 |
+| 本地余弦计算开销 | 低 | 大候选集下耗时上升 | 限制 K（当前 5），命中回写 L1 |
 | 缓存内存占用过大 | 低 | Redis OOM | maxmemory-policy=allkeys-lru 自动淘汰 |
 
 ---
@@ -721,20 +725,12 @@ REDIS_SOCKET_CONNECT_TIMEOUT = 1
 REDIS_RETRY_ON_TIMEOUT = False  # 不重试，缓存 miss 可接受
 ```
 
-## 附录 C：Chroma metadata 查询示例
+## 附录 C：ES 按商品 ID 失效示例
 
 ```python
-# 按 product_ids 精准失效
-collection.get(
-    where={
-        "$or": [
-            {"product_ids": {"$contains": "123"}},
-            {"product_ids": {"$contains": "456"}},
-        ]
-    }
-)
-# 注意：Chroma 的 $contains 是子串匹配，"123" 会匹配 "123,456" 和 "1123"
-# 存储时 product_ids 前后加逗号防止误匹配：",123,456,"
+# 按 product_ids 精准失效（ES terms 查询，避免子串误匹配）
+body = {"query": {"terms": {"product_ids": [123, 456]}}}
+# 存储时 product_ids 为数组字段，不用逗号拼接
 ```
 
 ---
