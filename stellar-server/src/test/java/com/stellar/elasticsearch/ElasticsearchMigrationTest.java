@@ -8,6 +8,7 @@ import co.elastic.clients.util.ObjectBuilder;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.stellar.dto.SpuPageQueryDTO;
 import com.stellar.elasticsearch.doc.SpuDocument;
+import com.stellar.elasticsearch.service.SearchDictionaryService;
 import com.stellar.elasticsearch.service.SearchSuggestService;
 import com.stellar.elasticsearch.service.SpuSearchService;
 import com.stellar.elasticsearch.service.SynonymEngine;
@@ -39,13 +40,14 @@ class ElasticsearchMigrationTest {
     private final ElasticsearchClient client = mock(ElasticsearchClient.class);
     private final SpuMapper mapper = mock(SpuMapper.class);
     private final SynonymEngine synonyms = mock(SynonymEngine.class);
+    private final SearchSuggestService suggestService = mock(SearchSuggestService.class);
     private SpuSearchService service;
     private SearchHits<SpuDocument> hits;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
-        service = new SpuSearchService(operations, client, mapper, synonyms);
+        service = new SpuSearchService(operations, client, mapper, synonyms, suggestService);
         ReflectionTestUtils.setField(service, "indexPrefix", "stellar");
         hits = mock(SearchHits.class);
         when(hits.iterator()).thenAnswer(invocation -> Collections.emptyIterator());
@@ -204,23 +206,66 @@ class ElasticsearchMigrationTest {
         when(hit.getContent()).thenReturn(document);
         when(hits.iterator()).thenAnswer(invocation -> List.of(hit, hit).iterator());
         when(synonyms.allTerms()).thenReturn(java.util.Set.of("手机膜", "手机壳"));
-        SearchSuggestService suggest = new SearchSuggestService(operations, synonyms);
+        SearchSuggestService suggest = new SearchSuggestService(operations, synonyms,
+                mock(SearchDictionaryService.class));
 
         assertEquals(List.of("手机膜", "手机壳"), suggest.suggest(" 手机 ").getCompletions());
         assertEquals("手机", capturedTextQuery().getQuery().bool().must().get(0).matchPhrasePrefix().query());
     }
 
     @Test
-    void correctionUsesFuzzinessAndRejectsShortInput() {
-        SearchSuggestService suggest = new SearchSuggestService(operations, synonyms);
-        assertNull(suggest.correct("ab"));
+    void correctionDelegatesToDictionaryAndFillsCorrectionWhenNoCompletions() {
+        SearchDictionaryService dictionary = mock(SearchDictionaryService.class);
+        when(dictionary.correct("iphoen")).thenReturn("iphone");
+        SearchSuggestService suggest = new SearchSuggestService(operations, synonyms, dictionary);
+
         assertTrue(suggest.suggest(" ").getCompletions().isEmpty());
         verifyNoInteractions(operations);
 
-        assertNull(suggest.correct("iphoen"));
-        var multiMatch = capturedTextQuery().getQuery().bool().must().get(0).multiMatch();
-        assertEquals("AUTO", multiMatch.fuzziness());
-        assertEquals(List.of("name", "subTitle"), multiMatch.fields());
+        assertEquals("iphone", suggest.suggest("iphoen").getCorrection());
+        assertEquals("iphone", suggest.correct("iphoen"));
+    }
+
+    @Test
+    void zeroResultSearchAttachesCorrection() throws Exception {
+        when(suggestService.correct("qwertyuiop")).thenReturn("qwerty");
+        cacheEmbedding("qwerty");
+        SpuPageQueryDTO dto = keyword("qwertyuiop");
+        stubVectors(0.95); // 拉丁乱码被纯语义兜底拒绝 → 0 结果
+
+        SearchResultVO result = service.searchWithHighlight(dto);
+
+        assertEquals(0L, result.getTotal());
+        assertEquals("qwerty", result.getCorrection());
+        assertNull(result.getCorrected(), "纠错词同样零结果时不应切换结果集");
+    }
+
+    @Test
+    void autoSwitchesToCorrectedResultsAndFlagsThem() throws Exception {
+        when(suggestService.correct("冰相")).thenReturn("冰箱");
+        cacheEmbedding("冰箱");
+        // 第一次 kNN（冰相）无召回，第二次 kNN（冰箱）命中 → 纠错重查有结果
+        stubVectorSequence(new double[]{}, new double[]{0.95});
+
+        SearchResultVO result = service.searchWithHighlight(keyword("冰相"));
+
+        assertEquals(1L, result.getTotal(), "应按纠错词返回结果");
+        assertEquals("冰箱", result.getCorrection());
+        assertEquals(Boolean.TRUE, result.getCorrected());
+    }
+
+    @Test
+    void literalSearchKeepsOriginalKeywordWithoutAutoCorrection() throws Exception {
+        when(suggestService.correct("冰相")).thenReturn("冰箱");
+        SpuPageQueryDTO dto = keyword("冰相");
+        dto.setLiteralSearch(true);
+        stubVectors();
+
+        SearchResultVO result = service.searchWithHighlight(dto);
+
+        assertEquals(0L, result.getTotal());
+        assertEquals("冰箱", result.getCorrection());
+        assertNull(result.getCorrected(), "literalSearch 不应自动切换结果集");
     }
 
     @Test
@@ -300,24 +345,38 @@ class ElasticsearchMigrationTest {
 
     @SuppressWarnings("unchecked")
     private SpuPageQueryDTO keyword(String text) {
-        Cache<String, double[]> cache = (Cache<String, double[]>) ReflectionTestUtils.getField(service, "embedCache");
-        cache.put(text, new double[]{1.0, 0.0});
+        cacheEmbedding(text);
         SpuPageQueryDTO dto = new SpuPageQueryDTO();
         dto.setName(text);
         return dto;
     }
 
     @SuppressWarnings("unchecked")
+    private void cacheEmbedding(String text) {
+        Cache<String, double[]> cache = (Cache<String, double[]>) ReflectionTestUtils.getField(service, "embedCache");
+        cache.put(text, new double[]{1.0, 0.0});
+    }
+
     private void stubVectors(double... scores) throws Exception {
-        var builder = new SearchResponse.Builder<Void>()
-                .took(1).timedOut(false).shards(s -> s.total(1).successful(1).failed(0));
-        var vectorHits = new java.util.ArrayList<co.elastic.clients.elasticsearch.core.search.Hit<Void>>();
-        for (int i = 0; i < scores.length; i++) {
-            vectorHits.add(new co.elastic.clients.elasticsearch.core.search.Hit.Builder<Void>()
-                    .index("stellar_spu").id(String.valueOf(i + 1)).score(scores[i]).build());
+        stubVectorSequence(scores);
+    }
+
+    /** 按调用顺序依次返回 kNN 响应：用于区分原词查询与纠错重查。 */
+    private void stubVectorSequence(double[]... scoreSets) throws Exception {
+        @SuppressWarnings("unchecked")
+        SearchResponse<Void>[] responses = new SearchResponse[scoreSets.length];
+        for (int s = 0; s < scoreSets.length; s++) {
+            var builder = new SearchResponse.Builder<Void>()
+                    .took(1).timedOut(false).shards(sh -> sh.total(1).successful(1).failed(0));
+            var vectorHits = new java.util.ArrayList<co.elastic.clients.elasticsearch.core.search.Hit<Void>>();
+            for (int i = 0; i < scoreSets[s].length; i++) {
+                vectorHits.add(new co.elastic.clients.elasticsearch.core.search.Hit.Builder<Void>()
+                        .index("stellar_spu").id(String.valueOf(i + 1)).score(scoreSets[s][i]).build());
+            }
+            responses[s] = builder.hits(h -> h.hits(vectorHits)).build();
         }
         when(client.search(any(Function.class), eq(Void.class)))
-                .thenReturn(builder.hits(h -> h.hits(vectorHits)).build());
+                .thenReturn(responses[0], java.util.Arrays.copyOfRange(responses, 1, responses.length));
     }
 
     @SuppressWarnings("unchecked")

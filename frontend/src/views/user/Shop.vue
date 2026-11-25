@@ -130,7 +130,7 @@
           <div class="result-bar">
             <span class="result-count" v-if="!loading">
               共 <strong>{{ total }}</strong> 件商品
-              <span v-if="keyword"> &mdash; <em class='hl'>{{ keyword }}</em></span>
+              <span v-if="keyword"> &mdash; <em class='hl'>{{ corrected ? correction : keyword }}</em></span>
               <span v-else-if="categoryName"> &mdash; {{ categoryName }}</span>
             </span>
             <span v-if="hasActiveFilters" class="active-filters-hint">
@@ -145,6 +145,17 @@
                 <el-radio-button :value="5">5</el-radio-button>
               </el-radio-group>
             </div>
+          </div>
+
+          <!-- 自动纠错：原词零结果时后端已按纠错词出结果，保留「仍然搜索原词」入口 -->
+          <div v-if="corrected && correction && keyword" class="did-you-mean">
+            <span class="dym-text">未找到“{{ keyword }}”的商品，已按“{{ correction }}”为您显示结果</span>
+            <button type="button" class="dym-link" @click="searchLiteral">仍然搜索“{{ keyword }}”</button>
+          </div>
+          <!-- 「您是不是要找」纠错提示：零结果 / 纯语义弱匹配时由后端返回 -->
+          <div v-else-if="correction && keyword" class="did-you-mean">
+            <span class="dym-text">您是不是要找：</span>
+            <button type="button" class="dym-link" @click="applyCorrection">{{ correction }}</button>
           </div>
 
           <!-- 商品网格 -->
@@ -252,6 +263,12 @@ function setColumns(n: any) {
 const loading = ref(false)
 const loadingMore = ref(false)
 const keyword = ref('')
+// 纠错建议词（后端返回）
+const correction = ref('')
+// 后端已按纠错词返回结果；此时展示「仍然搜索原词」而不是建议链接
+const corrected = ref(false)
+// true = 用户坚持按原词搜索，请求时跳过后端自动纠错
+const literalMode = ref(false)
 const searchKeyword = ref('')  // 顶部大搜索框的输入绑定
 const historyOpen = ref(false) // 搜索历史面板是否展开
 // 搜索历史（与导航栏/主页搜索框共享同一份数据，按用户隔离）
@@ -369,6 +386,7 @@ function doShopSearch() {
   addToHistory(kw)
   historyOpen.value = false
   keyword.value = kw
+  literalMode.value = false
   // 更新 URL 但不跳转新页面
   router.replace({ query: { ...route.query, keyword: kw } })
   // 重置并重新加载
@@ -381,6 +399,30 @@ function doShopSearch() {
   page.value = 1
   loadSpu()
   track('search', { keyword: kw, scene: 'search' })
+}
+
+/**
+ * 应用「您是不是要找」的纠错建议：以建议词重新搜索，并记录一次纠错点击埋点
+ */
+function applyCorrection() {
+  const suggested = correction.value
+  if (!suggested) return
+  track('search_correction_click', {
+    keyword: keyword.value,
+    scene: 'search',
+    extra: { correction: suggested }
+  })
+  searchKeyword.value = suggested
+  doShopSearch()
+}
+
+/**
+ * 仍然搜索原词：跳过后端自动纠错，展示原词的真实结果（通常为空）
+ */
+function searchLiteral() {
+  literalMode.value = true
+  page.value = 1
+  loadSpu()
 }
 
 /**
@@ -501,6 +543,8 @@ async function loadSpu(append = false) {
     page.value = 1
     favSet.clear()
     highlights.value = {}
+    correction.value = ''
+    corrected.value = false
     // 聚合数据不重置，保持初始全量数据
     // 旧卡片先留在原地作为 FLIP 的起点（首次加载时列表为空，骨架屏照常显示）；
     // total 不归零，避免把「共 N 件」清成 0 再跳回来
@@ -508,7 +552,10 @@ async function loadSpu(append = false) {
   }
   try {
     const params: Record<string, any> = { page: page.value, pageSize: pageSize.value }
-    if (keyword.value) params.name = keyword.value
+    if (keyword.value) {
+      params.name = keyword.value
+      if (literalMode.value) params.literalSearch = true
+    }
     if (categoryId.value) params.categoryId = categoryId.value
 
     // 聚合筛选参数
@@ -524,6 +571,10 @@ async function loadSpu(append = false) {
     const res: any = await listSpu(params)
     if (res && typeof res === 'object') {
       total.value = res.total || 0
+      if (!append) {
+        correction.value = keyword.value ? String(res.correction || '') : ''
+        corrected.value = Boolean(res.corrected)
+      }
       const records = Array.isArray(res.records) ? res.records
         : Array.isArray(res.list) ? res.list
         : Array.isArray(res) ? res : []
@@ -1035,6 +1086,38 @@ html.theme-dark .history-panel {
   margin-left: 8px;
 }
 
+/* 「您是不是要找」提示条：磨砂玻璃，与结果统计条同规格 */
+.did-you-mean {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: -8px 0 20px;
+  padding: 10px 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: var(--glass-bg);
+  backdrop-filter: var(--backdrop-blur);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+}
+.dym-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--brand-primary, #409EFF);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+@media (hover: hover) {
+  .dym-link:hover { color: var(--brand-primary-hover, #337ecc); }
+}
+
 .col-toggle {
   display: flex;
   align-items: center;
@@ -1137,6 +1220,7 @@ html.theme-dark .history-panel {
   .spu-price { font-size: 16px; }
   .result-bar { padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
   .result-bar strong { font-size: 16px; }
+  .did-you-mean { padding: 8px 12px; font-size: 13px; margin-bottom: 14px; }
 }
 
 @media (max-width: 480px) {

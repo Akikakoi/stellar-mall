@@ -63,6 +63,7 @@ public class SpuSearchService {
     private final ElasticsearchClient esClient;
     private final SpuMapper spuMapper;
     private final SynonymEngine synonymEngine;
+    private final SearchSuggestService suggestService;
 
     @Value("${stellar.elasticsearch.index-prefix:stellar}")
     private String indexPrefix;
@@ -104,10 +105,12 @@ public class SpuSearchService {
             .build();
 
     public SpuSearchService(ElasticsearchOperations esOps, ElasticsearchClient esClient,
-                            SpuMapper spuMapper, SynonymEngine synonymEngine) {
+                            SpuMapper spuMapper, SynonymEngine synonymEngine,
+                            SearchSuggestService suggestService) {
         this.esOps = esOps; this.esClient = esClient;
         this.spuMapper = spuMapper;
         this.synonymEngine = synonymEngine;
+        this.suggestService = suggestService;
     }
 
     @PostConstruct void init() { tryRecoverEs(); }
@@ -127,16 +130,28 @@ public class SpuSearchService {
             return cached;
         }
 
-        SearchResultVO vo = null;
-        if (esAvailable) {
-            try { vo = searchByEs(dto); }
-            catch (Exception e) {
-                log.warn("ES failed, fallback MySQL: {}", e.getMessage());
-                esAvailable = false;
-                tryRecoverEs();
+        SearchResultVO vo = doSearch(dto);
+
+        String typed = dto.getName() == null ? "" : dto.getName().trim();
+        // 零结果时给「您是不是要找」：词典纠错不依赖 ES，降级 MySQL 时同样可用
+        if (!typed.isEmpty() && vo.getCorrection() == null
+                && (vo.getTotal() == null || vo.getTotal() == 0)) {
+            vo.setCorrection(suggestService.correct(typed));
+        }
+
+        // 纠错词能搜到结果时直接按纠错词出结果并标记 corrected，前端提供「仍然搜索原词」；
+        // literalSearch=true（用户坚持原词）时跳过自动切换。
+        String correction = vo.getCorrection();
+        if (!Boolean.TRUE.equals(dto.getLiteralSearch()) && !typed.isEmpty()
+                && correction != null && !correction.equalsIgnoreCase(typed)) {
+            SearchResultVO correctedVo = doSearch(correctedQuery(dto, correction));
+            if (correctedVo.getTotal() != null && correctedVo.getTotal() > 0) {
+                correctedVo.setCorrection(correction);
+                correctedVo.setCorrected(true);
+                vo = correctedVo;
+                log.debug("search auto-corrected '{}' -> '{}'", typed, correction);
             }
         }
-        if (vo == null) vo = fallbackSearch(dto);
 
         // ---- 写入缓存（异常不影响搜索主流程） ----
         try {
@@ -147,13 +162,44 @@ public class SpuSearchService {
         return vo;
     }
 
+    private SearchResultVO doSearch(SpuPageQueryDTO dto) {
+        SearchResultVO vo = null;
+        if (esAvailable) {
+            try { vo = searchByEs(dto); }
+            catch (Exception e) {
+                log.warn("ES failed, fallback MySQL: {}", e.getMessage());
+                esAvailable = false;
+                tryRecoverEs();
+            }
+        }
+        return vo == null ? fallbackSearch(dto) : vo;
+    }
+
+    /** 复制查询条件、仅替换关键词用于纠错重查；不改动调用方 DTO。 */
+    private static SpuPageQueryDTO correctedQuery(SpuPageQueryDTO src, String keyword) {
+        SpuPageQueryDTO copy = new SpuPageQueryDTO();
+        copy.setPage(src.getPage());
+        copy.setPageSize(src.getPageSize());
+        copy.setName(keyword);
+        copy.setCategoryId(src.getCategoryId());
+        copy.setStatus(src.getStatus());
+        copy.setIsNew(src.getIsNew());
+        copy.setIsHot(src.getIsHot());
+        copy.setPriceFrom(src.getPriceFrom());
+        copy.setPriceTo(src.getPriceTo());
+        copy.setSortBy(src.getSortBy());
+        copy.setSortOrder(src.getSortOrder());
+        copy.setLiteralSearch(true);
+        return copy;
+    }
+
     /** 结果缓存 key：覆盖 DTO 全部影响结果的字段（trim 归一化空白）。 */
     private static String resultCacheKey(SpuPageQueryDTO dto) {
         return String.join("|",
                 norm(dto.getPage()), norm(dto.getPageSize()), norm(dto.getName()),
                 norm(dto.getCategoryId()), norm(dto.getStatus()), norm(dto.getIsNew()),
                 norm(dto.getIsHot()), norm(dto.getPriceFrom()), norm(dto.getPriceTo()),
-                norm(dto.getSortBy()), norm(dto.getSortOrder()));
+                norm(dto.getSortBy()), norm(dto.getSortOrder()), norm(dto.getLiteralSearch()));
     }
 
     private static String norm(Object o) {
@@ -550,6 +596,10 @@ public class SpuSearchService {
         vo.setRecords(spuList);
         vo.setHighlights(highlightMap);
         vo.setAggregations(mySqlAggregations(dto));
+        // BM25 零命中 → 结果纯靠语义兜底，相关性弱，顺带给出纠错建议
+        if (bmIds.isEmpty()) {
+            vo.setCorrection(suggestService.correct(keyword));
+        }
         return vo;
     }
 

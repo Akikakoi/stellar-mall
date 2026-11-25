@@ -165,6 +165,12 @@
             <artifactId>hutool-captcha</artifactId>
         </dependency>
 
+        <!-- 拼音转换（搜索纠错：同音字匹配，纯 Java 无外部服务） -->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+        </dependency>
+
         <!-- POI 报表 -->
         <dependency>
             <groupId>org.apache.poi</groupId>

@@ -38,6 +38,8 @@
         <jaxb-api>4.0.2</jaxb-api>
         <poi>5.2.5</poi>
         <hutool>5.8.32</hutool>
+        <!-- 拼音转换（搜索纠错：同音字匹配） -->
+        <pinyin4j>2.5.1</pinyin4j>
     </properties>
 
     <dependencyManagement>
@@ -137,6 +139,11 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-captcha</artifactId>
                 <version>${hutool}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.belerweb</groupId>
+                <artifactId>pinyin4j</artifactId>
+                <version>${pinyin4j}</version>
             </dependency>
             <!-- 三模块互相依赖声明（子模块自己写 version 时自动继承父 POM） -->
             <dependency>

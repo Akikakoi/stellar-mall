@@ -281,6 +281,13 @@
     ORDER BY s.id ASC
   </select>
 
+  <!-- 搜索纠错词典：只取上架商品名，避免加载 description 等大字段 -->
+  <select id="listAllNames" resultType="java.lang.String">
+    SELECT name FROM stellar_spu
+    WHERE status = 1 AND name IS NOT NULL
+    ORDER BY id ASC
+  </select>
+
   <!-- 销量累计（支付成功后回写） -->
   <update id="incrSaleCount">
     UPDATE stellar_spu SET sale_count = sale_count + #{qty} WHERE id = #{spuId}
