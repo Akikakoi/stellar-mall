@@ -144,6 +144,10 @@ export interface Aggregation {
 export interface SearchResult {
   total: number
   records: Spu[]
+  /** 纠错建议词（零结果/弱匹配时后端返回） */
+  correction?: string
+  /** true 表示 records 是按 correction 重新搜索的结果（原词零结果时自动切换） */
+  corrected?: boolean
   /** spuId → 高亮片段列表(含 <em> 标签的 HTML 片段) */
   highlights: Record<number, string[]>
   aggregations?: Aggregation

@@ -55,4 +55,11 @@ public class SpuPageQueryDTO implements Serializable {
      */
     @ApiModelProperty("排序方向：asc / desc；留空走默认方向")
     private String sortOrder;
+
+    /**
+     * true = 按原词字面搜索，跳过「零结果自动按纠错词出结果」。
+     * 前端「仍然搜索原词」入口使用；默认 false。
+     */
+    @ApiModelProperty("是否按原词字面搜索（跳过自动纠错）")
+    private Boolean literalSearch;
 }

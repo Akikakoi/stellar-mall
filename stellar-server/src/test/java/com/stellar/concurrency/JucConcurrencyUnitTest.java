@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.stellar.config.AsyncExecutorConfig;
 import com.stellar.config.BaseContextTaskDecorator;
 import com.stellar.context.BaseContext;
+import com.stellar.elasticsearch.service.SearchSuggestService;
 import com.stellar.elasticsearch.service.SpuSearchService;
 import com.stellar.elasticsearch.service.SynonymEngine;
 import com.stellar.elasticsearch.sync.SpuEsSyncService;
@@ -157,7 +158,8 @@ class JucConcurrencyUnitTest {
                 mock(ElasticsearchOperations.class),
                 mock(ElasticsearchClient.class),
                 mock(SpuMapper.class),
-                mock(SynonymEngine.class));
+                mock(SynonymEngine.class),
+                mock(SearchSuggestService.class));
 
         Cache<String, ?> resultCache = field(service, "resultCache");
         assertEquals(1024, resultCache.policy().eviction().orElseThrow().getMaximum(),

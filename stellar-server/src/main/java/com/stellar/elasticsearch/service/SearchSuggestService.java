@@ -16,7 +16,8 @@ import java.util.*;
  * 搜索建议服务 — 提供自动补全 + 拼写纠错。
  * <p>
  * 自动补全（match_phrase_prefix）在用户输入时实时提供候选项；
- * 拼写纠错（fuzziness 回查）当主搜索无结果时给出纠错建议。
+ * 拼写纠错走本地词典（{@link SearchDictionaryService}：拼音同音字 + 编辑距离），
+ * 不依赖 ES 可用性，主搜索无结果时由 {@code SpuSearchService} 调用。
  */
 @Slf4j
 @Service
@@ -26,10 +27,13 @@ public class SearchSuggestService {
 
     private final ElasticsearchOperations esOps;
     private final SynonymEngine synonymEngine;
+    private final SearchDictionaryService dictionaryService;
 
-    public SearchSuggestService(ElasticsearchOperations esOps, SynonymEngine synonymEngine) {
+    public SearchSuggestService(ElasticsearchOperations esOps, SynonymEngine synonymEngine,
+                                SearchDictionaryService dictionaryService) {
         this.esOps = esOps;
         this.synonymEngine = synonymEngine;
+        this.dictionaryService = dictionaryService;
     }
 
     /**
@@ -70,36 +74,15 @@ public class SearchSuggestService {
             vo.setCompletions(List.of());
         }
 
+        // 无补全候选时才给纠错建议（词典纠错不依赖 ES，ES 挂掉也能提示）
+        if (vo.getCompletions().isEmpty()) {
+            vo.setCorrection(dictionaryService.correct(kw));
+        }
         return vo;
     }
 
-    /**
-     * 拼写纠错：当搜索无结果时，用 fuzziness 模糊匹配给出纠错建议。
-     */
+    /** 拼写纠错：委托本地词典（拼音同音字 + 编辑距离），无可靠建议时返回 null。 */
     public String correct(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) return null;
-        String kw = keyword.trim();
-        if (kw.length() < 3) return null;
-
-        NativeQuery query = NativeQuery.builder()
-                .withQuery(q -> q.bool(b -> b
-                        .must(m -> m.multiMatch(mm -> mm
-                                .query(kw)
-                                .fields("name", "subTitle")
-                                .fuzziness("AUTO")))))
-                .withPageable(PageRequest.of(0, 3))
-                .withFields("name")
-                .build();
-
-        try {
-            SearchHits<SpuDocument> hits = esOps.search(query, SpuDocument.class);
-            if (hits.getTotalHits() > 0) {
-                // 拿第一个高得分的商品名作为纠错建议
-                return hits.getSearchHit(0).getContent().getName();
-            }
-        } catch (Exception e) {
-            log.warn("Spell correction failed: {}", e.getMessage());
-        }
-        return null;
+        return dictionaryService.correct(keyword);
     }
 }

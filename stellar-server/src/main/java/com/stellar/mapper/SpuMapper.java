@@ -82,6 +82,9 @@ public interface SpuMapper {
     /** 查询全部 SPU（用于导出），按 id 排序。 */
     List<Spu> listAll();
 
+    /** 搜索纠错词典用：仅取上架商品名称（不加载大字段）。 */
+    List<String> listAllNames();
+
     /** 累加商品销量（付款成功后调用）。 */
     int incrSaleCount(@Param("spuId") Long spuId, @Param("qty") int qty);
 
