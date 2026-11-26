@@ -112,7 +112,7 @@ export interface RecommendItem {
   categoryName?: string
   /** 推荐理由，可直接展示 */
   reason: string
-  /** cf / content / popular */
+  /** cf / content / popular / search / item */
   source: string
   score: number
 }
@@ -126,6 +126,8 @@ export interface RecommendResult {
   userId?: number
   generatedAt?: number
   note?: string
+  /** A/B 分桶：A（对照）/ B（实验）/ 不返回表示未参与实验 */
+  abBucket?: string | null
 }
 
 /** 搜索聚合桶(对齐 BucketVO) */

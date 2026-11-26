@@ -135,3 +135,7 @@ frontend/typecheck_errors.txt
 
 # ---------- 本地数据库备份（含真实数据，严禁提交）----------
 backups/
+
+# ---------- Playwright 运行产物（失败截图/trace/报告，勿提交）----------
+frontend/test-results/
+frontend/playwright-report/
