@@ -148,16 +148,44 @@ stellar:
     max-similar-per-item: 60
     max-per-category: 4
     max-limit: 30
-    cf-weight: 0.50
-    content-weight: 0.40
-    popular-weight: 0.10
+    # 融合权重（由 scripts/recommend_eval.py --sweep 扫出的最优结构）
+    cf-weight: 0.30
+    content-weight: 0.30
+    popular-weight: 0.20
     # 详情页存在 seed 商品 item-to-item 相似度时，seed 权重占比
     seed-weight: 0.45
-    cross-category-cf-weight: 0.35
+    cross-category-cf-weight: 0.10
     category-prior-base: 0.80
     category-prior-weight: 0.40
     seed-category-boost: 0.80
     seed-price-boost: 0.20
+    # search 事件关键词作为独立意图路：融合权重 / 最低命中分 / 单条搜索基础权重
+    search-intent-weight: 0.10
+    search-intent-min-score: 0.20
+    search-event-weight: 1.50
+    # 曝光未点击负反馈：开关 / 每次降权比例 / 最大降权比例
+    exposure-negative-enabled: true
+    exposure-negative-weight: 0.18
+    exposure-negative-max-penalty: 0.45
+    # 推荐位 A/B：按 user_id（游客按 device_id）稳定分桶；salt 中途不要改，改了等于重新洗桶
+    ab:
+      enabled: true
+      control-percent: 50
+      salt: stellar-rec-20261126
+      control:
+        cf-weight: 0.50
+        content-weight: 0.40
+        popular-weight: 0.10
+        search-intent-weight: 0.35
+        seed-weight: 0.45
+        cross-category-weight: 0.35
+      experiment:
+        cf-weight: 0.30
+        content-weight: 0.30
+        popular-weight: 0.20
+        search-intent-weight: 0.10
+        seed-weight: 0.45
+        cross-category-weight: 0.10
   # 邮件发送（邮箱验证码）
   # enabled=true 走真实 SMTP 发送；enabled=false（默认）为开发模式，
   # 不真实发信，接口直接返回验证码方便本地调试

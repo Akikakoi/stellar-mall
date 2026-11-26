@@ -30,4 +30,7 @@ public class RecommendResultVO implements Serializable {
     private Long generatedAt;
 
     private String note;
+
+    /** A/B 分桶：A（对照，旧权重）/ B（实验，新权重）/ null（实验关闭或无法分桶） */
+    private String abBucket;
 }
