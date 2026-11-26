@@ -194,6 +194,7 @@
               :key="sec.id"
               v-show="sec.loading || !sec.loaded || sec.products.length > 0"
               :data-product-lazy="`section-${sec.id}`"
+              :data-section-id="sec.id"
               class="cat-section"
               :class="{ 'product-pending': !sec.loaded }"
             >
@@ -577,7 +578,8 @@ async function loadModuleProducts(mod: any) {
     mod._loading = false
     mod._loaded = true
     void syncFavoriteState(mod._products)
-    reportProductExposure(mod)
+    // 懒加载提前 180px 触发，这里只补报“已经进入/滚过视口”的模块
+    nextTick(() => maybeReportModuleIfVisible(mod))
   }
 }
 
@@ -634,17 +636,103 @@ async function syncFavoriteState(products: any[]) {
   } catch (e: any) {}
 }
 
+// ========== 商品区曝光（首页模块 + 降级分类区块）==========
+// 两条渲染路径共用一套观察器：有后台模块走 modules，没有模块时才回退到 sections。
+let productExposureObserver: IntersectionObserver | null = null
+/** 已上报过的曝光 key，避免同一批商品被重复计数 */
+const exposureReported = new Set<string>()
+
+function exposureKey(prefix: string, ids: any[]): string {
+  return `${prefix}:${ids.join('-')}`
+}
+
 /**
- * 商品模块加载完成后的曝光埋点
+ * 商品模块曝光：只上报进入过视口的模块。
+ * 原来在加载完成时直接上报，而懒加载提前 180px 就触发，会把用户没看到的模块也算曝光，
+ * 进而让“曝光未点击”的负反馈误伤商品。
  */
 function reportProductExposure(mod: any) {
+  if (!mod._loaded) return
   const ids = Array.from(new Set((mod._products || []).map((p: any) => p?.id).filter(Boolean)))
-  if (ids.length > 0) {
-    track('view_item_list', {
-      scene: 'home',
-      extra: { moduleType: mod.type, spuIds: ids.slice(0, 50) }
+  if (ids.length === 0) return
+  const key = exposureKey(`m:${mod.id}`, ids)
+  if (exposureReported.has(key)) return
+  exposureReported.add(key)
+  track('view_item_list', {
+    scene: 'home',
+    extra: { moduleType: mod.type, spuIds: ids.slice(0, 50) }
+  })
+}
+
+/** 分类区块曝光：只上报模板实际渲染的前 8 个商品 */
+function reportSectionExposure(sec: any) {
+  if (!sec.loaded || !sec.products?.length) return
+  const ids = sec.products.slice(0, 8).map((p: any) => p?.id).filter(Boolean)
+  if (ids.length === 0) return
+  const key = exposureKey(`s:${sec.id}:${sec.activeSubId ?? ''}`, ids)
+  if (exposureReported.has(key)) return
+  exposureReported.add(key)
+  track('view_item_list', {
+    scene: 'home',
+    extra: {
+      moduleType: 'CATEGORY_SECTION',
+      categoryId: sec.activeSubId || sec.id,
+      categoryName: sec.name,
+      spuIds: ids
+    }
+  })
+}
+
+function ensureProductExposureObserver() {
+  if (productExposureObserver || typeof IntersectionObserver === 'undefined') return
+  productExposureObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return
+      const el = entry.target as HTMLElement
+      const lazy = el.getAttribute('data-product-lazy') || ''
+      if (lazy.startsWith('module-')) {
+        const mod = modules.value.find((m: any) => `module-${m.id}` === lazy)
+        if (!mod?._loaded) return
+        reportProductExposure(mod)
+      } else if (lazy.startsWith('section-')) {
+        const sec = sections.value.find((s: any) => `section-${s.id}` === lazy)
+        if (!sec?.loaded) return
+        reportSectionExposure(sec)
+      } else {
+        return
+      }
+      productExposureObserver?.unobserve(el)
     })
+  }, { threshold: 0.25 })
+}
+
+/**
+ * 元素加载完成后：已经进入过视口（含被快速滚动滚过）就立即上报，否则等它滚进来。
+ * 判据用 rect.top < innerHeight 而不是完整相交，避免快速滚动时区块在加载完成前就被滚过而永久漏报。
+ */
+function maybeReportIfVisible(el: Element | null, report: () => void) {
+  if (!el) return
+  if (el.getBoundingClientRect().top < window.innerHeight) {
+    report()
+    return
   }
+  ensureProductExposureObserver()
+  productExposureObserver?.observe(el)
+}
+
+function maybeReportModuleIfVisible(mod: any) {
+  maybeReportIfVisible(
+    document.querySelector(`[data-product-lazy="module-${mod.id}"]`),
+    () => reportProductExposure(mod)
+  )
+}
+
+/** 区块加载完成后：若已进入/滚过视口立即上报；否则交给观察器等滚动 */
+function maybeReportSectionIfVisible(sec: any) {
+  maybeReportIfVisible(
+    document.querySelector(`[data-product-lazy="section-${sec.id}"]`),
+    () => reportSectionExposure(sec)
+  )
 }
 
 // ========== 商品模块滚动懒加载 ==========
@@ -843,6 +931,8 @@ async function loadSectionProducts(sec: any) {
   } catch (e: any) { sec.products = [] } finally {
     sec.loading = false
     sec.loaded = true
+    // 加载完成时区块可能已经在视口内（懒加载提前 180px 触发），需要立即补报曝光
+    nextTick(() => maybeReportSectionIfVisible(sec))
   }
 }
 
@@ -1009,6 +1099,8 @@ onUnmounted(() => {
   lazyProductObserver?.disconnect()
   lazyProductObserver = null
   lazyProductTargets.clear()
+  productExposureObserver?.disconnect()
+  productExposureObserver = null
 })
 </script>
 

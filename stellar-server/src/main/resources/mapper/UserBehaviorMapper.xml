@@ -16,13 +16,29 @@
              #{b.clientIp}, #{b.userAgent}, NOW())
         </foreach>
     </insert>
-    <!-- 推荐模型：近期有效行为（登录用户 + 关联 SPU），只取建模需要的四列 -->
+    <!--
+      推荐模型：近期有效行为。
+      1) 强/弱反馈事件必须关联 SPU；
+      2) search 事件没有 spu_id，靠 keyword 在 Service 层匹配商品文本，作为显式意图信号；
+      3) view_item_list 是曝光事件，商品列表在 extra 里（推荐位用 itemIds、首页模块用 spuIds），
+         只取能解析到商品 ID 的曝光；scene 用于区分推荐位与普通列表的曝光强度。
+      keyword / extra 均截断，避免长文本进入内存模型。
+    -->
     <select id="listRecentForRecommendation" resultType="com.stellar.entity.UserBehavior">
-        SELECT user_id, device_id, spu_id, event_type, event_time
+        SELECT user_id, device_id, spu_id, event_type,
+               LEFT(keyword, 100) AS keyword,
+               scene, LEFT(extra, 1200) AS extra,
+               category_id, event_time
         FROM stellar_user_behavior
         WHERE (user_id IS NOT NULL OR (device_id IS NOT NULL AND device_id &lt;&gt; ''))
-          AND spu_id IS NOT NULL
-          AND event_type IN ('view_item', 'add_to_cart', 'favorite', 'order_placed')
+          AND (
+                (spu_id IS NOT NULL
+                 AND event_type IN ('view_item', 'add_to_cart', 'favorite', 'order_placed'))
+             OR (event_type = 'search' AND keyword IS NOT NULL AND keyword &lt;&gt; '')
+             OR (event_type = 'view_item_list'
+                 AND extra IS NOT NULL
+                 AND (extra LIKE '%itemIds%' OR extra LIKE '%spuIds%'))
+          )
           AND event_time &gt;= DATE_SUB(NOW(), INTERVAL #{days} DAY)
         ORDER BY user_id ASC, event_time ASC, id ASC
     </select>

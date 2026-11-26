@@ -84,6 +84,8 @@ const items = ref<RecommendItem[]>([])
 const loading = ref(true)
 const personalized = ref(false)
 const apiNote = ref('')
+/** 后端 A/B 分桶（A/B），随曝光与点击埋点一起上报，供按桶计算 CTR */
+const abBucket = ref<string | null>(null)
 const railRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
 let exposureTracked = false
@@ -105,6 +107,7 @@ function trackExposure() {
       itemIds: items.value.map((item) => item.id),
       sources: items.value.map((item) => item.source),
       personalized: personalized.value,
+      abBucket: abBucket.value,
       seedSpuId: props.seedSpuId ?? null,
       maxPrice: props.maxPrice ?? null
     }
@@ -144,6 +147,7 @@ async function load() {
       .filter((item) => props.maxPrice == null || Number(item.minPrice || 0) <= props.maxPrice)
       .slice(0, limit)
     personalized.value = !!res?.personalized
+    abBucket.value = res?.abBucket ?? null
     apiNote.value = res?.note || ''
   } catch {
     items.value = []
@@ -164,7 +168,8 @@ function goDetail(item: RecommendItem, index: number) {
       module: props.title,
       source: item.source,
       reason: item.reason,
-      personalized: personalized.value
+      personalized: personalized.value,
+      abBucket: abBucket.value
     }
   })
   const href = router.resolve(`/spu/${item.id}`).href

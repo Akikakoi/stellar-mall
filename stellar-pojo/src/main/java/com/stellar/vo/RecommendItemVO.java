@@ -31,7 +31,7 @@ public class RecommendItemVO implements Serializable {
     /** 推荐理由，可直接展示在卡片下方 */
     private String reason;
 
-    /** 推荐来源：cf（行为共现）/ content（类目价格偏好）/ popular（热度兜底） */
+    /** 推荐来源：search（搜索意图）/ item（相似商品）/ cf（行为共现）/ content（类目价格偏好）/ popular（热度兜底） */
     private String source;
 
     /** 最终融合分数，便于调试与离线对比 */
